@@ -16,5 +16,6 @@ public class UserService {
 
     public List<UserResponseDTO> getUsers(){
         List<User> users = userRepository.findAll();
+        return users;
     }
 }
