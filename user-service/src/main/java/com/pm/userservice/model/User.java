@@ -3,9 +3,12 @@ package com.pm.userservice.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -15,19 +18,34 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO) // Generate a 128 bit unique identifing number for a user
     private UUID id;
 
+    @NotBlank(message = "Username cannot blank ")
+    @Column(unique = true, nullable = false)
+    private String username;
+
     @NotNull
+    @Column(nullable = false)
     private String name;
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
 
     @NotNull
     @Email
     @Column(unique = true)
     private String email;
 
-    @NotNull
-    private String preference_vector_UPDATETYPETOBENEWJAVACLASSORFINDLIBRARY;
 
-    @NotNull
-    private LocalDate registerDate;
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updatedAt")
+    private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AccountStatus status = AccountStatus.ACTIVE;
 
     public UUID getId() {
         return id;
@@ -52,20 +70,45 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
-
-    public String getPreference_vector_UPDATETYPETOBENEWJAVACLASSORFINDLIBRARY() {
-        return preference_vector_UPDATETYPETOBENEWJAVACLASSORFINDLIBRARY;
+    public String getUsername() {
+        return username;
     }
 
-    public void setPreference_vector_UPDATETYPETOBENEWJAVACLASSORFINDLIBRARY(String preference_vector_UPDATETYPETOBENEWJAVACLASSORFINDLIBRARY) {
-        this.preference_vector_UPDATETYPETOBENEWJAVACLASSORFINDLIBRARY = preference_vector_UPDATETYPETOBENEWJAVACLASSORFINDLIBRARY;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public LocalDate getRegisterDate() {
-        return registerDate;
+    public String getProfileImageUrl() {
+        return profileImageUrl;
     }
 
-    public void setRegisterDate(LocalDate registerDate) {
-        this.registerDate = registerDate;
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public AccountStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AccountStatus status) {
+        this.status = status;
+    }
+
+
 }
