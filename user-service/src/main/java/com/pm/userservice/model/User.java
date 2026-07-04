@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Table(name = "users")
 @Entity
 public class User {
 
@@ -20,7 +21,7 @@ public class User {
 
     @NotBlank(message = "Username cannot blank ")
     @Column(unique = true, nullable = false)
-    private String username;
+    private String userName;
 
     @NotNull
     @Column(nullable = false)
@@ -36,15 +37,15 @@ public class User {
 
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "registered_date", updatable = false)
+    private LocalDateTime registeredDate;
 
     @UpdateTimestamp
-    @Column(name = "updatedAt")
+    @Column(name = "updatedAt", nullable = true)
     private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private AccountStatus status = AccountStatus.ACTIVE;
 
     public UUID getId() {
@@ -70,12 +71,12 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getProfileImageUrl() {
@@ -86,12 +87,12 @@ public class User {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public LocalDateTime getRegisteredDate() {
+        return registeredDate;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setRegisteredDate(LocalDateTime registeredDate) {
+        this.registeredDate = registeredDate;
     }
 
     public LocalDateTime getUpdatedAt() {

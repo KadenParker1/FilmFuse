@@ -1,0 +1,12 @@
+### GET request to example server
+POST http://localhost:4001/users
+Content-Type: application/json
+
+{
+"name": "Kurt_Healey",
+"userName": "Buff_and_smart",
+"email": "test@gmail.com",
+  "registeredDate": "2026-05-01T00:00:00",
+"profileImageUrl": "coolfrog"
+}
+###

@@ -1,9 +1,12 @@
 package com.pm.userservice.service;
 
+import com.pm.userservice.dto.UserRequestDTO;
 import com.pm.userservice.dto.UserResponseDTO;
+import com.pm.userservice.mapper.UserMapper;
 import com.pm.userservice.model.User;
 import com.pm.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -16,6 +19,13 @@ public class UserService {
 
     public List<UserResponseDTO> getUsers(){
         List<User> users = userRepository.findAll();
-        return users;
+        return users.stream().map(UserMapper::toDTO).toList();
     }
+
+    public UserResponseDTO createUser(UserRequestDTO userRequestDTO){
+        User newUser = userRepository.save(UserMapper.toModel(userRequestDTO));
+        return UserMapper.toDTO(newUser);
+
+    }
+
 }

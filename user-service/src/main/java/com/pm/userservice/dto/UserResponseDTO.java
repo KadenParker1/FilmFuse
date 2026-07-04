@@ -3,7 +3,7 @@ package com.pm.userservice.dto;
 public class UserResponseDTO {
     private String id;
     private String name;
-    private String username;
+    private String userName;
     private String profileImageUrl;
     private String email;
 
@@ -24,12 +24,12 @@ public class UserResponseDTO {
         this.name = name;
     }
 
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getProfileImageUrl() {
