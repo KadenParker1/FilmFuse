@@ -2,6 +2,7 @@ package com.pm.userservice.service;
 
 import com.pm.userservice.dto.UserRequestDTO;
 import com.pm.userservice.dto.UserResponseDTO;
+import com.pm.userservice.exception.EmailAlreadyExistsException;
 import com.pm.userservice.mapper.UserMapper;
 import com.pm.userservice.model.User;
 import com.pm.userservice.repository.UserRepository;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -23,8 +25,15 @@ public class UserService {
     }
 
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO){
+        if(userRepository.existsByEmail(userRequestDTO.getEmail())){
+            throw new EmailAlreadyExistsException("A user with this email " + "already exists" + userRequestDTO.getEmail());
+        }
+
         User newUser = userRepository.save(UserMapper.toModel(userRequestDTO));
         return UserMapper.toDTO(newUser);
+    }
+
+    public UserResponseDTO updatePatient(UUID id, UserRequestDTO userRequestDTO){
 
     }
 
