@@ -14,5 +14,30 @@ public class UserNode {
     @Relationship(type = "FRIEND", direction = Relationship.Direction.OUTGOING)
     private Set<UserNode> friends;
 
-    // Getters and Setters
+    @Relationship(type = "BLOCKED", direction = Relationship.Direction.OUTGOING)
+    private Set<UserNode> blocked;
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+
+    public Set<UserNode> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(Set<UserNode> friends) {
+        this.friends = friends;
+    }
+
+    public Set<UserNode> getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(Set<UserNode> blocked) {
+        this.blocked = blocked;
+    }
 }
