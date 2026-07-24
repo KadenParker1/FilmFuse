@@ -33,8 +33,6 @@ public class UserService {
         return UserMapper.toDTO(newUser);
     }
 
-    public UserResponseDTO updatePatient(UUID id, UserRequestDTO userRequestDTO){
-
-    }
+//    public UserResponseDTO updatePatient(UUID id, UserRequestDTO userRequestDTO)
 
 }
