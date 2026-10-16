@@ -1,0 +1,26 @@
+# Copy to application-local.properties (gitignored) for local development.
+#   supabase start                                   (local Postgres + Auth + Mailpit via Docker)
+#   ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+#
+# Sign in via supabase-js against http://127.0.0.1:54321 (or POST /auth/v1/signup) to get a real,
+# JWKS-verifiable user JWT for the .http files in api-requests/core-api/.
+# Never put real secrets in this example file.
+
+spring.datasource.url=jdbc:postgresql://127.0.0.1:54322/postgres?currentSchema=app
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+
+spring.security.oauth2.resourceserver.jwt.jwk-set-uri=${SUPABASE_JWKS_URI:http://127.0.0.1:54321/auth/v1/.well-known/jwks.json}
+spring.security.oauth2.resourceserver.jwt.issuer-uri=${SUPABASE_ISSUER:http://127.0.0.1:54321/auth/v1}
+# Supabase's asymmetric signing keys are ES256, not the RS256 Spring assumes by default.
+spring.security.oauth2.resourceserver.jwt.jws-algorithms=ES256
+
+app.cors.allowed-origins=http://localhost:8081,http://localhost:19006
+
+# --- Email: mock by default. To see real mail in Mailpit (http://127.0.0.1:54324): ---
+filmfuse.email.provider=mock
+#filmfuse.email.provider=smtp
+#spring.mail.host=127.0.0.1
+#spring.mail.port=54325
+#spring.mail.properties.mail.smtp.auth=false
+#spring.mail.properties.mail.smtp.starttls.enable=false
