@@ -69,7 +69,9 @@ public final class MovieMapper {
                 movie.getOverview(),
                 genreIds,
                 movie.getPopularity(),
-                movie.getVoteAverage());
+                movie.getVoteAverage(),
+                movie.getCertification(),
+                movie.getKeywords() == null ? List.of() : Arrays.asList(movie.getKeywords()));
     }
 
     /** {@code https://image.tmdb.org/t/p/} + {@code w500} + {@code /abc.jpg}; null when there is no image. */

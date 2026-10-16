@@ -89,6 +89,30 @@ public class SocialGraphService {
         return friendships.closeness(from, to).map(SocialMapper::toDouble).orElse(0d);
     }
 
+    /**
+     * {@link #closeness} for every ordered pair of {@code members} in one query:
+     * {@code matrix[i][j]} = closeness of members[i] to members[j]; 0 on the diagonal and between
+     * people who are not friends.
+     */
+    @Transactional(readOnly = true)
+    public double[][] closenessMatrix(List<UUID> members) {
+        int n = members.size();
+        double[][] matrix = new double[n][n];
+        for (FriendshipRepository.ClosenessRow row : friendships.closenessAmong(new java.util.LinkedHashSet<>(members))) {
+            for (int i = 0; i < n; i++) {
+                if (!members.get(i).equals(row.from())) {
+                    continue;
+                }
+                for (int j = 0; j < n; j++) {
+                    if (members.get(j).equals(row.to())) {
+                        matrix[i][j] = SocialMapper.toDouble(row.closeness());
+                    }
+                }
+            }
+        }
+        return matrix;
+    }
+
     // ---------------------------------------------------------------- reads for the social module
 
     /** Everyone who has blocked {@code user}: hidden from {@code user} in every read. */

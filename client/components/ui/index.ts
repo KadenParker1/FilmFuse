@@ -2,6 +2,8 @@ export { Avatar } from './Avatar';
 export { Button, type ButtonVariant } from './Button';
 export { Card } from './Card';
 export { Chip } from './Chip';
+export { ChoiceGroup, type Choice } from './ChoiceGroup';
+export { ConfirmSheet } from './ConfirmSheet';
 export { EmptyState } from './EmptyState';
 export { ErrorState, errorMessage } from './ErrorState';
 export { initialsFor } from './initials';

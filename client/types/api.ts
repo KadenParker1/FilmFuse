@@ -185,3 +185,195 @@ export interface InviteDTO {
 export interface InviteRedeemResultDTO {
   inviter: UserSummaryDTO;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Content comfort, groups & sessions (Phase 3) — com.pm.filmfuse.{user,reco,group}.dto
+// ---------------------------------------------------------------------------------------------
+
+/** Java enum `Certification` — US rating, ordered least → most mature. Display "PG-13" / "NC-17". */
+export type Certification = 'G' | 'PG' | 'PG_13' | 'R' | 'NC_17';
+
+/** Java enum `ContentDimension`. */
+export type ContentDimension = 'VIOLENCE' | 'SEXUAL' | 'LANGUAGE' | 'DRUGS' | 'FRIGHTENING';
+
+/** Java enum `ContentLevel` — ordered none → strong. */
+export type ContentLevel = 'NONE' | 'MILD' | 'MODERATE' | 'STRONG';
+
+/** Java enum `GroupRole`. */
+export type GroupRole = 'OWNER' | 'MEMBER';
+
+/** Java enum `MemberStatus`. */
+export type MemberStatus = 'INVITED' | 'ACTIVE';
+
+/** Java enum `SessionStatus` — OPEN sessions older than 24h report EXPIRED. */
+export type SessionStatus = 'OPEN' | 'DECIDED' | 'EXPIRED';
+
+/** Java enum `Vote`. */
+export type Vote = 'UP' | 'DOWN' | 'VETO';
+
+/** Java enum `Strategy` — how member fits are fused into one group score. */
+export type Strategy = 'MEAN' | 'LEAST_MISERY' | 'MOST_PLEASURE' | 'CLOSENESS_WEIGHTED' | 'FAIRNESS';
+
+/** Per-dimension ceilings; a missing dimension means STRONG (no limit). */
+export type ContentLimits = Partial<Record<ContentDimension, ContentLevel>>;
+
+/** com.pm.filmfuse.user.dto.ComfortSettingsDTO — GET/PUT /me/settings/comfort. `maxCertification` null = no limit. */
+export interface ComfortSettingsDTO {
+  maxCertification: Certification | null;
+  contentLimits: Partial<Record<ContentDimension, ContentLevel>>;
+  allowUnrated: boolean;
+}
+
+/**
+ * com.pm.filmfuse.reco.dto.EffectiveFilterDTO — the most restrictive value across everyone present
+ * (plus a group cap). Never says whose setting caused a limit. `label` e.g. "Up to PG-13 · mild violence".
+ */
+export interface EffectiveFilterDTO {
+  maxCertification: Certification | null;
+  contentLimits: Partial<Record<ContentDimension, ContentLevel>>;
+  allowUnrated: boolean;
+  label: string;
+}
+
+/** com.pm.filmfuse.group.dto.ComfortCapDTO — an owner-set ceiling for the whole group. */
+export interface ComfortCapDTO {
+  maxCertification: Certification | null;
+  contentLimits: Partial<Record<ContentDimension, ContentLevel>>;
+}
+
+/** com.pm.filmfuse.group.dto.GroupMemberDTO — `joinedAt` is null while INVITED. */
+export interface GroupMemberDTO {
+  user: UserSummaryDTO;
+  role: GroupRole;
+  status: MemberStatus;
+  joinedAt: string | null;
+}
+
+/** com.pm.filmfuse.group.dto.GroupSummaryDTO — `role` / `memberStatus` are the caller's; preview ≤ 5 active. */
+export interface GroupSummaryDTO {
+  id: string;
+  name: string;
+  emoji: string | null;
+  color: string | null;
+  role: GroupRole;
+  memberStatus: MemberStatus;
+  /** Active members only. */
+  memberCount: number;
+  memberPreview: UserSummaryDTO[];
+  lastSessionAt: string | null;
+}
+
+/** com.pm.filmfuse.group.dto.GroupDetailDTO */
+export interface GroupDetailDTO {
+  id: string;
+  name: string;
+  emoji: string | null;
+  color: string | null;
+  ownerId: string;
+  role: GroupRole;
+  memberStatus: MemberStatus;
+  members: GroupMemberDTO[];
+  comfortCap: ComfortCapDTO;
+  effectiveFilter: EffectiveFilterDTO;
+  /** At most 5, newest first. */
+  recentSessions: SessionSummaryDTO[];
+}
+
+/** com.pm.filmfuse.group.dto.CreateGroupDTO — name 1–40 (trimmed), emoji ≤ 8 chars, color `#RRGGBB`, 0–19 friends. */
+export interface CreateGroupDTO {
+  name: string;
+  emoji?: string | null;
+  color?: string | null;
+  memberIds: string[];
+}
+
+/** com.pm.filmfuse.group.dto.UpdateGroupDTO — owner only; omitted / null = unchanged. */
+export interface UpdateGroupDTO {
+  name?: string | null;
+  emoji?: string | null;
+  color?: string | null;
+  comfortCap?: ComfortCapDTO | null;
+}
+
+/** com.pm.filmfuse.group.dto.AddMembersDTO — 1–19 of the caller's own friends. */
+export interface AddMembersDTO {
+  userIds: string[];
+}
+
+/** com.pm.filmfuse.group.dto.SessionFiltersDTO — runtime 40–400 min, year 1900–2100. */
+export interface SessionFiltersDTO {
+  maxRuntime?: number | null;
+  minYear?: number | null;
+  genreIds?: number[] | null;
+}
+
+/** com.pm.filmfuse.group.dto.CreateSessionDTO — exactly one of `groupId` / `memberIds` (1–19 friends). */
+export interface CreateSessionDTO {
+  groupId?: string | null;
+  memberIds?: string[] | null;
+  filters?: SessionFiltersDTO | null;
+  strategy?: Strategy | null;
+}
+
+/** com.pm.filmfuse.group.dto.SessionMemberDTO — `hasVector` false = no taste profile yet (popularity prior). */
+export interface SessionMemberDTO {
+  user: UserSummaryDTO;
+  hasVector: boolean;
+  voted: boolean;
+}
+
+/** com.pm.filmfuse.group.dto.VoteTallyDTO */
+export interface VoteTallyDTO {
+  up: number;
+  down: number;
+  vetoed: boolean;
+}
+
+/** com.pm.filmfuse.group.dto.SessionResultDTO — `memberScores` is userId → fit (1–10). */
+export interface SessionResultDTO {
+  rank: number;
+  movie: MovieSummaryDTO;
+  certification: Certification | null;
+  groupScore: number;
+  memberScores: Record<string, number>;
+  explanation: string;
+  votes: VoteTallyDTO;
+  myVote: Vote | null;
+}
+
+/** com.pm.filmfuse.group.dto.SessionDTO — vetoed results are listed last with `votes.vetoed`. */
+export interface SessionDTO {
+  id: string;
+  groupId: string | null;
+  groupName: string | null;
+  createdBy: UserSummaryDTO;
+  status: SessionStatus;
+  strategy: Strategy;
+  filters: SessionFiltersDTO;
+  effectiveFilter: EffectiveFilterDTO;
+  members: SessionMemberDTO[];
+  results: SessionResultDTO[];
+  pickedMovie: MovieSummaryDTO | null;
+  createdAt: string;
+}
+
+/** com.pm.filmfuse.group.dto.SessionSummaryDTO */
+export interface SessionSummaryDTO {
+  id: string;
+  groupId: string | null;
+  groupName: string | null;
+  status: SessionStatus;
+  pickedMovie: MovieSummaryDTO | null;
+  memberCount: number;
+  createdAt: string;
+}
+
+/** com.pm.filmfuse.group.dto.CastVoteDTO */
+export interface CastVoteDTO {
+  vote: Vote;
+}
+
+/** com.pm.filmfuse.group.dto.PickMovieDTO */
+export interface PickMovieDTO {
+  movieId: number;
+}

@@ -1,0 +1,37 @@
+### FilmFuse core-api - content comfort settings (hard filters on every recommendation you are part of)
+# Token: see me.http. Certifications: G | PG | PG_13 | R | NC_17 (null = no limit).
+# Dimensions: VIOLENCE | SEXUAL | LANGUAGE | DRUGS | FRIGHTENING; levels: NONE | MILD | MODERATE | STRONG.
+# A missing dimension (or STRONG) = no limit. allowUnrated: may movies with unknown certification /
+# content level pass a limit? Default false.
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+
+### Current settings (defaults: null, {}, false)
+GET {{baseUrl}}/api/v1/me/settings/comfort
+Authorization: Bearer {{token}}
+
+### "I'll watch R, but only mild gore and no sex scenes"
+PUT {{baseUrl}}/api/v1/me/settings/comfort
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "maxCertification": "R",
+  "contentLimits": {"VIOLENCE": "MILD", "SEXUAL": "NONE"},
+  "allowUnrated": false
+}
+
+### Back to no limits (a PUT replaces everything; omitted fields take their defaults)
+PUT {{baseUrl}}/api/v1/me/settings/comfort
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}
+
+### Unknown value -> 400 ("PG-13" is the display form; the API value is PG_13)
+PUT {{baseUrl}}/api/v1/me/settings/comfort
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"maxCertification": "PG-13"}

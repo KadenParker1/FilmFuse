@@ -33,3 +33,8 @@ filmfuse.email.provider=mock
 #spring.mail.port=54325
 #spring.mail.properties.mail.smtp.auth=false
 #spring.mail.properties.mail.smtp.starttls.enable=false
+
+# --- ML service: blank = in-process FallbackRanker. With the service running locally
+#     (ENV=local uvicorn ... --port 8001) set both; ENV=local's dev key is in python-ml-service. ---
+filmfuse.ml.base-url=${ML_SERVICE_URL:}
+filmfuse.ml.internal-key=${ML_INTERNAL_KEY:}

@@ -1,0 +1,81 @@
+### FilmFuse core-api - recommendation sessions, votes, refresh, pick
+# Token: see me.http; groups in groups.http. Sessions are visible to their members only (404 otherwise).
+# Without ML_SERVICE_URL, results come from the in-process FallbackRanker ("Popular pick", scores 5.0)
+# over the eligible movies already in the cache (browse /movies first so there is something to rank;
+# movie details also bring certifications and content levels).
+# After each vote / refresh / pick core-api broadcasts `session_updated` on private Realtime topic
+# session:<id> (mock gateway without SUPABASE_SERVICE_ROLE_KEY - watch the log).
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+@otherToken = paste-second-access-token-here
+@otherUserId = 00000000-0000-0000-0000-000000000000
+@groupId = paste-group-id-here
+@sessionId = paste-session-id-here
+@movieId = 603
+
+### Group session (201): the group's ACTIVE members, filtered by everyone's comfort + the group cap
+POST {{baseUrl}}/api/v1/sessions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "groupId": "{{groupId}}",
+  "filters": {"maxRuntime": 150, "minYear": 1990, "genreIds": [35, 878]},
+  "strategy": "LEAST_MISERY"
+}
+
+### Ad-hoc "tonight" session with friends (you are added automatically)
+POST {{baseUrl}}/api/v1/sessions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"memberIds": ["{{otherUserId}}"]}
+
+### Both groupId and memberIds (or neither) -> 400
+POST {{baseUrl}}/api/v1/sessions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"groupId": "{{groupId}}", "memberIds": ["{{otherUserId}}"]}
+
+### The session: results (vetoed last), votes, members, effectiveFilter
+GET {{baseUrl}}/api/v1/sessions/{{sessionId}}
+Authorization: Bearer {{token}}
+
+### My session history, newest first (pass nextCursor back as ?cursor=)
+GET {{baseUrl}}/api/v1/sessions
+Authorization: Bearer {{token}}
+
+### Only one group's sessions
+GET {{baseUrl}}/api/v1/sessions?groupId={{groupId}}
+Authorization: Bearer {{token}}
+
+### Vote UP / DOWN / VETO (replaces your earlier vote). 404 if the movie is not a result; 409 unless OPEN.
+PUT {{baseUrl}}/api/v1/sessions/{{sessionId}}/votes/{{movieId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"vote": "UP"}
+
+### Veto (as the other member)
+PUT {{baseUrl}}/api/v1/sessions/{{sessionId}}/votes/{{movieId}}
+Authorization: Bearer {{otherToken}}
+Content-Type: application/json
+
+{"vote": "VETO"}
+
+### Withdraw your vote
+DELETE {{baseUrl}}/api/v1/sessions/{{sessionId}}/votes/{{movieId}}
+Authorization: Bearer {{token}}
+
+### More results: appended, never repeating anything already shown (or vetoed)
+POST {{baseUrl}}/api/v1/sessions/{{sessionId}}/refresh
+Authorization: Bearer {{token}}
+
+### Pick (any member): DECIDED, writes watch_history for every member. 400 if vetoed / not a result.
+POST {{baseUrl}}/api/v1/sessions/{{sessionId}}/pick
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"movieId": {{movieId}}}

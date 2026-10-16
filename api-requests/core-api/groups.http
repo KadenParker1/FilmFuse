@@ -1,0 +1,93 @@
+### FilmFuse core-api - saved groups
+# Token: see me.http. Use two accounts that are friends (social.http): @token owns the group,
+# @otherToken (id @otherUserId) is invited. Non-members get 404 for every group route.
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+@otherToken = paste-second-access-token-here
+@otherUserId = 00000000-0000-0000-0000-000000000000
+@groupId = paste-group-id-here
+
+### Create (201): you are OWNER; memberIds (0-19, your friends only) are INVITED
+POST {{baseUrl}}/api/v1/groups
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Roommates",
+  "emoji": "🍿",
+  "color": "#F5B942",
+  "memberIds": ["{{otherUserId}}"]
+}
+
+### Someone who is not your friend -> 400
+POST {{baseUrl}}/api/v1/groups
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"name": "Strangers", "memberIds": ["11111111-1111-1111-1111-111111111111"]}
+
+### My groups: ACTIVE ones by latest session, then pending invites
+GET {{baseUrl}}/api/v1/groups
+Authorization: Bearer {{token}}
+
+### Detail: members, comfort cap, effective filter (no attribution), recent sessions
+GET {{baseUrl}}/api/v1/groups/{{groupId}}
+Authorization: Bearer {{token}}
+
+### The invitee can view it while INVITED
+GET {{baseUrl}}/api/v1/groups/{{groupId}}
+Authorization: Bearer {{otherToken}}
+
+### Accept the invite (as the invitee)
+POST {{baseUrl}}/api/v1/groups/{{groupId}}/invites/accept
+Authorization: Bearer {{otherToken}}
+
+### ...or decline it (204; the invite row is removed)
+POST {{baseUrl}}/api/v1/groups/{{groupId}}/invites/decline
+Authorization: Bearer {{otherToken}}
+
+### Owner edits: rename, recolour, and cap the group at PG with mild frights ("Kids" group)
+PATCH {{baseUrl}}/api/v1/groups/{{groupId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Kids",
+  "color": "#C7354A",
+  "comfortCap": {"maxCertification": "PG", "contentLimits": {"FRIGHTENING": "MILD"}}
+}
+
+### Remove the cap and the emoji (empty string clears; null / missing = unchanged)
+PATCH {{baseUrl}}/api/v1/groups/{{groupId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"emoji": "", "comfortCap": {"maxCertification": null, "contentLimits": {}}}
+
+### Not the owner -> 403
+PATCH {{baseUrl}}/api/v1/groups/{{groupId}}
+Authorization: Bearer {{otherToken}}
+Content-Type: application/json
+
+{"name": "Mine now"}
+
+### Invite more of YOUR friends (any ACTIVE member; 409 beyond 20 people incl. invites)
+POST {{baseUrl}}/api/v1/groups/{{groupId}}/members
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"userIds": ["{{otherUserId}}"]}
+
+### Owner removes someone (204)
+DELETE {{baseUrl}}/api/v1/groups/{{groupId}}/members/{{otherUserId}}
+Authorization: Bearer {{token}}
+
+### Leave (remove yourself). An owner leaving hands over to the earliest-joined ACTIVE member;
+### the last ACTIVE member leaving deletes the group.
+DELETE {{baseUrl}}/api/v1/groups/{{groupId}}/members/{{otherUserId}}
+Authorization: Bearer {{otherToken}}
+
+### Delete the group (owner, 204). Its sessions survive without a group.
+DELETE {{baseUrl}}/api/v1/groups/{{groupId}}
+Authorization: Bearer {{token}}

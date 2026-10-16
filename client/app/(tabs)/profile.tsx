@@ -85,6 +85,12 @@ export default function ProfileScreen() {
         <Label>Settings</Label>
         <Card className="gap-3">
           <Button
+            title="Comfort settings"
+            variant="secondary"
+            icon={<Ionicons name="shield-checkmark-outline" size={18} color={colors.text} />}
+            onPress={() => router.push('/settings/comfort')}
+          />
+          <Button
             title="Blocked people"
             variant="secondary"
             icon={<Ionicons name="ban-outline" size={18} color={colors.text} />}

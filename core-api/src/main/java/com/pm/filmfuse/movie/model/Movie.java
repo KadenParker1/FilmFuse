@@ -49,6 +49,12 @@ public class Movie {
     @Column(name = "vote_average")
     private Double voteAverage;
 
+    /** US certification label ("PG-13"); null = unknown. Only a details fetch fills it in. */
+    private String certification;
+
+    /** Lowercased TMDB keyword names; empty until a details fetch. */
+    private String[] keywords;
+
     @Column(name = "cached_at")
     private Instant cachedAt;
 }
