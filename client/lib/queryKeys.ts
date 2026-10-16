@@ -7,6 +7,9 @@ const social = ['social'] as const;
 const userSearchAll = [...social, 'search'] as const;
 const friendRequestsAll = [...social, 'requests'] as const;
 const friendSuggestionsAll = [...social, 'suggestions'] as const;
+const groups = ['groups'] as const;
+const sessions = ['sessions'] as const;
+const sessionListAll = [...sessions, 'list'] as const;
 
 export const queryKeys = {
   /** The signed-in user's own profile (GET /me). */
@@ -42,4 +45,20 @@ export const queryKeys = {
   friendSuggestions: (limit: number | null) => [...friendSuggestionsAll, limit] as const,
   /** GET /blocks */
   blocks: [...social, 'blocks'] as const,
+  /** GET /me/settings/comfort */
+  comfortSettings: ['settings', 'comfort'] as const,
+  /** Everything group related (prefix). */
+  groups,
+  /** GET /groups */
+  groupList: [...groups, 'list'] as const,
+  /** GET /groups/{id} */
+  group: (id: string) => [...groups, 'detail', id] as const,
+  /** Everything session related (prefix). */
+  sessions,
+  /** GET /sessions/{id} */
+  session: (id: string) => [...sessions, 'detail', id] as const,
+  /** Every GET /sessions history list (prefix). */
+  sessionListAll,
+  /** GET /sessions?groupId= (infinite); null = all of the caller's sessions */
+  sessionList: (groupId: string | null) => [...sessionListAll, groupId] as const,
 } as const;

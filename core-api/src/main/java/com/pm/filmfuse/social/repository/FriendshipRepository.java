@@ -185,6 +185,32 @@ public class FriendshipRepository {
         return friend(user, friend).map(FriendEdge::closeness);
     }
 
+    /**
+     * Effective directional closeness for every accepted friendship among {@code members}, as
+     * (from, to, closeness) rows - both directions of each pair. Pairs that are not friends are absent.
+     */
+    public List<ClosenessRow> closenessAmong(Collection<UUID> members) {
+        if (members.isEmpty()) {
+            return List.of();
+        }
+        return jdbc.query("""
+                select e.me, e.other, %s as closeness from (
+                    select f.user_low as me, f.user_high as other from app.friendships f
+                    where f.status = 'ACCEPTED' and f.user_low in (:ids) and f.user_high in (:ids)
+                    union all
+                    select f.user_high, f.user_low from app.friendships f
+                    where f.status = 'ACCEPTED' and f.user_low in (:ids) and f.user_high in (:ids)
+                ) e
+                left join app.friend_closeness c on c.user_id = e.me and c.friend_id = e.other
+                """.formatted(EFFECTIVE_CLOSENESS), new MapSqlParameterSource("ids", members),
+                (rs, i) -> new ClosenessRow(rs.getObject("me", UUID.class), rs.getObject("other", UUID.class),
+                        rs.getFloat("closeness")));
+    }
+
+    /** One directed closeness value. */
+    public record ClosenessRow(UUID from, UUID to, float closeness) {
+    }
+
     public List<UUID> friendIds(UUID user) {
         return jdbc.queryForList(MY_FRIENDS, Map.of("me", user), UUID.class);
     }

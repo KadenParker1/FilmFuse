@@ -72,6 +72,11 @@ function RootNavigator() {
           <Stack.Screen name="movie/[id]" />
           <Stack.Screen name="profile/edit" />
           <Stack.Screen name="settings/blocked" />
+          <Stack.Screen name="settings/comfort" />
+          <Stack.Screen name="groups/new" />
+          <Stack.Screen name="groups/[id]" />
+          <Stack.Screen name="sessions/new" />
+          <Stack.Screen name="sessions/[id]" />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn} redirectTo="/">
           <Stack.Screen name="(auth)" />

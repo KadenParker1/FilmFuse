@@ -101,6 +101,27 @@ class FixtureMovieCatalogClientTest {
     }
 
     @Test
+    void listResultsOmitCertificationAndKeywordsLikeTmdb() {
+        assertThat(client.popular(null, 1).movies()).allMatch(movie -> movie.certification() == null
+                && movie.keywords().isEmpty());
+    }
+
+    @Test
+    void detailsCarryRealCertificationsAndKeywords() {
+        List<CatalogMovie> all = allPopular().stream().map(m -> client.details(m.id())).toList();
+        assertThat(all).allMatch(movie -> !movie.keywords().isEmpty());
+        assertThat(all).extracting(CatalogMovie::certification)
+                .contains("G", "PG", "PG-13", "R")
+                .containsNull()
+                .allMatch(c -> c == null || Set.of("G", "PG", "PG-13", "R", "NC-17").contains(c));
+        assertThat(client.details(862).certification()).isEqualTo("G");
+        assertThat(client.details(155).certification()).isEqualTo("PG-13");
+        assertThat(client.details(550).certification()).isEqualTo("R");
+        assertThat(client.details(129).certification()).isEqualTo("PG");
+        assertThat(client.details(550).keywords()).contains("fistfight");
+    }
+
+    @Test
     void detailsIncludeRuntime() {
         CatalogMovie fightClub = client.details(550);
         assertThat(fightClub.title()).isEqualTo("Fight Club");

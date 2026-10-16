@@ -6,6 +6,7 @@ import com.pm.filmfuse.movie.catalog.CatalogMovie;
 import com.pm.filmfuse.movie.catalog.CatalogPage;
 import com.pm.filmfuse.movie.catalog.MovieCatalogClient;
 import com.pm.filmfuse.movie.catalog.TmdbProperties;
+import com.pm.filmfuse.movie.content.ContentLevelService;
 import com.pm.filmfuse.movie.dto.MovieDetailDTO;
 import com.pm.filmfuse.movie.dto.MovieSummaryDTO;
 import com.pm.filmfuse.movie.mapper.MovieMapper;
@@ -35,20 +36,23 @@ public class MovieService {
     private final MovieCatalogClient catalogClient;
     private final MovieRepository movieRepository;
     private final GenreService genreService;
+    private final ContentLevelService contentLevelService;
     private final String imageBaseUrl;
     private final Clock clock;
 
     @Autowired
     public MovieService(MovieCatalogClient catalogClient, MovieRepository movieRepository,
-                        GenreService genreService, TmdbProperties tmdbProperties) {
-        this(catalogClient, movieRepository, genreService, tmdbProperties, Clock.systemUTC());
+                        GenreService genreService, ContentLevelService contentLevelService,
+                        TmdbProperties tmdbProperties) {
+        this(catalogClient, movieRepository, genreService, contentLevelService, tmdbProperties, Clock.systemUTC());
     }
 
     MovieService(MovieCatalogClient catalogClient, MovieRepository movieRepository, GenreService genreService,
-                 TmdbProperties tmdbProperties, Clock clock) {
+                 ContentLevelService contentLevelService, TmdbProperties tmdbProperties, Clock clock) {
         this.catalogClient = catalogClient;
         this.movieRepository = movieRepository;
         this.genreService = genreService;
+        this.contentLevelService = contentLevelService;
         this.imageBaseUrl = tmdbProperties.imageBaseUrl();
         this.clock = clock;
     }
@@ -76,18 +80,24 @@ public class MovieService {
                 .map(MovieMapper::toCatalogMovie)
                 .orElseGet(() -> {
                     CatalogMovie fetched = catalogClient.details(id);
-                    movieRepository.upsertAll(List.of(fetched), now);
+                    cache(List.of(fetched), now);
                     return fetched;
                 });
         return MovieMapper.toDetailDTO(movie, genreService.namesById(), imageBaseUrl);
     }
 
     private PageDTO<MovieSummaryDTO> toPage(CatalogPage page) {
-        movieRepository.upsertAll(page.movies(), clock.instant());
+        cache(page.movies(), clock.instant());
         List<MovieSummaryDTO> items = page.movies().stream()
                 .map(movie -> MovieMapper.toSummaryDTO(movie, imageBaseUrl))
                 .toList();
         return new PageDTO<>(items, page.hasNext() ? String.valueOf(page.page() + 1) : null);
+    }
+
+    /** Upserts the movies, then re-derives content levels for any that carry content data. */
+    private void cache(List<CatalogMovie> movies, Instant now) {
+        movieRepository.upsertAll(movies, now);
+        contentLevelService.refresh(movies, now);
     }
 
     private static boolean isFresh(Movie cached, Instant now) {

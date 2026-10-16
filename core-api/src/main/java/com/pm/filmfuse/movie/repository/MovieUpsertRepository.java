@@ -8,8 +8,8 @@ import java.util.Collection;
 public interface MovieUpsertRepository {
 
     /**
-     * Inserts or refreshes each movie, stamping {@code cached_at}. A null runtime (list results)
-     * never erases a runtime an earlier details fetch stored.
+     * Inserts or refreshes each movie, stamping {@code cached_at}. A null runtime or certification,
+     * or empty keywords (list results), never erase what an earlier details fetch stored.
      */
     void upsertAll(Collection<CatalogMovie> movies, Instant cachedAt);
 }

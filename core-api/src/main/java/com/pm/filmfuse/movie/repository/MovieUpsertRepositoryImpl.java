@@ -22,8 +22,8 @@ public class MovieUpsertRepositoryImpl implements MovieUpsertRepository {
 
     private static final String UPSERT = """
             insert into app.movies (id, title, release_year, runtime, poster_path, backdrop_path, overview,
-                                    genre_ids, popularity, vote_average, cached_at)
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                    genre_ids, popularity, vote_average, cached_at, certification, keywords)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             on conflict (id) do update set
                 title         = excluded.title,
                 release_year  = excluded.release_year,
@@ -34,7 +34,10 @@ public class MovieUpsertRepositoryImpl implements MovieUpsertRepository {
                 genre_ids     = excluded.genre_ids,
                 popularity    = excluded.popularity,
                 vote_average  = excluded.vote_average,
-                cached_at     = excluded.cached_at
+                cached_at     = excluded.cached_at,
+                certification = coalesce(excluded.certification, movies.certification),
+                keywords      = case when cardinality(excluded.keywords) > 0 then excluded.keywords
+                                     else movies.keywords end
             """;
 
     private final JdbcTemplate jdbc;
@@ -69,6 +72,8 @@ public class MovieUpsertRepositoryImpl implements MovieUpsertRepository {
                 ps.setObject(9, movie.popularity(), Types.DOUBLE);
                 ps.setObject(10, movie.voteAverage(), Types.DOUBLE);
                 ps.setTimestamp(11, stamp);
+                ps.setString(12, movie.certification());
+                ps.setArray(13, ps.getConnection().createArrayOf("text", movie.keywords().toArray()));
             }
 
             @Override

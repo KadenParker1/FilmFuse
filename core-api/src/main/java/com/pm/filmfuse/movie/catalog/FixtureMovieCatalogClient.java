@@ -19,8 +19,8 @@ import tools.jackson.databind.json.JsonMapper;
 /**
  * An offline catalog of well-known movies (real TMDB ids) from {@code catalog/fixture-movies.json},
  * used whenever no TMDB token is configured: local development and every test. It behaves like TMDB
- * where it matters to callers - 20 results per page, list results without runtime, 404 for an
- * unknown id - so the code above it cannot tell the difference.
+ * where it matters to callers - 20 results per page, list results without runtime, certification
+ * or keywords, 404 for an unknown id - so the code above it cannot tell the difference.
  */
 public class FixtureMovieCatalogClient implements MovieCatalogClient {
 
@@ -82,7 +82,7 @@ public class FixtureMovieCatalogClient implements MovieCatalogClient {
         int totalPages = Math.max(1, (matches.size() + PAGE_SIZE - 1) / PAGE_SIZE);
         int from = Math.min((page - 1) * PAGE_SIZE, matches.size());
         int to = Math.min(from + PAGE_SIZE, matches.size());
-        List<CatalogMovie> items = matches.subList(from, to).stream().map(CatalogMovie::withoutRuntime).toList();
+        List<CatalogMovie> items = matches.subList(from, to).stream().map(CatalogMovie::asListResult).toList();
         return new CatalogPage(items, page, totalPages);
     }
 }

@@ -6,6 +6,7 @@ import com.pm.filmfuse.user.repository.DeletedAccountRepository;
 import com.pm.filmfuse.user.repository.ProfileRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -17,6 +18,9 @@ import org.springframework.transaction.support.TransactionTemplate;
  * succeeds and the failure is logged at ERROR with the id for a manual clean-up (Supabase dashboard
  * or admin API). Failing the request instead would leave the user unable to retry - their next call
  * would simply provision a fresh, empty profile.
+ *
+ * <p>{@link AccountDeletionEvent} is published in that transaction, before the row goes, for clean-up
+ * a cascade cannot express (handing over group ownership).
  *
  * <p>The tombstone ({@code deleted_accounts}) is written in the same transaction as the row delete,
  * before the Auth call, so the caller's still-valid access token is refused from then on whatever
@@ -32,15 +36,17 @@ public class AccountDeletionService {
     private final AuthAdminGateway authAdminGateway;
     private final DeletedAccountRepository deletedAccountRepository;
     private final TransactionTemplate transactionTemplate;
+    private final ApplicationEventPublisher events;
 
     public AccountDeletionService(ProfileRepository profileRepository, ProfilePhotoService profilePhotoService,
                                   AuthAdminGateway authAdminGateway, DeletedAccountRepository deletedAccountRepository,
-                                  TransactionTemplate transactionTemplate) {
+                                  TransactionTemplate transactionTemplate, ApplicationEventPublisher events) {
         this.profileRepository = profileRepository;
         this.profilePhotoService = profilePhotoService;
         this.authAdminGateway = authAdminGateway;
         this.deletedAccountRepository = deletedAccountRepository;
         this.transactionTemplate = transactionTemplate;
+        this.events = events;
     }
 
     public void delete(Profile profile) {
@@ -51,6 +57,8 @@ public class AccountDeletionService {
 
         transactionTemplate.executeWithoutResult(status -> {
             deletedAccountRepository.markDeleted(profile.getId());
+            // Other modules tidy up first (e.g. group ownership hand-over); cascades remove the rest.
+            events.publishEvent(new AccountDeletionEvent(profile.getId()));
             profileRepository.deleteById(profile.getId());
             profileRepository.flush();
         });

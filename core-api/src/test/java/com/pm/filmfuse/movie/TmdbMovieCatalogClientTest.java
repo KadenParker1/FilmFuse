@@ -138,7 +138,7 @@ class TmdbMovieCatalogClientTest {
 
     @Test
     void detailsMapsGenresObjectsAndRuntime() {
-        server.expect(requestTo(BASE + "/movie/550?language=en-US"))
+        server.expect(requestTo(BASE + "/movie/550?language=en-US&append_to_response=release_dates,keywords"))
                 .andExpect(header("Authorization", "Bearer test-token"))
                 .andRespond(withSuccess("""
                         {"id": 550, "title": "Fight Club", "release_date": "1999-10-15", "runtime": 139,
@@ -156,7 +156,7 @@ class TmdbMovieCatalogClientTest {
 
     @Test
     void zeroRuntimeMeansUnknown() {
-        server.expect(requestTo(BASE + "/movie/7?language=en-US"))
+        server.expect(requestTo(BASE + "/movie/7?language=en-US&append_to_response=release_dates,keywords"))
                 .andRespond(withSuccess("{\"id\":7,\"title\":\"Short\",\"runtime\":0,\"genres\":[]}", MediaType.APPLICATION_JSON));
 
         assertThat(client.details(7).runtime()).isNull();
@@ -164,7 +164,7 @@ class TmdbMovieCatalogClientTest {
 
     @Test
     void notFoundBecomesNotFoundException() {
-        server.expect(requestTo(BASE + "/movie/999999999?language=en-US"))
+        server.expect(requestTo(BASE + "/movie/999999999?language=en-US&append_to_response=release_dates,keywords"))
                 .andRespond(withStatus(HttpStatus.NOT_FOUND)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body("{\"success\":false,\"status_code\":34,\"status_message\":\"The resource you requested could not be found.\"}"));
@@ -218,5 +218,86 @@ class TmdbMovieCatalogClientTest {
                 .andRespond(withSuccess("<html>gateway</html>", MediaType.APPLICATION_JSON));
 
         assertThatThrownBy(() -> client.details(1)).isInstanceOf(UpstreamUnavailableException.class);
+    }
+
+    @Test
+    void detailsTakeTheUsTheatricalCertificationAndKeywords() {
+        server.expect(requestTo(BASE + "/movie/155?language=en-US&append_to_response=release_dates,keywords"))
+                .andExpect(header("Authorization", "Bearer test-token"))
+                .andRespond(withSuccess("""
+                        {"id": 155, "title": "The Dark Knight", "release_date": "2008-07-16", "runtime": 152,
+                         "genres": [{"id": 18, "name": "Drama"}, {"id": 28, "name": "Action"}],
+                         "popularity": 145.0, "vote_average": 8.5,
+                         "release_dates": {"results": [
+                           {"iso_3166_1": "GB", "release_dates": [{"certification": "12A", "type": 3}]},
+                           {"iso_3166_1": "US", "release_dates": [
+                             {"certification": "", "type": 1},
+                             {"certification": "NR", "type": 4},
+                             {"certification": "PG-13", "type": 3}
+                           ]}
+                         ]},
+                         "keywords": {"keywords": [
+                           {"id": 1, "name": "Joker"}, {"id": 2, "name": " Vigilante "}, {"id": 3, "name": "joker"},
+                           {"id": 4, "name": ""}, {"id": 5, "name": null}
+                         ]}}
+                        """, MediaType.APPLICATION_JSON));
+
+        CatalogMovie movie = client.details(155);
+
+        server.verify();
+        assertThat(movie.certification()).isEqualTo("PG-13");
+        assertThat(movie.keywords()).containsExactly("joker", "vigilante");
+        assertThat(movie.hasContentData()).isTrue();
+        assertThat(movie.asListResult().certification()).isNull();
+        assertThat(movie.asListResult().keywords()).isEmpty();
+        assertThat(movie.asListResult().runtime()).isNull();
+    }
+
+    @Test
+    void withoutATheatricalCertificationTheFirstNonEmptyUsOneIsUsed() {
+        server.expect(requestTo(BASE + "/movie/9?language=en-US&append_to_response=release_dates,keywords"))
+                .andRespond(withSuccess("""
+                        {"id": 9, "title": "Streaming Only",
+                         "release_dates": {"results": [{"iso_3166_1": "US", "release_dates": [
+                           {"certification": "", "type": 3}, {"certification": "R", "type": 4},
+                           {"certification": "PG", "type": 5}]}]}}
+                        """, MediaType.APPLICATION_JSON));
+        CatalogMovie movie = client.details(9);
+        assertThat(movie.certification()).isEqualTo("R");
+        assertThat(movie.keywords()).isEmpty();
+    }
+
+    @Test
+    void unknownOrMissingCertificationsAreNull() {
+        server.expect(requestTo(BASE + "/movie/10?language=en-US&append_to_response=release_dates,keywords"))
+                .andRespond(withSuccess("""
+                        {"id": 10, "title": "Unrated",
+                         "release_dates": {"results": [{"iso_3166_1": "US", "release_dates": [
+                           {"certification": "NR", "type": 3}]}]}, "keywords": {"keywords": []}}
+                        """, MediaType.APPLICATION_JSON));
+        assertThat(client.details(10).certification()).isNull();
+
+        server.reset();
+        server.expect(requestTo(BASE + "/movie/11?language=en-US&append_to_response=release_dates,keywords"))
+                .andRespond(withSuccess("""
+                        {"id": 11, "title": "Foreign",
+                         "release_dates": {"results": [{"iso_3166_1": "FR", "release_dates": [
+                           {"certification": "U", "type": 3}]}]}}
+                        """, MediaType.APPLICATION_JSON));
+        CatalogMovie foreign = client.details(11);
+        assertThat(foreign.certification()).isNull();
+        assertThat(foreign.hasContentData()).isFalse();
+    }
+
+    @Test
+    void everyMpaaCertificationIsRecognised() {
+        for (String certification : java.util.List.of("G", "PG", "PG-13", "R", "NC-17")) {
+            assertThat(new CatalogMovie(1, "T", null, null, null, null, null, null, null, null, certification, null)
+                    .certification()).isEqualTo(certification);
+        }
+        assertThat(new CatalogMovie(1, "T", null, null, null, null, null, null, null, null, "pg-13", null)
+                .certification()).isEqualTo("PG-13");
+        assertThat(new CatalogMovie(1, "T", null, null, null, null, null, null, null, null, "TV-MA", null)
+                .certification()).isNull();
     }
 }
