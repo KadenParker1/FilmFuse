@@ -53,6 +53,7 @@ export default function RootLayout() {
 /**
  * Route guards. Signed out → only (auth). Signed in → (onboarding) and (tabs); the (tabs) layout
  * then checks `/me` and sends unfinished profiles to onboarding (it tolerates the API being down).
+ * Invite links (`/invite/<token>`) and profiles (`/user/<id>`) are reachable either way.
  */
 function RootNavigator() {
   const { session, loading } = useAuth();
@@ -70,6 +71,7 @@ function RootNavigator() {
           <Stack.Screen name="(onboarding)" />
           <Stack.Screen name="movie/[id]" />
           <Stack.Screen name="profile/edit" />
+          <Stack.Screen name="settings/blocked" />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn} redirectTo="/">
           <Stack.Screen name="(auth)" />
@@ -77,6 +79,10 @@ function RootNavigator() {
         {/* Unguarded: OAuth / email-link redirects land here signed out and leave signed in. */}
         <Stack.Screen name="auth/callback" />
         <Stack.Screen name="auth/reset-password" />
+        {/* Unguarded: signed out it saves the token and sends you to sign in; signed in it redeems. */}
+        <Stack.Screen name="invite/[token]" />
+        {/* Unguarded so email links survive a cold, signed-out load: it saves the path and sends you to sign in. */}
+        <Stack.Screen name="user/[id]" />
       </Stack>
       <RecoveryRedirect />
     </>

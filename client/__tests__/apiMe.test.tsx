@@ -8,7 +8,7 @@ jest.mock('../lib/supabase', () => ({
 }));
 
 import { act, waitFor } from '@testing-library/react-native';
-import { useDeleteAccount, useMe, useUpdateMe } from '../api/me';
+import { useCompleteOnboarding, useDeleteAccount, useMe, useUpdateMe } from '../api/me';
 import { queryKeys } from '../lib/queryKeys';
 import { supabase } from '../lib/supabase';
 import { jsonResponse, renderHookWithClient } from '../test-utils/render';
@@ -40,6 +40,33 @@ describe('useUpdateMe', () => {
     expect(fetchMock.mock.calls[0][1]).toMatchObject({ method: 'PATCH', body: JSON.stringify({ bio: 'hi' }) });
     expect(client.getQueryData(queryKeys.me)).toEqual({ id: 'u1', bio: 'hi' });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
+  });
+});
+
+describe('useCompleteOnboarding', () => {
+  it('POSTs /me/onboarding/complete and caches the completed profile', async () => {
+    const done = { id: 'u1', onboardingCompleted: true, onboardingCompletedAt: '2026-10-16T00:00:00Z' };
+    fetchMock.mockResolvedValue(jsonResponse(200, done));
+    const { result, client } = await renderHookWithClient(() => useCompleteOnboarding());
+    client.setQueryData(queryKeys.me, { id: 'u1', onboardingCompleted: false, onboardingCompletedAt: null });
+    await act(async () => {
+      await result.current.mutateAsync();
+    });
+    expect(fetchMock.mock.calls[0][0]).toBe(`${BASE}/me/onboarding/complete`);
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ method: 'POST' });
+    expect(client.getQueryData(queryKeys.me)).toEqual(done);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+  });
+
+  it('leaves the cached profile alone when the server refuses', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(400, { message: 'Choose a username first.' }));
+    const { result, client } = await renderHookWithClient(() => useCompleteOnboarding());
+    client.setQueryData(queryKeys.me, { id: 'u1', onboardingCompletedAt: null });
+    await act(async () => {
+      await result.current.mutateAsync().catch(() => {});
+    });
+    expect(client.getQueryData(queryKeys.me)).toEqual({ id: 'u1', onboardingCompletedAt: null });
+    await waitFor(() => expect(result.current.error).toMatchObject({ status: 400, message: 'Choose a username first.' }));
   });
 });
 

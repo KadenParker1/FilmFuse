@@ -35,6 +35,10 @@ Content-Type: application/json
   "username": "no spaces!"
 }
 
+### Complete onboarding (interim: needs a username; idempotent, keeps the first timestamp)
+POST {{baseUrl}}/api/v1/me/onboarding/complete
+Authorization: Bearer {{token}}
+
 ### Username availability
 GET {{baseUrl}}/api/v1/usernames/movie_buff/available
 Authorization: Bearer {{token}}

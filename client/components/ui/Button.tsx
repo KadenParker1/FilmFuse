@@ -23,10 +23,21 @@ type Props = Omit<PressableProps, 'children'> & {
   variant?: ButtonVariant;
   loading?: boolean;
   icon?: ReactNode;
+  /** `sm` is the compact pill used inside list rows. */
+  size?: 'md' | 'sm';
   className?: string;
 };
 
-export function Button({ title, variant = 'primary', loading = false, disabled, icon, className = '', ...rest }: Props) {
+export function Button({
+  title,
+  variant = 'primary',
+  loading = false,
+  disabled,
+  icon,
+  size = 'md',
+  className = '',
+  ...rest
+}: Props) {
   const { colors } = useTheme();
   const isDisabled = disabled || loading;
   const spinnerColor = variant === 'primary' ? colors.onGold : variant === 'danger' ? colors.onVelvet : colors.text;
@@ -37,13 +48,15 @@ export function Button({ title, variant = 'primary', loading = false, disabled, 
       accessibilityLabel={title}
       accessibilityState={{ disabled: !!isDisabled, busy: loading }}
       disabled={isDisabled}
-      className={`min-h-12 flex-row items-center justify-center gap-2 rounded-full px-5 py-3 active:opacity-80 ${
+      className={`flex-row items-center justify-center rounded-full active:opacity-80 ${
+        size === 'sm' ? 'min-h-9 gap-1.5 px-4 py-1.5' : 'min-h-12 gap-2 px-5 py-3'
+      } ${
         containerByVariant[variant]
       } ${isDisabled ? 'opacity-50' : ''} ${className}`}
       {...rest}
     >
       {loading ? <ActivityIndicator size="small" color={spinnerColor} /> : icon}
-      <Text className={`font-body-semibold text-base ${labelByVariant[variant]}`}>{title}</Text>
+      <Text className={`font-body-semibold ${size === 'sm' ? 'text-sm' : 'text-base'} ${labelByVariant[variant]}`}>{title}</Text>
     </Pressable>
   );
 }

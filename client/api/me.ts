@@ -20,6 +20,18 @@ export function useUpdateMe() {
 }
 
 /**
+ * Marks onboarding complete (interim: core-api only requires a username). Caching the returned
+ * profile is what lets ProfileGate through to the tabs.
+ */
+export function useCompleteOnboarding() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiClient.post<ProfileResponseDTO>('/me/onboarding/complete'),
+    onSuccess: (profile) => qc.setQueryData(queryKeys.me, profile),
+  });
+}
+
+/**
  * Permanently deletes the account (profile, photo and Supabase Auth user), then signs out locally
  * and drops every cached query so nothing of the old account lingers.
  */

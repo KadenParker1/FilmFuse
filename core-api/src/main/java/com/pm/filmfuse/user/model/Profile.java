@@ -48,6 +48,12 @@ public class Profile extends AuditableEntity implements Persistable<UUID> {
 
     private String bio;
 
+    /**
+     * Mirrored from the JWT {@code email} claim by ProfileService; the recipient of social emails.
+     * Never exposed through any DTO.
+     */
+    private String email;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AccountStatus status = AccountStatus.ACTIVE;
