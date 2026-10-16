@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [master, 'phase-*']
+  pull_request:
+    branches: [master]
+
+jobs:
+  core-api:
+    name: core-api (Maven)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: core-api
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: core-api/pom.xml
+
+      # Testcontainers needs a Docker daemon; ubuntu-latest ships one and the test profile needs no secrets.
+      - name: Run tests
+        run: ./mvnw -B test
+
+  ml-service:
+    name: python-ml-service (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python-ml-service
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            python-ml-service/requirements.txt
+            python-ml-service/requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Test
+        run: pytest -q
+
+  # client/types/api.ts mirrors the core-api DTOs by hand and nothing else compares one against
+  # the other, so this is the only thing standing between a forgotten field and a runtime
+  # `undefined`. Its own job: it needs neither Java nor Node, so it reports in seconds and says
+  # plainly which type drifted rather than hiding inside a build log.
+  api-type-drift:
+    name: api.ts mirrors the core-api DTOs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for DTO drift
+        run: python3 tools/check_api_type_drift.py
+
+  client:
+    name: client (Expo)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test -- --watchAll=false
+
+      - name: Web export
+        run: npx expo export -p web

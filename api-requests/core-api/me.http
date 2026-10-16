@@ -1,0 +1,43 @@
+### FilmFuse core-api - profile endpoints
+# Get a token: sign in via the client, or against local Supabase:
+#   curl -s -X POST 'http://127.0.0.1:54321/auth/v1/token?grant_type=password' \
+#     -H "apikey: <anon key from `supabase status`>" -H 'Content-Type: application/json' \
+#     -d '{"email":"you@example.com","password":"..."}' | jq -r .access_token
+# Then set @token below (never commit a real one).
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+
+### Health (public)
+GET {{baseUrl}}/actuator/health
+
+### Current profile (auto-provisioned on first call)
+GET {{baseUrl}}/api/v1/me
+Authorization: Bearer {{token}}
+
+### Update profile (partial; null/omitted = unchanged, "" clears displayName/bio/profileImageUrl)
+PATCH {{baseUrl}}/api/v1/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "username": "movie_buff",
+  "displayName": "Movie Buff",
+  "bio": "Horror on weekdays, rom-coms on Sundays."
+}
+
+### Invalid username -> 400 with fieldErrors
+PATCH {{baseUrl}}/api/v1/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "username": "no spaces!"
+}
+
+### Username availability
+GET {{baseUrl}}/api/v1/usernames/movie_buff/available
+Authorization: Bearer {{token}}
+
+### No token -> 401
+GET {{baseUrl}}/api/v1/me

@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "FilmFuse",
+    "slug": "filmfuse",
+    "scheme": "filmfuse",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0E0B14",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pm.filmfuse"
+    },
+    "android": {
+      "package": "com.pm.filmfuse",
+      "adaptiveIcon": {
+        "backgroundColor": "#0E0B14",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0E0B14",
+          "dark": {
+            "backgroundColor": "#0E0B14"
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

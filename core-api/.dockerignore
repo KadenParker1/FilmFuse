@@ -1,0 +1,12 @@
+# Keep the build context small and local secrets out of the image.
+.git
+.idea
+target
+*.md
+*.iml
+.env
+.env.*
+!.env.example
+src/main/resources/application-local.properties
+Dockerfile
+.dockerignore
