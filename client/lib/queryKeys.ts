@@ -3,6 +3,10 @@
  * spread it, so invalidation prefixes can't drift from the keys they invalidate.
  */
 const movies = ['movies'] as const;
+const social = ['social'] as const;
+const userSearchAll = [...social, 'search'] as const;
+const friendRequestsAll = [...social, 'requests'] as const;
+const friendSuggestionsAll = [...social, 'suggestions'] as const;
 
 export const queryKeys = {
   /** The signed-in user's own profile (GET /me). */
@@ -18,4 +22,24 @@ export const queryKeys = {
   popularMovies: (genreId: number | null) => [...movies, 'popular', genreId] as const,
   /** GET /movies/{id} */
   movie: (id: number) => [...movies, 'detail', id] as const,
+  /** Everything social-graph related (prefix). */
+  social,
+  /** Every GET /users/search page set (prefix). */
+  userSearchAll,
+  /** GET /users/search?q= (infinite) */
+  userSearch: (q: string) => [...userSearchAll, q] as const,
+  /** GET /users/{id} */
+  publicProfile: (id: string) => [...social, 'profile', id] as const,
+  /** GET /friends (infinite) */
+  friends: [...social, 'friends'] as const,
+  /** Both GET /friends/requests lists (prefix). */
+  friendRequestsAll,
+  /** GET /friends/requests?direction= */
+  friendRequests: (direction: 'INCOMING' | 'OUTGOING') => [...friendRequestsAll, direction] as const,
+  /** Every GET /friends/suggestions list (prefix). */
+  friendSuggestionsAll,
+  /** GET /friends/suggestions?limit=; null = the server default */
+  friendSuggestions: (limit: number | null) => [...friendSuggestionsAll, limit] as const,
+  /** GET /blocks */
+  blocks: [...social, 'blocks'] as const,
 } as const;

@@ -65,6 +65,8 @@ function ProfileHeader() {
 }
 
 export default function ProfileScreen() {
+  const router = useRouter();
+  const { colors } = useTheme();
   const { signOut } = useAuth();
   const [deleting, setDeleting] = useState(false);
 
@@ -82,6 +84,12 @@ export default function ProfileScreen() {
       <View className="gap-3 pb-28">
         <Label>Settings</Label>
         <Card className="gap-3">
+          <Button
+            title="Blocked people"
+            variant="secondary"
+            icon={<Ionicons name="ban-outline" size={18} color={colors.text} />}
+            onPress={() => router.push('/settings/blocked')}
+          />
           <Button title="Sign out" variant="secondary" onPress={() => void signOut()} />
           <Button title="Delete account" variant="danger" onPress={() => setDeleting(true)} />
         </Card>

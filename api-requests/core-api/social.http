@@ -1,0 +1,98 @@
+### FilmFuse core-api - social graph (friends, requests, blocks, search, suggestions, invites)
+# Token: see me.http. Use two accounts (@token and @otherToken) to exercise requests end to end;
+# set @otherUserId to the second account's profile id (GET /api/v1/me with @otherToken).
+# Cursors are opaque: pass back the previous response's nextCursor; null means the last page.
+# Emails (request received / accepted) go through the mock gateway unless FILMFUSE_EMAIL_PROVIDER=smtp
+# (local Mailpit: http://127.0.0.1:54324).
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+@otherToken = paste-second-access-token-here
+@otherUserId = 00000000-0000-0000-0000-000000000000
+
+### Search people: case-insensitive prefix on username or display name, 20 per page (q: 2-50 chars)
+GET {{baseUrl}}/api/v1/users/search?q=mo
+Authorization: Bearer {{token}}
+
+### Next page
+GET {{baseUrl}}/api/v1/users/search?q=mo&cursor=paste-nextCursor-here
+Authorization: Bearer {{token}}
+
+### Search text too short -> 400
+GET {{baseUrl}}/api/v1/users/search?q=m
+Authorization: Bearer {{token}}
+
+### Public profile (friendship state, mutualFriendCount, friendCount). 404 if they blocked you.
+GET {{baseUrl}}/api/v1/users/{{otherUserId}}
+Authorization: Bearer {{token}}
+
+### Send a friend request -> REQUEST_SENT (or FRIENDS if they had already asked you). Idempotent.
+POST {{baseUrl}}/api/v1/friends/requests
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "targetUserId": "{{otherUserId}}"
+}
+
+### Outgoing requests, newest first
+GET {{baseUrl}}/api/v1/friends/requests?direction=OUTGOING
+Authorization: Bearer {{token}}
+
+### Incoming requests (as the other account)
+GET {{baseUrl}}/api/v1/friends/requests?direction=INCOMING
+Authorization: Bearer {{otherToken}}
+
+### Accept (as the other account; path id = the requester). 404 if there is no pending request.
+# Replace the id with YOUR profile id (the requester).
+POST {{baseUrl}}/api/v1/friends/requests/00000000-0000-0000-0000-000000000000/accept
+Authorization: Bearer {{otherToken}}
+
+### Decline (as the other account) -> 204, idempotent
+POST {{baseUrl}}/api/v1/friends/requests/00000000-0000-0000-0000-000000000000/decline
+Authorization: Bearer {{otherToken}}
+
+### Cancel your outgoing request -> 204, idempotent
+DELETE {{baseUrl}}/api/v1/friends/requests/{{otherUserId}}
+Authorization: Bearer {{token}}
+
+### Friends: close friends first, then closeness, then username
+GET {{baseUrl}}/api/v1/friends
+Authorization: Bearer {{token}}
+
+### Mark as close friend (closeness becomes at least 0.8). 404 if not friends.
+PATCH {{baseUrl}}/api/v1/friends/{{otherUserId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "closeFriend": true
+}
+
+### Unfriend -> 204, idempotent
+DELETE {{baseUrl}}/api/v1/friends/{{otherUserId}}
+Authorization: Bearer {{token}}
+
+### Suggestions: friends of friends by mutual count (limit 1-50, default 10)
+GET {{baseUrl}}/api/v1/friends/suggestions?limit=10
+Authorization: Bearer {{token}}
+
+### Block -> 204 (removes friendship and pending requests both ways)
+POST {{baseUrl}}/api/v1/blocks/{{otherUserId}}
+Authorization: Bearer {{token}}
+
+### Blocked people, most recent first
+GET {{baseUrl}}/api/v1/blocks
+Authorization: Bearer {{token}}
+
+### Unblock -> 204
+DELETE {{baseUrl}}/api/v1/blocks/{{otherUserId}}
+Authorization: Bearer {{token}}
+
+### Create an invite link (valid 14 days, reusable)
+POST {{baseUrl}}/api/v1/invites
+Authorization: Bearer {{token}}
+
+### Redeem it as the other account -> you are friends immediately. 400 own / 404 unknown or blocked / 410 expired.
+POST {{baseUrl}}/api/v1/invites/paste-token-here/redeem
+Authorization: Bearer {{otherToken}}

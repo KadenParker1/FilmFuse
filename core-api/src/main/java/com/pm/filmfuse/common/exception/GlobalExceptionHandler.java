@@ -95,6 +95,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponseDTO.of(ex.getMessage()));
     }
 
+    @ExceptionHandler(GoneException.class)
+    public ResponseEntity<ErrorResponseDTO> handleGone(GoneException ex) {
+        return ResponseEntity.status(HttpStatus.GONE).body(ErrorResponseDTO.of(ex.getMessage()));
+    }
+
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponseDTO> handleForbidden(ForbiddenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponseDTO.of(ex.getMessage()));

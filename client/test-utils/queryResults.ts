@@ -32,3 +32,20 @@ export function queryResult<T>(overrides: Partial<Record<string, unknown>> & { d
     ...overrides,
   };
 }
+
+/** A hand-built useMutation result; `mutate` / `mutateAsync` are jest mocks. */
+export function mutationResult(overrides: Partial<Record<string, unknown>> = {}) {
+  return {
+    mutate: jest.fn(),
+    mutateAsync: jest.fn(() => Promise.resolve(undefined)),
+    reset: jest.fn(),
+    isPending: false,
+    isError: false,
+    isSuccess: false,
+    isIdle: true,
+    error: null as unknown,
+    data: undefined as unknown,
+    variables: undefined as unknown,
+    ...overrides,
+  };
+}

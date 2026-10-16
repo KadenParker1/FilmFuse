@@ -95,3 +95,93 @@ export interface MovieDetailDTO {
   voteAverage: number | null;
   popularity: number | null;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Social graph (Phase 2) — com.pm.filmfuse.social.dto
+// ---------------------------------------------------------------------------------------------
+
+/** Java enum `FriendshipState` (social module) — relative to the caller; BLOCKED = the caller blocked them. */
+export type FriendshipState = 'NONE' | 'FRIENDS' | 'REQUEST_SENT' | 'REQUEST_RECEIVED' | 'BLOCKED';
+
+/** Java enum `RequestDirection` (social module). */
+export type RequestDirection = 'INCOMING' | 'OUTGOING';
+
+/** com.pm.filmfuse.social.dto.UserSummaryDTO */
+export interface UserSummaryDTO {
+  id: string;
+  /** Null until they pick one (e.g. joined through an invite). */
+  username: string | null;
+  displayName: string | null;
+  profileImageUrl: string | null;
+  friendship: FriendshipState;
+}
+
+/** com.pm.filmfuse.social.dto.PublicProfileDTO — `tasteOverlap` stays null until taste vectors exist (Phase 1b). */
+export interface PublicProfileDTO {
+  id: string;
+  /** Null until they pick one (e.g. joined through an invite). */
+  username: string | null;
+  displayName: string | null;
+  profileImageUrl: string | null;
+  bio: string | null;
+  friendship: FriendshipState;
+  /** True only when you are FRIENDS and you flagged them as a close friend (directional). */
+  closeFriend: boolean;
+  mutualFriendCount: number;
+  friendCount: number;
+  tasteOverlap: number | null;
+}
+
+/** com.pm.filmfuse.social.dto.FriendDTO — `closeness` is 0–1; `friendsSince` is ISO-8601. */
+export interface FriendDTO {
+  id: string;
+  /** Null until they pick one (e.g. joined through an invite). */
+  username: string | null;
+  displayName: string | null;
+  profileImageUrl: string | null;
+  closeFriend: boolean;
+  closeness: number;
+  friendsSince: string;
+}
+
+/** com.pm.filmfuse.social.dto.FriendRequestDTO */
+export interface FriendRequestDTO {
+  user: UserSummaryDTO;
+  direction: RequestDirection;
+  createdAt: string;
+}
+
+/** com.pm.filmfuse.social.dto.FriendshipStatusDTO */
+export interface FriendshipStatusDTO {
+  userId: string;
+  friendship: FriendshipState;
+}
+
+/** com.pm.filmfuse.social.dto.FriendSuggestionDTO — `mutualFriends` holds at most 3 people. */
+export interface FriendSuggestionDTO {
+  user: UserSummaryDTO;
+  mutualFriendCount: number;
+  mutualFriends: UserSummaryDTO[];
+}
+
+/** com.pm.filmfuse.social.dto.SendFriendRequestDTO */
+export interface SendFriendRequestDTO {
+  targetUserId: string;
+}
+
+/** com.pm.filmfuse.social.dto.UpdateFriendDTO */
+export interface UpdateFriendDTO {
+  closeFriend: boolean;
+}
+
+/** com.pm.filmfuse.social.dto.InviteDTO — `url` is the web link to share (`<web-url>/invite/<token>`). */
+export interface InviteDTO {
+  token: string;
+  url: string;
+  expiresAt: string;
+}
+
+/** com.pm.filmfuse.social.dto.InviteRedeemResultDTO — `inviter.friendship` is FRIENDS after success. */
+export interface InviteRedeemResultDTO {
+  inviter: UserSummaryDTO;
+}

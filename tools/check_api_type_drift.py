@@ -7,7 +7,9 @@ invisible until something reads `undefined` at runtime. (Ported from Bellavera's
 
 Checks, by type name:
   * every TS interface in api.ts names a Java DTO record, and the two have the same field *names*;
-  * every Java DTO record has a mirror in api.ts, unless it is in SERVER_ONLY with a reason.
+  * every Java DTO record has a mirror in api.ts, unless it is in SERVER_ONLY with a reason;
+  * every Java enum in a dto/ package (plus EXTRA_ENUM_FILES) has a TS string-literal union of the
+    same name in api.ts (`export type X = 'A' | 'B';`) with exactly the same constants.
 
 Field types are deliberately not compared: `Instant` and `UUID` are `string`, `int` is `number`, a
 `Map` is `Record<string, ...>`, and encoding those mappings would cost more than it catches. A
@@ -27,6 +29,8 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BACKEND = ROOT / "core-api" / "src" / "main" / "java" / "com" / "pm" / "filmfuse"
 EXTRA_DTO_FILES = [BACKEND / "common" / "exception" / "ErrorResponseDTO.java"]
+# Enums outside dto/ packages that DTOs expose (serialised by name, so the client sees the constants).
+EXTRA_ENUM_FILES = [BACKEND / "user" / "model" / "AccountStatus.java"]
 MIRROR = ROOT / "client" / "types" / "api.ts"
 
 # Java DTOs that legitimately never reach the client, so need no mirror in api.ts.
@@ -101,6 +105,30 @@ def ts_interface_fields(text: str) -> dict[str, set[str]]:
     return found
 
 
+def java_enum_constants(text: str) -> dict[str, set[str]]:
+    """Constants by enum name. Stops at the first `;` (fields/methods follow it) or the closing brace."""
+    text = strip_comments_and_strings(text)
+    found: dict[str, set[str]] = {}
+    for match in re.finditer(r"\benum\s+(\w+)\s*(?:implements[^{]*)?\{([^;}]*)", text):
+        body = re.sub(r"\([^()]*\)", "", match.group(2))  # constructor arguments
+        body = re.sub(r"@[\w.]+", "", body)                  # annotations on constants
+        found[match.group(1)] = {c.strip() for c in body.split(",") if c.strip()}
+    return found
+
+
+def ts_string_unions(text: str) -> dict[str, set[str]]:
+    """`export type X = 'A' | 'B';` aliases made only of string literals; other aliases are ignored."""
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    text = re.sub(r"//[^\n]*", "", text)
+    found = {}
+    for match in re.finditer(r"export type (\w+)\s*=\s*([^;]+);", text):
+        members = [m.strip() for m in match.group(2).strip().lstrip("|").split("|")]
+        literals = [re.fullmatch(r"'([^']*)'|\"([^\"]*)\"", m) for m in members]
+        if members and all(literals):
+            found[match.group(1)] = {lit.group(1) if lit.group(1) is not None else lit.group(2) for lit in literals}
+    return found
+
+
 def dto_files() -> list[pathlib.Path]:
     files = {p for p in BACKEND.rglob("*.java") if "dto" in p.relative_to(BACKEND).parts[:-1]}
     files.update(p for p in EXTRA_DTO_FILES if p.exists())
@@ -111,7 +139,13 @@ def main() -> int:
     backend: dict[str, set[str]] = {}
     for path in dto_files():
         backend.update(java_record_fields(read(path)))
-    mirror = ts_interface_fields(read(MIRROR))
+    mirror_text = read(MIRROR)
+    mirror = ts_interface_fields(mirror_text)
+
+    enums: dict[str, set[str]] = {}
+    for path in dto_files() + [p for p in EXTRA_ENUM_FILES if p.exists()]:
+        enums.update(java_enum_constants(read(path)))
+    unions = ts_string_unions(mirror_text)
 
     problems: list[str] = []
     checked = 0
@@ -138,6 +172,22 @@ def main() -> int:
             problems.append(f"{name}: missing from api.ts: {sorted(missing)}")
         if extra:
             problems.append(f"{name}: in api.ts but not in the Java record: {sorted(extra)}")
+
+    for name in sorted(enums):
+        if name not in unions:
+            if name not in SERVER_ONLY:
+                problems.append(
+                    f"{name}: Java enum has no string-literal union in api.ts "
+                    f"(export type {name} = 'A' | 'B';)."
+                )
+            continue
+        checked += 1
+        missing = enums[name] - unions[name]
+        extra = unions[name] - enums[name]
+        if missing:
+            problems.append(f"{name}: enum constants missing from api.ts: {sorted(missing)}")
+        if extra:
+            problems.append(f"{name}: in the api.ts union but not the Java enum: {sorted(extra)}")
 
     if problems:
         print(f"api.ts has drifted from the core-api DTOs ({len(problems)} problem(s)):\n")

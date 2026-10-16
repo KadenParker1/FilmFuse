@@ -9,6 +9,7 @@ export { PosterCard } from './PosterCard';
 export { PosterGrid, posterColumns, type PosterItem } from './PosterGrid';
 export { Screen } from './Screen';
 export { SearchBar } from './SearchBar';
+export { SegmentedControl, type Segment } from './SegmentedControl';
 export { Sheet } from './Sheet';
 export { Skeleton } from './Skeleton';
 export { Slider1to10 } from './Slider1to10';

@@ -15,7 +15,7 @@ type Props = {
 export function Avatar({ uri, displayName, username, size = 64, className = '' }: Props) {
   const [failedUri, setFailedUri] = useState<string | null>(null);
   const showImage = !!uri && failedUri !== uri;
-  const name = displayName || username || 'Member';
+  const name = displayName || username || 'New member';
 
   return (
     <View

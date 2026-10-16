@@ -11,6 +11,7 @@ import com.pm.filmfuse.user.model.Profile;
 import com.pm.filmfuse.user.repository.DeletedAccountRepository;
 import com.pm.filmfuse.user.repository.ProfileRepository;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,9 @@ public class ProfileService {
      * The caller's profile, created on first sight of their Supabase user id. Deliberately not one
      * transaction: if two first requests race, the loser's insert fails on the primary key and it
      * simply re-reads the winner's row.
+     *
+     * <p>Also keeps {@code profiles.email} in step with the token's {@code email} claim (the user may
+     * have changed it in Supabase). A token without the claim leaves the stored address alone.
      */
     public Profile resolve(Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
@@ -45,6 +49,11 @@ public class ProfileService {
         // Belt and braces: SupabaseJwtAuthenticationConverter already refuses suspended accounts.
         if (profile.getStatus() == AccountStatus.SUSPENDED) {
             throw new ForbiddenException("This account is suspended.");
+        }
+        String email = emailFrom(jwt);
+        if (email != null && !Objects.equals(email, profile.getEmail())) {
+            profileRepository.updateEmail(userId, email);
+            profile.setEmail(email);
         }
         return profile;
     }
@@ -86,6 +95,7 @@ public class ProfileService {
         }
         Profile profile = new Profile(userId);
         profile.setDisplayName(displayNameFrom(jwt));
+        profile.setEmail(emailFrom(jwt));
         try {
             Profile saved = profileRepository.saveAndFlush(profile);
             log.info("Provisioned profile {}", userId);
@@ -94,6 +104,12 @@ public class ProfileService {
             log.debug("Concurrent provisioning of {}; re-reading", userId);
             return profileRepository.findById(userId).orElseThrow(() -> ex);
         }
+    }
+
+    /** The {@code email} claim, trimmed; null when absent or blank (e.g. a phone sign-in). */
+    static String emailFrom(Jwt jwt) {
+        String email = jwt.getClaimAsString("email");
+        return email == null || email.isBlank() ? null : email.trim();
     }
 
     /** Google / Apple sign-in put the person's name in {@code user_metadata}; a sensible default. */

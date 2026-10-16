@@ -60,6 +60,8 @@ describe('ProfileScreen', () => {
     await render(<ProfileScreen />);
     await fireEvent.press(screen.getByRole('button', { name: 'Edit profile' }));
     expect(routerState.router.push).toHaveBeenCalledWith('/profile/edit');
+    await fireEvent.press(screen.getByRole('button', { name: 'Blocked people' }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/settings/blocked');
     await fireEvent.press(screen.getByRole('button', { name: 'Sign out' }));
     expect(mockSignOut).toHaveBeenCalled();
     expect(screen.queryByText('Delete your account?')).toBeNull();

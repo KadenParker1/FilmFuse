@@ -1,18 +1,11 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/apiClient';
 import { queryKeys } from '../lib/queryKeys';
+import { withQuery } from '../lib/withQuery';
 import type { GenreDTO, MovieDetailDTO, MovieSummaryDTO, PageDTO } from '../types/api';
 
 /** Search queries are 1–100 chars server-side; anything else is never sent. */
 export const SEARCH_MAX_LENGTH = 100;
-
-function withQuery(path: string, params: Record<string, string | number | null | undefined>): string {
-  const qs = Object.entries(params)
-    .filter((e): e is [string, string | number] => e[1] !== null && e[1] !== undefined && e[1] !== '')
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
-    .join('&');
-  return qs ? `${path}?${qs}` : path;
-}
 
 export const fetchGenres = () => apiClient.get<GenreDTO[]>('/genres');
 

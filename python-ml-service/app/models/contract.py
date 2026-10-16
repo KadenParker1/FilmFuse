@@ -3,6 +3,12 @@
 JSON uses camelCase; Python uses snake_case (populate_by_name=True accepts both).
 Do not change these shapes without coordinating with core-api.
 All scores are integers 1-10. User ids are Supabase UUIDs; movie ids are TMDB ints.
+
+Hard constraints: `filters` (incl. `maxCertification` and `contentLimits`) are hard
+constraints, not preferences — never return a movie that violates them. When
+`candidateMovieIds` is present it is core-api's pre-filtered eligible pool; rank only
+within it. core-api re-checks every result against the effective filters and drops
+violations (defense in depth).
 """
 
 from datetime import datetime
@@ -14,6 +20,9 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 
 Score = Annotated[int, Field(ge=1, le=10)]
+Certification = Literal["G", "PG", "PG-13", "R", "NC-17"]
+ContentDimension = Literal["violence", "sexual", "language", "drugs", "frightening"]
+ContentLevel = Literal["none", "mild", "moderate", "strong"]
 K = Annotated[int, Field(ge=1, le=100)]
 MovieId = Annotated[int, Field(ge=1)]
 
@@ -38,6 +47,12 @@ class Filters(ContractModel):
     max_content_rating: str | None = None
     streaming_services: list[str] | None = None
     genre_ids: list[int] | None = None
+    # Hard constraints (see module docstring).
+    max_certification: Certification | None = None
+    # Max allowed level per content dimension; absent dimension = no limit.
+    content_limits: dict[ContentDimension, ContentLevel] = {}
+    # Whether movies with no certification / content data may be returned.
+    allow_unrated: bool = False
 
 
 class Strategy(str, Enum):
@@ -95,7 +110,7 @@ class UserVectorResponse(ContractModel):
 
 class GroupMember(ContractModel):
     user_id: UUID
-    vector: UserVector
+    vector: UserVector | None = None  # None = member has no vector yet
     weight: Annotated[float, Field(ge=0)] = 1.0
 
 
@@ -105,6 +120,8 @@ class GroupRecommendationRequest(ContractModel):
     closeness: list[list[float]] = []
     filters: Filters = Filters()
     exclude_movie_ids: list[MovieId] = []
+    # Pre-filtered eligible pool from core-api; when present, rank only within it.
+    candidate_movie_ids: list[MovieId] | None = None
     strategy: Strategy = Strategy.MEAN
     k: K = 20
 
@@ -137,6 +154,8 @@ class UserRecommendationRequest(ContractModel):
     vector: UserVector
     filters: Filters = Filters()
     exclude_movie_ids: list[MovieId] = []
+    # Pre-filtered eligible pool from core-api; when present, rank only within it.
+    candidate_movie_ids: list[MovieId] | None = None
     k: K = 20
 
 
