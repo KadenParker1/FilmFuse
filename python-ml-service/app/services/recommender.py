@@ -88,7 +88,7 @@ class PlaceholderRecommender:
 
     def recommend_for_group(self, req: GroupRecommendationRequest) -> GroupRecommendationResponse:
         # PLACEHOLDER — replace with your implementation
-        movie_ids = _take(_PLACEHOLDER_CANDIDATES, req.exclude_movie_ids, req.k)
+        movie_ids = _take(_pool(req.candidate_movie_ids), req.exclude_movie_ids, req.k)
         return GroupRecommendationResponse(
             results=[
                 GroupRecommendation(
@@ -103,7 +103,7 @@ class PlaceholderRecommender:
 
     def recommend_for_user(self, req: UserRecommendationRequest) -> UserRecommendationResponse:
         # PLACEHOLDER — replace with your implementation
-        movie_ids = _take(_PLACEHOLDER_CANDIDATES, req.exclude_movie_ids, req.k)
+        movie_ids = _take(_pool(req.candidate_movie_ids), req.exclude_movie_ids, req.k)
         return UserRecommendationResponse(
             results=[
                 UserRecommendation(movie_id=m, score=NEUTRAL_SCORE, explanation="Placeholder pick")
@@ -118,6 +118,12 @@ class PlaceholderRecommender:
         return CalibrationCandidatesResponse(
             movie_ids=_take(_PLACEHOLDER_CANDIDATES, req.seen_movie_ids, req.k)
         )
+
+
+# PLACEHOLDER — replace with your implementation
+def _pool(candidate_movie_ids: list[int] | None) -> list[int]:
+    # Use core-api's eligible pool (in given order) when provided, else the hard-coded list.
+    return _PLACEHOLDER_CANDIDATES if candidate_movie_ids is None else candidate_movie_ids
 
 
 def _take(candidates: list[int], exclude: list[int], k: int) -> list[int]:
