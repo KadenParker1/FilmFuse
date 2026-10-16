@@ -1,6 +1,7 @@
 package com.pm.filmfuse.user.security;
 
 import com.pm.filmfuse.user.model.AccountStatus;
+import com.pm.filmfuse.user.repository.DeletedAccountRepository;
 import com.pm.filmfuse.user.repository.ProfileRepository;
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +19,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
  * Turns a verified Supabase JWT into an authentication. Two checks beyond the signature:
  * <ul>
  *   <li>{@code sub} must be a UUID (Supabase always issues one); anything else is a 401, not a 500.</li>
+ *   <li>A deleted account (tombstoned in {@code deleted_accounts}) is a 401 {@code account_deleted}: its
+ *       token outlives the Supabase user, and must not resurrect the profile.</li>
  *   <li>A SUSPENDED profile is refused. Supabase cannot un-issue a token, so the ban is enforced here
  *       with one primary-key lookup per request.</li>
  * </ul>
@@ -28,14 +31,22 @@ public class SupabaseJwtAuthenticationConverter implements Converter<Jwt, Abstra
     private static final Logger log = LoggerFactory.getLogger(SupabaseJwtAuthenticationConverter.class);
 
     private final ProfileRepository profileRepository;
+    private final DeletedAccountRepository deletedAccountRepository;
 
-    public SupabaseJwtAuthenticationConverter(ProfileRepository profileRepository) {
+    public SupabaseJwtAuthenticationConverter(ProfileRepository profileRepository,
+                                              DeletedAccountRepository deletedAccountRepository) {
         this.profileRepository = profileRepository;
+        this.deletedAccountRepository = deletedAccountRepository;
     }
 
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
         UUID userId = subjectOf(jwt);
+        if (deletedAccountRepository.isDeleted(userId)) {
+            log.info("Rejecting a token for deleted account {}", userId);
+            throw new OAuth2AuthenticationException(
+                    new OAuth2Error("account_deleted", "This account has been deleted.", null));
+        }
         profileRepository.findById(userId)
                 .filter(profile -> profile.getStatus() == AccountStatus.SUSPENDED)
                 .ifPresent(profile -> {

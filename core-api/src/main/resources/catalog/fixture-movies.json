@@ -1,0 +1,770 @@
+[
+  {
+    "id": 278,
+    "title": "The Shawshank Redemption",
+    "releaseYear": 1994,
+    "runtime": 142,
+    "posterPath": "/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg",
+    "backdropPath": null,
+    "overview": "A banker sentenced to life in Shawshank prison forms an unlikely friendship and quietly holds on to hope over two decades.",
+    "genreIds": [
+      18,
+      80
+    ],
+    "popularity": 150.0,
+    "voteAverage": 8.7
+  },
+  {
+    "id": 238,
+    "title": "The Godfather",
+    "releaseYear": 1972,
+    "runtime": 175,
+    "posterPath": "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+    "backdropPath": null,
+    "overview": "The aging patriarch of a New York crime family hands control of his empire to his reluctant youngest son.",
+    "genreIds": [
+      18,
+      80
+    ],
+    "popularity": 147.5,
+    "voteAverage": 8.7
+  },
+  {
+    "id": 155,
+    "title": "The Dark Knight",
+    "releaseYear": 2008,
+    "runtime": 152,
+    "posterPath": "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    "backdropPath": null,
+    "overview": "Batman, Gordon and Harvey Dent take on Gotham's mob, until a chaos-loving criminal called the Joker upends the city.",
+    "genreIds": [
+      18,
+      28,
+      80,
+      53
+    ],
+    "popularity": 145.0,
+    "voteAverage": 8.5
+  },
+  {
+    "id": 680,
+    "title": "Pulp Fiction",
+    "releaseYear": 1994,
+    "runtime": 154,
+    "posterPath": "/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+    "backdropPath": null,
+    "overview": "Hitmen, a boxer, a gangster's wife and a pair of diner robbers collide in interlocking Los Angeles crime stories.",
+    "genreIds": [
+      53,
+      80
+    ],
+    "popularity": 142.5,
+    "voteAverage": 8.5
+  },
+  {
+    "id": 550,
+    "title": "Fight Club",
+    "releaseYear": 1999,
+    "runtime": 139,
+    "posterPath": "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+    "backdropPath": null,
+    "overview": "An insomniac office worker and a reckless soap salesman start an underground fight club that grows into something far darker.",
+    "genreIds": [
+      18
+    ],
+    "popularity": 140.0,
+    "voteAverage": 8.4
+  },
+  {
+    "id": 13,
+    "title": "Forrest Gump",
+    "releaseYear": 1994,
+    "runtime": 142,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A kind-hearted man with a low IQ drifts through decades of American history while never giving up on his childhood love.",
+    "genreIds": [
+      35,
+      18,
+      10749
+    ],
+    "popularity": 137.5,
+    "voteAverage": 8.5
+  },
+  {
+    "id": 27205,
+    "title": "Inception",
+    "releaseYear": 2010,
+    "runtime": 148,
+    "posterPath": "/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
+    "backdropPath": null,
+    "overview": "A thief who steals secrets from dreams is offered a chance at redemption: plant an idea in a target's mind instead.",
+    "genreIds": [
+      28,
+      878,
+      12
+    ],
+    "popularity": 135.0,
+    "voteAverage": 8.4
+  },
+  {
+    "id": 157336,
+    "title": "Interstellar",
+    "releaseYear": 2014,
+    "runtime": 169,
+    "posterPath": "/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    "backdropPath": null,
+    "overview": "With Earth failing, a former pilot leads a team through a wormhole in search of a new home for humanity.",
+    "genreIds": [
+      12,
+      18,
+      878
+    ],
+    "popularity": 132.5,
+    "voteAverage": 8.4
+  },
+  {
+    "id": 603,
+    "title": "The Matrix",
+    "releaseYear": 1999,
+    "runtime": 136,
+    "posterPath": "/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+    "backdropPath": null,
+    "overview": "A hacker learns that his reality is a simulation and joins a rebellion against the machines that built it.",
+    "genreIds": [
+      28,
+      878
+    ],
+    "popularity": 130.0,
+    "voteAverage": 8.2
+  },
+  {
+    "id": 129,
+    "title": "Spirited Away",
+    "releaseYear": 2001,
+    "runtime": 125,
+    "posterPath": "/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg",
+    "backdropPath": null,
+    "overview": "A girl trapped in a world of spirits works in a bathhouse for gods to free her parents and find her way home.",
+    "genreIds": [
+      16,
+      10751,
+      14
+    ],
+    "popularity": 127.5,
+    "voteAverage": 8.5
+  },
+  {
+    "id": 496243,
+    "title": "Parasite",
+    "releaseYear": 2019,
+    "runtime": 133,
+    "posterPath": "/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
+    "backdropPath": null,
+    "overview": "A struggling family schemes its way into the employ of a wealthy household, with consequences nobody foresees.",
+    "genreIds": [
+      35,
+      53,
+      18
+    ],
+    "popularity": 125.0,
+    "voteAverage": 8.5
+  },
+  {
+    "id": 120,
+    "title": "The Lord of the Rings: The Fellowship of the Ring",
+    "releaseYear": 2001,
+    "runtime": 179,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A young hobbit sets out with eight companions to destroy a ring of terrible power before the Dark Lord reclaims it.",
+    "genreIds": [
+      12,
+      14,
+      28
+    ],
+    "popularity": 122.5,
+    "voteAverage": 8.4
+  },
+  {
+    "id": 11,
+    "title": "Star Wars",
+    "releaseYear": 1977,
+    "runtime": 121,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A farm boy joins a smuggler, a princess and an old Jedi to strike back at the Galactic Empire's planet-killing battle station.",
+    "genreIds": [
+      12,
+      28,
+      878
+    ],
+    "popularity": 120.0,
+    "voteAverage": 8.2
+  },
+  {
+    "id": 1891,
+    "title": "The Empire Strikes Back",
+    "releaseYear": 1980,
+    "runtime": 124,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "As the Empire hunts the Rebels, Luke trains with Yoda while Han and Leia are pursued across the galaxy.",
+    "genreIds": [
+      12,
+      28,
+      878
+    ],
+    "popularity": 117.5,
+    "voteAverage": 8.4
+  },
+  {
+    "id": 105,
+    "title": "Back to the Future",
+    "releaseYear": 1985,
+    "runtime": 116,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A teenager accidentally travels back to 1955 in a time-machine DeLorean and must make sure his parents fall in love.",
+    "genreIds": [
+      12,
+      35,
+      878
+    ],
+    "popularity": 115.0,
+    "voteAverage": 8.3
+  },
+  {
+    "id": 597,
+    "title": "Titanic",
+    "releaseYear": 1997,
+    "runtime": 194,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A young aristocrat and a penniless artist fall in love aboard the ill-fated maiden voyage of the Titanic.",
+    "genreIds": [
+      18,
+      10749
+    ],
+    "popularity": 112.5,
+    "voteAverage": 7.9
+  },
+  {
+    "id": 19995,
+    "title": "Avatar",
+    "releaseYear": 2009,
+    "runtime": 162,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A paraplegic marine sent to the moon Pandora is torn between his orders and the native Na'vi people he comes to love.",
+    "genreIds": [
+      28,
+      12,
+      14,
+      878
+    ],
+    "popularity": 110.0,
+    "voteAverage": 7.6
+  },
+  {
+    "id": 329,
+    "title": "Jurassic Park",
+    "releaseYear": 1993,
+    "runtime": 127,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A theme park of cloned dinosaurs suffers a catastrophic breakdown during a preview tour for a handful of experts.",
+    "genreIds": [
+      12,
+      878
+    ],
+    "popularity": 107.5,
+    "voteAverage": 7.9
+  },
+  {
+    "id": 862,
+    "title": "Toy Story",
+    "releaseYear": 1995,
+    "runtime": 81,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A cowboy doll feels threatened when a flashy space-ranger action figure becomes his owner's new favourite toy.",
+    "genreIds": [
+      16,
+      12,
+      10751,
+      35
+    ],
+    "popularity": 105.0,
+    "voteAverage": 8.0
+  },
+  {
+    "id": 8587,
+    "title": "The Lion King",
+    "releaseYear": 1994,
+    "runtime": 89,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A lion cub flees his kingdom after his father's death and must one day return to claim his place as king.",
+    "genreIds": [
+      10751,
+      16,
+      18
+    ],
+    "popularity": 102.5,
+    "voteAverage": 8.3
+  },
+  {
+    "id": 424,
+    "title": "Schindler's List",
+    "releaseYear": 1993,
+    "runtime": 195,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A German industrialist saves more than a thousand Jewish refugees by employing them in his factories during the Holocaust.",
+    "genreIds": [
+      18,
+      36,
+      10752
+    ],
+    "popularity": 100.0,
+    "voteAverage": 8.6
+  },
+  {
+    "id": 857,
+    "title": "Saving Private Ryan",
+    "releaseYear": 1998,
+    "runtime": 169,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "After the Normandy landings, a squad of soldiers goes behind enemy lines to bring home a paratrooper whose brothers were killed.",
+    "genreIds": [
+      18,
+      36,
+      10752
+    ],
+    "popularity": 97.5,
+    "voteAverage": 8.2
+  },
+  {
+    "id": 274,
+    "title": "The Silence of the Lambs",
+    "releaseYear": 1991,
+    "runtime": 119,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "An FBI trainee seeks the help of an imprisoned cannibal psychiatrist to catch another serial killer.",
+    "genreIds": [
+      80,
+      18,
+      53
+    ],
+    "popularity": 95.0,
+    "voteAverage": 8.3
+  },
+  {
+    "id": 807,
+    "title": "Se7en",
+    "releaseYear": 1995,
+    "runtime": 127,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "Two detectives hunt a serial killer who stages each murder after one of the seven deadly sins.",
+    "genreIds": [
+      80,
+      9648,
+      53
+    ],
+    "popularity": 92.5,
+    "voteAverage": 8.4
+  },
+  {
+    "id": 694,
+    "title": "The Shining",
+    "releaseYear": 1980,
+    "runtime": 144,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A writer takes a winter caretaker job at an isolated hotel, where something sinister works on his mind.",
+    "genreIds": [
+      27,
+      53
+    ],
+    "popularity": 90.0,
+    "voteAverage": 8.2
+  },
+  {
+    "id": 539,
+    "title": "Psycho",
+    "releaseYear": 1960,
+    "runtime": 109,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A secretary on the run with stolen money checks into a remote motel run by a troubled young man.",
+    "genreIds": [
+      27,
+      18,
+      53
+    ],
+    "popularity": 87.5,
+    "voteAverage": 8.4
+  },
+  {
+    "id": 348,
+    "title": "Alien",
+    "releaseYear": 1979,
+    "runtime": 117,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "The crew of a commercial starship answers a distress call and brings back a deadly lifeform.",
+    "genreIds": [
+      27,
+      878
+    ],
+    "popularity": 85.0,
+    "voteAverage": 8.2
+  },
+  {
+    "id": 78,
+    "title": "Blade Runner",
+    "releaseYear": 1982,
+    "runtime": 118,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "In a rain-soaked future Los Angeles, a burned-out cop hunts escaped synthetic humans.",
+    "genreIds": [
+      878,
+      18,
+      53
+    ],
+    "popularity": 82.5,
+    "voteAverage": 7.9
+  },
+  {
+    "id": 62,
+    "title": "2001: A Space Odyssey",
+    "releaseYear": 1968,
+    "runtime": 149,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A mysterious black monolith guides humanity from prehistory to a mission to Jupiter with a troubled AI.",
+    "genreIds": [
+      878,
+      9648,
+      12
+    ],
+    "popularity": 80.0,
+    "voteAverage": 8.1
+  },
+  {
+    "id": 289,
+    "title": "Casablanca",
+    "releaseYear": 1942,
+    "runtime": 102,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A cynical nightclub owner in wartime Morocco must choose between love and helping his old flame escape the Nazis.",
+    "genreIds": [
+      18,
+      10749
+    ],
+    "popularity": 77.5,
+    "voteAverage": 8.2
+  },
+  {
+    "id": 429,
+    "title": "The Good, the Bad and the Ugly",
+    "releaseYear": 1966,
+    "runtime": 161,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "Three gunslingers race each other across the Civil War West to find a fortune in buried Confederate gold.",
+    "genreIds": [
+      37
+    ],
+    "popularity": 75.0,
+    "voteAverage": 8.5
+  },
+  {
+    "id": 68718,
+    "title": "Django Unchained",
+    "releaseYear": 2012,
+    "runtime": 165,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A freed slave teams up with a bounty hunter to rescue his wife from a brutal Mississippi plantation owner.",
+    "genreIds": [
+      18,
+      37
+    ],
+    "popularity": 72.5,
+    "voteAverage": 8.2
+  },
+  {
+    "id": 194,
+    "title": "Amélie",
+    "releaseYear": 2001,
+    "runtime": 122,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A shy Parisian waitress decides to secretly improve the lives of the people around her, and maybe her own.",
+    "genreIds": [
+      35,
+      10749
+    ],
+    "popularity": 70.0,
+    "voteAverage": 7.9
+  },
+  {
+    "id": 313369,
+    "title": "La La Land",
+    "releaseYear": 2016,
+    "runtime": 129,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A jazz pianist and an aspiring actress fall in love in Los Angeles while chasing their dreams.",
+    "genreIds": [
+      35,
+      18,
+      10749,
+      10402
+    ],
+    "popularity": 67.5,
+    "voteAverage": 7.9
+  },
+  {
+    "id": 244786,
+    "title": "Whiplash",
+    "releaseYear": 2014,
+    "runtime": 107,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "An ambitious young drummer is pushed to the edge by a ruthless conservatory instructor.",
+    "genreIds": [
+      18,
+      10402
+    ],
+    "popularity": 65.0,
+    "voteAverage": 8.4
+  },
+  {
+    "id": 424694,
+    "title": "Bohemian Rhapsody",
+    "releaseYear": 2018,
+    "runtime": 135,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "The story of Queen and Freddie Mercury, from their formation to their legendary Live Aid performance.",
+    "genreIds": [
+      10402,
+      18
+    ],
+    "popularity": 62.5,
+    "voteAverage": 8.0
+  },
+  {
+    "id": 419430,
+    "title": "Get Out",
+    "releaseYear": 2017,
+    "runtime": 104,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A young Black man visits his white girlfriend's family estate and uncovers a disturbing secret.",
+    "genreIds": [
+      9648,
+      53,
+      27
+    ],
+    "popularity": 60.0,
+    "voteAverage": 7.6
+  },
+  {
+    "id": 493922,
+    "title": "Hereditary",
+    "releaseYear": 2018,
+    "runtime": 127,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "After the family matriarch dies, her daughter's household is haunted by an increasingly terrifying inheritance.",
+    "genreIds": [
+      27,
+      9648,
+      53
+    ],
+    "popularity": 57.5,
+    "voteAverage": 7.3
+  },
+  {
+    "id": 76341,
+    "title": "Mad Max: Fury Road",
+    "releaseYear": 2015,
+    "runtime": 121,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "In a post-apocalyptic wasteland, a drifter and a rebel warrior flee a tyrant across the desert in a war rig.",
+    "genreIds": [
+      28,
+      12,
+      878
+    ],
+    "popularity": 55.0,
+    "voteAverage": 7.6
+  },
+  {
+    "id": 299534,
+    "title": "Avengers: Endgame",
+    "releaseYear": 2019,
+    "runtime": 181,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "The surviving Avengers assemble once more to undo the devastation caused by Thanos.",
+    "genreIds": [
+      12,
+      878,
+      28
+    ],
+    "popularity": 52.5,
+    "voteAverage": 8.2
+  },
+  {
+    "id": 324857,
+    "title": "Spider-Man: Into the Spider-Verse",
+    "releaseYear": 2018,
+    "runtime": 117,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "Teenager Miles Morales becomes Spider-Man and meets spider-people from other dimensions.",
+    "genreIds": [
+      16,
+      28,
+      12,
+      878
+    ],
+    "popularity": 50.0,
+    "voteAverage": 8.4
+  },
+  {
+    "id": 354912,
+    "title": "Coco",
+    "releaseYear": 2017,
+    "runtime": 105,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A boy who dreams of being a musician is transported to the Land of the Dead and seeks his great-great-grandfather.",
+    "genreIds": [
+      10751,
+      16,
+      14,
+      12,
+      35
+    ],
+    "popularity": 47.5,
+    "voteAverage": 8.2
+  },
+  {
+    "id": 11324,
+    "title": "Shutter Island",
+    "releaseYear": 2010,
+    "runtime": 138,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A U.S. Marshal investigates the disappearance of a patient from a hospital for the criminally insane.",
+    "genreIds": [
+      18,
+      53,
+      9648
+    ],
+    "popularity": 45.0,
+    "voteAverage": 8.2
+  },
+  {
+    "id": 77338,
+    "title": "The Intouchables",
+    "releaseYear": 2011,
+    "runtime": 113,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A wealthy quadriplegic hires a young man from the projects as his caretaker, and an unlikely friendship begins.",
+    "genreIds": [
+      18,
+      35
+    ],
+    "popularity": 42.5,
+    "voteAverage": 8.3
+  },
+  {
+    "id": 120467,
+    "title": "The Grand Budapest Hotel",
+    "releaseYear": 2014,
+    "runtime": 100,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A legendary hotel concierge and his lobby boy are caught up in the theft of a priceless painting.",
+    "genreIds": [
+      35,
+      18
+    ],
+    "popularity": 40.0,
+    "voteAverage": 8.0
+  },
+  {
+    "id": 545611,
+    "title": "Everything Everywhere All at Once",
+    "releaseYear": 2022,
+    "runtime": 140,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "A laundromat owner discovers she must connect with parallel-universe versions of herself to save the multiverse.",
+    "genreIds": [
+      28,
+      12,
+      878
+    ],
+    "popularity": 37.5,
+    "voteAverage": 7.8
+  },
+  {
+    "id": 872585,
+    "title": "Oppenheimer",
+    "releaseYear": 2023,
+    "runtime": 181,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "The story of J. Robert Oppenheimer and the race to build the atomic bomb.",
+    "genreIds": [
+      18,
+      36
+    ],
+    "popularity": 35.0,
+    "voteAverage": 8.1
+  },
+  {
+    "id": 438631,
+    "title": "Dune",
+    "releaseYear": 2021,
+    "runtime": 155,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "The heir of a noble family is thrust into a war over the most valuable resource in the galaxy on the desert planet Arrakis.",
+    "genreIds": [
+      878,
+      12
+    ],
+    "popularity": 32.5,
+    "voteAverage": 7.8
+  },
+  {
+    "id": 515042,
+    "title": "Free Solo",
+    "releaseYear": 2018,
+    "runtime": 100,
+    "posterPath": null,
+    "backdropPath": null,
+    "overview": "Climber Alex Honnold prepares to scale the 3,000-foot face of El Capitan without ropes.",
+    "genreIds": [
+      99
+    ],
+    "popularity": 30.0,
+    "voteAverage": 7.9
+  }
+]

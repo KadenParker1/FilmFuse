@@ -1,33 +1,58 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { AppleSignInButton } from '../../components/AppleSignInButton';
 import { Body, Button, Card, Heading, Screen, TextField } from '../../components/ui';
 import { useAuth } from '../../auth/useAuth';
+import { showAppleButton, signInWithProvider } from '../../auth/oauth';
+import type { OAuthProvider } from '../../auth/authRedirect';
+import { MIN_PASSWORD, validateAuthForm, type AuthFieldErrors, type AuthMode as Mode } from '../../auth/validateAuthForm';
 import { env } from '../../lib/env';
 import { useTheme } from '../../theme/useTheme';
 
-type Mode = 'sign-in' | 'sign-up';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const COPY: Record<Mode, { heading: string; tagline: string; submit: string }> = {
+  'sign-in': {
+    heading: 'Welcome back',
+    tagline: 'Rate what you watch. Pick movies everyone in the room will love.',
+    submit: 'Sign in',
+  },
+  'sign-up': {
+    heading: 'Grab a seat',
+    tagline: 'Create your account — your taste profile takes about three minutes.',
+    submit: 'Create account',
+  },
+  forgot: {
+    heading: 'Reset your password',
+    tagline: "Enter your email and we'll send you a link to get back in.",
+    submit: 'Send reset link',
+  },
+};
 
 export default function SignInScreen() {
-  const { signInWithPassword, signUp } = useAuth();
+  const { signInWithPassword, signUp, resetPassword } = useAuth();
   const { colors } = useTheme();
   const [mode, setMode] = useState<Mode>('sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [providerBusy, setProviderBusy] = useState<OAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
+
+  function switchMode(next: Mode) {
+    setMode(next);
+    setError(null);
+    setNotice(null);
+    setFieldErrors({});
+    setConfirm('');
+  }
 
   async function submit() {
     setError(null);
     setNotice(null);
-    const errs: typeof fieldErrors = {};
-    if (!EMAIL_RE.test(email.trim())) errs.email = 'Enter a valid email address';
-    if (password.length < (mode === 'sign-up' ? 8 : 1))
-      errs.password = mode === 'sign-up' ? 'Use at least 8 characters' : 'Enter your password';
+    const errs = validateAuthForm(mode, email, password, confirm);
     setFieldErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -36,10 +61,14 @@ export default function SignInScreen() {
       if (mode === 'sign-in') {
         const { error: err } = await signInWithPassword(email.trim(), password);
         if (err) setError(err.message);
-      } else {
+      } else if (mode === 'sign-up') {
         const { data, error: err } = await signUp(email.trim(), password);
         if (err) setError(err.message);
         else if (!data.session) setNotice('Check your inbox to confirm your email, then sign in.');
+      } else {
+        const { error: err } = await resetPassword(email.trim());
+        if (err) setError(err.message);
+        else setNotice('If that email has an account, a reset link is on its way.');
       }
     } catch {
       setError("Couldn't reach the sign-in service. Try again.");
@@ -48,16 +77,34 @@ export default function SignInScreen() {
     }
   }
 
-  const isSignIn = mode === 'sign-in';
+  async function withProvider(provider: OAuthProvider) {
+    setError(null);
+    setNotice(null);
+    setProviderBusy(provider);
+    try {
+      const result = await signInWithProvider(provider);
+      if (!result.ok && !result.cancelled) setError(result.error ?? 'Sign-in failed. Try again.');
+    } finally {
+      setProviderBusy(null);
+    }
+  }
+
+  const copy = COPY[mode];
+  const isForgot = mode === 'forgot';
+  const isSignUp = mode === 'sign-up';
+  const busy = submitting || providerBusy !== null;
 
   return (
     <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Screen scroll className="justify-center">
         <View className="w-full max-w-md gap-6 self-center">
           <View className="gap-2">
-            <Text className="font-body-semibold text-sm uppercase tracking-[3px] text-gold">FilmFuse</Text>
-            <Heading size="xl">{isSignIn ? 'Welcome back' : 'Grab a seat'}</Heading>
-            <Body muted>Rate what you watch. Pick movies everyone in the room will love.</Body>
+            <View className="flex-row items-center gap-2">
+              <Ionicons name="film" size={18} color={colors.gold} />
+              <Text className="font-body-semibold text-sm uppercase tracking-[3px] text-gold">FilmFuse</Text>
+            </View>
+            <Heading size="xl">{copy.heading}</Heading>
+            <Body muted>{copy.tagline}</Body>
           </View>
 
           {!env.isSupabaseConfigured ? (
@@ -80,61 +127,90 @@ export default function SignInScreen() {
               textContentType="emailAddress"
               placeholder="you@example.com"
               error={fieldErrors.email}
+              onSubmitEditing={isForgot ? submit : undefined}
             />
-            <TextField
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete={isSignIn ? 'current-password' : 'new-password'}
-              textContentType={isSignIn ? 'password' : 'newPassword'}
-              error={fieldErrors.password}
-              onSubmitEditing={submit}
-            />
+            {!isForgot ? (
+              <TextField
+                label="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                textContentType={isSignUp ? 'newPassword' : 'password'}
+                hint={isSignUp ? `At least ${MIN_PASSWORD} characters` : undefined}
+                error={fieldErrors.password}
+                onSubmitEditing={isSignUp ? undefined : submit}
+              />
+            ) : null}
+            {isSignUp ? (
+              <TextField
+                label="Confirm password"
+                value={confirm}
+                onChangeText={setConfirm}
+                secureTextEntry
+                autoComplete="new-password"
+                textContentType="newPassword"
+                error={fieldErrors.confirm}
+                onSubmitEditing={submit}
+              />
+            ) : null}
+            {mode === 'sign-in' ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => switchMode('forgot')}
+                className="-mt-1 self-end p-1 active:opacity-60"
+              >
+                <Text className="font-body-medium text-sm text-gold">Forgot password?</Text>
+              </Pressable>
+            ) : null}
             {error ? (
-              <Body accessibilityLiveRegion="polite" className="text-velvet">
+              <Body testID="auth-error" accessibilityLiveRegion="polite" className="text-velvet">
                 {error}
               </Body>
             ) : null}
             {notice ? (
-              <Body accessibilityLiveRegion="polite" className="text-success">
+              <Body testID="auth-notice" accessibilityLiveRegion="polite" className="text-success">
                 {notice}
               </Body>
             ) : null}
-            <Button title={isSignIn ? 'Sign in' : 'Create account'} loading={submitting} onPress={submit} />
+            <Button title={copy.submit} loading={submitting} disabled={busy && !submitting} onPress={submit} />
           </Card>
 
-          <View className="gap-3">
-            <Button
-              variant="secondary"
-              title="Continue with Google"
-              disabled
-              icon={<Ionicons name="logo-google" size={18} color={colors.text} />}
-            />
-            <Button
-              variant="secondary"
-              title="Continue with Apple"
-              disabled
-              icon={<Ionicons name="logo-apple" size={18} color={colors.text} />}
-            />
-            <Body muted className="text-center text-sm">
-              Google and Apple sign-in are coming in Phase 1a.
-            </Body>
-          </View>
+          {!isForgot ? (
+            <View className="gap-3">
+              <View className="flex-row items-center gap-3">
+                <View className="h-px flex-1 bg-border" />
+                <Body muted className="text-sm">
+                  or
+                </Body>
+                <View className="h-px flex-1 bg-border" />
+              </View>
+              <Button
+                variant="secondary"
+                title="Continue with Google"
+                loading={providerBusy === 'google'}
+                disabled={busy && providerBusy !== 'google'}
+                onPress={() => void withProvider('google')}
+                icon={<Ionicons name="logo-google" size={18} color={colors.text} />}
+              />
+              {showAppleButton ? (
+                <AppleSignInButton
+                  loading={providerBusy === 'apple'}
+                  disabled={busy && providerBusy !== 'apple'}
+                  onPress={() => void withProvider('apple')}
+                />
+              ) : null}
+            </View>
+          ) : null}
 
           <Pressable
             accessibilityRole="button"
-            onPress={() => {
-              setMode(isSignIn ? 'sign-up' : 'sign-in');
-              setError(null);
-              setNotice(null);
-              setFieldErrors({});
-            }}
+            onPress={() => switchMode(mode === 'sign-in' ? 'sign-up' : 'sign-in')}
             className="self-center p-2"
           >
             <Body muted>
-              {isSignIn ? 'New here? ' : 'Already have an account? '}
-              <Text className="font-body-semibold text-gold">{isSignIn ? 'Create an account' : 'Sign in'}</Text>
+              {mode === 'sign-in' ? 'New here? ' : isForgot ? 'Remembered it? ' : 'Already have an account? '}
+              <Text className="font-body-semibold text-gold">{mode === 'sign-in' ? 'Create an account' : 'Sign in'}</Text>
             </Body>
           </Pressable>
         </View>

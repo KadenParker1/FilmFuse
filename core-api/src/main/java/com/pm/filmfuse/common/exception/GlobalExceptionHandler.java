@@ -13,10 +13,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.util.DisconnectedClientHelper;
 
 /**
@@ -50,6 +52,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponseDTO("Validation failed", fieldErrors));
     }
 
+    /** A required query parameter is absent (e.g. {@code /movies/search} without {@code q}). */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMissingParameter(MissingServletRequestParameterException ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponseDTO("Validation failed",
+                Map.of(ex.getParameterName(), "This parameter is required")));
+    }
+
+    /**
+     * A path variable or query parameter that does not convert (e.g. {@code /movies/abc}). The
+     * converter's own message names Java types, so the field gets a fixed sentence instead.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponseDTO> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        Class<?> requiredType = ex.getRequiredType();
+        String problem = requiredType != null && (Number.class.isAssignableFrom(requiredType)
+                || (requiredType.isPrimitive() && requiredType != boolean.class))
+                ? "Must be a whole number" : "Has an invalid value";
+        return ResponseEntity.badRequest().body(new ErrorResponseDTO("Validation failed", Map.of(ex.getName(), problem)));
+    }
+
     /** A malformed body. The parser's message names Java types and offsets - do not forward it. */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponseDTO> handleUnreadable(HttpMessageNotReadableException ex) {
@@ -76,6 +98,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponseDTO> handleForbidden(ForbiddenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponseDTO.of(ex.getMessage()));
+    }
+
+    /** TMDB / Supabase failed or timed out. The cause (upstream status, body) is logged only. */
+    @ExceptionHandler(UpstreamUnavailableException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUpstream(UpstreamUnavailableException ex) {
+        log.warn("Upstream unavailable: {}", ex.getMessage(), ex.getCause());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(ErrorResponseDTO.of(ex.getMessage()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)

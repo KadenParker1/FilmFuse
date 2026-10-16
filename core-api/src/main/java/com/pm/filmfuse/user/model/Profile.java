@@ -42,7 +42,7 @@ public class Profile extends AuditableEntity implements Persistable<UUID> {
     @Column(name = "display_name")
     private String displayName;
 
-    /** A Supabase Storage path in the {@code profile-photos} bucket (or an absolute URL). */
+    /** The public URL of the photo in the {@code profile-photos} bucket; set only by ProfilePhotoService. */
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 

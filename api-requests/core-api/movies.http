@@ -1,0 +1,47 @@
+### FilmFuse core-api - movie catalog (Discover)
+# Token: see me.http. Without TMDB_ACCESS_TOKEN core-api serves the offline fixture catalog
+# (~50 well-known movies), so these work with no TMDB account.
+# Cursors are opaque: pass back the previous response's nextCursor; null means the last page.
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+
+### Genres (19, sorted by name)
+GET {{baseUrl}}/api/v1/genres
+Authorization: Bearer {{token}}
+
+### Search by title
+GET {{baseUrl}}/api/v1/movies/search?q=matrix
+Authorization: Bearer {{token}}
+
+### Search, next page
+GET {{baseUrl}}/api/v1/movies/search?q=the&cursor=2
+Authorization: Bearer {{token}}
+
+### Missing / blank / >100 char q -> 400 with fieldErrors.q
+GET {{baseUrl}}/api/v1/movies/search?q=
+Authorization: Bearer {{token}}
+
+### Popular
+GET {{baseUrl}}/api/v1/movies/popular
+Authorization: Bearer {{token}}
+
+### Popular in a genre (27 = Horror), page 2
+GET {{baseUrl}}/api/v1/movies/popular?genre=27&cursor=2
+Authorization: Bearer {{token}}
+
+### Unknown genre -> 400
+GET {{baseUrl}}/api/v1/movies/popular?genre=12345
+Authorization: Bearer {{token}}
+
+### Movie details (550 = Fight Club); served from app.movies for 7 days once fetched
+GET {{baseUrl}}/api/v1/movies/550
+Authorization: Bearer {{token}}
+
+### Unknown movie -> 404
+GET {{baseUrl}}/api/v1/movies/999999999
+Authorization: Bearer {{token}}
+
+### Non-numeric id -> 400
+GET {{baseUrl}}/api/v1/movies/abc
+Authorization: Bearer {{token}}

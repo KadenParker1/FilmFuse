@@ -1,0 +1,41 @@
+### FilmFuse core-api - profile photo
+# Token: see me.http. Flow: 1) get a signed upload URL, 2) PUT the JPEG to it, 3) confirm the path.
+# With SUPABASE_SERVICE_ROLE_KEY blank, core-api uses a mock storage gateway: step 1 returns a fake
+# URL (step 2 will fail) but steps 1 and 3 still exercise the API. For a real upload against
+# `supabase start`, set the service_role key that `supabase status` prints.
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+
+### 1) Signed upload URL -> {uploadUrl, path: "<userId>/<uuid>.jpg", expiresInSeconds}
+# @name uploadUrl
+POST {{baseUrl}}/api/v1/me/profile-photo/upload-url
+Authorization: Bearer {{token}}
+
+### 2) Upload the JPEG straight to Supabase Storage (no FilmFuse token; max 2 MB, image/jpeg only)
+PUT {{uploadUrl.response.body.uploadUrl}}
+Content-Type: image/jpeg
+
+< ./sample.jpg
+
+### 3) Confirm -> profile with profileImageUrl = public URL (the previous photo is deleted)
+POST {{baseUrl}}/api/v1/me/profile-photo
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "path": "{{uploadUrl.response.body.path}}"
+}
+
+### Someone else's folder (or anything not <yourId>/<uuid>.jpg) -> 400
+POST {{baseUrl}}/api/v1/me/profile-photo
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "path": "00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111.jpg"
+}
+
+### Remove the photo -> profile with profileImageUrl null
+DELETE {{baseUrl}}/api/v1/me/profile-photo
+Authorization: Bearer {{token}}

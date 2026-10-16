@@ -15,7 +15,7 @@ GET {{baseUrl}}/actuator/health
 GET {{baseUrl}}/api/v1/me
 Authorization: Bearer {{token}}
 
-### Update profile (partial; null/omitted = unchanged, "" clears displayName/bio/profileImageUrl)
+### Update profile (partial; null/omitted = unchanged, "" clears displayName/bio; photo: see profile-photo.http)
 PATCH {{baseUrl}}/api/v1/me
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -41,3 +41,7 @@ Authorization: Bearer {{token}}
 
 ### No token -> 401
 GET {{baseUrl}}/api/v1/me
+
+### Delete account -> 204 (profile row, photo, Supabase Auth user). Irreversible!
+DELETE {{baseUrl}}/api/v1/me
+Authorization: Bearer {{token}}
