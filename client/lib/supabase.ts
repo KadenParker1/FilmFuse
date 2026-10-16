@@ -18,6 +18,9 @@ export const supabase = createClient(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl,
+      // PKCE: OAuth redirects come back with ?code=…, exchanged in app/auth/callback.tsx (and by
+      // supabase-js itself on web via detectSessionInUrl).
+      flowType: 'pkce',
     },
   },
 );

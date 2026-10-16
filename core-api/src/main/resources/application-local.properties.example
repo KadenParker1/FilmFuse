@@ -17,6 +17,15 @@ spring.security.oauth2.resourceserver.jwt.jws-algorithms=ES256
 
 app.cors.allowed-origins=http://localhost:8081,http://localhost:19006
 
+# --- Supabase Storage / Auth admin (profile photos, DELETE /me) ---
+# `supabase status` prints the local service_role key. Leave it blank to use the mock gateways
+# (upload URLs are fakes; nothing is uploaded or deleted).
+filmfuse.supabase.url=${SUPABASE_URL:http://127.0.0.1:54321}
+filmfuse.supabase.service-role-key=${SUPABASE_SERVICE_ROLE_KEY:}
+
+# --- TMDB: blank = offline fixture catalog (~50 well-known movies). Set TMDB_ACCESS_TOKEN (v4 read token) for real data. ---
+filmfuse.tmdb.access-token=${TMDB_ACCESS_TOKEN:}
+
 # --- Email: mock by default. To see real mail in Mailpit (http://127.0.0.1:54324): ---
 filmfuse.email.provider=mock
 #filmfuse.email.provider=smtp

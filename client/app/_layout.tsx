@@ -2,6 +2,7 @@ import '../global.css';
 
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
+import { RecoveryRedirect } from '../components/RecoveryRedirect';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
@@ -67,11 +68,17 @@ function RootNavigator() {
         <Stack.Protected guard={signedIn} redirectTo="/sign-in">
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(onboarding)" />
+          <Stack.Screen name="movie/[id]" />
+          <Stack.Screen name="profile/edit" />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn} redirectTo="/">
           <Stack.Screen name="(auth)" />
         </Stack.Protected>
+        {/* Unguarded: OAuth / email-link redirects land here signed out and leave signed in. */}
+        <Stack.Screen name="auth/callback" />
+        <Stack.Screen name="auth/reset-password" />
       </Stack>
+      <RecoveryRedirect />
     </>
   );
 }

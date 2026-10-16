@@ -1,5 +1,6 @@
 package com.pm.filmfuse.common.config;
 
+import com.pm.filmfuse.user.repository.DeletedAccountRepository;
 import com.pm.filmfuse.user.repository.ProfileRepository;
 import com.pm.filmfuse.user.security.SupabaseJwtAuthenticationConverter;
 import java.util.Arrays;
@@ -65,8 +66,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SupabaseJwtAuthenticationConverter supabaseJwtAuthenticationConverter(ProfileRepository profileRepository) {
-        return new SupabaseJwtAuthenticationConverter(profileRepository);
+    public SupabaseJwtAuthenticationConverter supabaseJwtAuthenticationConverter(
+            ProfileRepository profileRepository, DeletedAccountRepository deletedAccountRepository) {
+        return new SupabaseJwtAuthenticationConverter(profileRepository, deletedAccountRepository);
     }
 
     /** Bearer-token client, so credentialed CORS is deliberately off. */

@@ -38,9 +38,6 @@ public final class ProfileMapper {
         if (request.bio() != null) {
             profile.setBio(blankToNull(request.bio()));
         }
-        if (request.profileImageUrl() != null) {
-            profile.setProfileImageUrl(blankToNull(request.profileImageUrl()));
-        }
     }
 
     private static String blankToNull(String value) {

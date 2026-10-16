@@ -1,9 +1,16 @@
+export { Avatar } from './Avatar';
 export { Button, type ButtonVariant } from './Button';
 export { Card } from './Card';
+export { Chip } from './Chip';
 export { EmptyState } from './EmptyState';
+export { ErrorState, errorMessage } from './ErrorState';
+export { initialsFor } from './initials';
 export { PosterCard } from './PosterCard';
+export { PosterGrid, posterColumns, type PosterItem } from './PosterGrid';
 export { Screen } from './Screen';
+export { SearchBar } from './SearchBar';
 export { Sheet } from './Sheet';
+export { Skeleton } from './Skeleton';
 export { Slider1to10 } from './Slider1to10';
 export { scoreLabel, clampScore, SCORE_MIN, SCORE_MAX } from './scoreLabel';
 export { TextField } from './TextField';

@@ -10,7 +10,8 @@
     "backgroundColor": "#0E0B14",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pm.filmfuse"
+      "bundleIdentifier": "com.pm.filmfuse",
+      "usesAppleSignIn": true
     },
     "android": {
       "package": "com.pm.filmfuse",
@@ -42,7 +43,19 @@
             "backgroundColor": "#0E0B14"
           }
         }
-      ]
+      ],
+      "expo-web-browser",
+      "expo-image",
+      "expo-apple-authentication",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "FilmFuse uses your photos so you can choose a profile picture.",
+          "cameraPermission": "FilmFuse uses your camera so you can take a profile picture.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true

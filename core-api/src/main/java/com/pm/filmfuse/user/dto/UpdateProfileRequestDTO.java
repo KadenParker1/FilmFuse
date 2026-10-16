@@ -6,8 +6,9 @@ import java.util.Locale;
 
 /**
  * A partial profile update (PATCH): every field is optional and {@code null} means "leave it
- * alone". For displayName / bio / profileImageUrl an empty string clears the value. A username,
- * once set, can be changed but not cleared.
+ * alone". For displayName / bio an empty string clears the value. A username, once set, can be
+ * changed but not cleared. The profile photo is not here: it changes only through
+ * {@code /me/profile-photo} (an unknown {@code profileImageUrl} key in the body is ignored).
  *
  * <p>The username is trimmed and lowercased before validation, so "Alice" is accepted as "alice".
  */
@@ -22,10 +23,7 @@ public record UpdateProfileRequestDTO(
         String displayName,
 
         @Size(max = 300, message = "Bio cannot exceed 300 characters")
-        String bio,
-
-        @Size(max = 1024, message = "Profile image URL cannot exceed 1024 characters")
-        String profileImageUrl) {
+        String bio) {
 
     public static final int USERNAME_MIN = 3;
     public static final int USERNAME_MAX = 30;

@@ -61,7 +61,7 @@ cd client && npx expo export -p web   # what Vercel builds
 ```
 
 ## Environment variables
-- core-api: `DATABASE_URL` (session pooler, `currentSchema=app`), `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `SUPABASE_URL`, `SUPABASE_JWKS_URI`, `SUPABASE_ISSUER`, `SUPABASE_SERVICE_ROLE_KEY` (storage signed URLs, account deletion, realtime broadcast), `TMDB_API_KEY`, `ML_SERVICE_URL`, `ML_INTERNAL_KEY`, `APP_CORS_ALLOWED_ORIGINS`, `PORT`, `SPRING_MAIL_*`, `FILMFUSE_EMAIL_*`.
+- core-api: `DATABASE_URL` (session pooler, `currentSchema=app`), `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `SUPABASE_URL`, `SUPABASE_JWKS_URI`, `SUPABASE_ISSUER`, `SUPABASE_SERVICE_ROLE_KEY` (storage signed URLs, account deletion, realtime broadcast; blank → mock storage / auth-admin gateways, required under `prod`), `TMDB_ACCESS_TOKEN` (TMDB v4 read access token; blank → offline fixture catalog `catalog/fixture-movies.json`), `ML_SERVICE_URL`, `ML_INTERNAL_KEY`, `APP_CORS_ALLOWED_ORIGINS`, `PORT`, `SPRING_MAIL_*`, `FILMFUSE_EMAIL_*`.
 - python-ml-service: `ML_DATABASE_URL` (read-only role), `ML_INTERNAL_KEY`.
 - client: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_API_BASE_URL` (baked in at build time).
 - Never commit secrets; `.env.example` files list names only.

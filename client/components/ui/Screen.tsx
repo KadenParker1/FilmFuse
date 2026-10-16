@@ -8,10 +8,12 @@ type Props = {
   /** Safe-area edges to pad. Tab screens skip the bottom (the tab bar handles it). */
   edges?: Edge[];
   className?: string;
+  /** Grid screens (Discover) use a wider max width on big web screens. */
+  wide?: boolean;
 };
 
 /** Safe-area page wrapper with the app background and a readable max width on wide web. */
-export function Screen({ children, scroll = false, edges = ['top', 'bottom'], className = '' }: Props) {
+export function Screen({ children, scroll = false, edges = ['top', 'bottom'], className = '', wide = false }: Props) {
   const insets = useSafeAreaInsets();
   const padding = {
     paddingTop: edges.includes('top') ? insets.top : 0,
@@ -19,7 +21,7 @@ export function Screen({ children, scroll = false, edges = ['top', 'bottom'], cl
     paddingLeft: edges.includes('left') ? insets.left : 0,
     paddingRight: edges.includes('right') ? insets.right : 0,
   };
-  const inner = <View className={`w-full max-w-3xl flex-1 self-center px-5 py-6 ${className}`}>{children}</View>;
+  const inner = <View className={`w-full ${wide ? 'max-w-6xl' : 'max-w-3xl'} flex-1 self-center px-5 py-6 ${className}`}>{children}</View>;
 
   return (
     <View className="flex-1 bg-bg" style={padding}>

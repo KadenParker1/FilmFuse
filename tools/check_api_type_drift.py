@@ -93,7 +93,8 @@ def split_components(params: str) -> set[str]:
 
 def ts_interface_fields(text: str) -> dict[str, set[str]]:
     found = {}
-    for match in re.finditer(r"export interface (\w+)\s*\{(.*?)\n\}", text, re.S):
+    # Generic interfaces (`PageDTO<T>`) compare by bare name, as Java's `record PageDTO<T>(...)` does.
+    for match in re.finditer(r"export interface (\w+)\s*(?:<[^>{]*>)?\s*\{(.*?)\n\}", text, re.S):
         body = re.sub(r"/\*.*?\*/", "", match.group(2), flags=re.S)
         body = re.sub(r"//[^\n]*", "", body)
         found[match.group(1)] = set(re.findall(r"^\s{2}(\w+)\??:", body, re.M))

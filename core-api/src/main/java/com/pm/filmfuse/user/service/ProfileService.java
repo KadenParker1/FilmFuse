@@ -8,6 +8,7 @@ import com.pm.filmfuse.user.dto.UsernameAvailabilityDTO;
 import com.pm.filmfuse.user.mapper.ProfileMapper;
 import com.pm.filmfuse.user.model.AccountStatus;
 import com.pm.filmfuse.user.model.Profile;
+import com.pm.filmfuse.user.repository.DeletedAccountRepository;
 import com.pm.filmfuse.user.repository.ProfileRepository;
 import java.util.Map;
 import java.util.UUID;
@@ -26,9 +27,11 @@ public class ProfileService {
     static final String USERNAME_TAKEN = "That username is already taken.";
 
     private final ProfileRepository profileRepository;
+    private final DeletedAccountRepository deletedAccountRepository;
 
-    public ProfileService(ProfileRepository profileRepository) {
+    public ProfileService(ProfileRepository profileRepository, DeletedAccountRepository deletedAccountRepository) {
         this.profileRepository = profileRepository;
+        this.deletedAccountRepository = deletedAccountRepository;
     }
 
     /**
@@ -77,6 +80,10 @@ public class ProfileService {
     }
 
     private Profile provision(UUID userId, Jwt jwt) {
+        // Belt and braces: SupabaseJwtAuthenticationConverter already 401s a deleted account's token.
+        if (deletedAccountRepository.isDeleted(userId)) {
+            throw new ForbiddenException("This account has been deleted.");
+        }
         Profile profile = new Profile(userId);
         profile.setDisplayName(displayNameFrom(jwt));
         try {

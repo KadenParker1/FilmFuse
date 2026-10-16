@@ -31,4 +31,39 @@ class MigrationIntegrationTest extends AbstractIntegrationTest {
                 "insert into app.profiles (id, username) values (?, 'NotLower')", UUID.randomUUID()))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
+
+    @Test
+    void genresAreSeededWithTheNineteenTmdbGenres() {
+        assertThat(jdbc.queryForObject("select count(*) from app.genres", Integer.class)).isEqualTo(19);
+        assertThat(jdbc.queryForObject("select name from app.genres where id = 878", String.class))
+                .isEqualTo("Science Fiction");
+        assertThat(jdbc.queryForObject("select name from app.genres where id = 10770", String.class))
+                .isEqualTo("TV Movie");
+        assertThat(jdbc.queryForList("select id from app.genres", Integer.class)).containsExactlyInAnyOrder(
+                28, 12, 16, 35, 80, 99, 18, 10751, 14, 36, 27, 10402, 9648, 10749, 878, 10770, 53, 10752, 37);
+    }
+
+    @Test
+    void mlReaderCanReadButNotWriteTheCatalog() {
+        for (String table : new String[] {"app.movies", "app.genres", "app.deleted_accounts"}) {
+            assertThat(jdbc.queryForObject("select has_table_privilege('ml_reader', ?, 'SELECT')", Boolean.class, table))
+                    .as("SELECT on %s", table).isTrue();
+            assertThat(jdbc.queryForObject("select has_table_privilege('ml_reader', ?, 'INSERT')", Boolean.class, table))
+                    .as("INSERT on %s", table).isFalse();
+            assertThat(jdbc.queryForObject("select has_table_privilege('ml_reader', ?, 'UPDATE')", Boolean.class, table))
+                    .as("UPDATE on %s", table).isFalse();
+        }
+    }
+
+    @Test
+    void moviesHaveAPopularityIndexAndRequireCachedAt() {
+        assertThat(jdbc.queryForObject(
+                "select indexdef from pg_indexes where schemaname = 'app' and indexname = 'movies_popularity_idx'",
+                String.class)).contains("popularity DESC");
+        assertThatThrownBy(() -> jdbc.update("insert into app.movies (id, title) values (-1, 'No cache stamp')"))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThat(jdbc.queryForObject("select column_default from information_schema.columns "
+                + "where table_schema = 'app' and table_name = 'movies' and column_name = 'genre_ids'", String.class))
+                .contains("{}");
+    }
 }
