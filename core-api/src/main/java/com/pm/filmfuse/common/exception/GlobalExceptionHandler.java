@@ -1,5 +1,7 @@
 package com.pm.filmfuse.common.exception;
 
+import com.pm.filmfuse.common.http.PayloadTooLargeException;
+import com.pm.filmfuse.common.http.RequestBodyLimitFilter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -72,9 +74,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponseDTO("Validation failed", Map.of(ex.getName(), problem)));
     }
 
-    /** A malformed body. The parser's message names Java types and offsets - do not forward it. */
+    /**
+     * A malformed body. The parser's message names Java types and offsets - do not forward it. A
+     * body cut off by {@link RequestBodyLimitFilter} (no Content-Length) arrives here too: 413.
+     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponseDTO> handleUnreadable(HttpMessageNotReadableException ex) {
+        if (PayloadTooLargeException.isCause(ex)) {
+            return payloadTooLarge();
+        }
         log.debug("Rejected an unreadable request body", ex);
         return ResponseEntity.badRequest().body(ErrorResponseDTO.of("The request body could not be read as JSON."));
     }
@@ -142,10 +150,17 @@ public class GlobalExceptionHandler {
                 || DisconnectedClientHelper.isClientDisconnectedException(ex)) {
             throw ex;
         }
+        if (PayloadTooLargeException.isCause(ex)) {
+            return payloadTooLarge();
+        }
         String errorId = newErrorId();
         log.error("Unhandled exception [{}]", errorId, ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ErrorResponseDTO.of("Something went wrong on our end. (error " + errorId + ")"));
+    }
+
+    private static ResponseEntity<ErrorResponseDTO> payloadTooLarge() {
+        return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(ErrorResponseDTO.of(RequestBodyLimitFilter.message()));
     }
 
     private static String newErrorId() {

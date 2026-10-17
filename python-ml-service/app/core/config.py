@@ -7,6 +7,9 @@ from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 LOCAL_DEV_INTERNAL_KEY = "local-dev-internal-key"
+# Bodies come only from core-api; the largest is a heavy rater's user-vectors request (~100 bytes
+# per rating), so 5 MiB is ample headroom while still refusing a runaway or hostile payload.
+DEFAULT_MAX_BODY_BYTES = 5 * 1024 * 1024
 
 
 class Settings(BaseSettings):
@@ -16,6 +19,12 @@ class Settings(BaseSettings):
     ml_internal_key: str | None = Field(default=None, alias="ML_INTERNAL_KEY")
     # Read-only role (ml_reader). Not used yet; optional until the algorithm needs the DB.
     ml_database_url: str | None = Field(default=None, alias="ML_DATABASE_URL")
+    max_body_bytes: int = Field(default=DEFAULT_MAX_BODY_BYTES, alias="ML_MAX_BODY_BYTES", ge=1024)
+
+    @property
+    def docs_enabled(self) -> bool:
+        """/docs, /redoc and /openapi.json: off in production (a free map of every route)."""
+        return self.env != "production"
 
     @model_validator(mode="after")
     def _require_internal_key(self) -> "Settings":

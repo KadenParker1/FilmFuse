@@ -40,6 +40,33 @@ class PreferencesIntegrationTest extends AbstractTasteIntegrationTest {
                 .andExpect(jsonPath("$[6].label").value("Dark & gritty"));
     }
 
+    // ------------------------------------------------------------------------------- list caps
+
+    /** More items than there are genres / moods is refused before any per-item work. */
+    @Test
+    void listsLongerThanTheDimensionsAreRefused() throws Exception {
+        TestUser user = user();
+        String genres = java.util.stream.IntStream.range(0, 20)
+                .mapToObj(i -> "{\"genreId\": 28, \"score\": 5}")
+                .collect(java.util.stream.Collectors.joining(",", "[", "]"));
+        putJson(user, GENRES, genres).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Send at most one score per genre."));
+        String moods = java.util.stream.IntStream.range(0, 9)
+                .mapToObj(i -> "{\"moodTag\": \"cozy\", \"score\": 5}")
+                .collect(java.util.stream.Collectors.joining(",", "[", "]"));
+        putJson(user, MOODS, moods).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Send at most one score per mood."));
+    }
+
+    /** An unknown mood tag is quoted back cut short, never whole. */
+    @Test
+    void unknownMoodTagsAreEchoedTruncated() throws Exception {
+        TestUser user = user();
+        String tag = "z".repeat(5000);
+        putJson(user, MOODS, "[{\"moodTag\": \"" + tag + "\", \"score\": 5}]").andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Unknown mood: " + "z".repeat(40) + "..."));
+    }
+
     // ------------------------------------------------------------------------------- genres
 
     @Test

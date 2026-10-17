@@ -87,6 +87,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Fails on any NEW high/critical advisory in production deps; accepted ones are documented in
+      # client/SECURITY-AUDIT.md. `|| true` only because npm audit exits non-zero whenever it finds anything.
+      - name: npm audit gate
+        run: (npm audit --omit=dev --json || true) | node ../tools/npm-audit-gate.cjs
+
       - name: Type-check
         run: npm run typecheck
 

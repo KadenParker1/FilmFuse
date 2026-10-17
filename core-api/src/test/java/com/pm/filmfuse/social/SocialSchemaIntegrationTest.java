@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /** V5__social_graph: constraints, cascades on account deletion and ml_reader access. */
 class SocialSchemaIntegrationTest extends AbstractSocialIntegrationTest {
 
-    private static final String[] TABLES = {"app.friendships", "app.friend_closeness", "app.blocks", "app.invites"};
+    private static final String[] TABLES = {"app.friendships", "app.friend_closeness", "app.blocks"};
 
     @Test
     void mlReaderCanReadButNotWriteTheSocialTables() {

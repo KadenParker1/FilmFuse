@@ -1,0 +1,25 @@
+### FilmFuse core-api - security controls (rate limits, body cap, headers). Token: see me.http.
+# Rate limits (in-memory, single replica): 429 + Retry-After (seconds) + {"message"} when exceeded.
+#   every request: 600/min per client address, 120/min per user
+#   per user: friend requests 30/h, invites 20/h (links, redeem, POST /groups, group invites),
+#             reports 20/h, comments 60/h, POST /sessions 30/h, photo upload URLs 20/h
+# Bodies over 64 KB: 413 {"message": "The request body is too large."}
+# Every API response: Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+
+### Response headers (look for Cache-Control, X-Content-Type-Options, X-Frame-Options)
+GET {{baseUrl}}/api/v1/me
+Authorization: Bearer {{token}}
+
+### Invite links: run 21 times within an hour - the 21st is a 429 with Retry-After
+POST {{baseUrl}}/api/v1/invites
+Authorization: Bearer {{token}}
+
+### Oversized body: paste more than 64 KB into bio to see the 413
+PATCH {{baseUrl}}/api/v1/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"bio": "paste-more-than-65536-characters-here"}
