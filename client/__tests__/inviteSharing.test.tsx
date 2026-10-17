@@ -11,7 +11,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as nativeShare from '../components/social/shareInvite.native';
 import { INVITE_MESSAGE } from '../components/social/shareInviteTypes';
 import * as nativePending from '../lib/pendingLink.native';
-import { invitePath, isPendingLinkPath, profilePath } from '../lib/pendingLinkPath';
+import { invitePath, isPendingLinkPath, profilePath, ratingPath } from '../lib/pendingLinkPath';
 
 // jest resolves platform files to .native (ios preset); load the web ones explicitly.
 const webShare = jest.requireActual<typeof import('../components/social/shareInvite')>(
@@ -93,11 +93,15 @@ describe('pendingLinkPath', () => {
   it('builds encoded invite and profile paths', () => {
     expect(invitePath('a b')).toBe('/invite/a%20b');
     expect(profilePath('u/1')).toBe('/user/u%2F1');
+    expect(ratingPath('r 1')).toBe('/ratings/r%201');
   });
 
   it.each([
     ['/invite/abc', true],
     ['/user/u1', true],
+    ['/ratings/r1', true],
+    ['/ratings/', false],
+    ['/ratings/r1/edit', false],
     ['/user/', false],
     ['/settings/blocked', false],
     ['https://evil.example/user/1', false],

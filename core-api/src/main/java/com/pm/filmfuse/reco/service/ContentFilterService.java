@@ -1,5 +1,6 @@
 package com.pm.filmfuse.reco.service;
 
+import com.pm.filmfuse.movie.service.CatalogEnrichmentService;
 import com.pm.filmfuse.reco.model.CandidateCriteria;
 import com.pm.filmfuse.reco.model.ContentFilter;
 import com.pm.filmfuse.reco.model.MovieContent;
@@ -31,12 +32,21 @@ public class ContentFilterService {
     /** How many eligible candidates are handed to the ranker. */
     public static final int POOL_SIZE = 200;
 
+    /** A pool smaller than this (twice the 20 results a session or page shows) triggers enrichment. */
+    public static final int ENRICH_BELOW = 40;
+
+    /** Movies looked up synchronously when a pool comes up short. */
+    public static final int SYNC_ENRICH = 30;
+
     private final ComfortSettingsService comfortSettings;
     private final MovieContentRepository movies;
+    private final CatalogEnrichmentService enrichment;
 
-    public ContentFilterService(ComfortSettingsService comfortSettings, MovieContentRepository movies) {
+    public ContentFilterService(ComfortSettingsService comfortSettings, MovieContentRepository movies,
+                                CatalogEnrichmentService enrichment) {
         this.comfortSettings = comfortSettings;
         this.movies = movies;
+        this.enrichment = enrichment;
     }
 
     /** The effective filter of {@code memberIds} under {@code groupCap} (null = no cap). */
@@ -63,11 +73,28 @@ public class ContentFilterService {
         return filter.isEligible(movie);
     }
 
-    /** Up to {@code limit} eligible movie ids, most popular first, excluding {@code excluded}. */
-    @Transactional(readOnly = true)
+    /**
+     * Up to {@code limit} eligible movie ids, most popular first, excluding {@code excluded}.
+     *
+     * <p>When fewer than {@code min(limit, }{@value #ENRICH_BELOW}{@code )} pass, the movie cache is
+     * topped up once and the pool rebuilt: a nearly empty cache first gets the catalog's popular
+     * pages ({@link CatalogEnrichmentService#seedIfSparse}); then, if the filter has limits that
+     * unrated movies fail, {@value #SYNC_ENRICH} never-checked movies get their certification and
+     * keywords looked up ({@link CatalogEnrichmentService#enrich}) - list-cached movies have none,
+     * so without this a PG-13 member could get an empty pool. Not transactional on purpose:
+     * enrichment calls the catalog and commits its own writes.
+     */
     public List<Integer> eligiblePool(ContentFilter filter, CandidateCriteria criteria, Collection<Integer> excluded,
                                       int limit) {
-        return movies.eligiblePool(filter, criteria, excluded, limit);
+        List<Integer> pool = movies.eligiblePool(filter, criteria, excluded, limit);
+        if (pool.size() >= Math.min(limit, ENRICH_BELOW)) {
+            return pool;
+        }
+        boolean changed = enrichment.seedIfSparse();
+        if (filter.hasLimits() && !filter.allowUnrated() && enrichment.hasUnchecked()) {
+            changed |= enrichment.enrich(SYNC_ENRICH) > 0;
+        }
+        return changed ? movies.eligiblePool(filter, criteria, excluded, limit) : pool;
     }
 
     /** The cached content of {@code movieIds}; ids not in the movie cache are absent. */

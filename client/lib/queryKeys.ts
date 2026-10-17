@@ -17,6 +17,8 @@ const taste = ['taste'] as const;
 const calibration = ['calibration'] as const;
 const feed = ['feed'] as const;
 const movieRatingsAll = [...feed, 'movie'] as const;
+const ratingDetailAll = ['ratingDetail'] as const;
+const commentsAll = ['comments'] as const;
 
 export const queryKeys = {
   /** The signed-in user's own profile (GET /me). */
@@ -102,4 +104,16 @@ export const queryKeys = {
   movieRatings: (movieId: number, scope: FeedScope) => [...movieRatingsAll, movieId, scope] as const,
   /** GET /users/{id}/ratings (infinite) */
   userRatings: (userId: string) => [...feed, 'user', userId] as const,
+  /** Every GET /ratings/{ratingId} (prefix). Not under `feed`: these hold one item, not pages. */
+  ratingDetailAll,
+  /** GET /ratings/{ratingId} — one visible rating (the rating detail screen). */
+  ratingDetail: (ratingId: string) => [...ratingDetailAll, ratingId] as const,
+  /** Every comment list (prefix). */
+  commentsAll,
+  /** GET /ratings/{ratingId}/comments (infinite, oldest first) */
+  comments: (ratingId: string) => [...commentsAll, ratingId] as const,
+  /** GET /me/pending-ratings — "Rate what you watched". */
+  pendingRatings: ['pendingRatings'] as const,
+  /** GET /me/settings/notifications */
+  notificationSettings: ['settings', 'notifications'] as const,
 } as const;

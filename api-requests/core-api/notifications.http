@@ -1,0 +1,16 @@
+### FilmFuse core-api - email notification preferences. Token: see me.http.
+# Defaults: everything on except weeklyDigest. PUT replaces all five (each required).
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+
+### Current preferences
+GET {{baseUrl}}/api/v1/me/settings/notifications
+Authorization: Bearer {{token}}
+
+### Replace them
+PUT {{baseUrl}}/api/v1/me/settings/notifications
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"friendRequests": true, "groupInvites": true, "sessionStarted": false, "comments": true, "weeklyDigest": true}

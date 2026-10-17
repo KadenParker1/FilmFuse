@@ -304,6 +304,16 @@ public class SocialGraphService {
         return true;
     }
 
+    /**
+     * Stores implicit closeness scores computed by {@link ClosenessJob} ({@code (from, to, score)},
+     * each 0-1). Only existing rows are updated, so a friendship that ended meanwhile stays gone;
+     * the explicit flag is untouched (the API still reports {@code max(score, 0.8)} while it is set).
+     */
+    @Transactional
+    public int setImplicitCloseness(List<FriendshipRepository.ClosenessRow> scores) {
+        return friendships.updateImplicitScores(scores);
+    }
+
     /** Ends a friendship (both closeness rows go with it). Idempotent; pending requests are untouched. */
     @Transactional
     public void unfriend(UUID a, UUID b) {

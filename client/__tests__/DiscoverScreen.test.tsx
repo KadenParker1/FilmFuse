@@ -1,4 +1,9 @@
 jest.mock('expo-router', () => require('../test-utils/router').expoRouterMock);
+// "Rate what you watched" has its own tests (PendingRatingsBanner.test.tsx).
+jest.mock('../components/rating/PendingRatingsBanner', () => {
+  const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
+  return { PendingRatingsBanner: () => <Text testID="pending-ratings-stub">Rate what you watched</Text> };
+});
 // "For you" has its own tests (ForYouSection.test.tsx).
 jest.mock('../components/reco/ForYouSection', () => {
   const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
@@ -66,6 +71,14 @@ const flushDebounce = async () => {
 };
 
 describe('DiscoverScreen', () => {
+  it('shows "Rate what you watched" above "For you", and hides it while searching', async () => {
+    await render(<DiscoverScreen />);
+    expect(screen.getByTestId('pending-ratings-stub')).toBeOnTheScreen();
+    await typeSearch('alien');
+    await flushDebounce();
+    expect(screen.queryByTestId('pending-ratings-stub')).toBeNull();
+  });
+
   it('puts "For you" above popular, and hides it while searching', async () => {
     await render(<DiscoverScreen />);
     expect(screen.getByTestId('for-you-stub')).toBeOnTheScreen();

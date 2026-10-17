@@ -1,0 +1,22 @@
+### FilmFuse core-api - reporting (app-store UGC rules). Token: see me.http.
+# targetType RATING | COMMENT | USER; reason SPAM | HARASSMENT | HATE | SEXUAL_CONTENT | SPOILERS | OTHER.
+# 204 (repeats while open are idempotent); 404 unknown or not visible to you; 400 self-report.
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+@ratingId = 00000000-0000-0000-0000-000000000000
+@userId = 00000000-0000-0000-0000-000000000000
+
+### Report a rating
+POST {{baseUrl}}/api/v1/reports
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"targetType": "RATING", "targetId": "{{ratingId}}", "reason": "SPOILERS", "details": "Ending in the first line"}
+
+### Report a user
+POST {{baseUrl}}/api/v1/reports
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"targetType": "USER", "targetId": "{{userId}}", "reason": "HARASSMENT"}

@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * the test's own users and movies, but the EVERYONE feed holds every test's public ratings, so
  * EVERYONE assertions walk every page ({@link #everyone}) and look for the test's own ids.
  */
-abstract class AbstractFeedIntegrationTest extends AbstractTasteIntegrationTest {
+public abstract class AbstractFeedIntegrationTest extends AbstractTasteIntegrationTest {
 
     protected static final String FRIENDS = "FRIENDS";
     protected static final String EVERYONE = "EVERYONE";

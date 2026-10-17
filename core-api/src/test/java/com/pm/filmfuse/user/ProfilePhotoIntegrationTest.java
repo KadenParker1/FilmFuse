@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /** Runs with the MockStorageGateway (no service-role key in tests). */
 class ProfilePhotoIntegrationTest extends AbstractIntegrationTest {
 
-    private static final String PUBLIC_PREFIX = "http://127.0.0.1:54321/storage/v1/object/public/profile-photos/";
+    private static final String PUBLIC_PREFIX = "http://127.0.0.1:55321/storage/v1/object/public/profile-photos/";
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,7 +55,7 @@ class ProfilePhotoIntegrationTest extends AbstractIntegrationTest {
         String path = JsonPath.read(body, "$.path");
         String uploadUrl = JsonPath.read(body, "$.uploadUrl");
         assertThat(path).matches("^" + userId + "/[0-9a-f-]{36}\\.jpg$");
-        assertThat(uploadUrl).isEqualTo("http://127.0.0.1:54321/storage/v1/object/upload/sign/profile-photos/"
+        assertThat(uploadUrl).isEqualTo("http://127.0.0.1:55321/storage/v1/object/upload/sign/profile-photos/"
                 + path + "?token=mock-upload-token");
         assertThat(mockStorage().calls()).contains(new MockStorageGateway.Call("sign-upload", "profile-photos", path));
 

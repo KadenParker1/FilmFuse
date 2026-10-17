@@ -4,6 +4,7 @@ let mockSession: unknown = { access_token: 't' };
 jest.mock('../auth/useAuth', () => ({ useAuth: () => ({ session: mockSession }) }));
 jest.mock('../lib/pendingLink', () => ({ setPendingLink: jest.fn(() => Promise.resolve()) }));
 jest.mock('../api/users', () => ({ usePublicProfile: jest.fn() }));
+jest.mock('../api/reports', () => ({ ...jest.requireActual('../api/reports'), useCreateReport: jest.fn() }));
 jest.mock('../api/feed', () => ({ useUserRatings: jest.fn(), useLikeRating: jest.fn(), useUnlikeRating: jest.fn() }));
 const mockOpenQuickRate = jest.fn();
 jest.mock('../components/rating/QuickRateProvider', () => ({
@@ -35,6 +36,7 @@ import {
   useUnfriend,
 } from '../api/social';
 import { usePublicProfile } from '../api/users';
+import { useCreateReport } from '../api/reports';
 import { ApiError, NetworkError } from '../lib/apiClient';
 import { setPendingLink } from '../lib/pendingLink';
 import { makeFeedItem, makeMovie, makeProfile, makePublicProfile } from '../test-utils/fixtures';
@@ -71,7 +73,11 @@ beforeEach(() => {
   (useLikeRating as jest.Mock).mockReturnValue(mutationResult());
   (useUnlikeRating as jest.Mock).mockReturnValue(mutationResult());
   mockOpenQuickRate.mockClear();
+  report = mutationResult();
+  (useCreateReport as jest.Mock).mockImplementation(() => report);
 });
+
+let report: ReturnType<typeof mutationResult>;
 
 /** Runs the mutate's onSuccess option, as TanStack would after the request succeeds. */
 const succeed = async (m: ReturnType<typeof mutationResult>) => {
@@ -509,5 +515,50 @@ describe('UserProfileScreen — ratings section', () => {
     mockUserRatings.mockReturnValue(infiniteResult({ items: [] }));
     await render(<UserProfileScreen />);
     expect(screen.getByTestId('user-ratings-empty')).toHaveTextContent("You haven't rated anything yet.");
+  });
+});
+
+describe('UserProfileScreen — reporting', () => {
+  it('overflow menu → Report → reason → sends a USER report; then a thank-you and Done', async () => {
+    showProfile('NONE');
+    await render(<UserProfileScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'More options' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Report Grace Hopper' }));
+    expect(screen.getByRole('header', { name: 'Report this person' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Send report' })).toBeDisabled();
+    await fireEvent.press(screen.getByRole('radio', { name: 'Harassment' }));
+    await fireEvent.changeText(screen.getByLabelText('Details (optional)'), 'Keeps messaging me');
+    await fireEvent.press(screen.getByRole('button', { name: 'Send report' }));
+    expect(report.mutate).toHaveBeenCalledWith({
+      targetType: 'USER',
+      targetId: 'u2',
+      reason: 'HARASSMENT',
+      details: 'Keeps messaging me',
+    });
+    report.isSuccess = true;
+    await screen.rerender(<UserProfileScreen />);
+    expect(screen.getByText('Thanks for letting us know')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
+    expect(screen.queryByText('Thanks for letting us know')).toBeNull();
+  });
+
+  it('friends can be reported from the friendship sheet', async () => {
+    showProfile('FRIENDS');
+    await render(<UserProfileScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Friends' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Report Grace Hopper' }));
+    expect(screen.getByTestId('report-form')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByTestId('report-form')).toBeNull();
+  });
+
+  it('shows a report failure inline', async () => {
+    showProfile('NONE');
+    report.isError = true;
+    report.error = new ApiError(400, "You can't report yourself");
+    await render(<UserProfileScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'More options' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Report Grace Hopper' }));
+    expect(screen.getByRole('alert')).toHaveTextContent("You can't report yourself");
   });
 });

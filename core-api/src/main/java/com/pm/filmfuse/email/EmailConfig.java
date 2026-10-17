@@ -25,7 +25,7 @@ public class EmailConfig {
             JavaMailSender sender = mailSender.getIfAvailable();
             if (sender == null) {
                 throw new IllegalStateException("filmfuse.email.provider=smtp needs spring.mail.host set"
-                        + " (smtp.resend.com in prod, 127.0.0.1:54325 for local Mailpit).");
+                        + " (smtp.resend.com in prod, 127.0.0.1:55325 for local Mailpit).");
             }
             return new SmtpEmailGateway(sender, properties.fromAddress());
         }

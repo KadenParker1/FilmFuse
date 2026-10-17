@@ -4,6 +4,7 @@ import { queryKeys } from '../lib/queryKeys';
 import { withQuery } from '../lib/withQuery';
 import type { PageDTO, RatingDTO, RecommendationDTO, UpsertRatingDTO } from '../types/api';
 import { invalidateFeedsAfterRating } from './feed';
+import { removePendingRating } from './pendingRatings';
 import { filterInfinite, mapInfinite, type InfinitePages } from './socialCache';
 import { markTasteRebuilding } from './taste';
 
@@ -71,6 +72,9 @@ export function useUpsertRating() {
         mapInfinite(data, (r) => (r.movie.id === movieId ? rating : r)),
       );
       void qc.invalidateQueries({ queryKey: queryKeys.myRatings });
+      // A rated movie is never prompted for again ("Rate what you watched").
+      removePendingRating(qc, movieId);
+      void qc.invalidateQueries({ queryKey: queryKeys.pendingRatings });
       afterTasteSignal(qc, movieId);
     },
   });

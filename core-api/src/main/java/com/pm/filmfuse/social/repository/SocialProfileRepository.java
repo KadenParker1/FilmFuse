@@ -61,6 +61,21 @@ public class SocialProfileRepository {
                 .stream().findFirst();
     }
 
+    /** Contacts of the users among {@code ids} that exist, keyed by id. */
+    public Map<UUID, Contact> findContacts(Collection<UUID> ids) {
+        Map<UUID, Contact> result = new LinkedHashMap<>();
+        if (ids.isEmpty()) {
+            return result;
+        }
+        jdbc.query("select id, username, display_name, email from app.profiles where id in (:ids)",
+                new MapSqlParameterSource("ids", ids), rs -> {
+                    Contact contact = new Contact(rs.getObject("id", UUID.class), rs.getString("username"),
+                            rs.getString("display_name"), rs.getString("email"));
+                    result.put(contact.id(), contact);
+                });
+        return result;
+    }
+
     /**
      * Active users with a username whose username or display name starts with {@code prefix}
      * (already lowercased and LIKE-escaped by the caller), excluding {@code excluded}, ordered by

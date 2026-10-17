@@ -131,11 +131,13 @@ public class SessionService {
 
         List<UUID> memberIds;
         ContentFilter cap;
+        String groupName = null;
         UUID groupId = request.groupId();
         if (hasGroup) {
             Group group = groupService.requireActiveMember(callerId, groupId);
             memberIds = groupService.activeMemberIds(groupId);
             cap = group.cap();
+            groupName = group.name();
         } else {
             List<UUID> friends = groupService.requireInvitableFriends(callerId, request.memberIds());
             if (friends.isEmpty()) {
@@ -153,12 +155,14 @@ public class SessionService {
 
         UUID sessionId = UUID.randomUUID();
         Instant now = clock.instant();
+        String startedIn = groupName;
         tx.executeWithoutResult(status -> {
             sessions.insertSession(sessionId, groupId, callerId, filters, effective, strategy, now);
             Map<UUID, Boolean> hasVector = new LinkedHashMap<>();
             memberIds.forEach(id -> hasVector.put(id, withVector.contains(id)));
             sessions.insertMembers(sessionId, hasVector);
             sessions.insertResults(sessionId, ranked, 1, now);
+            events.publishEvent(new SessionStartedEvent(sessionId, callerId, startedIn, List.copyOf(memberIds)));
         });
         return get(callerId, sessionId);
     }

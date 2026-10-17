@@ -11,6 +11,7 @@ import com.pm.filmfuse.movie.dto.MovieDetailDTO;
 import com.pm.filmfuse.movie.dto.MovieSummaryDTO;
 import com.pm.filmfuse.movie.mapper.MovieMapper;
 import com.pm.filmfuse.movie.model.Movie;
+import com.pm.filmfuse.movie.repository.MovieEnrichmentRepository;
 import com.pm.filmfuse.movie.repository.MovieRepository;
 import java.time.Clock;
 import java.time.Duration;
@@ -41,22 +42,26 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final GenreService genreService;
     private final ContentLevelService contentLevelService;
+    private final MovieEnrichmentRepository enrichment;
     private final String imageBaseUrl;
     private final Clock clock;
 
     @Autowired
     public MovieService(MovieCatalogClient catalogClient, MovieRepository movieRepository,
                         GenreService genreService, ContentLevelService contentLevelService,
-                        TmdbProperties tmdbProperties) {
-        this(catalogClient, movieRepository, genreService, contentLevelService, tmdbProperties, Clock.systemUTC());
+                        MovieEnrichmentRepository enrichment, TmdbProperties tmdbProperties) {
+        this(catalogClient, movieRepository, genreService, contentLevelService, enrichment, tmdbProperties,
+                Clock.systemUTC());
     }
 
     MovieService(MovieCatalogClient catalogClient, MovieRepository movieRepository, GenreService genreService,
-                 ContentLevelService contentLevelService, TmdbProperties tmdbProperties, Clock clock) {
+                 ContentLevelService contentLevelService, MovieEnrichmentRepository enrichment,
+                 TmdbProperties tmdbProperties, Clock clock) {
         this.catalogClient = catalogClient;
         this.movieRepository = movieRepository;
         this.genreService = genreService;
         this.contentLevelService = contentLevelService;
+        this.enrichment = enrichment;
         this.imageBaseUrl = tmdbProperties.imageBaseUrl();
         this.clock = clock;
     }
@@ -84,7 +89,7 @@ public class MovieService {
                 .map(MovieMapper::toCatalogMovie)
                 .orElseGet(() -> {
                     CatalogMovie fetched = catalogClient.details(id);
-                    cache(List.of(fetched), now);
+                    cacheDetails(fetched, now);
                     return fetched;
                 });
         return MovieMapper.toDetailDTO(movie, genreService.namesById(), imageBaseUrl);
@@ -101,7 +106,7 @@ public class MovieService {
         for (Integer id : new LinkedHashSet<>(ids)) {
             if (!cached.contains(id)) {
                 CatalogMovie fetched = catalogClient.details(id);
-                cache(List.of(fetched), clock.instant());
+                cacheDetails(fetched, clock.instant());
             }
         }
     }
@@ -118,6 +123,12 @@ public class MovieService {
     private void cache(List<CatalogMovie> movies, Instant now) {
         movieRepository.upsertAll(movies, now);
         contentLevelService.refresh(movies, now);
+    }
+
+    /** A details fetch is the certification lookup, so the movie leaves the enrichment queue. */
+    private void cacheDetails(CatalogMovie movie, Instant now) {
+        cache(List.of(movie), now);
+        enrichment.markChecked(List.of(movie.id()), now);
     }
 
     private static boolean isFresh(Movie cached, Instant now) {

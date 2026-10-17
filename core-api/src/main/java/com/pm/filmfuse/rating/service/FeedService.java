@@ -100,6 +100,17 @@ public class FeedService {
         });
     }
 
+    /** One rating ({@code GET /ratings/{id}}); 404 when it does not exist or the caller may not see it. */
+    public FeedItemDTO rating(UUID viewer, UUID ratingId) {
+        return readTx.execute(status -> {
+            List<FeedItemDTO> items = load(viewer, FeedFilter.rating(ratingId), null).items();
+            if (items.isEmpty()) {
+                throw new NotFoundException(RATING_NOT_FOUND);
+            }
+            return items.getFirst();
+        });
+    }
+
     /** 204, idempotent; 404 when the rating does not exist or the caller may not see it. */
     public void like(UUID viewer, UUID ratingId) {
         tx.executeWithoutResult(status -> {

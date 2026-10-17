@@ -37,7 +37,10 @@ public class VectorRefreshScheduler {
     @Scheduled(fixedDelayString = "${filmfuse.vectors.refresh.interval:PT15S}",
             initialDelayString = "${filmfuse.vectors.refresh.interval:PT15S}")
     void tick() {
-        refreshDue();
+        // Another job's @EnableScheduling also schedules this method: honour our own switch.
+        if (properties.enabled()) {
+            refreshDue();
+        }
     }
 
     /**

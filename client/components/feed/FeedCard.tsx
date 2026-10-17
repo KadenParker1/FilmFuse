@@ -7,6 +7,7 @@ import { useLikeRating, useUnlikeRating } from '../../api/feed';
 import { personName, pluralize, timeAgo } from '../../lib/format';
 import { useTheme } from '../../theme/useTheme';
 import type { FeedItemDTO } from '../../types/api';
+import { ReportSheet } from '../moderation/ReportSheet';
 import { useQuickRate } from '../rating/QuickRateProvider';
 import { VISIBILITY } from '../rating/RatingRow';
 import { CertificationBadge } from '../sessions/CertificationBadge';
@@ -18,6 +19,8 @@ type Props = {
   showAuthor?: boolean;
   /** Hide the poster / title row (e.g. on the movie's own page). */
   showMovie?: boolean;
+  /** The comment count opens the rating's detail page; off on that page itself. */
+  linkToDetail?: boolean;
 };
 
 /** A note marked as containing spoilers stays covered until tapped. */
@@ -85,12 +88,75 @@ function LikeButton({ item }: { item: FeedItemDTO }) {
   );
 }
 
+function CommentCount({ item, link }: { item: FeedItemDTO; link: boolean }) {
+  const router = useRouter();
+  const { colors } = useTheme();
+  const content = (
+    <>
+      <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
+      <Text testID={`feed-comment-count-${item.id}`} className="font-body-medium text-sm text-text-muted">
+        {item.commentCount}
+      </Text>
+    </>
+  );
+  const label = pluralize(item.commentCount, 'comment');
+  if (!link) {
+    return (
+      <View accessible accessibilityLabel={label} className="min-h-9 flex-row items-center gap-1.5 px-2">
+        {content}
+      </View>
+    );
+  }
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityHint="Opens the rating and its comments"
+      hitSlop={8}
+      onPress={() => router.push(`/ratings/${item.id}`)}
+      className="min-h-9 flex-row items-center gap-1.5 rounded-full px-2 active:opacity-70"
+    >
+      {content}
+    </Pressable>
+  );
+}
+
+/** "…" on someone else's rating: report it. */
+function RatingOverflow({ item, name }: { item: FeedItemDTO; name: string }) {
+  const { colors } = useTheme();
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Options for ${name}'s rating`}
+        hitSlop={8}
+        onPress={() => setOpen(true)}
+        className="min-h-9 items-center justify-center rounded-full px-2 active:opacity-70"
+      >
+        <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
+      </Pressable>
+      {/* Mounted only while open: a feed has many cards and each Modal costs. */}
+      {open ? (
+        <ReportSheet
+          visible
+          onClose={() => setOpen(false)}
+          menuTitle={`${name}'s rating`}
+          targetType="RATING"
+          targetId={item.id}
+        />
+      ) : null}
+    </>
+  );
+}
+
 /**
  * One rating in a feed: who, when, the movie, the score, an optional (spoiler-covered) note and a
- * like. Your own ratings also show who can see them and an "Edit" that reopens the quick-rate sheet.
- * Without a note the card is compact.
+ * like and the comment count (opens the rating's page). Your own ratings also show who can see
+ * them and an "Edit" that reopens the quick-rate sheet; anyone else's have "…" → Report. Without a
+ * note the card is compact.
  */
-export function FeedCard({ item, showAuthor = true, showMovie = true }: Props) {
+export function FeedCard({ item, showAuthor = true, showMovie = true, linkToDetail = true }: Props) {
   const router = useRouter();
   const { colors } = useTheme();
   const { openQuickRate } = useQuickRate();
@@ -189,6 +255,7 @@ export function FeedCard({ item, showAuthor = true, showMovie = true }: Props) {
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <LikeButton item={item} />
+          <CommentCount item={item} link={linkToDetail} />
           {!showAuthor && when ? <Text className="font-body text-xs text-text-muted">{when}</Text> : null}
         </View>
         {item.mine ? (
@@ -213,7 +280,9 @@ export function FeedCard({ item, showAuthor = true, showMovie = true }: Props) {
               <Text className="font-body-semibold text-sm text-gold">Edit</Text>
             </Pressable>
           </View>
-        ) : null}
+        ) : (
+          <RatingOverflow item={item} name={personName(author)} />
+        )}
       </View>
     </View>
   );

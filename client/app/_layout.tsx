@@ -56,7 +56,8 @@ export default function RootLayout() {
 /**
  * Route guards. Signed out → only (auth). Signed in → (onboarding) and (tabs); the (tabs) layout
  * then checks `/me` and sends unfinished profiles to onboarding (it tolerates the API being down).
- * Invite links (`/invite/<token>`) and profiles (`/user/<id>`) are reachable either way.
+ * Invite links (`/invite/<token>`), profiles (`/user/<id>`) and ratings (`/ratings/<id>`) are
+ * reachable either way.
  */
 function RootNavigator() {
   const { session, loading } = useAuth();
@@ -78,6 +79,7 @@ function RootNavigator() {
           <Stack.Screen name="profile/edit" />
           <Stack.Screen name="settings/blocked" />
           <Stack.Screen name="settings/comfort" />
+          <Stack.Screen name="settings/notifications" />
           <Stack.Screen name="groups/new" />
           <Stack.Screen name="groups/[id]" />
           <Stack.Screen name="sessions/new" />
@@ -96,6 +98,8 @@ function RootNavigator() {
         <Stack.Screen name="invite/[token]" />
         {/* Unguarded so email links survive a cold, signed-out load: it saves the path and sends you to sign in. */}
         <Stack.Screen name="user/[id]" />
+        {/* Unguarded for the same reason: comment emails link here. */}
+        <Stack.Screen name="ratings/[id]" />
       </Stack>
       <RecoveryRedirect />
     </>

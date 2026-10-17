@@ -1,0 +1,22 @@
+### FilmFuse core-api - post-watch rating prompts. Token: see me.http.
+# Movies your sessions picked in the last 14 days that you haven't rated (any route) or dismissed;
+# newest first, at most 10. Rating with PUT /ratings/{movieId} (source POST_WATCH) removes one.
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+@movieId = 603
+
+### Pending prompts
+GET {{baseUrl}}/api/v1/me/pending-ratings
+Authorization: Bearer {{token}}
+
+### Rate it from the prompt (removes it)
+PUT {{baseUrl}}/api/v1/ratings/{{movieId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"score": 8, "body": "Great with the group", "visibility": "FRIENDS", "source": "POST_WATCH"}
+
+### Dismiss: never prompted again for this movie (204, idempotent; 404 unknown movie)
+POST {{baseUrl}}/api/v1/me/pending-ratings/{{movieId}}/dismiss
+Authorization: Bearer {{token}}

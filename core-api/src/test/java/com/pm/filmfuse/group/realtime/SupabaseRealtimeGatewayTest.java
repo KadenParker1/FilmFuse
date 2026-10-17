@@ -90,9 +90,9 @@ class SupabaseRealtimeGatewayTest {
     @Test
     void configPicksTheMockWithoutAServiceRoleKey() {
         RealtimeConfig config = new RealtimeConfig();
-        assertThat(config.realtimeGateway(new SupabaseProperties("http://localhost:54321", "")))
+        assertThat(config.realtimeGateway(new SupabaseProperties("http://localhost:55321", "")))
                 .isInstanceOf(MockRealtimeGateway.class);
-        assertThat(config.realtimeGateway(new SupabaseProperties("http://localhost:54321", null)))
+        assertThat(config.realtimeGateway(new SupabaseProperties("http://localhost:55321", null)))
                 .isInstanceOf(MockRealtimeGateway.class);
         assertThat(config.realtimeGateway(PROPERTIES)).isInstanceOf(SupabaseRealtimeGateway.class);
     }

@@ -25,6 +25,12 @@ import static com.pm.filmfuse.social.service.SocialGraphService.sqlBlockedEither
  * {@link com.pm.filmfuse.social.service.SocialGraphService}'s SQL fragments, so graph-table SQL
  * stays in the social package. Rule 1 is a plain top-level conjunct so the partial index
  * {@code ratings_public_updated_idx} stays usable.
+ *
+ * <p><strong>Comments</strong> (Phase 5) follow from the same rule: a comment {@code c} is visible
+ * to {@code :viewer} iff its rating is ({@link #visibleTo}{@code (true)} - checked by every comment
+ * endpoint and by reports first) and {@link #commentVisibleTo} holds: its author is not suspended
+ * and neither the author nor the viewer has blocked the other. {@code commentCount} in the feed
+ * counts exactly these.
  */
 public final class RatingVisibilitySql {
 
@@ -47,5 +53,13 @@ public final class RatingVisibilitySql {
                       or (r.visibility = 'FRIENDS' and (r.user_id = :viewer or %s))%s))"""
                 .formatted(sqlBlockedEitherWay("r.user_id", ":viewer"), sqlAreFriends("r.user_id", ":viewer"),
                         ownPrivate);
+    }
+
+    /**
+     * SQL boolean: the comment {@code c} (author's profile aliased {@code ca}) may be shown to
+     * {@code :viewer}, given that its rating is visible to them.
+     */
+    public static String commentVisibleTo() {
+        return "(ca.status <> 'SUSPENDED' and not %s)".formatted(sqlBlockedEitherWay("c.user_id", ":viewer"));
     }
 }

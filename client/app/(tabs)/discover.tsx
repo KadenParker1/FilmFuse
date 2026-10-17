@@ -14,6 +14,7 @@ import {
   Skeleton,
   type PosterItem,
 } from '../../components/ui';
+import { PendingRatingsBanner } from '../../components/rating/PendingRatingsBanner';
 import { ForYouSection } from '../../components/reco/ForYouSection';
 import { TmdbAttribution } from '../../components/TmdbAttribution';
 import { useDebouncedValue } from '../../lib/useDebouncedValue';
@@ -78,6 +79,7 @@ export default function DiscoverScreen() {
     <Label className="pb-1">Results for “{query}”</Label>
   ) : (
     <View className="gap-4 pb-1">
+      <PendingRatingsBanner />
       <ForYouSection />
       <GenreChips selected={genreId} onSelect={setGenreId} />
       <Heading size="sm">Popular</Heading>
