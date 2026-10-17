@@ -278,7 +278,10 @@ public class FriendshipRepository {
                 .stream().findFirst();
     }
 
-    /** Pending requests involving {@code user}, newest first. */
+    /**
+     * Pending requests involving {@code user}, newest first. Requests with an account suspended
+     * since are left out both ways (SECURITY.md #17); deleted accounts cascade away.
+     */
     public List<PendingRequest> pending(UUID user, boolean outgoing) {
         return jdbc.query("""
                         select %s, f.created_at
@@ -286,6 +289,7 @@ public class FriendshipRepository {
                         join app.profiles p on p.id = %s
                         where f.status = 'PENDING' and (f.user_low = :me or f.user_high = :me)
                           and (f.requested_by = :me) = :outgoing
+                          and p.status <> 'SUSPENDED'
                         order by f.created_at desc, p.id
                         """.formatted(SocialRows.USER_COLUMNS, OTHER),
                 new MapSqlParameterSource("me", user).addValue("outgoing", outgoing),

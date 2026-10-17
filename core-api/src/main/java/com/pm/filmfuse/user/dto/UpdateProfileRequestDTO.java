@@ -1,5 +1,6 @@
 package com.pm.filmfuse.user.dto;
 
+import com.pm.filmfuse.common.validation.SafeText;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Locale;
@@ -20,9 +21,11 @@ public record UpdateProfileRequestDTO(
         String username,
 
         @Size(max = 77, message = "Display name cannot exceed 77 characters")
+        @SafeText
         String displayName,
 
         @Size(max = 300, message = "Bio cannot exceed 300 characters")
+        @SafeText(multiline = true)
         String bio) {
 
     public static final int USERNAME_MIN = 3;
@@ -31,6 +34,7 @@ public record UpdateProfileRequestDTO(
 
     public UpdateProfileRequestDTO {
         username = normaliseUsername(username);
+        bio = bio == null ? null : bio.replace("\r\n", "\n");
     }
 
     public static String normaliseUsername(String raw) {

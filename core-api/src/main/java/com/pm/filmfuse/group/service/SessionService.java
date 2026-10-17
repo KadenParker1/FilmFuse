@@ -352,6 +352,9 @@ public class SessionService {
         if (session.createdBy() != null) {
             userIds.add(session.createdBy());
         }
+        // SECURITY.md #15: people blocked either way with the caller are left out of what the caller
+        // sees (members, creator, memberScores keys). Counts and the stored ranking are unaffected.
+        userIds.removeAll(graph.blockedEitherWayAmong(callerId, userIds));
         Map<UUID, UserSummaryDTO> summaries = users.summaries(callerId, List.copyOf(userIds)).stream()
                 .collect(Collectors.toMap(UserSummaryDTO::id, Function.identity(), (a, b) -> a));
 
@@ -366,7 +369,7 @@ public class SessionService {
 
         List<SessionResultDTO> resultDTOs = results.stream()
                 .map(r -> toResultDTO(r, movies.get(r.movieId()), votesByMovie.getOrDefault(r.movieId(), List.of()),
-                        callerId))
+                        callerId, summaries.keySet()))
                 .filter(r -> r.movie() != null)
                 .sorted(Comparator.comparing((SessionResultDTO r) -> r.votes().vetoed()).thenComparingInt(SessionResultDTO::rank))
                 .toList();
@@ -374,16 +377,17 @@ public class SessionService {
                 .filter(m -> summaries.containsKey(m.userId()))
                 .map(m -> new SessionMemberDTO(summaries.get(m.userId()), m.hasVector(), m.voted()))
                 .toList();
+        int votedCount = (int) members.stream().filter(SessionMember::voted).count();
 
         return new SessionDTO(session.id(), session.groupId(), session.groupName(),
                 session.createdBy() == null ? null : summaries.get(session.createdBy()),
                 status, session.strategy(), session.filters(),
-                effective.toDTO(), memberDTOs, resultDTOs,
+                effective.toDTO(), members.size(), votedCount, memberDTOs, resultDTOs,
                 session.pickedMovieId() == null ? null : movies.get(session.pickedMovieId()), session.createdAt());
     }
 
     private static SessionResultDTO toResultDTO(SessionResult result, MovieSummaryDTO movie, List<SessionVote> votes,
-                                                UUID callerId) {
+                                                UUID callerId, Set<UUID> visibleUsers) {
         int up = 0;
         int down = 0;
         boolean vetoed = false;
@@ -398,7 +402,13 @@ public class SessionService {
                 mine = vote.vote();
             }
         }
+        Map<UUID, Double> scores = new LinkedHashMap<>();
+        result.memberScores().forEach((userId, score) -> {
+            if (visibleUsers.contains(userId)) {
+                scores.put(userId, score);
+            }
+        });
         return new SessionResultDTO(result.rank(), movie, result.certification(), result.groupScore(),
-                result.memberScores(), result.explanation(), new VoteTallyDTO(up, down, vetoed), mine);
+                scores, result.explanation(), new VoteTallyDTO(up, down, vetoed), mine);
     }
 }

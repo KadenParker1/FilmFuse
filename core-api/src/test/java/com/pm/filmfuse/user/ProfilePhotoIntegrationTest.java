@@ -82,6 +82,32 @@ class ProfilePhotoIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void confirmChecksTheObjectExistsBeforeUsingIt() throws Exception {
+        UUID userId = UUID.randomUUID();
+        String kept = issuePath(userId);
+        mockMvc.perform(confirm(userId, kept)).andExpect(status().isOk());
+        assertThat(mockStorage().calls()).contains(new MockStorageGateway.Call("exists", "profile-photos", kept));
+
+        String neverUploaded = issuePath(userId);
+        mockStorage().markMissing("profile-photos", neverUploaded);
+        mockMvc.perform(confirm(userId, neverUploaded))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Upload the photo before confirming it."));
+
+        // The profile keeps its photo and nothing is deleted.
+        assertThat(profileRepository.findById(userId).orElseThrow().getProfileImageUrl()).isEqualTo(PUBLIC_PREFIX + kept);
+        assertThat(mockStorage().deletedPaths()).doesNotContain(kept, neverUploaded);
+    }
+
+    @Test
+    void anotherUsersPathIsRefusedWithoutAskingStorage() throws Exception {
+        UUID caller = UUID.randomUUID();
+        String foreign = issuePath(UUID.randomUUID());
+        mockMvc.perform(confirm(caller, foreign)).andExpect(status().isBadRequest());
+        assertThat(mockStorage().calls()).doesNotContain(new MockStorageGateway.Call("exists", "profile-photos", foreign));
+    }
+
+    @Test
     void confirmingANewPhotoDeletesThePreviousObject() throws Exception {
         UUID userId = UUID.randomUUID();
         String first = issuePath(userId);

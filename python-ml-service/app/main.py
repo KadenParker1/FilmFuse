@@ -8,7 +8,8 @@ from app.core.limits import BodySizeLimitMiddleware
 
 
 def create_app() -> FastAPI:
-    # Fail fast at startup if ML_INTERNAL_KEY is missing outside ENV=local.
+    # Fail fast at startup if ML_INTERNAL_KEY is missing, or shorter than 32 characters,
+    # outside ENV=local.
     settings = get_settings()
     docs = settings.docs_enabled
     app = FastAPI(

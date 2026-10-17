@@ -66,6 +66,12 @@ describe('validateGroupForm', () => {
     expect(validateGroupForm(` ${'x'.repeat(40)} `, [])).toEqual({});
   });
 
+  it('rejects control and bidi characters in the name, like the server', () => {
+    expect(validateGroupForm('Club\u202E', []).name).toMatch(/invisible formatting/);
+    expect(validateGroupForm('Two\nlines', []).name).toMatch(/control characters/);
+    expect(validateGroupForm('Zoë’s club 🎬', [])).toEqual({});
+  });
+
   it('allows at most 19 other members', () => {
     const ids = (n: number) => Array.from({ length: n }, (_, i) => `u${i}`);
     expect(validateGroupForm('Club', ids(19))).toEqual({});

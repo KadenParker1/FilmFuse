@@ -2,6 +2,7 @@ package com.pm.filmfuse.user.service;
 
 import com.pm.filmfuse.common.exception.ConflictException;
 import com.pm.filmfuse.common.exception.ForbiddenException;
+import com.pm.filmfuse.common.validation.SafeTextValidator;
 import com.pm.filmfuse.user.dto.ProfileResponseDTO;
 import com.pm.filmfuse.user.dto.UpdateProfileRequestDTO;
 import com.pm.filmfuse.user.dto.UsernameAvailabilityDTO;
@@ -112,14 +113,19 @@ public class ProfileService {
         return email == null || email.isBlank() ? null : email.trim();
     }
 
-    /** Google / Apple sign-in put the person's name in {@code user_metadata}; a sensible default. */
+    /**
+     * Google / Apple sign-in put the person's name in {@code user_metadata}; a sensible default.
+     * {@code user_metadata} is user-editable, so a name that would fail {@code @SafeText} is dropped
+     * rather than stored (SECURITY.md #19).
+     */
     private static String displayNameFrom(Jwt jwt) {
         Object metadata = jwt.getClaims().get("user_metadata");
         if (metadata instanceof Map<?, ?> map) {
             for (String key : new String[] {"full_name", "name"}) {
                 if (map.get(key) instanceof String name && !name.isBlank()) {
                     String trimmed = name.trim();
-                    return trimmed.length() > DISPLAY_NAME_MAX ? trimmed.substring(0, DISPLAY_NAME_MAX) : trimmed;
+                    String capped = trimmed.length() > DISPLAY_NAME_MAX ? trimmed.substring(0, DISPLAY_NAME_MAX) : trimmed;
+                    return SafeTextValidator.isSafe(capped, false) ? capped : null;
                 }
             }
         }

@@ -12,7 +12,7 @@ export interface ErrorResponseDTO {
 }
 
 /** com.pm.filmfuse.user.model.AccountStatus */
-export type AccountStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING_VERIFICATION';
+export type AccountStatus = 'ACTIVE' | 'SUSPENDED';
 
 /** com.pm.filmfuse.user.dto.ProfileResponseDTO */
 export interface ProfileResponseDTO {
@@ -259,6 +259,7 @@ export interface GroupSummaryDTO {
   memberStatus: MemberStatus;
   /** Active members only. */
   memberCount: number;
+  /** Up to 5 active members, leaving out anyone blocked either way with the viewer. */
   memberPreview: UserSummaryDTO[];
   lastSessionAt: string | null;
 }
@@ -272,6 +273,11 @@ export interface GroupDetailDTO {
   ownerId: string;
   role: GroupRole;
   memberStatus: MemberStatus;
+  /** Every ACTIVE member. */
+  memberCount: number;
+  /** Every INVITED member. */
+  invitedCount: number;
+  /** Leaves out anyone blocked either way with the viewer, so it can be shorter than the counts. */
   members: GroupMemberDTO[];
   comfortCap: ComfortCapDTO;
   effectiveFilter: EffectiveFilterDTO;
@@ -346,11 +352,17 @@ export interface SessionDTO {
   id: string;
   groupId: string | null;
   groupName: string | null;
-  createdBy: UserSummaryDTO;
+  /** null once the creator deleted their account, or when blocked either way with the viewer. */
+  createdBy: UserSummaryDTO | null;
   status: SessionStatus;
   strategy: Strategy;
   filters: SessionFiltersDTO;
   effectiveFilter: EffectiveFilterDTO;
+  /** Every member, including any left out of `members`. */
+  memberCount: number;
+  /** Members who have voted on any result, including any left out of `members`. */
+  votedCount: number;
+  /** Leaves out anyone blocked either way with the viewer (and their `memberScores` entries). */
   members: SessionMemberDTO[];
   results: SessionResultDTO[];
   pickedMovie: MovieSummaryDTO | null;

@@ -23,3 +23,14 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {"bio": "paste-more-than-65536-characters-here"}
+
+### Control / bidi characters in names and free text -> 400 with fieldErrors
+# {"message": "Validation failed",
+#  "fieldErrors": {"displayName": "Cannot contain control characters or invisible formatting characters"}}
+# Same for bio, group name/emoji, rating notes, comment bodies and report details (line feeds are
+# allowed in the multi-line ones). U+202E is a right-to-left override.
+PATCH {{baseUrl}}/api/v1/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"displayName": "Ada\u202Eecalevol"}

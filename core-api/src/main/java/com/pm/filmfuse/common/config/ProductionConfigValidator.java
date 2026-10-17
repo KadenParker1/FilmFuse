@@ -22,6 +22,9 @@ import org.springframework.stereotype.Component;
 @Profile("prod")
 public class ProductionConfigValidator {
 
+    /** The ML service refuses a shorter key outside ENV=local too (SECURITY.md #20). */
+    static final int MIN_ML_INTERNAL_KEY_LENGTH = 32;
+
     public ProductionConfigValidator(Environment environment) {
         List<String> problems = problems(environment);
         if (!problems.isEmpty()) {
@@ -61,8 +64,13 @@ public class ProductionConfigValidator {
             }
         }
 
-        if (!isBlank(get(env, "filmfuse.ml.base-url")) && isBlank(get(env, "filmfuse.ml.internal-key"))) {
-            problems.add("filmfuse.ml.internal-key must be set when filmfuse.ml.base-url is");
+        if (!isBlank(get(env, "filmfuse.ml.base-url"))) {
+            String key = trim(get(env, "filmfuse.ml.internal-key"));
+            if (isBlank(key)) {
+                problems.add("filmfuse.ml.internal-key must be set when filmfuse.ml.base-url is");
+            } else if (key.length() < MIN_ML_INTERNAL_KEY_LENGTH) {
+                problems.add("filmfuse.ml.internal-key must be at least " + MIN_ML_INTERNAL_KEY_LENGTH + " characters");
+            }
         }
         if ("smtp".equalsIgnoreCase(trim(get(env, "filmfuse.email.provider")))
                 && isBlank(get(env, "spring.mail.password"))) {

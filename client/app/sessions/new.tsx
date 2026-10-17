@@ -47,9 +47,9 @@ function GroupHeader({ groupId }: { groupId: string }) {
         {groupEmoji(group.data.emoji)} {group.data.name}
       </Heading>
       <View className="flex-row items-center gap-3">
-        <AvatarStack users={active.map((m) => m.user)} total={active.length} />
+        <AvatarStack users={active.map((m) => m.user)} total={group.data.memberCount} />
         <Body muted className="text-sm">
-          {pluralize(active.length, 'member')}
+          {pluralize(group.data.memberCount, 'member')}
         </Body>
       </View>
       <FilterBanner filter={group.data.effectiveFilter} />

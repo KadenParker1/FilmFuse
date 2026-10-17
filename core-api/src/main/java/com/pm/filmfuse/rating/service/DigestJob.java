@@ -1,5 +1,6 @@
 package com.pm.filmfuse.rating.service;
 
+import com.pm.filmfuse.email.MailErrors;
 import com.pm.filmfuse.movie.dto.MovieSummaryDTO;
 import com.pm.filmfuse.movie.service.MovieSummaries;
 import com.pm.filmfuse.rating.model.FeedEntry;
@@ -65,7 +66,7 @@ public class DigestJob {
                     sent++;
                 }
             } catch (RuntimeException ex) {
-                log.warn("Weekly digest failed for user {}", userId, ex);
+                log.warn("Weekly digest failed for user {}: {}", userId, MailErrors.describe(ex));
             }
         }
         log.info("Weekly digest: {} opted in, {} sent", recipients.size(), sent);

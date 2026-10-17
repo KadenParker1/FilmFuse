@@ -11,15 +11,27 @@ function joinNames(names: string[]): string {
   return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]} have`;
 }
 
-/** Everyone in the session with a tick once they've voted, plus a hint about missing taste profiles. */
-export function SessionMembersRow({ members }: { members: SessionMemberDTO[] }) {
+/**
+ * Everyone in the session the viewer can see, with a tick once they've voted, plus a hint about
+ * missing taste profiles. The "x of y voted" line uses the server's counts, which include members
+ * left out of `members` because they are blocked either way with the viewer.
+ */
+export function SessionMembersRow({
+  members,
+  memberCount = members.length,
+  votedCount,
+}: {
+  members: SessionMemberDTO[];
+  memberCount?: number;
+  votedCount?: number;
+}) {
   const { colors } = useTheme();
   const noVector = members.filter((m) => !m.hasVector).map((m) => personName(m.user));
-  const voted = members.filter((m) => m.voted).length;
+  const voted = votedCount ?? members.filter((m) => m.voted).length;
   return (
     <View className="gap-2">
       <Text className="font-body-semibold text-sm text-text-muted">
-        {voted} of {members.length} voted
+        {voted} of {memberCount} voted
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-3">
         {members.map((m) => {

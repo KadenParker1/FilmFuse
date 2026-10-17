@@ -11,6 +11,7 @@ import {
   useDeleteComment,
 } from '../../api/comments';
 import { ApiError } from '../../lib/apiClient';
+import { UNSAFE_TEXT_MESSAGE, isSafeText } from '../../lib/safeText';
 import { personName, timeAgo } from '../../lib/format';
 import { useTheme } from '../../theme/useTheme';
 import type { CommentDTO } from '../../types/api';
@@ -22,6 +23,7 @@ export function validateComment(draft: string): string | null {
   const trimmed = draft.trim();
   if (!trimmed) return 'Write something first.';
   if (trimmed.length > COMMENT_MAX) return `Keep it under ${COMMENT_MAX} characters.`;
+  if (!isSafeText(trimmed, true)) return UNSAFE_TEXT_MESSAGE;
   return null;
 }
 

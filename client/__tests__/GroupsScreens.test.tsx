@@ -309,6 +309,8 @@ describe('GroupScreen', () => {
     show(
       makeGroup({
         role: 'MEMBER',
+        memberCount: 2,
+        invitedCount: 0,
         members: [makeGroupMember({ id: 'u1' }, { role: 'OWNER' }), makeGroupMember({ id: 'f0', displayName: 'Friend 0' })],
       }),
     );
@@ -327,10 +329,21 @@ describe('GroupScreen', () => {
   it('a full group says so', async () => {
     show(
       makeGroup({
+        memberCount: 20,
+        invitedCount: 0,
         members: Array.from({ length: 20 }, (_, i) => makeGroupMember({ id: `x${i}` })),
       }),
     );
     await render(<GroupScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Invite friends' }));
+    expect(screen.getByText('This group is full (20 people).')).toBeOnTheScreen();
+  });
+
+  it('counts members hidden from the viewer (blocked either way) for room and the member count', async () => {
+    // 18 active + 2 invited on the server, but only 2 of them are visible to this viewer.
+    show(makeGroup({ memberCount: 18, invitedCount: 2 }));
+    await render(<GroupScreen />);
+    expect(screen.getByText('18 members')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Invite friends' }));
     expect(screen.getByText('This group is full (20 people).')).toBeOnTheScreen();
   });

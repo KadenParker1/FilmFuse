@@ -1,5 +1,6 @@
 package com.pm.filmfuse.rating.dto;
 
+import com.pm.filmfuse.common.validation.SafeText;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -18,10 +19,15 @@ public record UpsertRatingDTO(
         Integer score,
 
         @Size(max = 1000, message = "A note cannot exceed 1000 characters")
+        @SafeText(multiline = true)
         String body,
 
         Boolean containsSpoilers,
         RatingVisibility visibility,
         LocalDate watchedOn,
         RatingSource source) {
+
+    public UpsertRatingDTO {
+        body = body == null ? null : body.replace("\r\n", "\n");
+    }
 }

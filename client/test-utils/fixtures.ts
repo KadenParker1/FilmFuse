@@ -162,6 +162,8 @@ export const makeGroup = (overrides: Partial<GroupDetailDTO> = {}): GroupDetailD
   ownerId: 'u1',
   role: 'OWNER',
   memberStatus: 'ACTIVE',
+  memberCount: 2,
+  invitedCount: 1,
   members: [
     makeGroupMember({ id: 'u1', displayName: 'Ada Lovelace', username: 'ada', friendship: 'NONE' }, { role: 'OWNER' }),
     makeGroupMember(),
@@ -204,6 +206,8 @@ export const makeSession = (overrides: Partial<SessionDTO> = {}): SessionDTO => 
   strategy: 'MEAN',
   filters: {},
   effectiveFilter: makeEffectiveFilter(),
+  memberCount: 2,
+  votedCount: 1,
   members: [
     makeSessionMember({ id: 'u1', displayName: 'Ada Lovelace', username: 'ada' }),
     makeSessionMember({}, { voted: true }),

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { Image } from 'expo-image';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSessionLive } from '../../api/sessionLive';
@@ -170,7 +170,7 @@ function SessionView({ session, mode }: { session: SessionDTO; mode: LiveMode })
         </Body>
       </View>
       <FilterBanner filter={session.effectiveFilter} />
-      <SessionMembersRow members={session.members} />
+      <SessionMembersRow members={session.members} memberCount={session.memberCount} votedCount={session.votedCount} />
 
       {session.status === 'DECIDED' && session.pickedMovie ? <DecidedHero movie={session.pickedMovie} /> : null}
 
@@ -204,7 +204,8 @@ export default function SessionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const session = useSession(id);
   const { mode } = useSessionLive(id);
-  const fallback = session.data?.groupId ? `/groups/${session.data.groupId}` : '/groups';
+  const groupId = session.data?.groupId;
+  const fallback: Href = groupId ? `/groups/${groupId}` : '/groups';
 
   let content;
   if (session.isPending) {

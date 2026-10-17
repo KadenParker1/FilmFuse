@@ -111,6 +111,14 @@ describe('FuseMeter', () => {
     expect(new Set(segs.map((s) => s.color)).size).toBe(3);
   });
 
+  it('ignores scores for people not in the visible member list (hidden for a block)', () => {
+    const segs = fuseSegments(members.slice(0, 2), { u1: 6, u2: 2, hidden: 8 });
+    expect(segs.map((s) => [s.user.id, s.share])).toEqual([
+      ['u1', 0.75],
+      ['u2', 0.25],
+    ]);
+  });
+
   it('skips members without a positive score', () => {
     expect(fuseSegments(members, { u1: 5, u2: 0 }).map((s) => [s.user.id, s.share])).toEqual([['u1', 1]]);
     expect(fuseSegments(members, {})).toEqual([]);
@@ -171,6 +179,11 @@ describe('SessionMembersRow', () => {
     expect(screen.getByLabelText('Grace Hopper, has voted')).toBeOnTheScreen();
     expect(screen.getByLabelText('Alan Turing, hasn’t voted yet, no taste profile yet')).toBeOnTheScreen();
     expect(screen.getByTestId('no-vector-hint')).toHaveTextContent(/^Alan Turing has no taste profile yet/);
+  });
+
+  it('uses the server counts, which include members hidden from the viewer', async () => {
+    await render(<SessionMembersRow members={members} memberCount={4} votedCount={2} />);
+    expect(screen.getByText('2 of 4 voted')).toBeOnTheScreen();
   });
 
   it('joins several names and hides the hint when everyone has a profile', async () => {

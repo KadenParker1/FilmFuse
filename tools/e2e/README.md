@@ -28,3 +28,12 @@ ANON_KEY="$ANON_KEY" MEMBER_EMAIL=... SESSION_ID=... node tools/e2e/realtime-smo
 Bugs these have caught so far (2026-10-17):
 - **ML calls failed with 422.** The JDK HTTP client's HTTP/2 upgrade made uvicorn drop request bodies. Fixed by pinning HTTP/1.1 in `RestClients`.
 - **Capped groups got empty sessions.** List endpoints never cached certifications, so groups with a certification cap got zero results. Fixed by catalog certification enrichment.
+
+## Local browser test accounts
+Throwaway accounts that exist only in the local Supabase stack (`supabase start`), used for manual and
+Claude-in-Chrome browser runs against `http://localhost:8081`. Reset with `supabase db reset`.
+
+| Email | Password |
+|---|---|
+| browser-a@filmfuse.test | ff-local-7de477aeae5b |
+| browser-b@filmfuse.test | ff-local-7de477aeae5b |

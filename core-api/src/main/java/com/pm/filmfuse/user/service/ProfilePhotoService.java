@@ -27,6 +27,7 @@ public class ProfilePhotoService {
     /** Supabase Storage's signed-upload lifetime (storage-api default; the sign endpoint takes no expiry). */
     public static final int UPLOAD_URL_TTL_SECONDS = 7200;
     static final String INVALID_PATH = "That is not a photo path issued to you.";
+    static final String NOT_UPLOADED = "Upload the photo before confirming it.";
 
     private final ProfileRepository profileRepository;
     private final StorageGateway storageGateway;
@@ -44,11 +45,15 @@ public class ProfilePhotoService {
 
     /**
      * Points the profile at an uploaded photo and deletes the previous one (best-effort). The path
-     * must be one this endpoint could have issued to the caller - never another user's folder.
+     * must be one this endpoint could have issued to the caller - never another user's folder - and
+     * the object must exist in storage (SECURITY.md #22), so a profile never points at nothing.
      */
     public ProfileResponseDTO confirm(Profile profile, String path) {
         if (path == null || !ownPhotoPath(profile.getId()).matcher(path).matches()) {
             throw new BadRequestException(INVALID_PATH);
+        }
+        if (!storageGateway.exists(BUCKET, path)) {
+            throw new BadRequestException(NOT_UPLOADED);
         }
         String previousPath = storagePathOf(profile.getProfileImageUrl());
         profile.setProfileImageUrl(storageGateway.publicUrl(BUCKET, path));

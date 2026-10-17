@@ -198,6 +198,8 @@ describe('group mutations', () => {
       'u1',
       'u3',
     ]);
+    expect(client.getQueryData<GroupDetailDTO>(queryKeys.group('g1'))?.memberCount).toBe(1);
+    expect(client.getQueryData<GroupDetailDTO>(queryKeys.group('g1'))?.invitedCount).toBe(1);
     expect(isInvalidated(client, queryKeys.group('g1'))).toBe(true);
     expect(isInvalidated(client, queryKeys.groupList)).toBe(true);
     expect(listIds(client)).toEqual(['g1', 'g2']);
