@@ -17,6 +17,9 @@ public class MlServiceClient {
 
     public static final String INTERNAL_KEY_HEADER = "X-Internal-Key";
     static final String GROUP_RECOMMENDATIONS = "/internal/group-recommendations";
+    static final String USER_VECTORS = "/internal/user-vectors";
+    static final String USER_RECOMMENDATIONS = "/internal/user-recommendations";
+    static final String CALIBRATION_CANDIDATES = "/internal/calibration-candidates";
 
     private final RestClient restClient;
     private final boolean configured;
@@ -62,6 +65,49 @@ public class MlServiceClient {
             throw new MlServiceException("ML service returned no results body");
         }
         return response.results();
+    }
+
+    /** {@code POST /internal/user-vectors}; a response without an interpretable vector is an {@link MlServiceException}. */
+    public MlUserVectorResponse userVector(MlUserVectorRequest request) {
+        MlUserVectorResponse response = post(USER_VECTORS, request, MlUserVectorResponse.class);
+        if (response == null || response.vector() == null || response.vector().interpretable() == null
+                || response.vector().interpretable().isEmpty() || response.modelVersion() == null
+                || response.modelVersion().isBlank()) {
+            throw new MlServiceException("ML service returned no usable vector");
+        }
+        return response;
+    }
+
+    /** {@code POST /internal/user-recommendations}; the results in the ML service's order. */
+    public List<MlUserRecommendation> userRecommendations(MlUserRecommendationRequest request) {
+        MlUserRecommendationResponse response = post(USER_RECOMMENDATIONS, request, MlUserRecommendationResponse.class);
+        if (response == null || response.results() == null) {
+            throw new MlServiceException("ML service returned no results body");
+        }
+        return response.results();
+    }
+
+    /** {@code POST /internal/calibration-candidates}; movie ids in the ML service's order. */
+    public List<Integer> calibrationCandidates(MlCalibrationCandidatesRequest request) {
+        MlCalibrationCandidatesResponse response = post(CALIBRATION_CANDIDATES, request,
+                MlCalibrationCandidatesResponse.class);
+        if (response == null || response.movieIds() == null) {
+            throw new MlServiceException("ML service returned no movieIds body");
+        }
+        return response.movieIds();
+    }
+
+    private <T> T post(String path, Object body, Class<T> responseType) {
+        if (!configured) {
+            throw new MlServiceException("ML_SERVICE_URL is not set");
+        }
+        return call(() -> restClient.post()
+                .uri(path)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .body(responseType));
     }
 
     private static <T> T call(Supplier<T> request) {

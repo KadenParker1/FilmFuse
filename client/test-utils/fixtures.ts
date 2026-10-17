@@ -6,7 +6,13 @@ import type {
   GroupMemberDTO,
   GroupSummaryDTO,
   MovieSummaryDTO,
+  OnboardingStateDTO,
+  RatingDTO,
+  RecommendationDTO,
   SessionDTO,
+  TasteDimensionDTO,
+  TasteHistoryEntryDTO,
+  TasteProfileDTO,
   SessionMemberDTO,
   SessionResultDTO,
   SessionSummaryDTO,
@@ -204,5 +210,74 @@ export const makeSession = (overrides: Partial<SessionDTO> = {}): SessionDTO => 
   ],
   pickedMovie: null,
   createdAt: '2026-10-16T19:00:00Z',
+  ...overrides,
+});
+
+// ---- Phase 1b: onboarding, ratings, taste, "For you" -------------------------------------------
+
+export const makeOnboardingState = (overrides: Partial<OnboardingStateDTO> = {}): OnboardingStateDTO => ({
+  step: 1,
+  completed: false,
+  genrePrefs: [],
+  moodPrefs: [],
+  favorites: [],
+  calibrationRatedCount: 0,
+  comfort: makeComfort(),
+  ...overrides,
+});
+
+export const makeRating = (overrides: Partial<RatingDTO> = {}): RatingDTO => ({
+  id: 'r1',
+  movie: makeMovie(),
+  score: 8,
+  body: null,
+  containsSpoilers: false,
+  visibility: 'FRIENDS',
+  source: 'QUICK_RATE',
+  watchedOn: null,
+  createdAt: '2026-10-10T20:00:00Z',
+  updatedAt: '2026-10-10T20:00:00Z',
+  ...overrides,
+});
+
+export const makeDimension = (overrides: Partial<TasteDimensionDTO> = {}): TasteDimensionDTO => ({
+  key: 'genre:878',
+  label: 'Science Fiction',
+  stated: 8,
+  learned: 7.4,
+  ...overrides,
+});
+
+export const makeTasteProfile = (overrides: Partial<TasteProfileDTO> = {}): TasteProfileDTO => ({
+  status: 'FRESH',
+  updatedAt: '2026-10-15T00:00:00Z',
+  modelVersion: 'fallback-0',
+  persona: 'Cozy Sci-Fi Romantic',
+  topGenres: [makeDimension()],
+  dimensions: [
+    makeDimension(),
+    makeDimension({ key: 'genre:27', label: 'Horror', stated: 4, learned: 7 }),
+    makeDimension({ key: 'genre:35', label: 'Comedy', stated: null, learned: null }),
+    makeDimension({ key: 'mood:cozy', label: 'Cozy', stated: 6, learned: 6.5 }),
+    makeDimension({ key: 'mood:dark-gritty', label: 'Dark & gritty', stated: null, learned: 3.2 }),
+  ],
+  ratingsCount: 12,
+  ...overrides,
+});
+
+export const makeHistoryEntry = (overrides: Partial<TasteHistoryEntryDTO> = {}): TasteHistoryEntryDTO => ({
+  version: 1,
+  reason: 'ONBOARDING',
+  modelVersion: 'fallback-0',
+  createdAt: '2026-10-15T00:00:00Z',
+  topGenres: [makeDimension()],
+  ...overrides,
+});
+
+export const makeRecommendation = (overrides: Partial<RecommendationDTO> = {}): RecommendationDTO => ({
+  movie: makeMovie(),
+  certification: 'R',
+  score: 8.1,
+  explanation: 'Because you love crime thrillers',
   ...overrides,
 });

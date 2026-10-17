@@ -17,6 +17,7 @@ import { AuthProvider } from '../auth/AuthProvider';
 import { useAuth } from '../auth/useAuth';
 import { ThemeRoot } from '../components/ThemeRoot';
 import { FullScreenLoader } from '../components/FullScreenLoader';
+import { QuickRateProvider } from '../components/rating/QuickRateProvider';
 import { useScheme } from '../theme/useTheme';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {
@@ -43,7 +44,9 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeRoot>
-          <RootNavigator />
+          <QuickRateProvider>
+            <RootNavigator />
+          </QuickRateProvider>
         </ThemeRoot>
       </AuthProvider>
     </QueryClientProvider>
@@ -77,6 +80,9 @@ function RootNavigator() {
           <Stack.Screen name="groups/[id]" />
           <Stack.Screen name="sessions/new" />
           <Stack.Screen name="sessions/[id]" />
+          <Stack.Screen name="taste/index" />
+          <Stack.Screen name="taste/history" />
+          <Stack.Screen name="taste/recalibrate" />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn} redirectTo="/">
           <Stack.Screen name="(auth)" />

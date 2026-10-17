@@ -1,0 +1,23 @@
+### FilmFuse core-api - personal "For you". Token: see me.http.
+# Ranked by python-ml-service from your vector (or popularity until you have one / when it is down),
+# within movies that pass your comfort settings, never anything you rated, skipped or dismissed.
+# Cached per vector version; a rebuild refreshes it.
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+
+### First page (20)
+GET {{baseUrl}}/api/v1/me/recommendations
+Authorization: Bearer {{token}}
+
+### Next page: pass nextCursor
+GET {{baseUrl}}/api/v1/me/recommendations?cursor=paste-next-cursor
+Authorization: Bearer {{token}}
+
+### Not interested (204, idempotent; a weak negative taste signal)
+POST {{baseUrl}}/api/v1/me/recommendations/550/dismiss
+Authorization: Bearer {{token}}
+
+### Recalibrate: next swipe posters (count 1-30, default 10)
+GET {{baseUrl}}/api/v1/me/calibration/next
+Authorization: Bearer {{token}}

@@ -1,17 +1,25 @@
 jest.mock('expo-router', () => require('../test-utils/router').expoRouterMock);
 jest.mock('../api/movies', () => ({ ...jest.requireActual('../api/movies'), useMovie: jest.fn() }));
+jest.mock('../api/ratings', () => ({ ...jest.requireActual('../api/ratings'), useMyRating: jest.fn() }));
+const mockOpenQuickRate = jest.fn();
+jest.mock('../components/rating/QuickRateProvider', () => ({
+  useQuickRate: () => ({ openQuickRate: mockOpenQuickRate, openRatePicker: jest.fn(), showTasteUpdating: jest.fn() }),
+}));
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import MovieScreen from '../app/movie/[id]';
 import { useMovie } from '../api/movies';
+import { useMyRating } from '../api/ratings';
 import { TMDB_ATTRIBUTION } from '../components/TmdbAttribution';
 import { ApiError, NetworkError } from '../lib/apiClient';
 import { formatRuntime } from '../lib/format';
+import { makeRating } from '../test-utils/fixtures';
 import { queryResult } from '../test-utils/queryResults';
 import { routerState } from '../test-utils/router';
 import type { MovieDetailDTO } from '../types/api';
 
 const mockUseMovie = useMovie as jest.Mock;
+const mockUseMyRating = useMyRating as jest.Mock;
 
 const dune: MovieDetailDTO = {
   id: 438631,
@@ -33,6 +41,8 @@ beforeEach(() => {
   routerState.reset();
   routerState.params = { id: '438631' };
   mockUseMovie.mockReturnValue(queryResult({ data: dune }));
+  mockUseMyRating.mockReturnValue(queryResult({ data: null, isPending: false, isSuccess: true }));
+  mockOpenQuickRate.mockClear();
 });
 
 describe('formatRuntime', () => {
@@ -58,11 +68,28 @@ describe('MovieScreen', () => {
     expect(screen.getByText(TMDB_ATTRIBUTION)).toBeOnTheScreen();
   });
 
-  it('shows Rate and Add to watchlist as disabled Phase 1b buttons', async () => {
+  it('opens the quick-rate sheet on this movie from Rate; watchlist stays disabled', async () => {
     await render(<MovieScreen />);
-    expect(screen.getByRole('button', { name: 'Rate' })).toBeDisabled();
+    expect(mockUseMyRating).toHaveBeenCalledWith(438631);
     expect(screen.getByRole('button', { name: 'Add to watchlist' })).toBeDisabled();
-    expect(screen.getByText(/Phase 1b/)).toBeOnTheScreen();
+    expect(screen.queryByTestId('my-rating')).toBeNull();
+    await fireEvent.press(screen.getByRole('button', { name: 'Rate' }));
+    expect(mockOpenQuickRate).toHaveBeenCalledWith({
+      id: 438631,
+      title: 'Dune',
+      releaseYear: 2021,
+      posterUrl: dune.posterUrl,
+      genreIds: [878, 12],
+      voteAverage: 7.8,
+    });
+  });
+
+  it('shows "Your rating 8/10" and Edit rating once rated', async () => {
+    mockUseMyRating.mockReturnValue(queryResult({ data: makeRating({ score: 8 }) }));
+    await render(<MovieScreen />);
+    expect(screen.getByTestId('my-rating')).toHaveTextContent('Your rating 8/10');
+    await fireEvent.press(screen.getByRole('button', { name: 'Edit rating' }));
+    expect(mockOpenQuickRate).toHaveBeenCalledTimes(1);
   });
 
   it('handles missing optional fields', async () => {

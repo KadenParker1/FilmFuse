@@ -1,0 +1,82 @@
+### FilmFuse core-api - onboarding (8 resumable steps) and stated taste preferences
+# Token: see me.http. Every score is an integer 1-10. Each preference PUT replaces the whole list
+# and marks the taste vector dirty (rebuilt by VectorRefreshScheduler ~10-25 s later).
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+
+### Mood tags, fixed vector order (use these slugs in /me/preferences/moods)
+GET {{baseUrl}}/api/v1/moods
+Authorization: Bearer {{token}}
+
+### Everything saved so far (resume here)
+GET {{baseUrl}}/api/v1/me/onboarding
+Authorization: Bearer {{token}}
+
+### Record progress (0-8; a lower step is ignored)
+PUT {{baseUrl}}/api/v1/me/onboarding/step
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"step": 2}
+
+### Step 2 - genre scores (TMDB genre ids; completion needs 5+, with 3+ of them 8+)
+PUT {{baseUrl}}/api/v1/me/preferences/genres
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[
+  {"genreId": 878, "score": 9},
+  {"genreId": 10749, "score": 8},
+  {"genreId": 28, "score": 8},
+  {"genreId": 27, "score": 2},
+  {"genreId": 35, "score": 6}
+]
+
+### Step 3 - all-time favourites (0-10, unique movies and ranks; completion needs 3+)
+PUT {{baseUrl}}/api/v1/me/preferences/favorites
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[
+  {"movieId": 603, "rank": 1},
+  {"movieId": 27205, "rank": 2},
+  {"movieId": 129, "rank": 3}
+]
+
+### Step 4 - calibration deck (popular, genre-diverse; never rated / unseen / favourites; comfort-filtered)
+GET {{baseUrl}}/api/v1/me/calibration/next?count=20
+Authorization: Bearer {{token}}
+
+### Step 4 - calibration swipes (1-50; exactly one of score or unseen=true; always PRIVATE)
+POST {{baseUrl}}/api/v1/me/ratings/batch
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[
+  {"movieId": 278, "score": 9, "unseen": false},
+  {"movieId": 238, "score": null, "unseen": true}
+]
+
+### Step 5 - vibes
+PUT {{baseUrl}}/api/v1/me/preferences/moods
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[
+  {"moodTag": "mind-bending", "score": 9},
+  {"moodTag": "cozy", "score": 7}
+]
+
+### Step 6 - comfort settings: see comfort.http (PUT /me/settings/comfort)
+
+### Step 8 - complete (400 until username + genres + favourites qualify; builds the first vector now)
+POST {{baseUrl}}/api/v1/me/onboarding/complete
+Authorization: Bearer {{token}}
+
+### Unknown mood -> 400
+PUT {{baseUrl}}/api/v1/me/preferences/moods
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[{"moodTag": "spooky", "score": 5}]

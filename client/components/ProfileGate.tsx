@@ -6,10 +6,11 @@ import { useAuth } from '../auth/useAuth';
 import { ApiError } from '../lib/apiClient';
 import { Body, Button, EmptyState, Screen } from './ui';
 import { FullScreenLoader } from './FullScreenLoader';
+import { onboardingPath } from './onboarding/steps';
 
 /**
  * The RequireOnboarding guard: loads `/me` (which provisions the profile on first call) and sends
- * anyone who hasn't finished onboarding there. If core-api can't be reached it shows a retry state
+ * anyone who hasn't finished onboarding to their saved step. If core-api can't be reached it shows a retry state
  * instead of crashing, with an escape hatch so the shell is still usable while the backend is down.
  */
 export function ProfileGate({ children }: { children: ReactNode }) {
@@ -41,7 +42,8 @@ export function ProfileGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (me.data && !me.data.onboardingCompletedAt) return <Redirect href="/onboarding" />;
+  // Resume where they left off (the server's step; 0 = not started → step 1).
+  if (me.data && !me.data.onboardingCompletedAt) return <Redirect href={onboardingPath(me.data.onboardingStep)} />;
 
   return <>{children}</>;
 }

@@ -53,7 +53,7 @@ describe('ProfileGate', () => {
         <Onboarding />
       </>,
     );
-    await waitFor(() => expect(screen.getByTestId('redirect')).toHaveTextContent('/onboarding'));
+    await waitFor(() => expect(screen.getByTestId('redirect')).toHaveTextContent('/onboarding/1'));
     expect(screen.queryByText('tabs')).toBeNull();
 
     fetchMock.mockResolvedValueOnce(jsonResponse(200, done));
@@ -65,6 +65,25 @@ describe('ProfileGate', () => {
 
     await waitFor(() => expect(screen.getByText('tabs')).toBeOnTheScreen());
     expect(screen.queryByTestId('redirect')).toBeNull();
+  });
+
+  it.each([
+    [0, '/onboarding/1'],
+    [1, '/onboarding/1'],
+    [4, '/onboarding/4'],
+    [8, '/onboarding/8'],
+    [12, '/onboarding/8'],
+  ])('resumes a profile saved at step %p on %p', async (step, href) => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(200, { ...pending, onboardingStep: step }));
+    await renderWithClient(gate);
+    await waitFor(() => expect(screen.getByTestId('redirect')).toHaveTextContent(href));
+    expect(screen.queryByText('tabs')).toBeNull();
+  });
+
+  it('lets an interim user who completed without taste prefs through', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(200, { ...done, onboardingStep: 0 }));
+    await renderWithClient(gate);
+    await waitFor(() => expect(screen.getByText('tabs')).toBeOnTheScreen());
   });
 
   it('renders the app for an onboarded profile', async () => {
@@ -85,7 +104,7 @@ describe('ProfileGate', () => {
 
     fetchMock.mockResolvedValueOnce(jsonResponse(200, pending));
     await fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
-    await waitFor(() => expect(screen.getByTestId('redirect')).toHaveTextContent('/onboarding'));
+    await waitFor(() => expect(screen.getByTestId('redirect')).toHaveTextContent('/onboarding/1'));
   });
 
   it('"Continue anyway" bypasses a failing /me', async () => {

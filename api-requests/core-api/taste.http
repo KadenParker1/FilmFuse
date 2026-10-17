@@ -1,0 +1,22 @@
+### FilmFuse core-api - taste profile and vector history. Token: see me.http.
+# status: NONE (no vector) | FRESH | REBUILDING (a newer taste signal is waiting; ~10-25 s).
+# dimensions: every genre then every mood in the fixed vector order; stated = your sliders,
+# learned = the vector's interpretable value (1 decimal). persona is cosmetic.
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+
+### Taste profile
+GET {{baseUrl}}/api/v1/me/taste-profile
+Authorization: Bearer {{token}}
+
+### How your taste changed: built versions, newest first (limit 1-50, default 20)
+GET {{baseUrl}}/api/v1/me/taste/history?limit=10
+Authorization: Bearer {{token}}
+
+### Taste editor: the sliders edit stated prefs through the same PUTs as onboarding (see onboarding.http)
+PUT {{baseUrl}}/api/v1/me/preferences/genres
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[{"genreId": 27, "score": 7}]

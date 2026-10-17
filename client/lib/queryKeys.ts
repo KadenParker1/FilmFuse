@@ -10,6 +10,9 @@ const friendSuggestionsAll = [...social, 'suggestions'] as const;
 const groups = ['groups'] as const;
 const sessions = ['sessions'] as const;
 const sessionListAll = [...sessions, 'list'] as const;
+const ratings = ['ratings'] as const;
+const taste = ['taste'] as const;
+const calibration = ['calibration'] as const;
 
 export const queryKeys = {
   /** The signed-in user's own profile (GET /me). */
@@ -61,4 +64,26 @@ export const queryKeys = {
   sessionListAll,
   /** GET /sessions?groupId= (infinite); null = all of the caller's sessions */
   sessionList: (groupId: string | null) => [...sessionListAll, groupId] as const,
+  /** GET /moods */
+  moods: ['moods'] as const,
+  /** GET /me/onboarding */
+  onboarding: ['onboarding'] as const,
+  /** Every calibration batch (prefix). */
+  calibration,
+  /** GET /me/calibration/next — one deck's `batch`-th batch (`deck` keeps separate decks apart). */
+  calibrationBatch: (deck: string, batch: number) => [...calibration, deck, batch] as const,
+  /** Everything rating related (prefix). */
+  ratings,
+  /** GET /me/ratings (infinite) */
+  myRatings: [...ratings, 'list'] as const,
+  /** GET /me/ratings/{movieId}; null data = not rated */
+  myRating: (movieId: number) => [...ratings, 'movie', movieId] as const,
+  /** Everything taste related (prefix). */
+  taste,
+  /** GET /me/taste-profile */
+  tasteProfile: [...taste, 'profile'] as const,
+  /** GET /me/taste/history?limit= */
+  tasteHistory: (limit: number | null) => [...taste, 'history', limit] as const,
+  /** GET /me/recommendations (infinite) */
+  recommendations: ['recommendations'] as const,
 } as const;

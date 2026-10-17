@@ -1,20 +1,17 @@
 import { useState } from 'react';
-import { Switch, Text, View } from 'react-native';
+import { View } from 'react-native';
 import { useComfortSettings, useUpdateComfortSettings } from '../../api/comfort';
 import { BackButton } from '../../components/BackButton';
-import { CertificationPicker } from '../../components/comfort/CertificationPicker';
-import { ContentLimitsEditor } from '../../components/comfort/ContentLevelPicker';
+import { ComfortFields } from '../../components/comfort/ComfortFields';
 import { GROUP_PRIVACY_NOTE, sameLimits, validateComfort } from '../../components/comfort/comfortCopy';
-import { Body, Button, Card, ErrorState, Heading, Label, Screen, Skeleton, errorMessage } from '../../components/ui';
+import { Body, Button, ErrorState, Heading, Screen, Skeleton, errorMessage } from '../../components/ui';
 import { ApiError } from '../../lib/apiClient';
-import { useTheme } from '../../theme/useTheme';
 import type { ComfortSettingsDTO } from '../../types/api';
 
 const sameSettings = (a: ComfortSettingsDTO, b: ComfortSettingsDTO) =>
   a.maxCertification === b.maxCertification && a.allowUnrated === b.allowUnrated && sameLimits(a.contentLimits, b.contentLimits);
 
 function ComfortForm({ initial }: { initial: ComfortSettingsDTO }) {
-  const { colors } = useTheme();
   const update = useUpdateComfortSettings();
   const [draft, setDraft] = useState<ComfortSettingsDTO>(initial);
   const [saved, setSaved] = useState<ComfortSettingsDTO>(initial);
@@ -56,33 +53,7 @@ function ComfortForm({ initial }: { initial: ComfortSettingsDTO }) {
         say.
       </Body>
 
-      <Card className="gap-4">
-        <CertificationPicker
-          title="Highest rating you’ll watch"
-          value={draft.maxCertification}
-          onChange={(maxCertification) => edit({ maxCertification })}
-        />
-      </Card>
-
-      <Card className="gap-4">
-        <Label accessibilityRole="header">Within that, how much…</Label>
-        <ContentLimitsEditor value={draft.contentLimits} onChange={(contentLimits) => edit({ contentLimits })} />
-      </Card>
-
-      <Card className="flex-row items-center gap-4">
-        <View className="flex-1 gap-1">
-          <Text className="font-body-semibold text-base text-text">Allow movies with unknown ratings</Text>
-          <Body muted className="text-sm">
-            Some movies have no rating or content details. Off keeps them out when you’ve set a limit.
-          </Body>
-        </View>
-        <Switch
-          accessibilityLabel="Allow movies with unknown ratings"
-          value={draft.allowUnrated}
-          onValueChange={(allowUnrated) => edit({ allowUnrated })}
-          trackColor={{ true: colors.gold, false: colors.border }}
-        />
-      </Card>
+      <ComfortFields value={draft} onChange={edit} />
 
       <Body muted testID="comfort-privacy-note" className="text-sm">
         {GROUP_PRIVACY_NOTE}

@@ -17,4 +17,5 @@ export { Skeleton } from './Skeleton';
 export { Slider1to10 } from './Slider1to10';
 export { scoreLabel, clampScore, SCORE_MIN, SCORE_MAX } from './scoreLabel';
 export { TextField } from './TextField';
+export { Toast, type ToastTone } from './Toast';
 export { Body, Heading, Label } from './Text';

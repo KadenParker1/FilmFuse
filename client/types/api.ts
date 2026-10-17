@@ -377,3 +377,140 @@ export interface CastVoteDTO {
 export interface PickMovieDTO {
   movieId: number;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Onboarding, ratings, taste & "For you" (Phase 1b) — com.pm.filmfuse.{user,rating,reco}.dto
+// Every score is an integer 1–10.
+// ---------------------------------------------------------------------------------------------
+
+/** Java enum `RatingSource` — where a score came from. ONBOARDING_SWIPE only via POST /me/ratings/batch. */
+export type RatingSource = 'ONBOARDING_SWIPE' | 'QUICK_RATE' | 'POST_WATCH';
+
+/** Java enum `RatingVisibility` — calibration swipes are always PRIVATE. */
+export type RatingVisibility = 'PRIVATE' | 'FRIENDS' | 'PUBLIC';
+
+/** Java enum `VectorStatus` — NONE = no taste vector yet; REBUILDING = a newer signal is waiting to be applied. */
+export type VectorStatus = 'NONE' | 'FRESH' | 'REBUILDING';
+
+/** Java enum `VectorChangeReason` — why a taste-vector version was built. */
+export type VectorChangeReason = 'ONBOARDING' | 'TASTE_EDIT' | 'RATING' | 'DISMISS' | 'PICK';
+
+/** com.pm.filmfuse.user.dto.MoodDTO — GET /moods, fixed order; `tag` is a slug like "mind-bending". */
+export interface MoodDTO {
+  tag: string;
+  label: string;
+}
+
+/** com.pm.filmfuse.user.dto.GenrePrefDTO — a stated genre preference (TMDB genre id, 1–10). */
+export interface GenrePrefDTO {
+  genreId: number;
+  score: number;
+}
+
+/** com.pm.filmfuse.user.dto.MoodPrefDTO — a stated mood ("vibe") preference (1–10). */
+export interface MoodPrefDTO {
+  moodTag: string;
+  score: number;
+}
+
+/** com.pm.filmfuse.user.dto.FavoriteDTO — PUT /me/preferences/favorites item; ranks start at 1. */
+export interface FavoriteDTO {
+  movieId: number;
+  rank: number;
+}
+
+/** com.pm.filmfuse.user.dto.FavoriteMovieDTO */
+export interface FavoriteMovieDTO {
+  rank: number;
+  movie: MovieSummaryDTO;
+}
+
+/** com.pm.filmfuse.user.dto.OnboardingStateDTO — GET /me/onboarding; everything saved so far (resumable). */
+export interface OnboardingStateDTO {
+  /** 0–8; only ever increases server-side. */
+  step: number;
+  completed: boolean;
+  genrePrefs: GenrePrefDTO[];
+  moodPrefs: MoodPrefDTO[];
+  favorites: FavoriteMovieDTO[];
+  calibrationRatedCount: number;
+  comfort: ComfortSettingsDTO;
+}
+
+/** com.pm.filmfuse.user.dto.UpdateOnboardingStepDTO — step 0–8. */
+export interface UpdateOnboardingStepDTO {
+  step: number;
+}
+
+/** com.pm.filmfuse.rating.dto.CalibrationRatingDTO — exactly one of `score` / `unseen: true`. */
+export interface CalibrationRatingDTO {
+  movieId: number;
+  score: number | null;
+  unseen: boolean;
+}
+
+/** com.pm.filmfuse.rating.dto.RatingDTO — a "review" is a rating with a note and visibility ≠ PRIVATE. */
+export interface RatingDTO {
+  id: string;
+  movie: MovieSummaryDTO;
+  score: number;
+  body: string | null;
+  containsSpoilers: boolean;
+  visibility: RatingVisibility;
+  source: RatingSource;
+  /** ISO date (yyyy-MM-dd). */
+  watchedOn: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** com.pm.filmfuse.rating.dto.UpsertRatingDTO — PUT /ratings/{movieId}; body ≤ 1000 chars. */
+export interface UpsertRatingDTO {
+  score: number;
+  body?: string | null;
+  containsSpoilers?: boolean;
+  /** Defaults to FRIENDS. */
+  visibility?: RatingVisibility;
+  watchedOn?: string | null;
+  /** Defaults to QUICK_RATE; ONBOARDING_SWIPE is rejected here. */
+  source?: RatingSource;
+}
+
+/** com.pm.filmfuse.reco.dto.TasteDimensionDTO — `key` is "genre:28" or "mood:cozy"; `learned` comes from the vector. */
+export interface TasteDimensionDTO {
+  key: string;
+  label: string;
+  stated: number | null;
+  learned: number | null;
+}
+
+/** com.pm.filmfuse.reco.dto.TasteProfileDTO — GET /me/taste-profile. */
+export interface TasteProfileDTO {
+  status: VectorStatus;
+  updatedAt: string | null;
+  modelVersion: string | null;
+  persona: string | null;
+  /** ≤ 5, by learned (falling back to stated), highest first. */
+  topGenres: TasteDimensionDTO[];
+  /** Every genre, then every mood, in the fixed vector order. */
+  dimensions: TasteDimensionDTO[];
+  ratingsCount: number;
+}
+
+/** com.pm.filmfuse.reco.dto.TasteHistoryEntryDTO — GET /me/taste/history, newest first. */
+export interface TasteHistoryEntryDTO {
+  version: number;
+  reason: VectorChangeReason;
+  modelVersion: string;
+  createdAt: string;
+  /** ≤ 3. */
+  topGenres: TasteDimensionDTO[];
+}
+
+/** com.pm.filmfuse.reco.dto.RecommendationDTO — one "For you" pick. */
+export interface RecommendationDTO {
+  movie: MovieSummaryDTO;
+  certification: Certification | null;
+  score: number;
+  explanation: string;
+}

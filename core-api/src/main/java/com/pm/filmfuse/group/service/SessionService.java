@@ -24,6 +24,8 @@ import com.pm.filmfuse.group.model.SessionVote;
 import com.pm.filmfuse.group.realtime.SessionUpdatedEvent;
 import com.pm.filmfuse.group.repository.SessionRepository;
 import com.pm.filmfuse.movie.dto.MovieSummaryDTO;
+import com.pm.filmfuse.movie.service.MovieSummaries;
+import com.pm.filmfuse.reco.dto.VectorChangeReason;
 import com.pm.filmfuse.reco.model.CandidateCriteria;
 import com.pm.filmfuse.reco.model.ContentFilter;
 import com.pm.filmfuse.reco.model.GroupRecommendationInput;
@@ -32,6 +34,7 @@ import com.pm.filmfuse.reco.model.RankedMovie;
 import com.pm.filmfuse.reco.model.UserVectorLookup;
 import com.pm.filmfuse.reco.service.ContentFilterService;
 import com.pm.filmfuse.reco.service.GroupRecommender;
+import com.pm.filmfuse.reco.service.VectorDirtyMarker;
 import com.pm.filmfuse.social.dto.UserSummaryDTO;
 import com.pm.filmfuse.social.service.SocialGraphService;
 import com.pm.filmfuse.social.service.SocialUsers;
@@ -91,12 +94,13 @@ public class SessionService {
     private final ApplicationEventPublisher events;
     private final TransactionTemplate tx;
     private final TransactionTemplate readTx;
+    private final VectorDirtyMarker dirtyMarker;
     private final Clock clock;
 
     public SessionService(SessionRepository sessions, GroupService groupService, ContentFilterService contentFilter,
                           GroupRecommender recommender, UserVectorLookup vectorLookup, SocialGraphService graph,
                           SocialUsers users, MovieSummaries movieSummaries, ApplicationEventPublisher events,
-                          TransactionTemplate transactionTemplate, Clock clock) {
+                          TransactionTemplate transactionTemplate, VectorDirtyMarker dirtyMarker, Clock clock) {
         this.sessions = sessions;
         this.groupService = groupService;
         this.contentFilter = contentFilter;
@@ -109,6 +113,7 @@ public class SessionService {
         this.tx = transactionTemplate;
         this.readTx = new TransactionTemplate(transactionTemplate.getTransactionManager());
         this.readTx.setReadOnly(true);
+        this.dirtyMarker = dirtyMarker;
         this.clock = clock;
     }
 
@@ -262,7 +267,10 @@ public class SessionService {
             }
             Instant now = clock.instant();
             sessions.decide(sessionId, movieId, now);
-            sessions.insertWatchHistory(sessions.memberIds(sessionId), movieId, sessionId, now);
+            List<UUID> watchers = sessions.memberIds(sessionId);
+            sessions.insertWatchHistory(watchers, movieId, sessionId, now);
+            // A pick is a taste signal for everyone who watches it (the ML service reads watch_history).
+            dirtyMarker.markDirty(watchers, VectorChangeReason.PICK);
             events.publishEvent(new SessionUpdatedEvent(sessionId, SessionUpdatedEvent.PICK));
             return toDTO(callerId, sessions.findSession(session.id()).orElseThrow());
         });

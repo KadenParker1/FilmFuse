@@ -6,11 +6,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Finds members' interest vectors for the ranker. Phase 3 has no {@code user_interest_vectors}
- * table yet, so the only implementation ({@link com.pm.filmfuse.reco.service.NoUserVectorLookup})
- * returns nothing: every session member is snapshotted with {@code hasVector = false} and sent to
- * the ML service with {@code vector: null}. Phase 1b replaces it with a lookup of non-dirty rows in
- * {@code user_interest_vectors} - nothing else needs to change.
+ * Finds members' interest vectors for the ranker ({@link com.pm.filmfuse.reco.service.DbUserVectorLookup}
+ * reads {@code user_interest_vectors}). Members without a built vector are absent: they are
+ * snapshotted with {@code hasVector = false} and sent to the ML service with {@code vector: null}.
  */
 public interface UserVectorLookup {
 

@@ -11,7 +11,7 @@ import com.pm.filmfuse.reco.model.RankedMovie;
 import com.pm.filmfuse.reco.service.ContentFilterService;
 import com.pm.filmfuse.reco.service.FallbackRanker;
 import com.pm.filmfuse.reco.service.GroupRecommender;
-import com.pm.filmfuse.reco.service.NoUserVectorLookup;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +66,7 @@ class GroupRecommenderTest {
         RestClient.Builder builder = RestClient.builder();
         server = MockRestServiceServer.bindTo(builder).build();
         MlServiceClient client = new MlServiceClient(builder, new MlProperties(baseUrl, "key"));
-        return new GroupRecommender(contentFilter, client, new FallbackRanker(), new NoUserVectorLookup());
+        return new GroupRecommender(contentFilter, client, new FallbackRanker(), ids -> Map.of());
     }
 
     private static GroupRecommendationInput input(int k) {

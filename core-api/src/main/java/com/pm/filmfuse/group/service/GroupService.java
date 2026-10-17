@@ -21,6 +21,7 @@ import com.pm.filmfuse.group.model.Session;
 import com.pm.filmfuse.group.repository.GroupRepository;
 import com.pm.filmfuse.group.repository.SessionRepository;
 import com.pm.filmfuse.movie.dto.MovieSummaryDTO;
+import com.pm.filmfuse.movie.service.MovieSummaries;
 import com.pm.filmfuse.reco.model.ContentFilter;
 import com.pm.filmfuse.reco.service.ContentFilterService;
 import com.pm.filmfuse.social.dto.UserSummaryDTO;

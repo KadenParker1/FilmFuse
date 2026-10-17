@@ -1,4 +1,9 @@
 jest.mock('expo-router', () => require('../test-utils/router').expoRouterMock);
+// "For you" has its own tests (ForYouSection.test.tsx).
+jest.mock('../components/reco/ForYouSection', () => {
+  const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
+  return { ForYouSection: () => <Text testID="for-you-stub">For you</Text> };
+});
 jest.mock('../api/movies', () => ({
   ...jest.requireActual('../api/movies'),
   useGenres: jest.fn(),
@@ -61,6 +66,14 @@ const flushDebounce = async () => {
 };
 
 describe('DiscoverScreen', () => {
+  it('puts "For you" above popular, and hides it while searching', async () => {
+    await render(<DiscoverScreen />);
+    expect(screen.getByTestId('for-you-stub')).toBeOnTheScreen();
+    await typeSearch('alien');
+    await flushDebounce();
+    expect(screen.queryByTestId('for-you-stub')).toBeNull();
+  });
+
   it('shows genre chips, the popular grid and TMDB attribution when not searching', async () => {
     await render(<DiscoverScreen />);
     expect(screen.getByRole('button', { name: 'All' })).toBeSelected();

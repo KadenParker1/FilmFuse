@@ -20,14 +20,20 @@ export function useUpdateMe() {
 }
 
 /**
- * Marks onboarding complete (interim: core-api only requires a username). Caching the returned
- * profile is what lets ProfileGate through to the tabs.
+ * Marks onboarding complete. core-api requires a username, ≥5 genre prefs (≥3 scored 8+) and ≥3
+ * favourites, and starts the first taste-vector build. Caching the returned profile is what lets
+ * ProfileGate through to the tabs.
  */
 export function useCompleteOnboarding() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => apiClient.post<ProfileResponseDTO>('/me/onboarding/complete'),
-    onSuccess: (profile) => qc.setQueryData(queryKeys.me, profile),
+    onSuccess: (profile) => {
+      qc.setQueryData(queryKeys.me, profile);
+      void qc.invalidateQueries({ queryKey: queryKeys.onboarding });
+      void qc.invalidateQueries({ queryKey: queryKeys.taste });
+      void qc.invalidateQueries({ queryKey: queryKeys.recommendations });
+    },
   });
 }
 
