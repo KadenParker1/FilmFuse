@@ -1,5 +1,9 @@
 package com.pm.filmfuse.common.config;
 
+import com.pm.filmfuse.common.http.HttpLimitsProperties;
+import com.pm.filmfuse.common.http.RequestBodyLimitFilter;
+import com.pm.filmfuse.common.ratelimit.RateLimitFilter;
+import com.pm.filmfuse.common.ratelimit.RateLimiter;
 import com.pm.filmfuse.user.repository.DeletedAccountRepository;
 import com.pm.filmfuse.user.repository.ProfileRepository;
 import com.pm.filmfuse.user.security.SupabaseJwtAuthenticationConverter;
@@ -12,6 +16,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.web.cors.CorsConfiguration;
@@ -22,10 +27,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  * Stateless OAuth2 resource server. Supabase issues the JWTs (ES256); we verify them against the
  * project's JWKS ({@code spring.security.oauth2.resourceserver.jwt.*}). No sessions, no CSRF -
  * the client sends a bearer token by hand, never a cookie.
+ *
+ * <p>Two filters of our own run in the chain, both after CORS (so a browser can read their errors):
+ * {@link RequestBodyLimitFilter} before authentication (413 for an oversized body) and
+ * {@link RateLimitFilter} right after it (429 per user / IP / category). Spring Security's default
+ * headers stay on: {@code Cache-Control: no-cache, no-store, max-age=0, must-revalidate},
+ * {@code X-Content-Type-Options: nosniff}, {@code X-Frame-Options: DENY}, HSTS over HTTPS.
  */
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties(CorsProperties.class)
+@EnableConfigurationProperties({CorsProperties.class, HttpLimitsProperties.class})
 public class SecurityConfig {
 
     /** Public off-prod only; springdoc is switched off entirely under {@code prod}. */
@@ -35,6 +46,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            SupabaseJwtAuthenticationConverter jwtAuthenticationConverter,
                                            CorsConfigurationSource corsConfigurationSource,
+                                           RateLimiter rateLimiter,
+                                           HttpLimitsProperties httpLimits,
                                            Environment environment) throws Exception {
         boolean prod = Arrays.asList(environment.getActiveProfiles()).contains("prod");
 
@@ -61,7 +74,10 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().authenticated();
                 })
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
+                .addFilterBefore(new RequestBodyLimitFilter(httpLimits.maxBodySize().toBytes()),
+                        BearerTokenAuthenticationFilter.class)
+                .addFilterAfter(new RateLimitFilter(rateLimiter), BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 

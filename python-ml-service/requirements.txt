@@ -1,4 +1,6 @@
 fastapi==0.115.12
+# Pinned explicitly: FastAPI only bounds it, and it parses every request.
+starlette==0.46.2
 uvicorn[standard]==0.34.2
 pydantic==2.11.4
 pydantic-settings==2.9.1

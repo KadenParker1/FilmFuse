@@ -20,9 +20,24 @@ class MigrationIntegrationTest extends AbstractIntegrationTest {
         assertThat(jdbc.queryForObject(
                 "select rolcanlogin from pg_roles where rolname = 'ml_reader'", Boolean.class)).isFalse();
         assertThat(jdbc.queryForObject(
-                "select has_table_privilege('ml_reader', 'app.profiles', 'SELECT')", Boolean.class)).isTrue();
+                "select has_column_privilege('ml_reader', 'app.profiles', 'id', 'SELECT')", Boolean.class)).isTrue();
         assertThat(jdbc.queryForObject(
                 "select has_table_privilege('ml_reader', 'app.profiles', 'INSERT')", Boolean.class)).isFalse();
+    }
+
+    /** V16: no email addresses, invite token hashes or moderation reports for the ML service. */
+    @Test
+    void mlReaderCannotReadPersonalOrModerationData() {
+        assertThat(jdbc.queryForObject(
+                "select has_column_privilege('ml_reader', 'app.profiles', 'email', 'SELECT')", Boolean.class)).isFalse();
+        for (String column : new String[] {"id", "username", "display_name", "status", "created_at"}) {
+            assertThat(jdbc.queryForObject("select has_column_privilege('ml_reader', 'app.profiles', ?, 'SELECT')",
+                    Boolean.class, column)).as("SELECT on profiles.%s", column).isTrue();
+        }
+        for (String table : new String[] {"app.invites", "app.reports"}) {
+            assertThat(jdbc.queryForObject("select has_table_privilege('ml_reader', ?, 'SELECT')", Boolean.class, table))
+                    .as("SELECT on %s", table).isFalse();
+        }
     }
 
     @Test

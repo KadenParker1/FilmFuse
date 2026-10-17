@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class Phase5SchemaIntegrationTest extends AbstractPhase5IntegrationTest {
 
     private static final String[] TABLES = {
-            "app.pending_rating_dismissals", "app.rating_comments", "app.reports", "app.notification_settings"};
+            "app.pending_rating_dismissals", "app.rating_comments", "app.notification_settings"};
 
     @Test
     void mlReaderCanReadButNotWriteTheNewTables() {

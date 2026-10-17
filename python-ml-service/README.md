@@ -12,8 +12,12 @@ python3 -m venv .venv
 ENV=local .venv/bin/uvicorn app.main:app --reload --port 8001   # dev key: local-dev-internal-key
 ```
 
-Env vars (see `.env.example`): `ENV`, `ML_INTERNAL_KEY` (required unless `ENV=local`),
-`ML_DATABASE_URL` (read-only `ml_reader` role, optional for now), `PORT`.
+Env vars (see `.env.example`): `ENV` (`local` | `test` | `production`; unset = `production`),
+`ML_INTERNAL_KEY` (required unless `ENV=local`), `ML_DATABASE_URL` (read-only `ml_reader` role,
+optional for now), `ML_MAX_BODY_BYTES` (request body cap, default 5 MiB; larger is a 413), `PORT`.
+
+`/docs`, `/redoc` and `/openapi.json` exist only when `ENV` is not `production`. `/health` is
+always public; everything under `/internal` needs the key.
 
 ## Test
 

@@ -46,6 +46,8 @@ public class TastePreferencesService {
     static final String FAVORITE_FIELDS = "Each favourite needs a movieId and a rank of 1 or more.";
     static final String DUPLICATE_FAVORITE = "Each movie and each rank can appear only once.";
     static final String NULL_ITEM = "The list cannot contain null items.";
+    static final String TOO_MANY_GENRES = "Send at most one score per genre.";
+    static final String TOO_MANY_MOODS = "Send at most one score per mood.";
 
     private final TastePreferencesRepository repository;
     private final VectorDirtyMarker dirtyMarker;
@@ -92,7 +94,10 @@ public class TastePreferencesService {
     /** 400 on a null item, an unknown genre, a duplicate or a score outside 1-10. */
     public List<GenrePrefDTO> replaceGenrePrefs(UUID userId, List<GenrePrefDTO> request) {
         Map<Integer, Integer> prefs = new LinkedHashMap<>();
-        for (GenrePrefDTO pref : requireList(request)) {
+        if (requireList(request).size() > TasteDimensions.GENRE_IDS.size()) {
+            throw new BadRequestException(TOO_MANY_GENRES);
+        }
+        for (GenrePrefDTO pref : request) {
             if (pref == null) {
                 throw new BadRequestException(NULL_ITEM);
             }
@@ -115,12 +120,15 @@ public class TastePreferencesService {
     /** 400 on a null item, an unknown tag (see {@code GET /moods}), a duplicate or a score outside 1-10. */
     public List<MoodPrefDTO> replaceMoodPrefs(UUID userId, List<MoodPrefDTO> request) {
         Map<String, Integer> prefs = new LinkedHashMap<>();
-        for (MoodPrefDTO pref : requireList(request)) {
+        if (requireList(request).size() > TasteDimensions.MOOD_TAGS.size()) {
+            throw new BadRequestException(TOO_MANY_MOODS);
+        }
+        for (MoodPrefDTO pref : request) {
             if (pref == null) {
                 throw new BadRequestException(NULL_ITEM);
             }
             if (!TasteDimensions.isMood(pref.moodTag())) {
-                throw new BadRequestException(UNKNOWN_MOOD + pref.moodTag());
+                throw new BadRequestException(UNKNOWN_MOOD + echo(pref.moodTag()));
             }
             requireScore(pref.score());
             if (prefs.put(pref.moodTag(), pref.score()) != null) {
@@ -178,6 +186,14 @@ public class TastePreferencesService {
             throw new BadRequestException("The request body must be a JSON array.");
         }
         return request;
+    }
+
+    /** Caller text quoted back in an error, cut short so a huge value is not reflected whole. */
+    static String echo(String value) {
+        if (value == null) {
+            return "null";
+        }
+        return value.length() > 40 ? value.substring(0, 40) + "..." : value;
     }
 
     static void requireScore(Integer score) {
