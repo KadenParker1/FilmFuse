@@ -1,4 +1,9 @@
 jest.mock('expo-router', () => require('../test-utils/router').expoRouterMock);
+// "Rate what you watched" has its own tests (PendingRatingsBanner.test.tsx).
+jest.mock('../components/rating/PendingRatingsBanner', () => {
+  const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
+  return { PendingRatingsBanner: () => <Text testID="pending-ratings-stub">Rate what you watched</Text> };
+});
 jest.mock('../auth/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1' } }) }));
 jest.mock('../api/social', () => ({ useFriends: jest.fn() }));
 jest.mock('../api/groups', () => ({
@@ -126,6 +131,8 @@ describe('GroupsScreen', () => {
     await render(<GroupsScreen />);
     expect(screen.getByTestId('groups-loading')).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: /^Tonight/ })).toBeOnTheScreen();
+    // "Rate what you watched" doesn't wait for the groups.
+    expect(screen.getByTestId('pending-ratings-stub')).toBeOnTheScreen();
   });
 
   it('error with retry', async () => {

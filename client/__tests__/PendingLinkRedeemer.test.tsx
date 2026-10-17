@@ -39,6 +39,12 @@ describe('PendingLinkRedeemer', () => {
     await waitFor(() => expect(routerState.router.push).toHaveBeenCalledWith('/user/u9'));
   });
 
+  it('reopens a saved rating link (from a comment email)', async () => {
+    getPending.mockResolvedValue('/ratings/r9');
+    await render(<PendingLinkRedeemer />);
+    await waitFor(() => expect(routerState.router.push).toHaveBeenCalledWith('/ratings/r9'));
+  });
+
   it('does nothing without a saved link', async () => {
     getPending.mockResolvedValue(null);
     await render(<PendingLinkRedeemer />);

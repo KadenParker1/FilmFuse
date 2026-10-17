@@ -187,3 +187,35 @@ describe('FeedCardSkeletons', () => {
     expect(screen.getByTestId('sk').children).toHaveLength(2);
   });
 });
+
+describe('FeedCard — comments and overflow', () => {
+  it('shows the comment count, which opens the rating detail', async () => {
+    await render(<FeedCard item={item({ commentCount: 4 })} />);
+    expect(screen.getByTestId('feed-comment-count-f1')).toHaveTextContent('4');
+    const comments = screen.getByRole('button', { name: '4 comments' });
+    expect(comments.props.accessibilityHint).toBe('Opens the rating and its comments');
+    await fireEvent.press(comments);
+    expect(routerState.router.push).toHaveBeenCalledWith('/ratings/f1');
+  });
+
+  it('singular label, and zero still links', async () => {
+    await render(<FeedCard item={item({ commentCount: 1 })} />);
+    expect(screen.getByRole('button', { name: '1 comment' })).toBeOnTheScreen();
+    await render(<FeedCard item={item({ id: 'f2', commentCount: 0 })} />);
+    await fireEvent.press(screen.getByRole('button', { name: '0 comments' }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/ratings/f2');
+  });
+
+  it('linkToDetail=false shows the count without a link (on the detail page itself)', async () => {
+    await render(<FeedCard item={item({ commentCount: 2 })} linkToDetail={false} />);
+    expect(screen.queryByRole('button', { name: '2 comments' })).toBeNull();
+    expect(screen.getByLabelText('2 comments')).toBeOnTheScreen();
+  });
+
+  it("others' ratings have an options button; yours don't (you get Edit instead)", async () => {
+    await render(<FeedCard item={item()} />);
+    expect(screen.getByRole('button', { name: "Options for Grace Hopper's rating" })).toBeOnTheScreen();
+    await render(<FeedCard item={item({ id: 'mine', mine: true })} />);
+    expect(screen.queryByRole('button', { name: /^Options for/ })).toBeNull();
+  });
+});

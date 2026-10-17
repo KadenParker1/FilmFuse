@@ -10,7 +10,7 @@ import { env } from './env';
  * so the app and the static web export load; the sign-in screen surfaces `env.isSupabaseConfigured`.
  */
 export const supabase = createClient(
-  env.supabaseUrl || 'http://127.0.0.1:54321',
+  env.supabaseUrl || 'http://127.0.0.1:55321',
   env.supabaseAnonKey || 'missing-anon-key',
   {
     auth: {

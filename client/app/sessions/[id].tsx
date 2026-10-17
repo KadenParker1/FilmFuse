@@ -48,11 +48,20 @@ function DecidedHero({ movie }: { movie: MovieSummaryDTO }) {
         {movie.title}
       </Heading>
       {movie.releaseYear ? <Body muted>{movie.releaseYear}</Body> : null}
-      <View className="flex-row items-start gap-2 px-2">
-        <Ionicons name="star-outline" size={18} color={colors.gold} />
-        <Body muted className="flex-1 text-sm">
-          Rate it later: once you’ve watched it, a quick 1–10 helps everyone’s next picks.
-        </Body>
+      <View testID="rate-after-watching" className="w-full gap-2 rounded-xl border border-border bg-surface-raised p-3">
+        <View className="flex-row items-start gap-2">
+          <Ionicons name="star-outline" size={18} color={colors.gold} />
+          <Body className="flex-1 text-sm">
+            Rate it after watching: it’ll wait for you under “Rate what you watched” on the Groups tab, and a quick
+            1–10 helps everyone’s next picks.
+          </Body>
+        </View>
+        <Button
+          size="sm"
+          variant="ghost"
+          title="Go to Rate what you watched"
+          onPress={() => router.push('/groups')}
+        />
       </View>
       <Button title="Movie details" variant="secondary" onPress={() => router.push(`/movie/${movie.id}`)} />
     </Card>

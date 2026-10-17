@@ -18,6 +18,7 @@ import { usePublicProfile } from '../../api/users';
 import { useAuth } from '../../auth/useAuth';
 import { BackButton } from '../../components/BackButton';
 import { UserRatingsSection } from '../../components/feed/RatingsSections';
+import { ReportForm } from '../../components/moderation/ReportSheet';
 import { SaveLinkAndSignIn } from '../../components/SaveLinkAndSignIn';
 import {
   Avatar,
@@ -38,7 +39,7 @@ import type { PublicProfileDTO } from '../../types/api';
 
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-type SheetMode = 'menu' | 'friends' | 'confirm-cancel' | 'confirm-unfriend' | 'confirm-block';
+type SheetMode = 'menu' | 'friends' | 'confirm-cancel' | 'confirm-unfriend' | 'confirm-block' | 'report';
 
 function ProfileSkeleton() {
   return (
@@ -209,6 +210,7 @@ function ProfileView({ profile }: { profile: PublicProfileDTO }) {
       sheetBody = (
         <View className="gap-3">
           <Button title={`Block ${name}`} variant="danger" onPress={() => setMode('confirm-block')} />
+          <Button title={`Report ${name}`} variant="secondary" onPress={() => setMode('report')} />
           <Button title="Cancel" variant="ghost" onPress={closeSheet} />
         </View>
       );
@@ -220,6 +222,7 @@ function ProfileView({ profile }: { profile: PublicProfileDTO }) {
           <CloseFriendSwitch profile={profile} />
           <Button title="Unfriend" variant="secondary" onPress={() => setMode('confirm-unfriend')} />
           <Button title="Block" variant="danger" onPress={() => setMode('confirm-block')} />
+          <Button title="Report" variant="secondary" accessibilityLabel={`Report ${name}`} onPress={() => setMode('report')} />
           <Button title="Done" variant="ghost" onPress={closeSheet} />
         </View>
       );
@@ -257,6 +260,10 @@ function ProfileView({ profile }: { profile: PublicProfileDTO }) {
           <Button title="Cancel" variant="ghost" disabled={unfriend.isPending} onPress={closeSheet} />
         </View>
       );
+      break;
+    case 'report':
+      // The form brings its own heading and thank-you.
+      sheetBody = <ReportForm targetType="USER" targetId={profile.id} onDone={closeSheet} />;
       break;
     case 'confirm-block':
       sheetTitle = `Block ${name}?`;

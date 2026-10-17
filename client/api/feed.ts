@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQueryClient, type QueryClient, type QueryKey } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type QueryClient, type QueryKey } from '@tanstack/react-query';
 import { apiClient } from '../lib/apiClient';
 import { queryKeys } from '../lib/queryKeys';
 import { withQuery } from '../lib/withQuery';
@@ -13,6 +13,9 @@ export const fetchMovieRatings = (movieId: number, scope: FeedScope, cursor?: st
 
 export const fetchUserRatings = (userId: string, cursor?: string | null) =>
   apiClient.get<PageDTO<FeedItemDTO>>(withQuery(`/users/${encodeURIComponent(userId)}/ratings`, { cursor }));
+
+export const fetchRating = (ratingId: string) =>
+  apiClient.get<FeedItemDTO>(`/ratings/${encodeURIComponent(ratingId)}`);
 
 const validMovieId = (id: number | null | undefined): id is number => id != null && Number.isInteger(id) && id > 0;
 
@@ -48,21 +51,54 @@ export function useUserRatings(userId: string | null | undefined) {
   });
 }
 
+/** One rating the caller may see (the rating detail screen); a 404 = deleted or not visible. */
+export function useRating(ratingId: string | null | undefined) {
+  return useQuery({
+    queryKey: queryKeys.ratingDetail(ratingId ?? ''),
+    queryFn: () => fetchRating(ratingId as string),
+    enabled: !!ratingId,
+  });
+}
+
+/**
+ * Applies `fn` to rating `ratingId` everywhere it's cached: every feed-item list (both feeds, every
+ * movie's ratings, every person's ratings) and its detail.
+ */
+export function updateFeedItem(qc: QueryClient, ratingId: string, fn: (item: FeedItemDTO) => FeedItemDTO): void {
+  qc.setQueriesData<InfinitePages<FeedItemDTO>>({ queryKey: queryKeys.feed }, (data) =>
+    mapInfinite(data, (item) => (item.id === ratingId ? fn(item) : item)),
+  );
+  qc.setQueryData<FeedItemDTO>(queryKeys.ratingDetail(ratingId), (item) => (item ? fn(item) : item));
+}
+
 /**
  * Sets `likedByMe` on rating `ratingId` in every cached feed-item list (both feeds, every movie's
  * ratings, every person's ratings), adjusting `likeCount` only when the flag actually changes.
  */
 export function applyLike(qc: QueryClient, ratingId: string, liked: boolean): void {
-  qc.setQueriesData<InfinitePages<FeedItemDTO>>({ queryKey: queryKeys.feed }, (data) =>
-    mapInfinite(data, (item) =>
-      item.id !== ratingId || item.likedByMe === liked
-        ? item
-        : { ...item, likedByMe: liked, likeCount: Math.max(0, item.likeCount + (liked ? 1 : -1)) },
-    ),
+  updateFeedItem(qc, ratingId, (item) =>
+    item.likedByMe === liked
+      ? item
+      : { ...item, likedByMe: liked, likeCount: Math.max(0, item.likeCount + (liked ? 1 : -1)) },
   );
 }
 
-type Snapshot = [QueryKey, InfinitePages<FeedItemDTO> | undefined][];
+type Snapshot = [QueryKey, unknown][];
+
+/** Every cached copy of a rating (the feed lists plus its detail), for rolling back an optimistic edit. */
+export async function snapshotFeedItem(qc: QueryClient, ratingId: string): Promise<Snapshot> {
+  // A refetch landing mid-mutation would overwrite the optimistic change with stale data.
+  await qc.cancelQueries({ queryKey: queryKeys.feed });
+  await qc.cancelQueries({ queryKey: queryKeys.ratingDetail(ratingId) });
+  return [
+    ...qc.getQueriesData<InfinitePages<FeedItemDTO>>({ queryKey: queryKeys.feed }),
+    [queryKeys.ratingDetail(ratingId), qc.getQueryData(queryKeys.ratingDetail(ratingId))],
+  ];
+}
+
+export function restoreSnapshot(qc: QueryClient, snapshot: Snapshot | undefined): void {
+  snapshot?.forEach(([key, data]) => qc.setQueryData(key, data));
+}
 
 function useLikeMutation(liked: boolean) {
   const qc = useQueryClient();
@@ -72,15 +108,11 @@ function useLikeMutation(liked: boolean) {
         ? apiClient.post<void>(`/ratings/${encodeURIComponent(ratingId)}/like`)
         : apiClient.del<void>(`/ratings/${encodeURIComponent(ratingId)}/like`),
     onMutate: async (ratingId: string) => {
-      // A refetch landing mid-mutation would overwrite the optimistic flag with stale data.
-      await qc.cancelQueries({ queryKey: queryKeys.feed });
-      const previous: Snapshot = qc.getQueriesData<InfinitePages<FeedItemDTO>>({ queryKey: queryKeys.feed });
+      const previous = await snapshotFeedItem(qc, ratingId);
       applyLike(qc, ratingId, liked);
       return { previous };
     },
-    onError: (_error, _ratingId, context) => {
-      context?.previous.forEach(([key, data]) => qc.setQueryData(key, data));
-    },
+    onError: (_error, _ratingId, context) => restoreSnapshot(qc, context?.previous),
   });
 }
 
@@ -99,6 +131,8 @@ export function invalidateFeedsAfterRating(qc: QueryClient, movieId: number): vo
   void qc.invalidateQueries({ queryKey: queryKeys.feedList('FRIENDS') });
   void qc.invalidateQueries({ queryKey: queryKeys.feedList('EVERYONE') });
   void qc.invalidateQueries({ queryKey: queryKeys.movieRatingsFor(movieId) });
+  // An open rating detail may be this rating (cheap: at most a screen or two is cached).
+  void qc.invalidateQueries({ queryKey: queryKeys.ratingDetailAll });
   const me = qc.getQueryData<ProfileResponseDTO>(queryKeys.me);
   if (me) void qc.invalidateQueries({ queryKey: queryKeys.userRatings(me.id) });
 }

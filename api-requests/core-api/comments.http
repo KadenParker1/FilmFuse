@@ -1,0 +1,34 @@
+### FilmFuse core-api - one rating and its comments. Token: see me.http.
+# Visibility follows rating.repository.RatingVisibilitySql: 404 when you can't see the rating;
+# comments by people blocked either way are hidden (and not counted in commentCount).
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+@ratingId = 00000000-0000-0000-0000-000000000000
+@commentId = 00000000-0000-0000-0000-000000000000
+
+### One rating as a feed item (rating detail screen; includes commentCount)
+GET {{baseUrl}}/api/v1/ratings/{{ratingId}}
+Authorization: Bearer {{token}}
+
+### Comments, oldest first, 30 per page (pass nextCursor as ?cursor=)
+GET {{baseUrl}}/api/v1/ratings/{{ratingId}}/comments
+Authorization: Bearer {{token}}
+
+### Add a comment (201; body 1-500 chars after trimming). Emails the rating's author if they allow it
+POST {{baseUrl}}/api/v1/ratings/{{ratingId}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"body": "Totally agree about the ending."}
+
+### Delete (204 for the comment's or the rating's author; 403 others; 404 unknown/hidden)
+DELETE {{baseUrl}}/api/v1/comments/{{commentId}}
+Authorization: Bearer {{token}}
+
+### Empty body -> 400
+POST {{baseUrl}}/api/v1/ratings/{{ratingId}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"body": "   "}

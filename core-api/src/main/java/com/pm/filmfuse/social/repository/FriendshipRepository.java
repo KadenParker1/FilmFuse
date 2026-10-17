@@ -180,6 +180,30 @@ public class FriendshipRepository {
                 """, new MapSqlParameterSource("me", user).addValue("friend", friend).addValue("explicit", explicitClose));
     }
 
+    /**
+     * Sets the implicit {@code score} of existing closeness rows (one per direction). Update only:
+     * a friendship ended since the scores were computed has no rows left, and none is recreated.
+     *
+     * @return how many rows were updated
+     */
+    public int updateImplicitScores(List<ClosenessRow> scores) {
+        if (scores.isEmpty()) {
+            return 0;
+        }
+        MapSqlParameterSource[] batch = scores.stream()
+                .map(row -> new MapSqlParameterSource("me", row.from()).addValue("friend", row.to())
+                        .addValue("score", row.closeness()))
+                .toArray(MapSqlParameterSource[]::new);
+        int updated = 0;
+        for (int n : jdbc.batchUpdate("""
+                update app.friend_closeness set score = :score, updated_at = now()
+                where user_id = :me and friend_id = :friend
+                """, batch)) {
+            updated += Math.max(n, 0);
+        }
+        return updated;
+    }
+
     /** Effective closeness of {@code user} to {@code friend}; empty when they are not friends. */
     public Optional<Float> closeness(UUID user, UUID friend) {
         return friend(user, friend).map(FriendEdge::closeness);

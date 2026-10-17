@@ -25,7 +25,7 @@ class SupabaseGatewayConfigTest {
 
     @Test
     void urlDefaultsToLocalSupabase() {
-        assertThat(new SupabaseProperties(null, null).url()).isEqualTo("http://127.0.0.1:54321");
+        assertThat(new SupabaseProperties(null, null).url()).isEqualTo("http://127.0.0.1:55321");
         assertThat(new SupabaseProperties("https://x.test//", null).url()).isEqualTo("https://x.test");
     }
 

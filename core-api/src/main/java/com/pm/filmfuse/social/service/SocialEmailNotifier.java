@@ -1,36 +1,26 @@
 package com.pm.filmfuse.social.service;
 
-import com.pm.filmfuse.common.config.AppProperties;
-import com.pm.filmfuse.email.EmailGateway;
-import com.pm.filmfuse.email.EmailMessage;
-import com.pm.filmfuse.social.repository.SocialProfileRepository;
 import com.pm.filmfuse.social.repository.SocialProfileRepository.Contact;
+import com.pm.filmfuse.social.service.NotificationEmailSender.Draft;
+import com.pm.filmfuse.user.model.NotificationType;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Social notification emails, sent only once the change that triggered them has committed - a
- * rolled-back request never emails anyone. A recipient without a known email address is skipped.
- * A failed send is logged and swallowed: the friend request itself has already succeeded.
+ * rolled-back request never emails anyone. Both respect the recipient's {@code friendRequests}
+ * preference; a recipient without a known email address is skipped; a failed send is logged and
+ * swallowed (see {@link NotificationEmailSender}).
  */
 @Component
 public class SocialEmailNotifier {
 
-    private static final Logger log = LoggerFactory.getLogger(SocialEmailNotifier.class);
+    private final NotificationEmailSender sender;
 
-    private final EmailGateway emailGateway;
-    private final SocialProfileRepository profiles;
-    private final String webUrl;
-
-    public SocialEmailNotifier(EmailGateway emailGateway, SocialProfileRepository profiles,
-                               AppProperties appProperties) {
-        this.emailGateway = emailGateway;
-        this.profiles = profiles;
-        this.webUrl = appProperties.webUrl();
+    public SocialEmailNotifier(NotificationEmailSender sender) {
+        this.sender = sender;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -58,24 +48,15 @@ public class SocialEmailNotifier {
     }
 
     private void send(UUID recipientId, UUID actorId, String subjectTemplate, String bodyTemplate) {
-        try {
-            Contact recipient = profiles.findContact(recipientId).orElse(null);
-            Contact actor = profiles.findContact(actorId).orElse(null);
-            if (recipient == null || actor == null || recipient.email() == null || recipient.email().isBlank()) {
-                log.debug("Skipping a social email to {}: no recipient address", recipientId);
-                return;
-            }
-            String name = nameOf(actor);
-            emailGateway.send(new EmailMessage(recipient.email(), subjectTemplate.formatted(name),
-                    bodyTemplate.formatted(name, webUrl + "/user/" + actorId)));
-        } catch (RuntimeException ex) {
-            // No address in the log: logs outlive account deletion.
-            log.warn("Could not send a social email to user {}", recipientId, ex);
-        }
+        sender.send(java.util.List.of(recipientId), NotificationType.FRIEND_REQUESTS, id -> {
+            String name = sender.nameOf(actorId);
+            return new Draft(subjectTemplate.formatted(name),
+                    bodyTemplate.formatted(name, sender.webUrl() + "/user/" + actorId));
+        });
     }
 
     /** "Display Name (@username)", or whichever half exists. */
-    static String nameOf(Contact contact) {
+    public static String nameOf(Contact contact) {
         String displayName = contact.displayName() == null || contact.displayName().isBlank()
                 ? null : contact.displayName().trim();
         String handle = contact.username() == null ? null : "@" + contact.username();

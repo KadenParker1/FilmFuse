@@ -21,7 +21,7 @@ import org.springframework.stereotype.Repository;
 /**
  * Other people's ratings ({@code /feed}, {@code /movies/{id}/ratings}, {@code /users/{id}/ratings})
  * and {@code app.rating_likes}. Every read embeds {@link RatingVisibilitySql#visibleTo}; author,
- * certification, like count and "liked by me" come back in the same query (no per-row lookups).
+ * certification, like count, "liked by me" and the visible comment count come back in the same query (no per-row lookups).
  * Keyset order: {@code updated_at desc, id desc}.
  */
 @Repository
@@ -34,11 +34,13 @@ public class FeedRepository {
                    m.certification,
                    (select count(*) from app.rating_likes l where l.rating_id = r.id) as like_count,
                    exists (select 1 from app.rating_likes l where l.rating_id = r.id and l.user_id = :viewer)
-                       as liked_by_me
+                       as liked_by_me,
+                   (select count(*) from app.rating_comments c join app.profiles ca on ca.id = c.user_id
+                    where c.rating_id = r.id and %s) as comment_count
             from app.ratings r
             join app.profiles a on a.id = r.user_id
             join app.movies m on m.id = r.movie_id
-            where """;
+            where """.formatted(RatingVisibilitySql.commentVisibleTo());
 
     /** The viewer and their friends: the FRIENDS scope's authors. */
     private static final String FRIENDS_AND_SELF = "r.user_id in (select cast(:viewer as uuid) union all "
@@ -67,12 +69,31 @@ public class FeedRepository {
             sql.append("\n  and r.user_id = :author");
             params.addValue("author", filter.authorId());
         }
+        if (filter.ratingId() != null) {
+            sql.append("\n  and r.id = :rating");
+            params.addValue("rating", filter.ratingId());
+        }
         if (after != null) {
             sql.append("\n  and (r.updated_at, r.id) < (:afterUpdatedAt, :afterId)");
             params.addValue("afterUpdatedAt", Timestamp.from(after.updatedAt())).addValue("afterId", after.id());
         }
         sql.append("\norder by r.updated_at desc, r.id desc limit :limit");
         return jdbc.query(sql.toString(), params, (rs, n) -> map(rs));
+    }
+
+    /**
+     * The weekly digest: {@code viewer}'s friends' ratings visible to them (not their own) updated
+     * since {@code since}, best score first (then newest), at most {@code limit}.
+     */
+    public List<FeedEntry> topFriendRatings(UUID viewer, Instant since, int limit) {
+        return jdbc.query(SELECT + RatingVisibilitySql.visibleTo(false) + """
+
+                  and r.user_id in (%s)
+                  and r.updated_at >= :since
+                order by r.score desc, r.updated_at desc, r.id desc limit :limit
+                """.formatted(SocialGraphService.sqlFriendIds(":viewer")),
+                new MapSqlParameterSource("viewer", viewer).addValue("since", Timestamp.from(since))
+                        .addValue("limit", limit), (rs, n) -> map(rs));
     }
 
     /** Whether the rating exists and is visible to {@code viewer} anywhere (own PRIVATE ratings included). */
@@ -119,6 +140,7 @@ public class FeedRepository {
                 RatingVisibility.valueOf(rs.getString("visibility")),
                 rs.getLong("like_count"),
                 rs.getBoolean("liked_by_me"),
+                rs.getLong("comment_count"),
                 rs.getTimestamp("created_at").toInstant(),
                 rs.getTimestamp("updated_at").toInstant());
     }

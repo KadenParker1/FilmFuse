@@ -14,14 +14,23 @@ public final class RestClients {
     /**
      * A builder on the JDK {@link HttpClient}, which (unlike {@code HttpURLConnection}) also sends a
      * body with DELETE - Supabase Storage's delete takes one.
+     *
+     * <p>Pinned to HTTP/1.1: the JDK client's default (HTTP/2) sends an {@code Upgrade: h2c} request
+     * to plain-http hosts, and uvicorn (python-ml-service over Railway's private network) rejects the
+     * upgrade and drops the request body - every ML call then fails validation with 422.
      */
     public static RestClient.Builder withTimeouts(Duration connectTimeout, Duration readTimeout) {
-        HttpClient httpClient = HttpClient.newBuilder()
-                .connectTimeout(connectTimeout)
-                .followRedirects(HttpClient.Redirect.NEVER)
-                .build();
+        HttpClient httpClient = newHttpClient(connectTimeout);
         JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
         requestFactory.setReadTimeout(readTimeout);
         return RestClient.builder().requestFactory(requestFactory);
+    }
+
+    static HttpClient newHttpClient(Duration connectTimeout) {
+        return HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(connectTimeout)
+                .followRedirects(HttpClient.Redirect.NEVER)
+                .build();
     }
 }

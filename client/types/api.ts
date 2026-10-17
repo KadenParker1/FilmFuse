@@ -537,7 +537,63 @@ export interface FeedItemDTO {
   visibility: RatingVisibility;
   likeCount: number;
   likedByMe: boolean;
+  /** Comments the caller can see (blocked people's are left out). */
+  commentCount: number;
   mine: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Polish (Phase 5) — post-watch prompts, comments, reports, notification preferences
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * com.pm.filmfuse.rating.dto.PendingRatingDTO — a movie picked in one of the caller's sessions in
+ * the last 14 days that they haven't rated or dismissed. `groupName` is null for ad-hoc sessions.
+ */
+export interface PendingRatingDTO {
+  movie: MovieSummaryDTO;
+  sessionId: string;
+  groupName: string | null;
+  pickedAt: string;
+}
+
+/** com.pm.filmfuse.rating.dto.CommentDTO — `canDelete` = the comment's author or the rating's author. */
+export interface CommentDTO {
+  id: string;
+  ratingId: string;
+  author: UserSummaryDTO;
+  body: string;
+  createdAt: string;
+  mine: boolean;
+  canDelete: boolean;
+}
+
+/** com.pm.filmfuse.rating.dto.CreateCommentDTO — body 1–500 chars after trimming. */
+export interface CreateCommentDTO {
+  body: string;
+}
+
+/** Java enum `ReportTargetType` (moderation module). */
+export type ReportTargetType = 'RATING' | 'COMMENT' | 'USER';
+
+/** Java enum `ReportReason` (moderation module). */
+export type ReportReason = 'SPAM' | 'HARASSMENT' | 'HATE' | 'SEXUAL_CONTENT' | 'SPOILERS' | 'OTHER';
+
+/** com.pm.filmfuse.moderation.dto.CreateReportDTO — POST /reports; `details` ≤ 500 chars. */
+export interface CreateReportDTO {
+  targetType: ReportTargetType;
+  targetId: string;
+  reason: ReportReason;
+  details?: string | null;
+}
+
+/** com.pm.filmfuse.user.dto.NotificationSettingsDTO — email preferences; all on by default except the digest. */
+export interface NotificationSettingsDTO {
+  friendRequests: boolean;
+  groupInvites: boolean;
+  sessionStarted: boolean;
+  comments: boolean;
+  weeklyDigest: boolean;
 }

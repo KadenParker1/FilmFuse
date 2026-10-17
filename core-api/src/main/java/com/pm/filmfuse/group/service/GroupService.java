@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,16 +77,19 @@ public class GroupService {
     private final SocialUsers users;
     private final ContentFilterService contentFilter;
     private final MovieSummaries movieSummaries;
+    private final ApplicationEventPublisher events;
     private final Clock clock;
 
     public GroupService(GroupRepository groups, SessionRepository sessions, SocialGraphService graph, SocialUsers users,
-                        ContentFilterService contentFilter, MovieSummaries movieSummaries, Clock clock) {
+                        ContentFilterService contentFilter, MovieSummaries movieSummaries,
+                        ApplicationEventPublisher events, Clock clock) {
         this.groups = groups;
         this.sessions = sessions;
         this.graph = graph;
         this.users = users;
         this.contentFilter = contentFilter;
         this.movieSummaries = movieSummaries;
+        this.events = events;
         this.clock = clock;
     }
 
@@ -100,6 +104,7 @@ public class GroupService {
         groups.insertGroup(group);
         groups.insertMembers(group.id(), List.of(callerId), GroupRole.OWNER, MemberStatus.ACTIVE, null, now);
         groups.insertMembers(group.id(), invitees, GroupRole.MEMBER, MemberStatus.INVITED, callerId, now);
+        publishInvites(group.id(), group.name(), callerId, invitees);
         return detail(callerId, group.id());
     }
 
@@ -155,7 +160,7 @@ public class GroupService {
     /** Any ACTIVE member may invite their own friends; people already in the group are skipped. */
     @Transactional
     public GroupDetailDTO addMembers(UUID callerId, UUID groupId, AddMembersDTO request) {
-        lockVisible(callerId, groupId);
+        Group group = lockVisible(callerId, groupId);
         requireActive(callerId, groupId);
         Set<UUID> existing = groups.findMembers(groupId).stream().map(GroupMember::userId).collect(Collectors.toSet());
         List<UUID> invitees = requireInvitableFriends(callerId, request.userIds()).stream()
@@ -165,6 +170,7 @@ public class GroupService {
             throw new ConflictException(GROUP_FULL);
         }
         groups.insertMembers(groupId, invitees, GroupRole.MEMBER, MemberStatus.INVITED, callerId, clock.instant());
+        publishInvites(groupId, group.name(), callerId, invitees);
         return detail(callerId, groupId);
     }
 
@@ -252,6 +258,13 @@ public class GroupService {
     }
 
     // ------------------------------------------------------------------------------- helpers
+
+    /** New invitees are emailed after commit (GroupEmailNotifier). */
+    private void publishInvites(UUID groupId, String groupName, UUID inviterId, List<UUID> invitees) {
+        if (!invitees.isEmpty()) {
+            events.publishEvent(new GroupInvitesSentEvent(groupId, groupName, inviterId, List.copyOf(invitees)));
+        }
+    }
 
     private void leave(Group group, GroupMember member) {
         groups.deleteMember(group.id(), member.userId());

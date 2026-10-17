@@ -1,4 +1,7 @@
 import type {
+  CommentDTO,
+  NotificationSettingsDTO,
+  PendingRatingDTO,
   ComfortSettingsDTO,
   EffectiveFilterDTO,
   FeedItemDTO,
@@ -296,8 +299,41 @@ export const makeFeedItem = (overrides: Partial<FeedItemDTO> = {}): FeedItemDTO 
   visibility: 'FRIENDS',
   likeCount: 0,
   likedByMe: false,
+  commentCount: 0,
   mine: false,
   createdAt: '2026-10-10T20:00:00Z',
   updatedAt: '2026-10-10T20:00:00Z',
+  ...overrides,
+});
+
+// ---- Phase 5: post-watch prompts, comments, notification preferences ---------------------------
+
+export const makePendingRating = (overrides: Partial<PendingRatingDTO> = {}): PendingRatingDTO => ({
+  movie: makeMovie(),
+  sessionId: 's1',
+  groupName: 'Film club',
+  pickedAt: '2026-10-15T21:00:00Z',
+  ...overrides,
+});
+
+export const makeComment = (overrides: Partial<CommentDTO> = {}): CommentDTO => ({
+  id: 'c1',
+  ratingId: 'f1',
+  author: makeUser({ friendship: 'FRIENDS' }),
+  body: 'Great call.',
+  createdAt: '2026-10-10T21:00:00Z',
+  mine: false,
+  canDelete: false,
+  ...overrides,
+});
+
+export const makeNotificationSettings = (
+  overrides: Partial<NotificationSettingsDTO> = {},
+): NotificationSettingsDTO => ({
+  friendRequests: true,
+  groupInvites: true,
+  sessionStarted: true,
+  comments: true,
+  weeklyDigest: false,
   ...overrides,
 });

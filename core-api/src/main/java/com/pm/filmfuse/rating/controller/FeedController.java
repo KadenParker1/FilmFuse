@@ -53,6 +53,12 @@ public class FeedController {
         return feedService.userRatings(caller.getId(), id, cursor);
     }
 
+    /** One rating as a feed item (the rating-detail screen); 404 when the caller cannot see it. */
+    @GetMapping("/ratings/{ratingId}")
+    public FeedItemDTO rating(@CurrentUser Profile caller, @PathVariable UUID ratingId) {
+        return feedService.rating(caller.getId(), ratingId);
+    }
+
     /** 204, idempotent; 404 when the caller cannot see the rating. */
     @PostMapping("/ratings/{ratingId}/like")
     @ResponseStatus(HttpStatus.NO_CONTENT)

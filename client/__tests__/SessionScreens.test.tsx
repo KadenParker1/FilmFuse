@@ -298,13 +298,15 @@ describe('SessionScreen', () => {
     expect(screen.getByRole('button', { name: 'More options' })).toBeOnTheScreen();
   });
 
-  it('DECIDED: picked movie hero with a rate-it-later note; no voting', async () => {
+  it('DECIDED: picked movie hero with a rate-it-after-watching note; no voting', async () => {
     show(makeSession({ status: 'DECIDED', pickedMovie: makeMovie({ id: 200, title: 'Up', posterUrl: 'https://x/up.jpg' }) }));
     await render(<SessionScreen />);
     expect(screen.getByTestId('decided-hero')).toBeOnTheScreen();
     expect(screen.getByRole('header', { name: 'Up' })).toBeOnTheScreen();
     expect(screen.getByTestId('decided-poster')).toBeOnTheScreen();
-    expect(screen.getByText(/Rate it later/)).toBeOnTheScreen();
+    expect(screen.getByTestId('rate-after-watching')).toHaveTextContent(/Rate it after watching/);
+    await fireEvent.press(screen.getByRole('button', { name: 'Go to Rate what you watched' }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/groups');
     expect(screen.getByTestId('session-meta')).toHaveTextContent('Decided · Mean');
     expect(screen.queryByTestId('live-indicator')).toBeNull();
     expect(screen.queryByRole('button', { name: 'More options' })).toBeNull();

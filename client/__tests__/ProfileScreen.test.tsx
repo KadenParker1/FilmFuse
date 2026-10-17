@@ -79,6 +79,8 @@ describe('ProfileScreen', () => {
     expect(routerState.router.push).toHaveBeenCalledWith('/profile/edit');
     await fireEvent.press(screen.getByRole('button', { name: 'Comfort settings' }));
     expect(routerState.router.push).toHaveBeenCalledWith('/settings/comfort');
+    await fireEvent.press(screen.getByRole('button', { name: 'Notifications' }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/settings/notifications');
     await fireEvent.press(screen.getByRole('button', { name: 'Blocked people' }));
     expect(routerState.router.push).toHaveBeenCalledWith('/settings/blocked');
     await fireEvent.press(screen.getByRole('button', { name: 'Sign out' }));

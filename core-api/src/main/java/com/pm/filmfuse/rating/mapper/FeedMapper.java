@@ -14,6 +14,7 @@ public final class FeedMapper {
     public static FeedItemDTO toDTO(FeedEntry entry, UserSummaryDTO author, MovieSummaryDTO movie, UUID viewer) {
         return new FeedItemDTO(entry.id(), author, movie, entry.certification(), entry.score(), entry.body(),
                 entry.containsSpoilers(), entry.visibility(), entry.likeCount(), entry.likedByMe(),
+                entry.commentCount(),
                 entry.author().id().equals(viewer), entry.createdAt(), entry.updatedAt());
     }
 }

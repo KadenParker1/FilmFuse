@@ -152,6 +152,8 @@ export function usePickMovie() {
     onSuccess: (session) => {
       qc.setQueryData(queryKeys.session(session.id), session);
       invalidateHistory(qc, session.groupId);
+      // The pick goes into watch history, so it becomes a "Rate what you watched" prompt.
+      void qc.invalidateQueries({ queryKey: queryKeys.pendingRatings });
     },
   });
 }
