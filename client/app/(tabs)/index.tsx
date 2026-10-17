@@ -2,29 +2,15 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useFriendRequests } from '../../api/social';
 import { USER_SEARCH_MAX_LENGTH } from '../../api/users';
+import { FeedPanel } from '../../components/feed/FeedPanel';
 import { FriendsPanel } from '../../components/social/FriendsPanel';
 import { UserSearchResults } from '../../components/social/UserSearchResults';
-import { Button, EmptyState, Heading, Screen, SearchBar, SegmentedControl } from '../../components/ui';
+import { Heading, Screen, SearchBar, SegmentedControl } from '../../components/ui';
 import { useDebouncedValue } from '../../lib/useDebouncedValue';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
 type SocialSegment = 'feed' | 'friends';
-
-function FeedPlaceholder({ onFindFriends }: { onFindFriends: () => void }) {
-  return (
-    <View testID="feed-empty" className="flex-1 pb-28">
-      <EmptyState
-        icon="chatbubbles-outline"
-        title="Your friends' ratings will appear here"
-        message="When your friends rate and review movies, their takes show up in this feed. Reviews arrive in Phase 1b."
-      />
-      <View className="w-full max-w-sm self-center">
-        <Button title="Find friends" variant="secondary" onPress={onFindFriends} />
-      </View>
-    </View>
-  );
-}
 
 export default function SocialScreen() {
   const [input, setInput] = useState('');
@@ -60,7 +46,7 @@ export default function SocialScreen() {
             ]}
           />
           {segment === 'feed' ? (
-            <FeedPlaceholder onFindFriends={() => setSegment('friends')} />
+            <FeedPanel onFindFriends={() => setSegment('friends')} />
           ) : (
             <ScrollView
               testID="friends-scroll"

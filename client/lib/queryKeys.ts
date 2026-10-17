@@ -1,3 +1,5 @@
+import type { FeedScope } from '../types/api';
+
 /**
  * Every TanStack Query key in the app, in one place. A prefix is the parent node and specific keys
  * spread it, so invalidation prefixes can't drift from the keys they invalidate.
@@ -13,6 +15,8 @@ const sessionListAll = [...sessions, 'list'] as const;
 const ratings = ['ratings'] as const;
 const taste = ['taste'] as const;
 const calibration = ['calibration'] as const;
+const feed = ['feed'] as const;
+const movieRatingsAll = [...feed, 'movie'] as const;
 
 export const queryKeys = {
   /** The signed-in user's own profile (GET /me). */
@@ -86,4 +90,16 @@ export const queryKeys = {
   tasteHistory: (limit: number | null) => [...taste, 'history', limit] as const,
   /** GET /me/recommendations (infinite) */
   recommendations: ['recommendations'] as const,
+  /** Every list of FeedItemDTOs — feeds, a movie's ratings, a person's ratings (prefix). */
+  feed,
+  /** GET /feed?scope= (infinite) */
+  feedList: (scope: FeedScope) => [...feed, 'list', scope] as const,
+  /** Every GET /movies/{id}/ratings list (prefix). */
+  movieRatingsAll,
+  /** Both scopes of one movie's ratings (prefix). */
+  movieRatingsFor: (movieId: number) => [...movieRatingsAll, movieId] as const,
+  /** GET /movies/{id}/ratings?scope= (infinite) */
+  movieRatings: (movieId: number, scope: FeedScope) => [...movieRatingsAll, movieId, scope] as const,
+  /** GET /users/{id}/ratings (infinite) */
+  userRatings: (userId: string) => [...feed, 'user', userId] as const,
 } as const;

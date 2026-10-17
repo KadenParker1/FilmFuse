@@ -1,6 +1,7 @@
 import type {
   ComfortSettingsDTO,
   EffectiveFilterDTO,
+  FeedItemDTO,
   FriendDTO,
   GroupDetailDTO,
   GroupMemberDTO,
@@ -279,5 +280,24 @@ export const makeRecommendation = (overrides: Partial<RecommendationDTO> = {}): 
   certification: 'R',
   score: 8.1,
   explanation: 'Because you love crime thrillers',
+  ...overrides,
+});
+
+// ---- Phase 2b: ratings feed --------------------------------------------------------------------
+
+export const makeFeedItem = (overrides: Partial<FeedItemDTO> = {}): FeedItemDTO => ({
+  id: 'f1',
+  author: makeUser({ friendship: 'FRIENDS' }),
+  movie: makeMovie(),
+  certification: 'R',
+  score: 8,
+  body: null,
+  containsSpoilers: false,
+  visibility: 'FRIENDS',
+  likeCount: 0,
+  likedByMe: false,
+  mine: false,
+  createdAt: '2026-10-10T20:00:00Z',
+  updatedAt: '2026-10-10T20:00:00Z',
   ...overrides,
 });

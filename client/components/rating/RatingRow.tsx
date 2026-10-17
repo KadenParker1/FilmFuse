@@ -5,7 +5,8 @@ import { useTheme } from '../../theme/useTheme';
 import type { RatingDTO, RatingVisibility } from '../../types/api';
 import { scoreLabel } from '../ui';
 
-const VISIBILITY: Record<RatingVisibility, { icon: 'lock-closed-outline' | 'people-outline' | 'globe-outline'; label: string }> = {
+/** Icon and words for who can see a rating. */
+export const VISIBILITY: Record<RatingVisibility, { icon: 'lock-closed-outline' | 'people-outline' | 'globe-outline'; label: string }> = {
   PRIVATE: { icon: 'lock-closed-outline', label: 'Only you' },
   FRIENDS: { icon: 'people-outline', label: 'Friends' },
   PUBLIC: { icon: 'globe-outline', label: 'Public' },

@@ -73,6 +73,8 @@ function RootNavigator() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(onboarding)" />
           <Stack.Screen name="movie/[id]" />
+          <Stack.Screen name="movie/[id]/ratings" />
+          <Stack.Screen name="user/[id]/ratings" />
           <Stack.Screen name="profile/edit" />
           <Stack.Screen name="settings/blocked" />
           <Stack.Screen name="settings/comfort" />

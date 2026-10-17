@@ -4,6 +4,11 @@ let mockSession: unknown = { access_token: 't' };
 jest.mock('../auth/useAuth', () => ({ useAuth: () => ({ session: mockSession }) }));
 jest.mock('../lib/pendingLink', () => ({ setPendingLink: jest.fn(() => Promise.resolve()) }));
 jest.mock('../api/users', () => ({ usePublicProfile: jest.fn() }));
+jest.mock('../api/feed', () => ({ useUserRatings: jest.fn(), useLikeRating: jest.fn(), useUnlikeRating: jest.fn() }));
+const mockOpenQuickRate = jest.fn();
+jest.mock('../components/rating/QuickRateProvider', () => ({
+  useQuickRate: () => ({ openQuickRate: mockOpenQuickRate, openRatePicker: jest.fn(), showTasteUpdating: jest.fn() }),
+}));
 jest.mock('../api/social', () => ({
   useAcceptRequest: jest.fn(),
   useBlock: jest.fn(),
@@ -15,8 +20,9 @@ jest.mock('../api/social', () => ({
   useUnfriend: jest.fn(),
 }));
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import UserProfileScreen from '../app/user/[id]';
+import { useLikeRating, useUnlikeRating, useUserRatings } from '../api/feed';
 import { useMe } from '../api/me';
 import {
   useAcceptRequest,
@@ -31,8 +37,8 @@ import {
 import { usePublicProfile } from '../api/users';
 import { ApiError, NetworkError } from '../lib/apiClient';
 import { setPendingLink } from '../lib/pendingLink';
-import { makeProfile, makePublicProfile } from '../test-utils/fixtures';
-import { mutationResult, queryResult } from '../test-utils/queryResults';
+import { makeFeedItem, makeMovie, makeProfile, makePublicProfile } from '../test-utils/fixtures';
+import { infiniteResult, mutationResult, queryResult } from '../test-utils/queryResults';
 import { routerState } from '../test-utils/router';
 import type { FriendshipState } from '../types/api';
 
@@ -49,6 +55,7 @@ const hooks = {
 type Key = keyof typeof hooks;
 let mut: Record<Key, ReturnType<typeof mutationResult>>;
 const mockProfile = usePublicProfile as jest.Mock;
+const mockUserRatings = useUserRatings as jest.Mock;
 
 const showProfile = (friendship: FriendshipState, overrides = {}) =>
   mockProfile.mockReturnValue(queryResult({ data: makePublicProfile({ friendship, ...overrides }) }));
@@ -60,6 +67,10 @@ beforeEach(() => {
   (useMe as jest.Mock).mockReturnValue(queryResult({ data: makeProfile({ id: 'u1' }) }));
   mut = Object.fromEntries((Object.keys(hooks) as Key[]).map((k) => [k, mutationResult()])) as typeof mut;
   (Object.keys(hooks) as Key[]).forEach((k) => hooks[k].mockImplementation(() => mut[k]));
+  mockUserRatings.mockReturnValue(infiniteResult({ items: [] }));
+  (useLikeRating as jest.Mock).mockReturnValue(mutationResult());
+  (useUnlikeRating as jest.Mock).mockReturnValue(mutationResult());
+  mockOpenQuickRate.mockClear();
 });
 
 /** Runs the mutate's onSuccess option, as TanStack would after the request succeeds. */
@@ -425,5 +436,78 @@ describe('UserProfileScreen — BLOCKED', () => {
     mut.unblock.error = new NetworkError();
     await render(<UserProfileScreen />);
     expect(screen.getByTestId('profile-action-error')).toBeOnTheScreen();
+  });
+});
+
+describe('UserProfileScreen — ratings section', () => {
+  const items = [1, 2, 3, 4, 5, 6].map((n) =>
+    makeFeedItem({ id: `f${n}`, movie: makeMovie({ id: 100 + n, title: `Movie ${n}` }), score: n + 4 }),
+  );
+  const section = () => within(screen.getByTestId('user-ratings'));
+
+  it("previews this person's first 5 ratings without repeating their name on every card", async () => {
+    showProfile('FRIENDS');
+    mockUserRatings.mockReturnValue(infiniteResult({ items }));
+    await render(<UserProfileScreen />);
+    expect(mockUserRatings).toHaveBeenCalledWith('u2');
+    expect(section().getByRole('header', { name: 'Ratings' })).toBeOnTheScreen();
+    expect(screen.getByTestId('feed-card-f5')).toBeOnTheScreen();
+    expect(screen.queryByTestId('feed-card-f6')).toBeNull();
+    expect(section().queryByRole('button', { name: /^Grace Hopper/ })).toBeNull();
+    await fireEvent.press(section().getByRole('button', { name: 'Movie 1, 1995' }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/movie/101');
+  });
+
+  it('"See all" opens their full ratings list', async () => {
+    showProfile('NONE');
+    mockUserRatings.mockReturnValue(infiniteResult({ items }));
+    await render(<UserProfileScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: "See all of Grace Hopper's ratings" }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/user/u2/ratings');
+  });
+
+  it('no "See all" when everything fits', async () => {
+    showProfile('NONE');
+    mockUserRatings.mockReturnValue(infiniteResult({ items: items.slice(0, 2) }));
+    await render(<UserProfileScreen />);
+    expect(screen.queryByRole('button', { name: /See all/ })).toBeNull();
+  });
+
+  it('empty, loading and error states', async () => {
+    showProfile('NONE');
+    const { rerender } = await render(<UserProfileScreen />);
+    expect(screen.getByTestId('user-ratings-empty')).toHaveTextContent("Grace Hopper hasn't shared any ratings with you yet.");
+
+    mockUserRatings.mockReturnValue(infiniteResult());
+    await rerender(<UserProfileScreen />);
+    expect(screen.getByTestId('user-ratings-loading')).toBeOnTheScreen();
+
+    const refetch = jest.fn();
+    mockUserRatings.mockReturnValue(infiniteResult({ isError: true, isPending: false, error: new NetworkError(), refetch }));
+    await rerender(<UserProfileScreen />);
+    await fireEvent.press(section().getByRole('button', { name: 'Try again' }));
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it('is hidden for someone you blocked', async () => {
+    showProfile('BLOCKED');
+    await render(<UserProfileScreen />);
+    expect(screen.queryByTestId('user-ratings')).toBeNull();
+  });
+
+  it('on your own profile: own wording, visibility and Edit on each card', async () => {
+    (useMe as jest.Mock).mockReturnValue(queryResult({ data: makeProfile({ id: 'u2' }) }));
+    showProfile('NONE');
+    mockUserRatings.mockReturnValue(
+      infiniteResult({ items: [makeFeedItem({ id: 'mine', mine: true, visibility: 'PRIVATE', movie: makeMovie({ title: 'Heat' }) })] }),
+    );
+    await render(<UserProfileScreen />);
+    expect(screen.getByLabelText('Visible to: Only you')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: 'Edit your rating of Heat' }));
+    expect(mockOpenQuickRate).toHaveBeenCalledWith(expect.objectContaining({ title: 'Heat' }));
+
+    mockUserRatings.mockReturnValue(infiniteResult({ items: [] }));
+    await render(<UserProfileScreen />);
+    expect(screen.getByTestId('user-ratings-empty')).toHaveTextContent("You haven't rated anything yet.");
   });
 });

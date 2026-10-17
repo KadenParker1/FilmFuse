@@ -514,3 +514,30 @@ export interface RecommendationDTO {
   score: number;
   explanation: string;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Ratings feed (Phase 2b) — com.pm.filmfuse.rating.dto
+// ---------------------------------------------------------------------------------------------
+
+/** Java enum `FeedScope` — FRIENDS = your friends' and your own visible ratings; EVERYONE = public ratings. */
+export type FeedScope = 'FRIENDS' | 'EVERYONE';
+
+/**
+ * com.pm.filmfuse.rating.dto.FeedItemDTO — one visible rating in a feed, a movie's ratings or a
+ * person's ratings. `id` is the rating id; `mine` = written by the caller.
+ */
+export interface FeedItemDTO {
+  id: string;
+  author: UserSummaryDTO;
+  movie: MovieSummaryDTO;
+  certification: Certification | null;
+  score: number;
+  body: string | null;
+  containsSpoilers: boolean;
+  visibility: RatingVisibility;
+  likeCount: number;
+  likedByMe: boolean;
+  mine: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

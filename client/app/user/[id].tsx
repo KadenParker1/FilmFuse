@@ -17,6 +17,7 @@ import {
 import { usePublicProfile } from '../../api/users';
 import { useAuth } from '../../auth/useAuth';
 import { BackButton } from '../../components/BackButton';
+import { UserRatingsSection } from '../../components/feed/RatingsSections';
 import { SaveLinkAndSignIn } from '../../components/SaveLinkAndSignIn';
 import {
   Avatar,
@@ -327,6 +328,9 @@ function ProfileView({ profile }: { profile: PublicProfileDTO }) {
         {actions}
         {inlineFailure ? <ActionError error={inlineFailure} /> : null}
       </View>
+
+      {/* Blocked people's ratings aren't shown (the server answers 404). */}
+      {state !== 'BLOCKED' ? <UserRatingsSection userId={profile.id} name={name} isSelf={isSelf} /> : null}
 
       <Sheet visible={mode !== null} onClose={closeSheet} title={sheetTitle}>
         {sheetBody}

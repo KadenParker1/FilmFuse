@@ -1,0 +1,39 @@
+### FilmFuse core-api - ratings feed and likes. Token: see me.http.
+# Visibility (one rule, rating.repository.RatingVisibilitySql): never calibration swipes; never across
+# a block (either way) or from a suspended author; PUBLIC to anyone, FRIENDS to the author's friends
+# and the author, PRIVATE only on the author's own /users/{self}/ratings.
+# Every list: 20 per page, newest updatedAt first (re-rating moves an item up); pass nextCursor as ?cursor=.
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+@movieId = 603
+@userId = 00000000-0000-0000-0000-000000000000
+@ratingId = 00000000-0000-0000-0000-000000000000
+
+### Friends feed: my and my friends' visible ratings
+GET {{baseUrl}}/api/v1/feed?scope=FRIENDS
+Authorization: Bearer {{token}}
+
+### Everyone feed: visible PUBLIC ratings by anyone
+GET {{baseUrl}}/api/v1/feed?scope=EVERYONE
+Authorization: Bearer {{token}}
+
+### A movie's ratings (same scopes; 404 for a movie that is not cached)
+GET {{baseUrl}}/api/v1/movies/{{movieId}}/ratings?scope=FRIENDS
+Authorization: Bearer {{token}}
+
+### A user's ratings I can see (my own id: everything but swipes, PRIVATE included). 404 if blocked either way
+GET {{baseUrl}}/api/v1/users/{{userId}}/ratings
+Authorization: Bearer {{token}}
+
+### Like (204, idempotent; 404 if I cannot see the rating)
+POST {{baseUrl}}/api/v1/ratings/{{ratingId}}/like
+Authorization: Bearer {{token}}
+
+### Unlike (204, idempotent)
+DELETE {{baseUrl}}/api/v1/ratings/{{ratingId}}/like
+Authorization: Bearer {{token}}
+
+### Missing or unknown scope -> 400
+GET {{baseUrl}}/api/v1/feed?scope=ALL
+Authorization: Bearer {{token}}
