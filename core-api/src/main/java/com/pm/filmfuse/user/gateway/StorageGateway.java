@@ -16,6 +16,12 @@ public interface StorageGateway {
     /** The object's public URL (the bucket must be public). Pure string building, no request. */
     String publicUrl(String bucket, String path);
 
+    /**
+     * Whether the object exists. False for a missing object (or bucket); an outage is an
+     * {@code UpstreamUnavailableException}, never a silent false.
+     */
+    boolean exists(String bucket, String path);
+
     /** Deleting an object that does not exist is not an error. */
     void delete(String bucket, String path);
 }

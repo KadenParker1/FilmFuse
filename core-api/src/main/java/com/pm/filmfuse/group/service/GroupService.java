@@ -114,8 +114,11 @@ public class GroupService {
         List<GroupListing> listings = groups.listFor(callerId);
         Map<UUID, List<UUID>> previews = groups.activePreview(
                 listings.stream().map(listing -> listing.group().id()).toList(), PREVIEW_SIZE);
-        Map<UUID, UserSummaryDTO> summaries = summaries(callerId,
-                previews.values().stream().flatMap(List::stream).collect(Collectors.toCollection(LinkedHashSet::new)));
+        Set<UUID> previewIds = previews.values().stream().flatMap(List::stream)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<UUID> hidden = graph.blockedEitherWayAmong(callerId, previewIds);
+        previewIds.removeAll(hidden);
+        Map<UUID, UserSummaryDTO> summaries = summaries(callerId, previewIds);
         return listings.stream().map(listing -> {
             Group group = listing.group();
             List<UserSummaryDTO> preview = previews.getOrDefault(group.id(), List.of()).stream()
@@ -318,15 +321,19 @@ public class GroupService {
         List<GroupMember> members = groups.findMembers(groupId);
         GroupMember mine = members.stream().filter(m -> m.userId().equals(callerId)).findFirst()
                 .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND));
-        Map<UUID, UserSummaryDTO> summaries = summaries(callerId, members.stream().map(GroupMember::userId).toList());
+        List<UUID> memberIds = members.stream().map(GroupMember::userId).toList();
+        Set<UUID> hidden = graph.blockedEitherWayAmong(callerId, memberIds);
+        Map<UUID, UserSummaryDTO> summaries = summaries(callerId,
+                memberIds.stream().filter(id -> !hidden.contains(id)).toList());
         List<GroupMemberDTO> memberDTOs = members.stream()
                 .filter(m -> summaries.containsKey(m.userId()))
                 .map(m -> GroupMapper.toMemberDTO(m, summaries.get(m.userId())))
                 .toList();
         List<UUID> activeIds = members.stream().filter(GroupMember::isActive).map(GroupMember::userId).toList();
+        int invitedCount = (int) members.stream().filter(m -> m.status() == MemberStatus.INVITED).count();
         ContentFilter effective = contentFilter.effectiveFor(activeIds, group.cap());
         return new GroupDetailDTO(group.id(), group.name(), group.emoji(), group.color(), group.ownerId(), mine.role(),
-                mine.status(), memberDTOs, GroupMapper.toCapDTO(group.cap()), effective.toDTO(),
+                mine.status(), activeIds.size(), invitedCount, memberDTOs, GroupMapper.toCapDTO(group.cap()), effective.toDTO(),
                 recentSessions(callerId, groupId));
     }
 

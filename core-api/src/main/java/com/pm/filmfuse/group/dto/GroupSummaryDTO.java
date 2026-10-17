@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * A group in the caller's list. {@code role} / {@code memberStatus} are the caller's;
  * {@code memberCount} counts ACTIVE members; {@code memberPreview} is up to 5 of them, earliest
- * joined first. {@code lastSessionAt} is the newest session of the group (null = none). Mirrored
+ * joined first, leaving out anyone blocked either way with the caller. {@code lastSessionAt} is the newest session of the group (null = none). Mirrored
  * in client/types/api.ts.
  */
 public record GroupSummaryDTO(

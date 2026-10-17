@@ -112,6 +112,48 @@ class SupabaseStorageGatewayTest {
     }
 
     @Test
+    void existsIsAnAuthenticatedHeadOnTheObject() {
+        server.expect(requestTo(SUPABASE + "/storage/v1/object/profile-photos/" + PATH))
+                .andExpect(method(HttpMethod.HEAD))
+                .andExpect(header("Authorization", "Bearer service-key"))
+                .andExpect(header("apikey", "service-key"))
+                .andRespond(withSuccess());
+
+        assertThat(gateway.exists("profile-photos", PATH)).isTrue();
+        server.verify();
+    }
+
+    @Test
+    void existsTreats400And404AsMissing() {
+        // storage-api answers a missing object with 400 + {"statusCode": "404"}; some versions use 404.
+        server.expect(requestTo(SUPABASE + "/storage/v1/object/profile-photos/" + PATH))
+                .andRespond(withStatus(HttpStatus.BAD_REQUEST));
+        server.expect(requestTo(SUPABASE + "/storage/v1/object/profile-photos/" + PATH))
+                .andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+        assertThat(gateway.exists("profile-photos", PATH)).isFalse();
+        assertThat(gateway.exists("profile-photos", PATH)).isFalse();
+        server.verify();
+    }
+
+    @Test
+    void existsFailureIsUpstreamUnavailableNotFalse() {
+        server.expect(requestTo(SUPABASE + "/storage/v1/object/profile-photos/" + PATH))
+                .andRespond(withServerError());
+        server.expect(requestTo(SUPABASE + "/storage/v1/object/profile-photos/" + PATH))
+                .andRespond(withStatus(HttpStatus.UNAUTHORIZED));
+        server.expect(requestTo(SUPABASE + "/storage/v1/object/profile-photos/" + PATH))
+                .andRespond(withException(new ConnectException("refused")));
+
+        for (int i = 0; i < 3; i++) {
+            assertThatThrownBy(() -> gateway.exists("profile-photos", PATH))
+                    .isInstanceOf(UpstreamUnavailableException.class)
+                    .hasMessage("Photo storage is temporarily unavailable.");
+        }
+        server.verify();
+    }
+
+    @Test
     void connectionFailureIsUpstreamUnavailable() {
         server.expect(requestTo(SUPABASE + "/storage/v1/object/profile-photos"))
                 .andRespond(withException(new ConnectException("refused")));

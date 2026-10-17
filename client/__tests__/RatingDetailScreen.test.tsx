@@ -237,6 +237,9 @@ describe('RatingDetailScreen — composer', () => {
     expect(validateComment('ok')).toBeNull();
     expect(validateComment(` ${'x'.repeat(500)} `)).toBeNull();
     expect(validateComment('x'.repeat(501))).toBe('Keep it under 500 characters.');
+    expect(validateComment('line one\nline two')).toBeNull();
+    expect(validateComment('evil\u202Etxt')).toMatch(/invisible formatting/);
+    expect(validateComment('bell\u0007')).toMatch(/control characters/);
   });
 });
 

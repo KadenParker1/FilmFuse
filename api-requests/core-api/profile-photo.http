@@ -1,7 +1,9 @@
 ### FilmFuse core-api - profile photo
 # Token: see me.http. Flow: 1) get a signed upload URL, 2) PUT the JPEG to it, 3) confirm the path.
 # With SUPABASE_SERVICE_ROLE_KEY blank, core-api uses a mock storage gateway: step 1 returns a fake
-# URL (step 2 will fail) but steps 1 and 3 still exercise the API. For a real upload against
+# URL (step 2 will fail) but steps 1 and 3 still exercise the API (the mock reports every object
+# as present). With real storage, confirm HEADs the object first: skip step 2 and step 3 is a 400
+# {"message": "Upload the photo before confirming it."}. For a real upload against
 # `supabase start`, set the service_role key that `supabase status` prints.
 
 @baseUrl = http://localhost:8080

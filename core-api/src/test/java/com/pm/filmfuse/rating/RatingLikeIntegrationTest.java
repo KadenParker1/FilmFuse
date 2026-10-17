@@ -107,6 +107,35 @@ class RatingLikeIntegrationTest extends AbstractFeedIntegrationTest {
     }
 
     @Test
+    void likeCountLeavesOutLikesFromPeopleBlockedEitherWayWithTheViewer() throws Exception {
+        TestUser author = user();
+        TestUser viewer = user();
+        TestUser blocksViewer = user();
+        TestUser blockedByViewer = user();
+        TestUser fan = user();
+        befriend(author, viewer);
+        befriend(author, fan);
+        String id = review(author, newMovie(), "PUBLIC");
+        like(blocksViewer, id).andExpect(status().isNoContent());
+        like(blockedByViewer, id).andExpect(status().isNoContent());
+        like(fan, id).andExpect(status().isNoContent());
+        block(blocksViewer, viewer);
+        block(viewer, blockedByViewer);
+
+        assertItem(viewer, id, 1, false, false);
+        int movie = jdbc.queryForObject("select movie_id from app.ratings where id = ?::uuid", Integer.class, id);
+        movieRatings(viewer, movie, EVERYONE, null).andExpect(jsonPath("$.items[0].likeCount").value(1));
+        userRatings(viewer, author.id(), null).andExpect(jsonPath("$.items[0].likeCount").value(1));
+        // Everyone else still counts all three; the likes themselves are kept.
+        assertItem(fan, id, 3, true, false);
+        assertItem(author, id, 3, false, true);
+        assertThat(likeRows(id)).isEqualTo(3);
+        // Unblocking brings the like back into the viewer's count.
+        unblock(viewer, blockedByViewer);
+        assertItem(viewer, id, 2, false, false);
+    }
+
+    @Test
     void deletingARatingDeletesItsLikes() throws Exception {
         TestUser author = user();
         TestUser fan = user();

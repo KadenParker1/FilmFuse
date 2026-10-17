@@ -47,7 +47,8 @@ function memberSubtitle(m: GroupMemberDTO): string | undefined {
 function InviteMoreSheet({ group, visible, onClose }: { group: GroupDetailDTO; visible: boolean; onClose: () => void }) {
   const add = useAddMembers();
   const [selected, setSelected] = useState<string[]>([]);
-  const room = Math.max(0, MAX_GROUP_MEMBERS - group.members.length);
+  // Counts, not members.length: the list leaves out people blocked either way with the viewer.
+  const room = Math.max(0, MAX_GROUP_MEMBERS - group.memberCount - group.invitedCount);
   const close = () => {
     setSelected([]);
     add.reset();
@@ -134,7 +135,7 @@ function GroupDetail({ group }: { group: GroupDetailDTO }) {
   const isOwner = group.role === 'OWNER';
   const invited = group.memberStatus === 'INVITED';
   const color = groupColor(group.color);
-  const activeCount = group.members.filter((m) => m.status === 'ACTIVE').length;
+  const activeCount = group.memberCount;
 
   const closeConfirm = () => {
     remove.reset();

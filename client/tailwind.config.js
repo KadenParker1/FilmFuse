@@ -6,6 +6,11 @@ const color = (name) => `rgb(var(--color-${name}) / <alpha-value>)`;
 module.exports = {
   content: ['./app/**/*.{js,jsx,ts,tsx}', './components/**/*.{js,jsx,ts,tsx}', './auth/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
+  // 'class', not the default 'media': on web NativeWind sets the colour scheme itself once its
+  // darkMode flag lands in <head>, and with 'media' that throws ("Cannot manually set color scheme")
+  // and crashes the dev server page. We don't use `dark:` variants - ThemeRoot switches palettes
+  // via CSS variables from React Native's useColorScheme() - so 'class' changes nothing visually.
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {

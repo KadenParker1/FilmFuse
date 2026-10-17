@@ -1,5 +1,6 @@
 package com.pm.filmfuse.moderation.dto;
 
+import com.pm.filmfuse.common.validation.SafeText;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -23,10 +24,11 @@ public record CreateReportDTO(
         ReportReason reason,
 
         @Size(max = 500, message = "Details cannot exceed 500 characters")
+        @SafeText(multiline = true)
         String details) {
 
     public CreateReportDTO {
         targetId = targetId == null ? null : targetId.strip();
-        details = details == null || details.isBlank() ? null : details.strip();
+        details = details == null || details.isBlank() ? null : details.replace("\r\n", "\n").strip();
     }
 }

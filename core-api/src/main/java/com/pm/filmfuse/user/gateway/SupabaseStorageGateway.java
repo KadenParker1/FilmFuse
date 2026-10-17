@@ -63,6 +63,30 @@ public class SupabaseStorageGateway implements StorageGateway {
         return storageUrl + "/object/public/" + bucket + "/" + path;
     }
 
+    /**
+     * {@code HEAD /object/{bucket}/{path}} (authenticated; the same call supabase-js
+     * {@code exists()} makes). 2xx = exists. storage-api reports a missing object or bucket as 400
+     * (with a {@code "statusCode": "404"} body) or 404, so both mean "no"; anything else is an outage.
+     */
+    @Override
+    public boolean exists(String bucket, String path) {
+        try {
+            HttpStatusCode status = restClient.head()
+                    .uri("/object/" + bucket + "/" + path)
+                    .exchange((request, response) -> response.getStatusCode());
+            if (status.is2xxSuccessful()) {
+                return true;
+            }
+            if (status.value() == 400 || status.value() == 404) {
+                return false;
+            }
+            throw new UpstreamUnavailableException(UNAVAILABLE,
+                    new IllegalStateException("Supabase Storage HEAD returned " + status.value()));
+        } catch (RestClientException ex) {
+            throw new UpstreamUnavailableException(UNAVAILABLE, ex);
+        }
+    }
+
     /** {@code DELETE /object/{bucket}} with {@code {"prefixes": [path]}}; a missing object is a 200 with an empty list. */
     @Override
     public void delete(String bucket, String path) {

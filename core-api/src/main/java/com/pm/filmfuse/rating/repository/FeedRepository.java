@@ -22,6 +22,7 @@ import org.springframework.stereotype.Repository;
  * Other people's ratings ({@code /feed}, {@code /movies/{id}/ratings}, {@code /users/{id}/ratings})
  * and {@code app.rating_likes}. Every read embeds {@link RatingVisibilitySql#visibleTo}; author,
  * certification, like count, "liked by me" and the visible comment count come back in the same query (no per-row lookups).
+ * The like count leaves out likes from people blocked either way with the viewer (SECURITY.md #16).
  * Keyset order: {@code updated_at desc, id desc}.
  */
 @Repository
@@ -32,7 +33,8 @@ public class FeedRepository {
                    r.created_at, r.updated_at,
                    a.username, a.display_name, a.profile_image_url,
                    m.certification,
-                   (select count(*) from app.rating_likes l where l.rating_id = r.id) as like_count,
+                   (select count(*) from app.rating_likes l
+                    where l.rating_id = r.id and not %s) as like_count,
                    exists (select 1 from app.rating_likes l where l.rating_id = r.id and l.user_id = :viewer)
                        as liked_by_me,
                    (select count(*) from app.rating_comments c join app.profiles ca on ca.id = c.user_id
@@ -40,7 +42,8 @@ public class FeedRepository {
             from app.ratings r
             join app.profiles a on a.id = r.user_id
             join app.movies m on m.id = r.movie_id
-            where """.formatted(RatingVisibilitySql.commentVisibleTo());
+            where """.formatted(SocialGraphService.sqlBlockedEitherWay("l.user_id", ":viewer"),
+            RatingVisibilitySql.commentVisibleTo());
 
     /** The viewer and their friends: the FRIENDS scope's authors. */
     private static final String FRIENDS_AND_SELF = "r.user_id in (select cast(:viewer as uuid) union all "

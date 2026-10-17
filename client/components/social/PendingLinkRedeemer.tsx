@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useRootNavigationState, useRouter } from 'expo-router';
+import { useRootNavigationState, useRouter, type Href } from 'expo-router';
 import { clearPendingLink, getPendingLink } from '../../lib/pendingLink';
 
 /**
@@ -20,7 +20,8 @@ export function PendingLinkRedeemer() {
       const path = await getPendingLink().catch(() => null);
       if (!path) return;
       await clearPendingLink().catch(() => {});
-      router.push(path);
+      // Only the allow-listed shapes (/invite/…, /user/…, /ratings/…) are ever stored or read back.
+      router.push(path as Href);
     })();
   }, [navReady, router]);
 

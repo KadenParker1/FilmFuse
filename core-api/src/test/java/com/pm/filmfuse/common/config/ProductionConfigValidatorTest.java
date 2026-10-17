@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
@@ -23,7 +24,7 @@ class ProductionConfigValidatorTest {
                 .withProperty("filmfuse.app.web-url", "https://filmfuse.vercel.app")
                 .withProperty("app.cors.allowed-origins", "https://filmfuse.vercel.app")
                 .withProperty("filmfuse.ml.base-url", "http://python-ml-service.railway.internal:8001")
-                .withProperty("filmfuse.ml.internal-key", "internal")
+                .withProperty("filmfuse.ml.internal-key", "0123456789abcdef0123456789abcdef")
                 .withProperty("filmfuse.email.provider", "smtp")
                 .withProperty("spring.mail.password", "resend-key")
                 .withProperty("springdoc.api-docs.enabled", "false")
@@ -82,6 +83,23 @@ class ProductionConfigValidatorTest {
                 .withProperty("filmfuse.ml.internal-key", ""))).isEmpty();
         assertThat(ProductionConfigValidator.problems(valid().withProperty("spring.mail.password", "")))
                 .containsExactly("spring.mail.password must be set when filmfuse.email.provider=smtp");
+    }
+
+    @Test
+    void theMlKeyMustBeAtLeastThirtyTwoCharacters() {
+        String shortKey = "k".repeat(31);
+        List<String> problems = ProductionConfigValidator.problems(
+                valid().withProperty("filmfuse.ml.internal-key", shortKey));
+        assertThat(problems).containsExactly("filmfuse.ml.internal-key must be at least 32 characters");
+        assertThat(String.join(" ", problems)).doesNotContain(shortKey);
+        // Surrounding whitespace does not count towards the length.
+        assertThat(ProductionConfigValidator.problems(valid().withProperty("filmfuse.ml.internal-key",
+                "  " + shortKey + "   "))).containsExactly("filmfuse.ml.internal-key must be at least 32 characters");
+        assertThat(ProductionConfigValidator.problems(valid().withProperty("filmfuse.ml.internal-key", "k".repeat(32))))
+                .isEmpty();
+        // Without an ML URL the key is unused, so its length does not matter.
+        assertThat(ProductionConfigValidator.problems(valid().withProperty("filmfuse.ml.base-url", "")
+                .withProperty("filmfuse.ml.internal-key", "short"))).isEmpty();
     }
 
     @Test

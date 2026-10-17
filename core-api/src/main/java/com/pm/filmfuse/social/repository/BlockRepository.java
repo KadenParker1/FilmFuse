@@ -63,6 +63,19 @@ public class BlockRepository {
                 new MapSqlParameterSource("blocker", blocker).addValue("others", others), UUID.class));
     }
 
+    /** Which of {@code others} have blocked {@code user} or been blocked by them. */
+    public Set<UUID> blockedEitherWayAmong(UUID user, Collection<UUID> others) {
+        if (others.isEmpty()) {
+            return Set.of();
+        }
+        return new HashSet<>(jdbc.queryForList("""
+                        select blocked_id from app.blocks where blocker_id = :user and blocked_id in (:others)
+                        union
+                        select blocker_id from app.blocks where blocked_id = :user and blocker_id in (:others)
+                        """,
+                new MapSqlParameterSource("user", user).addValue("others", others), UUID.class));
+    }
+
     /** Everyone {@code blocker} has blocked, most recent first. */
     public List<BlockedUser> blockedBy(UUID blocker) {
         return jdbc.query("""

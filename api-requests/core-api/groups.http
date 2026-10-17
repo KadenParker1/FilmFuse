@@ -31,7 +31,8 @@ Content-Type: application/json
 GET {{baseUrl}}/api/v1/groups
 Authorization: Bearer {{token}}
 
-### Detail: members, comfort cap, effective filter (no attribution), recent sessions
+### Detail: memberCount/invitedCount, members, comfort cap, effective filter (no attribution), recent sessions
+# members (and memberPreview in the list) leave out anyone blocked either way with you; the counts don't.
 GET {{baseUrl}}/api/v1/groups/{{groupId}}
 Authorization: Bearer {{token}}
 

@@ -39,7 +39,8 @@ Content-Type: application/json
 
 {"groupId": "{{groupId}}", "memberIds": ["{{otherUserId}}"]}
 
-### The session: results (vetoed last), votes, members, effectiveFilter
+### The session: results (vetoed last), votes, memberCount/votedCount, members, effectiveFilter
+# members, createdBy and each result's memberScores leave out anyone blocked either way with you.
 GET {{baseUrl}}/api/v1/sessions/{{sessionId}}
 Authorization: Bearer {{token}}
 

@@ -157,6 +157,16 @@ public class SocialGraphService {
         return blocks.blockersOf(user);
     }
 
+    /**
+     * Which of {@code others} are blocked either way with {@code viewer} (one query). Used to leave
+     * them out of member lists the viewer sees.
+     */
+    @Transactional(readOnly = true)
+    public Set<UUID> blockedEitherWayAmong(UUID viewer, Collection<UUID> others) {
+        List<UUID> candidates = others.stream().filter(id -> !id.equals(viewer)).distinct().toList();
+        return blocks.blockedEitherWayAmong(viewer, candidates);
+    }
+
     /** {@code other}'s standing relative to {@code viewer}. */
     @Transactional(readOnly = true)
     public FriendshipState stateOf(UUID viewer, UUID other) {

@@ -1,5 +1,6 @@
 package com.pm.filmfuse.group.dto;
 
+import com.pm.filmfuse.common.validation.SafeText;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -16,9 +17,11 @@ import java.util.UUID;
 public record CreateGroupDTO(
         @NotBlank(message = "Name is required")
         @Size(max = 40, message = "Name cannot exceed 40 characters")
+        @SafeText
         String name,
 
         @Size(max = 8, message = "Emoji cannot exceed 8 characters")
+        @SafeText
         String emoji,
 
         @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Color must look like #RRGGBB")

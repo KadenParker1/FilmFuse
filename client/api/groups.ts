@@ -104,9 +104,16 @@ export function useRemoveMember() {
     mutationFn: ({ groupId, userId }: MemberVars) =>
       apiClient.del<void>(`/groups/${id(groupId)}/members/${id(userId)}`),
     onSuccess: (_, { groupId, userId }) => {
-      qc.setQueryData<GroupDetailDTO>(queryKeys.group(groupId), (g) =>
-        g ? { ...g, members: g.members.filter((m) => m.user.id !== userId) } : g,
-      );
+      qc.setQueryData<GroupDetailDTO>(queryKeys.group(groupId), (g) => {
+        const removed = g?.members.find((m) => m.user.id === userId);
+        if (!g || !removed) return g;
+        return {
+          ...g,
+          memberCount: g.memberCount - (removed.status === 'ACTIVE' ? 1 : 0),
+          invitedCount: g.invitedCount - (removed.status === 'INVITED' ? 1 : 0),
+          members: g.members.filter((m) => m.user.id !== userId),
+        };
+      });
       // The effective filter may loosen once they're gone.
       void qc.invalidateQueries({ queryKey: queryKeys.group(groupId) });
       void qc.invalidateQueries({ queryKey: queryKeys.groupList });

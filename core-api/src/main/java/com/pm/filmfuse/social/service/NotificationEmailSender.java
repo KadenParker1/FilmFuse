@@ -3,6 +3,7 @@ package com.pm.filmfuse.social.service;
 import com.pm.filmfuse.common.config.AppProperties;
 import com.pm.filmfuse.email.EmailGateway;
 import com.pm.filmfuse.email.EmailMessage;
+import com.pm.filmfuse.email.MailErrors;
 import com.pm.filmfuse.social.repository.SocialProfileRepository;
 import com.pm.filmfuse.social.repository.SocialProfileRepository.Contact;
 import com.pm.filmfuse.user.model.NotificationType;
@@ -20,7 +21,8 @@ import org.springframework.stereotype.Component;
 /**
  * The one way a notification email goes out. For each recipient it checks, in this order: the
  * recipient has {@code type} switched on in their notification settings, and has an email
- * address - otherwise they are skipped. A failed send is logged (ids only, never an address) and
+ * address - otherwise they are skipped. A failed send is logged (user id, exception class and an address-redacted message - never the
+ * exception itself, whose provider text can carry the address; SECURITY.md #18) and
  * swallowed, so one bad recipient never stops the others or the change that triggered the email.
  * Callers invoke it after commit ({@code @TransactionalEventListener(AFTER_COMMIT)}) or from a job.
  */
@@ -78,11 +80,11 @@ public class NotificationEmailSender {
                     emailGateway.send(new EmailMessage(contact.email(), draft.subject(), draft.body()));
                     sent++;
                 } catch (RuntimeException ex) {
-                    log.warn("Could not send a {} email to user {}", type, id, ex);
+                    log.warn("Could not send a {} email to user {}: {}", type, id, MailErrors.describe(ex));
                 }
             }
         } catch (RuntimeException ex) {
-            log.warn("Could not send {} emails to {} users", type, ids.size(), ex);
+            log.warn("Could not send {} emails to {} users: {}", type, ids.size(), MailErrors.describe(ex));
         }
         return sent;
     }

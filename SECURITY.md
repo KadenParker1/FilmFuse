@@ -79,13 +79,37 @@ distributed addresses. In-app rate limits only blunt the second; it needs an edg
   constants (column lists, `RatingVisibilitySql`, `SocialGraphService.sql*`, an enum column name).
   `LIKE` input is escaped.
 - **Email**: subjects have control characters replaced (no header injection). Bodies are plain text.
+  A failed send is logged as user id plus `MailErrors.describe(ex)`: exception classes and messages
+  with addresses redacted, never the exception or its stack trace.
+- **Display text** (`common.validation.@SafeText`): display name, bio, group name and emoji, rating
+  notes, comment bodies and report details refuse the following, with a 400 and
+  `fieldErrors.<field>` = "Cannot contain control characters or invisible formatting characters":
+  - C0/C1 control characters and DEL. Line feeds are allowed in the multi-line fields (bio, notes,
+    comments, report details), where CRLF is normalised to LF first.
+  - Bidi embeddings, overrides and isolates (U+202A–U+202E, U+2066–U+2069).
+  - A zero-width character (U+200B–U+200D, U+2060, U+FEFF) at the start or end. Inside text they
+    are kept, because emoji sequences need ZWJ.
+
+  Usernames were already `^[a-z0-9_]{3,30}$`. `client/lib/safeText.ts` mirrors the rule.
+- **Blocked members** (#15): in group detail, `memberPreview` and the session view, people blocked
+  either way with the viewer are left out of `members`, `createdBy` and each result's `memberScores`
+  keys.
+  - The new `memberCount`/`invitedCount` (group) and `memberCount`/`votedCount` (session) still
+    count everyone, so the client sizes "room", member counts and "x of y voted" from them.
+  - Vote tallies still include the hidden person's votes, and the stored results, ranking and
+    `groupScore` are untouched.
+  - The Fuse meter only draws the members it is given, so hidden members' scores simply drop out of
+    the shares.
+  - Leaving people out was chosen over an anonymised placeholder, because any stable placeholder id
+    would let the viewer work out who it is.
 
 ### Configuration, errors and headers
 - `ProductionConfigValidator` stops a `prod` startup when any of these holds:
   - A DB or service-role secret is blank.
   - JWKS, issuer, Supabase or web URLs are not https, or point at a local host.
   - A CORS origin is a wildcard or not https.
-  - The ML URL is set without a key, or SMTP is enabled without a password.
+  - The ML URL is set without a key (or with one under 32 characters), or SMTP is enabled without a
+    password.
   - Rate limiting is off, or springdoc is on.
 
   Its messages name the property keys only, never the values.
@@ -105,8 +129,8 @@ distributed addresses. In-app rate limits only blunt the second; it needs an edg
   CSRF surface.
 
 ### python-ml-service
-- `/internal/*` requires `X-Internal-Key`, compared with `hmac.compare_digest`. The key is mandatory
-  unless `ENV=local`, and `ENV` defaults to `production`.
+- `/internal/*` requires `X-Internal-Key`, compared with `hmac.compare_digest`. The key is mandatory,
+  and at least 32 characters, unless `ENV=local`. `ENV` defaults to `production`.
 - `/docs`, `/redoc` and `/openapi.json` are disabled when `ENV=production`. `/health` stays public.
 - `BodySizeLimitMiddleware` returns 413 above `ML_MAX_BODY_BYTES` (default 5 MiB), for declared and
   chunked bodies alike.
@@ -131,19 +155,19 @@ before the fix.
 | 9 | Low | A `*` or http CORS origin was accepted in prod. | `common/config/SecurityConfig.java:94` | **Fixed**: validator |
 | 10 | Low | Genre and mood lists were only implicitly bounded, and an unknown mood tag was echoed back whole. | `user/service/TastePreferencesService.java:93-131` | **Fixed**: caps + 40-char echo |
 | 11 | Low | starlette was not pinned. | `python-ml-service/requirements.txt` | **Fixed** |
-| 12 | Low | The IP bucket uses the first `X-Forwarded-For` entry (`forward-headers-strategy=framework`). If Railway appends to a client-supplied header rather than replacing it, a client can rotate its apparent IP. Per-user limits are unaffected. | `application-prod.properties:8` | Open: verify Railway's behaviour, or key on a trusted header |
+| 12 | Low | The IP bucket uses the first `X-Forwarded-For` entry (`forward-headers-strategy=framework`). If Railway appends to a client-supplied header rather than replacing it, a client can rotate its apparent IP. Per-user limits are unaffected. | `application-prod.properties:8` | Open: verify Railway's behaviour (does its edge replace or append `X-Forwarded-For`?), or key on a trusted header. Per-user limits are the backstop. |
 | 13 | Low | Rate-limit state is in memory: it resets on restart and is not shared across replicas. | `common/ratelimit/RateLimiter.java` | Accepted (single replica) |
-| 14 | Low | Session membership is a snapshot. Someone removed from a group, or blocked later, keeps read access to past sessions they were in. | `group/service/SessionService.java:297` | Open (by design; revisit) |
-| 15 | Low | Group and session member lists include members who have blocked the viewer. | `group/service/GroupService.java:321` | Open |
-| 16 | Low | `likeCount` counts likes from users blocked either way. | `rating/repository/FeedRepository.java:35` | Open |
-| 17 | Low | Incoming friend requests from accounts suspended later are still listed. | `social/repository/FriendshipRepository.java:282` | Open |
-| 18 | Low | A failed send logs the mail exception, whose provider message can include the recipient address. | `social/service/NotificationEmailSender.java:81` | Open |
-| 19 | Low | Display and group names accept control and bidi characters, which allows render-level spoofing. | `user/dto/UpdateProfileRequestDTO.java`, `group/dto/CreateGroupDTO.java` | Open |
-| 20 | Low | `ML_INTERNAL_KEY` has no minimum length or entropy check. | `python-ml-service/app/core/config.py` | Open |
-| 21 | Low | The invite token is in the URL path, so it can appear in proxy access logs. | `social/controller/InviteController.java:31` | Open |
-| 22 | Low | Photo confirmation does not check that the object exists in storage, though it is limited to the caller's own prefix. | `user/service/ProfilePhotoService.java:49` | Open |
-| 23 | Info | `PENDING_VERIFICATION` account status is not enforced anywhere. | `user/model/AccountStatus.java` | Open |
-| 24 | Info | Python pins have no hashes (`--require-hashes`). Maven versions come from the Boot BOM. | `requirements.txt`, `pom.xml` | Open |
+| 14 | Low | Session membership is a snapshot. Someone removed from a group, or blocked later, keeps read access to past sessions they were in. | `group/service/SessionService.java:297` | Open (by design; revisit). Since #15, a later block does hide each from the other inside those sessions. |
+| 15 | Low | Group and session member lists include members who have blocked the viewer. | `group/service/GroupService.java:321` | **Fixed**: `SocialGraphService.blockedEitherWayAmong` (one query). See *Blocked members* below. |
+| 16 | Low | `likeCount` counts likes from users blocked either way. | `rating/repository/FeedRepository.java:35` | **Fixed**: the `like_count` subquery skips likers blocked either way with the viewer (`sqlBlockedEitherWay`, still one query). The likes are kept, so others' counts and an unblock are unaffected. |
+| 17 | Low | Incoming friend requests from accounts suspended later are still listed. | `social/repository/FriendshipRepository.java:282` | **Fixed**: incoming and outgoing lists skip `SUSPENDED` accounts (rows are kept; lifting the suspension restores them). Deleted accounts already cascade. |
+| 18 | Low | A failed send logs the mail exception, whose provider message can include the recipient address. | `social/service/NotificationEmailSender.java:81` | **Fixed**: `email.MailErrors.describe` logs the exception class chain with email-shaped text replaced by `<redacted-email>` and no stack trace. Used by `NotificationEmailSender` (both catch blocks) and `DigestJob`. `SmtpEmailGateway` logs no exception text. |
+| 19 | Low | Display and group names accept control and bidi characters, which allows render-level spoofing. | `user/dto/UpdateProfileRequestDTO.java`, `group/dto/CreateGroupDTO.java` | **Fixed**: `common.validation.@SafeText` (see *Abuse and input limits*). Sign-in `user_metadata` names that fail it are dropped at provisioning. The client pre-checks group names and comments (`lib/safeText.ts`). |
+| 20 | Low | `ML_INTERNAL_KEY` has no minimum length or entropy check. | `python-ml-service/app/core/config.py` | **Fixed**: at least 32 characters (after trimming) unless `ENV=local`, else startup fails. `ProductionConfigValidator` requires the same when `filmfuse.ml.base-url` is set. Neither message echoes the key. |
+| 21 | Low | The invite token is in the URL path, so it can appear in proxy access logs. | `social/controller/InviteController.java:31` | Open: tokens are single-use and only their hashes are stored. Moving the token to a body or header changes the client contract. |
+| 22 | Low | Photo confirmation does not check that the object exists in storage, though it is limited to the caller's own prefix. | `user/service/ProfilePhotoService.java:49` | **Fixed**: `StorageGateway.exists` (Supabase: authenticated `HEAD /object/{bucket}/{path}`, the call supabase-js `exists()` makes; 400/404 = missing, other errors = 502). A missing object gets 400 "Upload the photo before confirming it." The mock answers true unless a test calls `markMissing`. |
+| 23 | Info | `PENDING_VERIFICATION` account status is not enforced anywhere. | `user/model/AccountStatus.java` | **Fixed**: removed. Only the enum, the V1 CHECK and the TS union referenced it. `V17__drop_pending_verification_status` turns any such row into ACTIVE (it already behaved as one) and tightens the CHECK. |
+| 24 | Info | Python pins have no hashes (`--require-hashes`). Maven versions come from the Boot BOM. | `requirements.txt`, `pom.xml` | Open (versions are pinned exactly; hashes not yet added) |
 
 **Checked with nothing found:**
 - IDOR on groups, sessions (get/vote/refresh/pick/list by `groupId`), ratings, comments, likes,
@@ -165,5 +189,32 @@ before the fix.
     10k-element arrays, 413 before authentication.
   - `ProductionConfigValidatorTest`, `EmailMessageTest` and `MigrationIntegrationTest` (ml_reader).
   - Header and error-leak tests in `SecurityIntegrationTest`, list caps in `PreferencesIntegrationTest`.
+  - Low findings (#15–#23):
+    - `MemberBlockVisibilityIntegrationTest`: detail, list preview, invited count, session members,
+      creator, `memberScores`, counts and tallies.
+    - `RatingLikeIntegrationTest.likeCountLeavesOutLikesFromPeopleBlockedEitherWayWithTheViewer`, across
+      the feed, movie and user lists.
+    - `FriendRequestIntegrationTest.requestsWithAnAccountSuspendedSinceAreNotListed`.
+    - `MailErrorsTest` and `NotificationEmailSenderLoggingTest`: a gateway throws with the address in the
+      message and its cause, and the captured log has the user id and classes but no address and no
+      stack trace.
+    - `SafeTextValidatorTest` covers the rules. `SafeTextIntegrationTest` checks that every annotated
+      field gives a 400 with `fieldErrors`, line feeds pass only in bodies, ordinary Unicode and ZWJ
+      emoji are accepted, and unsafe sign-in metadata names are dropped.
+    - `ProductionConfigValidatorTest.theMlKeyMustBeAtLeastThirtyTwoCharacters`.
+    - `ProfilePhotoIntegrationTest` (missing object = 400, no delete, other users' paths never reach
+      storage) and `SupabaseStorageGatewayTest` (HEAD with the service key; 400/404 = false; 5xx, 401
+      and connection errors = upstream unavailable).
+    - `MigrationIntegrationTest.statusIsOnlyActiveOrSuspended` (V17).
 - **python-ml-service**: `tests/test_security.py` covers docs off in production, `/health` public,
-  413 for declared and chunked bodies, and the `ENV` default.
+  413 for declared and chunked bodies, and the `ENV` default. `tests/test_config.py` covers the
+  32-character key minimum outside `ENV=local`: the key is never echoed, whitespace padding does not
+  count, and short keys are fine locally.
+- **client**:
+  - `__tests__/safeText.test.ts` covers the mirrored rules, plus the `validateGroupForm` and
+    `validateComment` pre-checks.
+  - `sessionComponents.test.tsx`: the Fuse meter ignores scores of hidden members, and "x of y
+    voted" uses the server counts.
+  - `GroupsScreens.test.tsx`: room and the member count come from the server counts.
+  - `apiGroups.test.tsx`: optimistic removal keeps the counts in step.
+  - Existing screen tests already show server `fieldErrors` inline on every affected form.

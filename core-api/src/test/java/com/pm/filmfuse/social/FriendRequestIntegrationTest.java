@@ -244,6 +244,30 @@ class FriendRequestIntegrationTest extends AbstractSocialIntegrationTest {
     }
 
     @Test
+    void requestsWithAnAccountSuspendedSinceAreNotListed() throws Exception {
+        TestUser me = user();
+        TestUser suspendedSender = user();
+        TestUser suspendedTarget = user();
+        TestUser activeSender = user();
+        sendRequest(suspendedSender, me).andExpect(status().isOk());
+        sendRequest(activeSender, me).andExpect(status().isOk());
+        sendRequest(me, suspendedTarget).andExpect(status().isOk());
+        jdbc.update("update app.profiles set status = 'SUSPENDED' where id in (?, ?)",
+                suspendedSender.id(), suspendedTarget.id());
+
+        mockMvc.perform(get("/api/v1/friends/requests").param("direction", "INCOMING").with(me.auth()))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].user.id").value(activeSender.id().toString()));
+        mockMvc.perform(get("/api/v1/friends/requests").param("direction", "OUTGOING").with(me.auth()))
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        // Lifting the suspension brings the request back; the row itself was kept.
+        jdbc.update("update app.profiles set status = 'ACTIVE' where id = ?", suspendedSender.id());
+        mockMvc.perform(get("/api/v1/friends/requests").param("direction", "INCOMING").with(me.auth()))
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
     void usersWithoutAUsernameCanStillBeAskedById() throws Exception {
         TestUser alice = user();
         TestUser nameless = userWithoutUsername();

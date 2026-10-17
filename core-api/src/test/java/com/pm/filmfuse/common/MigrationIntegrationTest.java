@@ -1,6 +1,7 @@
 package com.pm.filmfuse.common;
 
 import com.pm.filmfuse.support.AbstractIntegrationTest;
+import com.pm.filmfuse.user.model.AccountStatus;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,21 @@ class MigrationIntegrationTest extends AbstractIntegrationTest {
             assertThat(jdbc.queryForObject("select has_table_privilege('ml_reader', ?, 'SELECT')", Boolean.class, table))
                     .as("SELECT on %s", table).isFalse();
         }
+    }
+
+    /** V17: the never-enforced PENDING_VERIFICATION status is gone; ACTIVE and SUSPENDED remain. */
+    @Test
+    void statusIsOnlyActiveOrSuspended() {
+        assertThatThrownBy(() -> jdbc.update(
+                "insert into app.profiles (id, status) values (?, 'PENDING_VERIFICATION')", UUID.randomUUID()))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        for (AccountStatus status : AccountStatus.values()) {
+            UUID id = UUID.randomUUID();
+            jdbc.update("insert into app.profiles (id, status) values (?, ?)", id, status.name());
+            jdbc.update("delete from app.profiles where id = ?", id);
+        }
+        assertThat(AccountStatus.values()).extracting(Enum::name)
+                .containsExactly("ACTIVE", "SUSPENDED");
     }
 
     @Test
