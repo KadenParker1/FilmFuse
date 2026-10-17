@@ -38,3 +38,16 @@ export function parseDimensionKey(key: string): { kind: 'genre' | 'mood'; id: st
   if ((kind !== 'genre' && kind !== 'mood') || !id) return null;
   return { kind, id };
 }
+
+/** How many top genres the persona card can list. */
+export const TOP_GENRES_MAX = 5;
+
+/**
+ * The line under the top genres. The server lists only genres above neutral (5), so the list may
+ * be short or empty while a taste is still forming.
+ */
+export function topGenresNote(count: number): string | null {
+  if (count === 0) return 'No standout genres yet. Rate a few movies you loved and they’ll show up here.';
+  if (count < TOP_GENRES_MAX) return 'Only the genres you rate above neutral show up. Rate more to round this out.';
+  return null;
+}

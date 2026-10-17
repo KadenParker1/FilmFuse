@@ -331,23 +331,23 @@ class ContentFilterTest {
 
         @Test
         void certificationOnly() {
-            assertThat(filter(PG_13, Map.of(), false).label()).isEqualTo("Up to PG-13");
-            assertThat(filter(NC_17, Map.of(), false).label()).isEqualTo("Up to NC-17");
-            assertThat(filter(G, Map.of(), false).label()).isEqualTo("Up to G");
+            assertThat(filter(PG_13, Map.of(), false).label()).isEqualTo("Rated PG-13 or below");
+            assertThat(filter(NC_17, Map.of(), false).label()).isEqualTo("Rated NC-17 or below");
+            assertThat(filter(G, Map.of(), false).label()).isEqualTo("Rated G only");
         }
 
         @Test
         void certificationAndLimits() {
             assertThat(filter(PG_13, Map.of(SEXUAL, NONE, VIOLENCE, MILD), false).label())
-                    .isEqualTo("Up to PG-13 · mild violence · no sexual content");
+                    .isEqualTo("Rated PG-13 or below · mild violence at most · no sexual content");
         }
 
         @Test
         void limitsOnlyStartWithACapital() {
             assertThat(filter(null, Map.of(LANGUAGE, NONE), false).label()).isEqualTo("No bad language");
             assertThat(filter(null, Map.of(DRUGS, MODERATE, FRIGHTENING, MILD), false).label())
-                    .isEqualTo("Moderate drug content · mild frightening scenes");
-            assertThat(filter(null, Map.of(LANGUAGE, MILD), false).label()).isEqualTo("Mild language");
+                    .isEqualTo("Moderate drug content at most · mild frightening scenes at most");
+            assertThat(filter(null, Map.of(LANGUAGE, MILD), false).label()).isEqualTo("Mild language at most");
         }
     }
 

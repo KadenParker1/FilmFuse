@@ -7,7 +7,7 @@ import { PendingRatingsBanner } from '../../components/rating/PendingRatingsBann
 import { Body, Button, EmptyState, ErrorState, Heading, Label, Screen, Skeleton, errorMessage } from '../../components/ui';
 import { useTheme } from '../../theme/useTheme';
 
-/** The big gold "Tonight" call to action: an ad-hoc session with whichever friends are around. */
+/** The big cobalt "Tonight" call to action: an ad-hoc session with whichever friends are around. */
 function TonightCta({ onPress }: { onPress: () => void }) {
   const { colors } = useTheme();
   return (
@@ -15,14 +15,16 @@ function TonightCta({ onPress }: { onPress: () => void }) {
       accessibilityRole="button"
       accessibilityLabel="Tonight: start a movie night with friends"
       onPress={onPress}
-      className="flex-row items-center gap-4 rounded-3xl bg-gold px-5 py-5 active:opacity-90"
+      className="flex-row items-center gap-4 rounded-[22px] bg-accent px-5 py-5 active:opacity-90"
     >
-      <Ionicons name="sparkles" size={32} color={colors.onGold} />
-      <View className="flex-1">
-        <Text className="font-display-bold text-2xl text-on-gold">Tonight</Text>
-        <Text className="font-body text-sm text-on-gold">Pick friends, get picks everyone will like.</Text>
+      <View className="h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.accent2 }}>
+        <Ionicons name="sparkles" size={24} color={colors.onAccent2} />
       </View>
-      <Ionicons name="arrow-forward" size={24} color={colors.onGold} />
+      <View className="flex-1">
+        <Text className="font-display-bold text-2xl tracking-tight text-on-accent">Tonight</Text>
+        <Text className="font-body text-sm text-on-accent">Pick friends, get picks everyone will like.</Text>
+      </View>
+      <Ionicons name="arrow-forward" size={24} color={colors.onAccent} />
     </Pressable>
   );
 }
@@ -71,7 +73,7 @@ export default function GroupsScreen() {
           <View testID="group-invites" className="gap-3">
             <Label accessibilityRole="header">Invites · {invites.length}</Label>
             {failure ? (
-              <Body accessibilityRole="alert" className="text-sm text-velvet">
+              <Body accessibilityRole="alert" className="text-sm text-danger">
                 {errorMessage(failure)}
               </Body>
             ) : null}

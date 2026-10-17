@@ -28,15 +28,15 @@ export function Toast({ message, tone = 'success', bottomOffset = 96 }: Props) {
         testID="toast"
         accessibilityRole="alert"
         accessibilityLiveRegion="polite"
-        className="flex-row items-center gap-2 rounded-full border border-border bg-surface-raised px-4 py-2.5 shadow-lg"
+        className="flex-row items-center gap-2 rounded-full bg-raised px-4 py-2.5 shadow-lg"
       >
         {tone === 'busy' ? (
-          <ActivityIndicator testID="toast-spinner" size="small" color={colors.gold} />
+          <ActivityIndicator testID="toast-spinner" size="small" color={colors.accent} />
         ) : (
           <Ionicons
             name={tone === 'success' ? 'checkmark-circle' : 'alert-circle'}
             size={18}
-            color={tone === 'success' ? colors.success : colors.velvet}
+            color={tone === 'success' ? colors.success : colors.danger}
           />
         )}
         <Text className="font-body-medium text-sm text-text">{message}</Text>

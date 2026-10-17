@@ -36,7 +36,7 @@ export default function BlockedPeopleScreen() {
     content = (
       <Card className="gap-1 py-2">
         {unblock.isError ? (
-          <Body accessibilityRole="alert" className="py-1 text-sm text-velvet">
+          <Body accessibilityRole="alert" className="py-1 text-sm text-danger">
             {errorMessage(unblock.error)}
           </Body>
         ) : null}

@@ -289,4 +289,51 @@ describe('GroupSettingsSheet', () => {
     expect(screen.getByRole('radio', { name: 'G' })).toBeChecked();
     expect(screen.getByRole('radio', { name: 'Language: None' })).toBeChecked();
   });
+
+  it('hides "Sex & nudity" below R and drops SEXUAL from the saved cap', async () => {
+    await render(
+      <GroupSettingsSheet
+        group={makeGroup({ comfortCap: { maxCertification: 'R', contentLimits: { SEXUAL: 'MILD', VIOLENCE: 'MILD' } } })}
+        visible
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+      />,
+    );
+    expect(screen.getByRole('radio', { name: 'Sex & nudity: Mild' })).toBeChecked();
+    await fireEvent.press(screen.getByRole('radio', { name: 'PG-13' }));
+    expect(screen.queryByText('Sex & nudity')).toBeNull();
+    await fireEvent.press(screen.getByRole('button', { name: 'Save changes' }));
+    expect(update.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ comfortCap: { maxCertification: 'PG_13', contentLimits: { VIOLENCE: 'MILD' } } }),
+      }),
+      expect.anything(),
+    );
+  });
+
+  it.each([['No limit', null], ['R', 'R'], ['NC-17', 'NC_17']])('shows "Sex & nudity" for %s', async (_label, cert) => {
+    await render(
+      <GroupSettingsSheet
+        group={makeGroup({ comfortCap: { maxCertification: cert as 'R' | null, contentLimits: {} } })}
+        visible
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+      />,
+    );
+    expect(screen.getByText('Sex & nudity')).toBeOnTheScreen();
+  });
+
+  it('never sends a hidden SEXUAL value already stored under a sub-R cap', async () => {
+    await render(
+      <GroupSettingsSheet
+        group={makeGroup({ comfortCap: { maxCertification: 'G', contentLimits: { SEXUAL: 'NONE' } } })}
+        visible
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+      />,
+    );
+    expect(screen.queryByText('Sex & nudity')).toBeNull();
+    await fireEvent.press(screen.getByRole('button', { name: 'Save changes' }));
+    expect(update.mutate.mock.calls[0][0].body.comfortCap).toEqual({ maxCertification: 'G', contentLimits: {} });
+  });
 });

@@ -5,7 +5,7 @@ export const GROUP_EMOJIS = [
   '🦸', '💘', '😂', '😱', '🐉', '🏴‍☠️', '👽', '🎉',
 ] as const;
 
-/** Swatches that sit well on the Marquee background (gold, velvet and friends). */
+/** Group swatches (stored per group, so the hex values stay stable across restyles). */
 export const GROUP_COLORS = [
   { hex: '#F5B942', name: 'Marquee gold' },
   { hex: '#C7354A', name: 'Velvet red' },

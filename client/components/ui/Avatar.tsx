@@ -11,7 +11,7 @@ type Props = {
   className?: string;
 };
 
-/** Round profile photo, falling back to gold-on-velvet initials when there's no photo (or it fails). */
+/** Round profile photo, falling back to initials on the tangerine second accent when there's no photo (or it fails). */
 export function Avatar({ uri, displayName, username, size = 64, className = '' }: Props) {
   const [failedUri, setFailedUri] = useState<string | null>(null);
   const showImage = !!uri && failedUri !== uri;
@@ -22,7 +22,7 @@ export function Avatar({ uri, displayName, username, size = 64, className = '' }
       accessible
       accessibilityRole="image"
       accessibilityLabel={`${name}'s profile photo`}
-      className={`items-center justify-center overflow-hidden rounded-full border-2 border-gold bg-velvet ${className}`}
+      className={`items-center justify-center overflow-hidden rounded-full bg-accent2 ${className}`}
       style={{ width: size, height: size }}
     >
       {showImage ? (
@@ -35,7 +35,7 @@ export function Avatar({ uri, displayName, username, size = 64, className = '' }
           onError={() => setFailedUri(uri)}
         />
       ) : (
-        <Text testID="avatar-initials" className="font-display-bold text-on-velvet" style={{ fontSize: size * 0.38 }}>
+        <Text testID="avatar-initials" className="font-body-bold text-on-accent2" style={{ fontSize: size * 0.38 }}>
           {initialsFor(displayName, username)}
         </Text>
       )}

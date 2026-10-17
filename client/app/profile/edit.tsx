@@ -54,6 +54,9 @@ function EditForm({ profile }: { profile: ProfileResponseDTO }) {
   }
 
   return (
+    <View className="gap-6">
+    {/* The avatar's initials follow the name as it's typed. */}
+    <ProfilePhotoSection profile={profile} displayName={displayName} username={username} />
     <Card className="gap-4">
       <ProfileBasicsForm
         displayName={displayName}
@@ -76,13 +79,13 @@ function EditForm({ profile }: { profile: ProfileResponseDTO }) {
         />
         <Text
           testID="bio-counter"
-          className={`self-end font-body text-xs ${bio.length >= BIO_MAX ? 'text-velvet' : 'text-text-muted'}`}
+          className={`self-end font-body text-xs ${bio.length >= BIO_MAX ? 'text-danger' : 'text-muted'}`}
         >
           {bio.length}/{BIO_MAX}
         </Text>
       </View>
       {generalError ? (
-        <Body testID="save-error" accessibilityLiveRegion="polite" className="text-velvet">
+        <Body testID="save-error" accessibilityLiveRegion="polite" className="text-danger">
           {generalError}
         </Body>
       ) : null}
@@ -93,6 +96,7 @@ function EditForm({ profile }: { profile: ProfileResponseDTO }) {
       ) : null}
       <Button title="Save" loading={update.isPending} disabled={blockSave} onPress={save} />
     </Card>
+    </View>
   );
 }
 
@@ -110,7 +114,7 @@ export default function EditProfileScreen() {
             accessibilityLabel="Back"
             hitSlop={8}
             onPress={() => (router.canGoBack() ? router.back() : router.replace('/profile'))}
-            className="h-10 w-10 items-center justify-center rounded-full border border-border bg-surface active:opacity-70"
+            className="h-10 w-10 items-center justify-center rounded-xl bg-raised active:opacity-70"
           >
             <Ionicons name="chevron-back" size={22} color={colors.text} />
           </Pressable>
@@ -127,7 +131,6 @@ export default function EditProfileScreen() {
           />
         ) : (
           <View className="gap-6 pb-10">
-            <ProfilePhotoSection profile={me.data} />
             <EditForm profile={me.data} />
           </View>
         )}

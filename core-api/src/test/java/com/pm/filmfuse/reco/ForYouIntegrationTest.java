@@ -99,6 +99,45 @@ class ForYouIntegrationTest extends AbstractTasteIntegrationTest {
     }
 
     @Test
+    void favouritesAreNeverRecommended() throws Exception {
+        TestUser user = userWithVector();
+        int genre = uniqueGenre();
+        int favorite = topMovie(genre, "PG");
+        int eligible = topMovie(genre, "PG");
+        setFavorites(user, favorite);
+        buildVector(user);
+        mlReturns(favorite, eligible);
+
+        assertThat(forYouIds(user)).containsExactly(eligible);
+        MlUserRecommendationRequest request = lastRequest();
+        assertThat(request.candidateMovieIds()).contains(eligible).doesNotContain(favorite);
+        assertThat(request.excludeMovieIds()).contains(favorite);
+    }
+
+    @Test
+    void theFallbackSkipsFavouritesToo() throws Exception {
+        TestUser user = user();
+        int genre = uniqueGenre();
+        int favorite = topMovie(genre, "PG-13");
+        int other = topMovie(genre, "PG");
+        setFavorites(user, favorite);
+        assertThat(forYouIds(user)).contains(other).doesNotContain(favorite);
+        verify(mlClient, never()).userRecommendations(any());
+    }
+
+    @Test
+    void favouritesAddedAfterCachingAreDroppedAtOnce() throws Exception {
+        TestUser user = userWithVector();
+        int genre = uniqueGenre();
+        int first = topMovie(genre, "PG");
+        int second = topMovie(genre, "PG");
+        mlReturns(first, second);
+        assertThat(forYouIds(user)).containsExactly(first, second);
+        setFavorites(user, first);
+        assertThat(forYouIds(user)).containsExactly(second);
+    }
+
+    @Test
     void anIneligibleMovieFromTheRankerIsDroppedForAPg13User() throws Exception {
         TestUser user = userWithVector();
         setComfort(user, "{\"maxCertification\": \"PG_13\"}");

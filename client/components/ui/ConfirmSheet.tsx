@@ -39,7 +39,7 @@ export function ConfirmSheet({
         {message ? <Body muted>{message}</Body> : null}
         {children}
         {error ? (
-          <Body accessibilityRole="alert" className="text-sm text-velvet">
+          <Body accessibilityRole="alert" className="text-sm text-danger">
             {errorMessage(error)}
           </Body>
         ) : null}

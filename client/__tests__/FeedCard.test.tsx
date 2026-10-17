@@ -5,7 +5,7 @@ jest.mock('../components/rating/QuickRateProvider', () => ({
   useQuickRate: () => ({ openQuickRate: mockOpenQuickRate, openRatePicker: jest.fn(), showTasteUpdating: jest.fn() }),
 }));
 
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
 import { useLikeRating, useUnlikeRating } from '../api/feed';
 import { FeedCard, FeedCardSkeletons } from '../components/feed/FeedCard';
 import { makeFeedItem, makeMovie, makeUser } from '../test-utils/fixtures';
@@ -217,5 +217,28 @@ describe('FeedCard — comments and overflow', () => {
     expect(screen.getByRole('button', { name: "Options for Grace Hopper's rating" })).toBeOnTheScreen();
     await render(<FeedCard item={item({ id: 'mine', mine: true })} />);
     expect(screen.queryByRole('button', { name: /^Options for/ })).toBeNull();
+  });
+});
+
+describe('FeedCard — layout without the movie row (bug 7: a big gap above the score)', () => {
+  it('puts the score in the author header when the movie row is hidden', async () => {
+    await render(<FeedCard item={item()} showMovie={false} />);
+    const header = screen.getByTestId('feed-header-f1');
+    expect(within(header).getByTestId('feed-score-f1')).toBeOnTheScreen();
+    expect(within(header).getByText('Grace Hopper')).toBeOnTheScreen();
+    expect(screen.queryByText('Heat')).toBeNull();
+    expect(screen.queryByTestId('feed-poster-compact')).toBeNull();
+  });
+
+  it('keeps the score beside the movie when the movie row is shown', async () => {
+    await render(<FeedCard item={item()} />);
+    expect(within(screen.getByTestId('feed-header-f1')).queryByTestId('feed-score-f1')).toBeNull();
+    expect(screen.getByTestId('feed-score-f1')).toBeOnTheScreen();
+  });
+
+  it('still shows the score with neither author nor movie', async () => {
+    await render(<FeedCard item={item()} showMovie={false} showAuthor={false} />);
+    expect(screen.queryByTestId('feed-header-f1')).toBeNull();
+    expect(screen.getByLabelText('Rated 8 out of 10, really like')).toBeOnTheScreen();
   });
 });

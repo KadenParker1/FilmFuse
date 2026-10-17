@@ -26,7 +26,7 @@ function FriendsEmpty({ onFindFriends }: { onFindFriends: () => void }) {
       <View className="w-full max-w-sm gap-3 self-center">
         <Button
           title="Rate a movie"
-          icon={<Ionicons name="star-outline" size={18} color={colors.onGold} />}
+          icon={<Ionicons name="star-outline" size={18} color={colors.onAccent} />}
           onPress={openRatePicker}
         />
         <Button title="Find friends" variant="secondary" onPress={onFindFriends} />

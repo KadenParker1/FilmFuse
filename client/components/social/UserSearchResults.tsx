@@ -59,7 +59,7 @@ export function UserSearchResults({ query }: { query: string }) {
       ListFooterComponent={
         <View>
           {search.isFetchingNextPage ? (
-            <ActivityIndicator testID="search-loading-more" color={colors.gold} className="py-4" />
+            <ActivityIndicator testID="search-loading-more" color={colors.accent} className="py-4" />
           ) : null}
           {search.isError && items.length > 0 ? (
             <ErrorState

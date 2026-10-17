@@ -3,10 +3,16 @@ import { View } from 'react-native';
 import { useComfortSettings, useUpdateComfortSettings } from '../../api/comfort';
 import { BackButton } from '../../components/BackButton';
 import { ComfortFields } from '../../components/comfort/ComfortFields';
-import { GROUP_PRIVACY_NOTE, sameLimits, validateComfort } from '../../components/comfort/comfortCopy';
+import { GROUP_PRIVACY_NOTE, limitsForCertification, sameLimits, validateComfort } from '../../components/comfort/comfortCopy';
 import { Body, Button, ErrorState, Heading, Screen, Skeleton, errorMessage } from '../../components/ui';
 import { ApiError } from '../../lib/apiClient';
 import type { ComfortSettingsDTO } from '../../types/api';
+
+/** Never send a hidden row's value (e.g. "Sex & nudity" below R). */
+const saveable = (d: ComfortSettingsDTO): ComfortSettingsDTO => ({
+  ...d,
+  contentLimits: limitsForCertification(d.maxCertification, d.contentLimits),
+});
 
 const sameSettings = (a: ComfortSettingsDTO, b: ComfortSettingsDTO) =>
   a.maxCertification === b.maxCertification && a.allowUnrated === b.allowUnrated && sameLimits(a.contentLimits, b.contentLimits);
@@ -30,7 +36,7 @@ function ComfortForm({ initial }: { initial: ComfortSettingsDTO }) {
       setLocalError(problem);
       return;
     }
-    update.mutate(draft, {
+    update.mutate(saveable(draft), {
       onSuccess: (settings) => {
         setSaved(settings);
         setDraft(settings);
@@ -60,7 +66,7 @@ function ComfortForm({ initial }: { initial: ComfortSettingsDTO }) {
       </Body>
 
       {error ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           {error}
         </Body>
       ) : update.isSuccess && !dirty ? (

@@ -80,7 +80,7 @@ export function FeedList({
       ListFooterComponent={
         <View>
           {query.isFetchingNextPage ? (
-            <ActivityIndicator testID={`${testID}-loading-more`} color={colors.gold} className="py-4" />
+            <ActivityIndicator testID={`${testID}-loading-more`} color={colors.accent} className="py-4" />
           ) : null}
           {query.isError && items.length > 0 ? (
             <ErrorState

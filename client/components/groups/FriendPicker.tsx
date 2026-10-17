@@ -85,13 +85,13 @@ export function FriendPicker({ selected, onChange, max, excludeIds = [], title =
               {personName(f)}
             </Text>
             {f.displayName && f.username ? (
-              <Text className="font-body text-sm text-text-muted">@{f.username}</Text>
+              <Text className="font-body text-sm text-muted">@{f.username}</Text>
             ) : null}
           </View>
           <Ionicons
             name={checked ? 'checkmark-circle' : 'ellipse-outline'}
             size={24}
-            color={checked ? colors.gold : colors.textMuted}
+            color={checked ? colors.accent : colors.muted}
           />
         </Pressable>
       );
@@ -102,12 +102,12 @@ export function FriendPicker({ selected, onChange, max, excludeIds = [], title =
     <View className="gap-2">
       <View className="flex-row items-center justify-between">
         <Label accessibilityRole="header">{title}</Label>
-        <Text testID="friend-picker-count" className="font-body text-sm text-text-muted">
+        <Text testID="friend-picker-count" className="font-body text-sm text-muted">
           {selected.length} of {max} selected
         </Text>
       </View>
       {full ? (
-        <Body accessibilityLiveRegion="polite" className="text-sm text-velvet">
+        <Body accessibilityLiveRegion="polite" className="text-sm text-danger">
           That’s the most you can add.
         </Body>
       ) : null}

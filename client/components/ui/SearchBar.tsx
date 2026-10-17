@@ -15,16 +15,16 @@ export function SearchBar({ value, onChangeText, label = 'Search', placeholder, 
   const { colors } = useTheme();
   return (
     <View
-      className={`min-h-12 flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 ${className}`}
+      className={`min-h-12 flex-row items-center gap-2 rounded-xl border border-border bg-surface px-3.5 ${className}`}
     >
-      <Ionicons name="search" size={18} color={colors.textMuted} />
+      <Ionicons name="search" size={18} color={colors.muted} />
       <TextInput
         accessibilityLabel={label}
         accessibilityRole="search"
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder ?? label}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={colors.muted}
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="search"
@@ -39,7 +39,7 @@ export function SearchBar({ value, onChangeText, label = 'Search', placeholder, 
           onPress={() => onChangeText('')}
           className="active:opacity-60"
         >
-          <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+          <Ionicons name="close-circle" size={18} color={colors.muted} />
         </Pressable>
       ) : null}
     </View>

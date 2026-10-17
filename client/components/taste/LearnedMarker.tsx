@@ -14,7 +14,7 @@ export function LearnedMarker({ learned, testID }: { learned: number | null; tes
       className="h-5 justify-center"
     >
       <View className="h-1 w-full rounded-full bg-border" />
-      <View className="absolute -ml-2 h-4 w-4 rounded-full border-2 border-bg bg-velvet" style={{ left }} />
+      <View className="absolute -ml-2 h-4 w-4 rounded-full border-2 border-bg bg-danger" style={{ left }} />
     </View>
   );
 }

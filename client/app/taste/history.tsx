@@ -10,21 +10,21 @@ function HistoryEntry({ entry, last }: { entry: TasteHistoryEntryDTO; last: bool
   return (
     <View testID={`history-${entry.version}`} className="flex-row gap-3">
       <View className="items-center">
-        <View className="mt-1.5 h-3 w-3 rounded-full bg-gold" />
+        <View className="mt-1.5 h-3 w-3 rounded-full bg-accent" />
         {!last ? <View className="w-0.5 flex-1 bg-border" /> : null}
       </View>
       <Card className="mb-4 flex-1 gap-2">
         <View className="flex-row items-center justify-between gap-2">
           <Text className="font-body-semibold text-base text-text">{REASON_LABELS[entry.reason]}</Text>
-          <Text className="font-body text-xs text-text-muted">v{entry.version}</Text>
+          <Text className="font-body text-xs text-muted">v{entry.version}</Text>
         </View>
-        <Text className="font-body text-sm text-text-muted">{timeAgo(entry.createdAt)}</Text>
+        <Text className="font-body text-sm text-muted">{timeAgo(entry.createdAt)}</Text>
         {entry.topGenres.length > 0 ? (
           <View className="flex-row flex-wrap gap-2">
             {entry.topGenres.map((g) => {
               const v = dimensionValue(g);
               return (
-                <View key={g.key} className="rounded-full border border-border bg-surface-raised px-3 py-1">
+                <View key={g.key} className="rounded-full bg-raised px-3 py-1">
                   <Text className="font-body-medium text-xs text-text">
                     {g.label}
                     {v != null ? ` ${formatScore(v)}` : ''}
@@ -33,7 +33,11 @@ function HistoryEntry({ entry, last }: { entry: TasteHistoryEntryDTO; last: bool
               );
             })}
           </View>
-        ) : null}
+        ) : (
+          <Text testID={`history-${entry.version}-no-genres`} className="font-body text-sm text-muted">
+            No standout genres in this version yet.
+          </Text>
+        )}
       </Card>
     </View>
   );

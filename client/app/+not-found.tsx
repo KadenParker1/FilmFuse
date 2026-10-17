@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <Screen>
       <EmptyState icon="help-circle-outline" title="This reel is missing" message="That page doesn't exist." />
-      <Link href="/" className="self-center p-4 font-body-semibold text-gold">
+      <Link href="/" className="self-center p-4 font-body-semibold text-accent-ink">
         Back to FilmFuse
       </Link>
     </Screen>

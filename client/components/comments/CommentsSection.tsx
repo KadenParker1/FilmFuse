@@ -64,7 +64,7 @@ function CommentRow({ comment, onDelete, onReport }: RowProps) {
           <Text className="font-body-semibold text-sm text-text" numberOfLines={1}>
             {name}
           </Text>
-          {when ? <Text className="font-body text-xs text-text-muted">{when}</Text> : null}
+          {when ? <Text className="font-body text-xs text-muted">{when}</Text> : null}
         </View>
         <Body testID={`comment-body-${comment.id}`}>{comment.body}</Body>
       </View>
@@ -76,7 +76,7 @@ function CommentRow({ comment, onDelete, onReport }: RowProps) {
           onPress={onDelete}
           className="h-9 w-9 items-center justify-center rounded-full active:opacity-70"
         >
-          <Ionicons name="trash-outline" size={18} color={colors.textMuted} />
+          <Ionicons name="trash-outline" size={18} color={colors.muted} />
         </Pressable>
       ) : null}
       {!pending && !comment.mine ? (
@@ -87,7 +87,7 @@ function CommentRow({ comment, onDelete, onReport }: RowProps) {
           onPress={onReport}
           className="h-9 w-9 items-center justify-center rounded-full active:opacity-70"
         >
-          <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
+          <Ionicons name="ellipsis-horizontal" size={18} color={colors.muted} />
         </Pressable>
       ) : null}
     </View>
@@ -137,18 +137,18 @@ function Composer({ ratingId }: { ratingId: string }) {
         maxLength={COMMENT_MAX}
         multiline
         placeholder="Add a comment"
-        placeholderTextColor={colors.textMuted}
-        className="min-h-16 rounded-xl border border-border bg-surface-raised p-3 font-body text-base text-text"
+        placeholderTextColor={colors.muted}
+        className="min-h-16 rounded-xl bg-raised p-3 font-body text-base text-text"
         textAlignVertical="top"
       />
       <View className="flex-row items-center justify-between gap-3">
-        <Text testID="comment-counter" className="font-body text-xs text-text-muted">
+        <Text testID="comment-counter" className="font-body text-xs text-muted">
           {draft.length}/{COMMENT_MAX}
         </Text>
         <Button size="sm" title="Post" accessibilityLabel="Post comment" disabled={empty} onPress={send} />
       </View>
       {error ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           {error}
         </Body>
       ) : null}
@@ -212,7 +212,7 @@ export function CommentsSection({ ratingId }: { ratingId: string }) {
           />
         ) : null}
         {comments.isError ? (
-          <Body accessibilityRole="alert" className="text-sm text-velvet">
+          <Body accessibilityRole="alert" className="text-sm text-danger">
             {errorMessage(comments.error)}
           </Body>
         ) : null}
@@ -225,7 +225,7 @@ export function CommentsSection({ ratingId }: { ratingId: string }) {
       <Heading size="sm">Comments</Heading>
       {list}
       {remove.isError ? (
-        <Body testID="comment-delete-error" accessibilityRole="alert" className="text-sm text-velvet">
+        <Body testID="comment-delete-error" accessibilityRole="alert" className="text-sm text-danger">
           Couldn&apos;t delete the comment. {errorMessage(remove.error)}
         </Body>
       ) : null}

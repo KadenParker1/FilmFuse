@@ -68,11 +68,15 @@ public class TasteSignalRepository {
         return ids("select movie_id from app.user_favorite_movies where user_id = :id order by movie_id", userId);
     }
 
-    /** Never recommended in For you: rated, marked unseen or dismissed. */
+    /**
+     * Never recommended in For you: rated, marked unseen, dismissed or a favourite (they already
+     * love it). Group sessions do not use this - a favourite there is a fair rewatch.
+     */
     public Set<Integer> forYouExclusions(UUID userId) {
         Set<Integer> excluded = new HashSet<>(ratedIds(userId));
         excluded.addAll(unseenIds(userId));
         excluded.addAll(dismissedIds(userId));
+        excluded.addAll(favoriteIds(userId));
         return excluded;
     }
 

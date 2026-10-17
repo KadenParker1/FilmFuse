@@ -34,7 +34,7 @@ type Props = {
   fieldErrors?: Record<string, string>;
 };
 
-const toneClass = { muted: 'text-text-muted', good: 'text-success', bad: 'text-velvet' } as const;
+const toneClass = { muted: 'text-muted', good: 'text-success', bad: 'text-danger' } as const;
 
 /** Display name + username with live availability. Shared by edit profile and onboarding. */
 export function ProfileBasicsForm({

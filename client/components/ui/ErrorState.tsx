@@ -30,7 +30,11 @@ export function ErrorState({ title = 'Something went wrong', error, message, onR
     <View
       className={`items-center justify-center gap-3 px-6 ${compact ? 'py-6' : 'flex-1 py-12'}`}
     >
-      <Ionicons name="cloud-offline-outline" size={compact ? 28 : 40} color={colors.velvet} />
+      <View
+        className={`items-center justify-center bg-danger-soft ${compact ? 'h-12 w-12 rounded-2xl' : 'h-20 w-20 rounded-3xl'}`}
+      >
+        <Ionicons name="cloud-offline-outline" size={compact ? 24 : 36} color={colors.danger} />
+      </View>
       <Heading size="sm" className="text-center">
         {title}
       </Heading>

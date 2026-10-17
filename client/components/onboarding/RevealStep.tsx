@@ -33,7 +33,7 @@ export function RevealStep() {
   if (complete.isError) {
     content = (
       <View testID="reveal-error" className="gap-3">
-        <Body accessibilityRole="alert" className="text-center text-velvet">
+        <Body accessibilityRole="alert" className="text-center text-danger">
           {describeError(complete.error)}
         </Body>
         <Button title="Try again" variant="secondary" onPress={() => complete.mutate()} />
@@ -42,7 +42,7 @@ export function RevealStep() {
   } else if (!complete.isSuccess) {
     content = (
       <View testID="reveal-completing" className="items-center gap-3 py-10">
-        <ActivityIndicator color={colors.gold} />
+        <ActivityIndicator color={colors.accent} />
         <Body muted>Putting your taste together…</Body>
       </View>
     );
@@ -63,7 +63,7 @@ export function RevealStep() {
         {taste.data ? <PersonaCard profile={taste.data} /> : null}
         {!fresh ? (
           <View testID="reveal-building" className="flex-row items-center justify-center gap-2">
-            <ActivityIndicator size="small" color={colors.gold} />
+            <ActivityIndicator size="small" color={colors.accent} />
             <Body muted>Still tuning your taste profile…</Body>
           </View>
         ) : null}

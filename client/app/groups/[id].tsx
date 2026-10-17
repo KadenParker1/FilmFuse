@@ -68,7 +68,7 @@ function InviteMoreSheet({ group, visible, onClose }: { group: GroupDetailDTO; v
           />
         )}
         {add.isError ? (
-          <Body accessibilityRole="alert" className="text-sm text-velvet">
+          <Body accessibilityRole="alert" className="text-sm text-danger">
             {errorMessage(add.error)}
           </Body>
         ) : null}
@@ -92,7 +92,7 @@ function InvitedView({ group }: { group: GroupDetailDTO }) {
     <Card testID="group-invite-card" className="gap-3">
       <Body>You’ve been invited to join {group.name}.</Body>
       {failure ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           {errorMessage(failure)}
         </Body>
       ) : null}
@@ -193,7 +193,7 @@ function GroupDetail({ group }: { group: GroupDetailDTO }) {
             accessibilityLabel="Group settings"
             hitSlop={8}
             onPress={() => setSettingsOpen(true)}
-            className="h-10 w-10 items-center justify-center rounded-full border border-border bg-surface active:opacity-70"
+            className="h-10 w-10 items-center justify-center rounded-xl bg-raised active:opacity-70"
           >
             <Ionicons name="settings-outline" size={20} color={colors.text} />
           </Pressable>
@@ -207,7 +207,7 @@ function GroupDetail({ group }: { group: GroupDetailDTO }) {
           <FilterBanner filter={group.effectiveFilter} />
           <Button
             title="Start session"
-            icon={<Ionicons name="play" size={18} color={colors.onGold} />}
+            icon={<Ionicons name="play" size={18} color={colors.onAccent} />}
             onPress={() => router.push(`/sessions/new?groupId=${encodeURIComponent(group.id)}`)}
           />
         </>

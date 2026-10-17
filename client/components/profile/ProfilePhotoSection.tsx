@@ -11,7 +11,16 @@ import { canUseCamera, pickSquarePhoto, prepareProfilePhoto, type PhotoSource } 
  * The avatar with Change / Remove photo: pick (library, or camera on native) → square 512px JPEG →
  * upload. Updates the `me` cache, so the avatar refreshes everywhere. Used by edit profile and onboarding.
  */
-export function ProfilePhotoSection({ profile }: { profile: ProfileResponseDTO }) {
+export function ProfilePhotoSection({
+  profile,
+  displayName,
+  username,
+}: {
+  profile: ProfileResponseDTO;
+  /** The name being typed (not saved yet): the initials fallback follows it live. */
+  displayName?: string;
+  username?: string;
+}) {
   const { colors } = useTheme();
   const upload = useUploadProfilePhoto();
   const remove = useRemoveProfilePhoto();
@@ -53,7 +62,12 @@ export function ProfilePhotoSection({ profile }: { profile: ProfileResponseDTO }
 
   return (
     <View className="items-center gap-3">
-      <Avatar uri={profile.profileImageUrl} displayName={profile.displayName} username={profile.username} size={112} />
+      <Avatar
+        uri={profile.profileImageUrl}
+        displayName={displayName ?? profile.displayName}
+        username={username ?? profile.username}
+        size={112}
+      />
       <View className="flex-row gap-2">
         <Button
           title={busy ? 'Uploading…' : 'Change photo'}
@@ -67,7 +81,7 @@ export function ProfilePhotoSection({ profile }: { profile: ProfileResponseDTO }
         ) : null}
       </View>
       {error ? (
-        <Body testID="photo-error" accessibilityLiveRegion="polite" className="text-center text-velvet">
+        <Body testID="photo-error" accessibilityLiveRegion="polite" className="text-center text-danger">
           {error}
         </Body>
       ) : null}

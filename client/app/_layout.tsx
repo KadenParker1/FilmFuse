@@ -7,18 +7,22 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces/600SemiBold';
-import { Fraunces_700Bold } from '@expo-google-fonts/fraunces/700Bold';
-import { Inter_400Regular } from '@expo-google-fonts/inter/400Regular';
-import { Inter_500Medium } from '@expo-google-fonts/inter/500Medium';
-import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold';
+import { BricolageGrotesque_500Medium } from '@expo-google-fonts/bricolage-grotesque/500Medium';
+import { BricolageGrotesque_700Bold } from '@expo-google-fonts/bricolage-grotesque/700Bold';
+import { BricolageGrotesque_800ExtraBold } from '@expo-google-fonts/bricolage-grotesque/800ExtraBold';
+import { Figtree_400Regular } from '@expo-google-fonts/figtree/400Regular';
+import { Figtree_500Medium } from '@expo-google-fonts/figtree/500Medium';
+import { Figtree_600SemiBold } from '@expo-google-fonts/figtree/600SemiBold';
+import { Figtree_700Bold } from '@expo-google-fonts/figtree/700Bold';
 import { queryClient } from '../lib/queryClient';
 import { AuthProvider } from '../auth/AuthProvider';
 import { useAuth } from '../auth/useAuth';
 import { ThemeRoot } from '../components/ThemeRoot';
 import { FullScreenLoader } from '../components/FullScreenLoader';
 import { QuickRateProvider } from '../components/rating/QuickRateProvider';
-import { useScheme } from '../theme/useTheme';
+import { AppearanceProvider } from '../theme/AppearanceProvider';
+import { stackScreenOptions } from '../theme/navigation';
+import { statusBarStyle, useTheme } from '../theme/useTheme';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {
   // already hidden (e.g. fast refresh) — harmless
@@ -26,11 +30,13 @@ void SplashScreen.preventAutoHideAsync().catch(() => {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    Fraunces_600SemiBold,
-    Fraunces_700Bold,
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
+    BricolageGrotesque_500Medium,
+    BricolageGrotesque_700Bold,
+    BricolageGrotesque_800ExtraBold,
+    Figtree_400Regular,
+    Figtree_500Medium,
+    Figtree_600SemiBold,
+    Figtree_700Bold,
   });
   const ready = fontsLoaded || !!fontError;
 
@@ -41,15 +47,17 @@ export default function RootLayout() {
   if (!ready) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeRoot>
-          <QuickRateProvider>
-            <RootNavigator />
-          </QuickRateProvider>
-        </ThemeRoot>
-      </AuthProvider>
-    </QueryClientProvider>
+    <AppearanceProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ThemeRoot>
+            <QuickRateProvider>
+              <RootNavigator />
+            </QuickRateProvider>
+          </ThemeRoot>
+        </AuthProvider>
+      </QueryClientProvider>
+    </AppearanceProvider>
   );
 }
 
@@ -61,15 +69,15 @@ export default function RootLayout() {
  */
 function RootNavigator() {
   const { session, loading } = useAuth();
-  const scheme = useScheme();
+  const { scheme, colors } = useTheme();
 
   if (loading) return <FullScreenLoader />;
   const signedIn = !!session;
 
   return (
     <>
-      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
+      <StatusBar style={statusBarStyle(scheme)} />
+      <Stack screenOptions={stackScreenOptions(colors.bg)}>
         <Stack.Protected guard={signedIn} redirectTo="/sign-in">
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(onboarding)" />
@@ -80,6 +88,7 @@ function RootNavigator() {
           <Stack.Screen name="settings/blocked" />
           <Stack.Screen name="settings/comfort" />
           <Stack.Screen name="settings/notifications" />
+          <Stack.Screen name="settings/appearance" />
           <Stack.Screen name="groups/new" />
           <Stack.Screen name="groups/[id]" />
           <Stack.Screen name="sessions/new" />

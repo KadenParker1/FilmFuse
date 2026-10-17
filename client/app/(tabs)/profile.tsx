@@ -92,6 +92,12 @@ export default function ProfileScreen() {
             onPress={() => router.push('/settings/comfort')}
           />
           <Button
+            title="Appearance"
+            variant="secondary"
+            icon={<Ionicons name="contrast-outline" size={18} color={colors.text} />}
+            onPress={() => router.push('/settings/appearance')}
+          />
+          <Button
             title="Notifications"
             variant="secondary"
             icon={<Ionicons name="notifications-outline" size={18} color={colors.text} />}

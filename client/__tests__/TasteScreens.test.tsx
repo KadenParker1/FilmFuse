@@ -18,6 +18,7 @@ import { serveRoutes } from '../test-utils/fetchRoutes';
 import { makeDimension, makeHistoryEntry, makeMovie, makeTasteProfile } from '../test-utils/fixtures';
 import { renderWithClient } from '../test-utils/render';
 import { routerState } from '../test-utils/router';
+import { slideTo } from '../test-utils/slider';
 
 notifyManager.setScheduler((cb) => cb());
 
@@ -52,6 +53,25 @@ describe('PersonaCard', () => {
     expect(screen.getByTestId('taste-status')).toHaveTextContent('Updating…');
     expect(screen.queryByTestId('top-genres')).toBeNull();
     expect(screen.getByText(/Rate movies to sharpen it/)).toBeOnTheScreen();
+  });
+
+  // Bug 9: the server now sends only genres above neutral, so there may be none or fewer than five.
+  it('says so kindly when no genre is above neutral yet', async () => {
+    await render(<PersonaCard profile={makeTasteProfile({ topGenres: [] })} />);
+    expect(screen.queryByTestId('top-genres')).toBeNull();
+    expect(screen.getByTestId('top-genres-note')).toHaveTextContent(/No standout genres yet/);
+  });
+
+  it('lists a short top-genres list as is, with a note', async () => {
+    await render(<PersonaCard profile={makeTasteProfile({ topGenres: [makeDimension()] })} />);
+    expect(screen.getByTestId('top-genres')).toHaveTextContent(/Science Fiction7\.4/);
+    expect(screen.getByTestId('top-genres-note')).toHaveTextContent(/above neutral/);
+  });
+
+  it('has no note with a full five', async () => {
+    const five = ['28', '18', '35', '27', '99'].map((id) => makeDimension({ key: `genre:${id}`, label: `G${id}`, learned: 8 }));
+    await render(<PersonaCard profile={makeTasteProfile({ topGenres: five })} />);
+    expect(screen.queryByTestId('top-genres-note')).toBeNull();
   });
 });
 
@@ -112,9 +132,9 @@ describe('Taste editor', () => {
 
   it('saves stated genres only when a genre moved (replace-all, keeping the others)', async () => {
     const api = await open([{ method: 'PUT', path: '/me/preferences/genres', body: [] }]);
-    await fireEvent(screen.getByLabelText('Horror'), 'valueChange', 9);
+    await slideTo('Horror', 9);
     expect(screen.getByTestId('stated-vs-learned-genre:27')).toHaveTextContent('You said 9 · your ratings say 7');
-    await fireEvent(screen.getByLabelText('Comedy'), 'valueChange', 3);
+    await slideTo('Comedy', 3);
     await fireEvent.press(screen.getByRole('button', { name: 'Save changes' }));
     await waitFor(() => expect(screen.getByText('Saved. Your taste is updating.')).toBeOnTheScreen());
     expect(api.callsTo('PUT', '/me/preferences/genres')[0]?.body).toEqual([
@@ -132,7 +152,7 @@ describe('Taste editor', () => {
       { method: 'PUT', path: '/me/preferences/genres', body: [] },
       { method: 'PUT', path: '/me/preferences/moods', body: [] },
     ]);
-    await fireEvent(screen.getByLabelText('Dark & gritty'), 'valueChange', 2);
+    await slideTo('Dark & gritty', 2);
     await fireEvent.press(screen.getByRole('button', { name: 'Save changes' }));
     await waitFor(() => expect(api.callsTo('PUT', '/me/preferences/moods')).toHaveLength(1));
     expect(api.callsTo('PUT', '/me/preferences/moods')[0]?.body).toEqual([
@@ -144,7 +164,7 @@ describe('Taste editor', () => {
 
   it('shows a server validation error and keeps the changes', async () => {
     await open([{ method: 'PUT', path: '/me/preferences/genres', status: 400, body: { message: 'Unknown genre 878' } }]);
-    await fireEvent(screen.getByLabelText('Horror'), 'valueChange', 9);
+    await slideTo('Horror', 9);
     await fireEvent.press(screen.getByRole('button', { name: 'Save changes' }));
     await waitFor(() => expect(screen.getByText('Unknown genre 878')).toBeOnTheScreen());
     expect(screen.getByRole('button', { name: 'Save changes' })).toBeEnabled();
@@ -192,6 +212,8 @@ describe('Taste history', () => {
     expect(screen.getByTestId('history-3')).toHaveTextContent(/2 hours ago/);
     expect(screen.getByTestId('history-3')).toHaveTextContent(/Science Fiction 7\.4/);
     expect(screen.getByTestId('history-2')).toHaveTextContent(/Edited your taste/);
+    expect(screen.getByTestId('history-2-no-genres')).toHaveTextContent(/No standout genres/);
+    expect(screen.queryByTestId('history-3-no-genres')).toBeNull();
     expect(screen.getByTestId('history-1')).toHaveTextContent(/Finished onboarding/);
   });
 

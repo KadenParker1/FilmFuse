@@ -19,14 +19,14 @@ export function SessionSummaryRow({ session, onPress }: { session: SessionSummar
     >
       <View
         className={`h-2.5 w-2.5 rounded-full ${
-          session.status === 'OPEN' ? 'bg-success' : session.status === 'DECIDED' ? 'bg-gold' : 'bg-border'
+          session.status === 'OPEN' ? 'bg-success' : session.status === 'DECIDED' ? 'bg-accent' : 'bg-border'
         }`}
       />
       <View className="flex-1">
         <Text className="font-body-semibold text-base text-text" numberOfLines={1}>
           {title}
         </Text>
-        <Text className="font-body text-xs text-text-muted">{meta}</Text>
+        <Text className="font-body text-xs text-muted">{meta}</Text>
       </View>
     </Pressable>
   );

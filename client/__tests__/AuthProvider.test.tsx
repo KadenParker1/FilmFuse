@@ -66,3 +66,43 @@ describe('AuthProvider password recovery', () => {
     expect(supabase.auth.updateUser).toHaveBeenCalledWith({ password: 'brand-new-pw' });
   });
 });
+
+describe('AuthProvider cold load (bug 5: a deep link bounced to "/")', () => {
+  afterEach(() => {
+    (supabase.auth.getSession as jest.Mock).mockImplementation(() => Promise.resolve({ data: { session: null } }));
+    jest.useRealTimers();
+  });
+
+  it('stays loading when the session read fails, until INITIAL_SESSION brings the real session', async () => {
+    (supabase.auth.getSession as jest.Mock).mockImplementation(() => Promise.reject(new Error('lock timed out')));
+    const { result } = await renderHook(() => useAuth(), { wrapper });
+    await act(async () => {});
+    // A guessed "signed out" here would send /movie/12 to sign-in and then to "/".
+    expect(result.current.loading).toBe(true);
+    expect(result.current.session).toBeNull();
+
+    await act(async () => mockListener('INITIAL_SESSION', { access_token: 'real' }));
+    expect(result.current.loading).toBe(false);
+    expect(result.current.session).toEqual({ access_token: 'real' });
+  });
+
+  it('falls back to signed out if INITIAL_SESSION never comes after a failed read', async () => {
+    jest.useFakeTimers();
+    (supabase.auth.getSession as jest.Mock).mockImplementation(() => Promise.reject(new Error('broken')));
+    const { result } = await renderHook(() => useAuth(), { wrapper });
+    await act(async () => {});
+    expect(result.current.loading).toBe(true);
+    await act(async () => jest.advanceTimersByTime(5_000));
+    expect(result.current.loading).toBe(false);
+    expect(result.current.session).toBeNull();
+  });
+
+  it('ends loading with the stored session on a successful read', async () => {
+    (supabase.auth.getSession as jest.Mock).mockImplementation(() =>
+      Promise.resolve({ data: { session: { access_token: 'stored' } } }),
+    );
+    const { result } = await renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.session).toEqual({ access_token: 'stored' });
+  });
+});

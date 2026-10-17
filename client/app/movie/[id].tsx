@@ -30,7 +30,7 @@ function BackButton() {
       hitSlop={8}
       // A deep link or web refresh has no history to pop.
       onPress={() => (router.canGoBack() ? router.back() : router.replace('/discover'))}
-      className="h-10 w-10 items-center justify-center rounded-full border border-border bg-bg/80 active:opacity-70"
+      className="h-10 w-10 items-center justify-center rounded-xl bg-bg/80 active:opacity-70"
     >
       <Ionicons name="chevron-back" size={22} color={colors.text} />
     </Pressable>
@@ -64,7 +64,7 @@ function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
   const meta = metaLine(movie);
   return (
     <View className="w-full max-w-4xl self-center">
-      <View className="h-56 w-full overflow-hidden bg-surface-raised md:h-80">
+      <View className="h-56 w-full overflow-hidden bg-raised md:h-80">
         {movie.backdropUrl ? (
           <Image
             testID="movie-backdrop"
@@ -78,7 +78,7 @@ function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
       </View>
 
       <View className="flex-row gap-4 px-5">
-        <View className="-mt-20 h-48 w-32 overflow-hidden rounded-xl border border-border bg-surface-raised">
+        <View className="-mt-20 h-48 w-32 overflow-hidden rounded-2xl bg-raised">
           {movie.posterUrl ? (
             <Image
               testID="movie-poster"
@@ -90,7 +90,7 @@ function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
             />
           ) : (
             <View className="flex-1 items-center justify-center p-2">
-              <Ionicons name="film-outline" size={32} color={colors.textMuted} />
+              <Ionicons name="film-outline" size={32} color={colors.muted} />
             </View>
           )}
         </View>
@@ -99,11 +99,11 @@ function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
           {meta ? <Body muted className="text-sm">{meta}</Body> : null}
           {movie.voteAverage != null ? (
             <View
-              className="mt-1 flex-row items-center gap-1 self-start rounded-full bg-gold px-2.5 py-0.5"
+              className="mt-1 flex-row items-center gap-1 self-start rounded-full bg-accent px-2.5 py-0.5"
               accessibilityLabel={`TMDB rating ${movie.voteAverage.toFixed(1)} out of 10`}
             >
-              <Ionicons name="star" size={12} color={colors.onGold} />
-              <Text className="font-body-semibold text-sm text-on-gold">{movie.voteAverage.toFixed(1)}</Text>
+              <Ionicons name="star" size={12} color={colors.onAccent} />
+              <Text className="font-body-semibold text-sm text-on-accent">{movie.voteAverage.toFixed(1)}</Text>
             </View>
           ) : null}
         </View>
@@ -115,7 +115,7 @@ function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
             title={myRating.data ? 'Edit rating' : 'Rate'}
             className="flex-1"
             onPress={() => openQuickRate(toMovieSummary(movie))}
-            icon={<Ionicons name={myRating.data ? 'star' : 'star-outline'} size={18} color={colors.onGold} />}
+            icon={<Ionicons name={myRating.data ? 'star' : 'star-outline'} size={18} color={colors.onAccent} />}
           />
           <Button
             title="Add to watchlist"
@@ -128,7 +128,7 @@ function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
         </View>
         {myRating.data ? (
           <View testID="my-rating" className="-mt-2 flex-row items-center gap-2 self-center">
-            <Ionicons name="star" size={14} color={colors.gold} />
+            <Ionicons name="star" size={14} color={colors.accent} />
             <Text className="font-body-semibold text-sm text-text">Your rating {myRating.data.score}/10</Text>
           </View>
         ) : (

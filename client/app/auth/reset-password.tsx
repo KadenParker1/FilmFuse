@@ -87,7 +87,7 @@ export default function ResetPasswordScreen() {
                 onSubmitEditing={submit}
               />
               {error ? (
-                <Body testID="reset-error" accessibilityLiveRegion="polite" className="text-velvet">
+                <Body testID="reset-error" accessibilityLiveRegion="polite" className="text-danger">
                   {error}
                 </Body>
               ) : null}

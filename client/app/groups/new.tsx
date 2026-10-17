@@ -75,12 +75,12 @@ export default function NewGroupScreen() {
           max={MAX_INVITEES}
         />
         {errors.members ? (
-          <Body accessibilityRole="alert" className="text-sm text-velvet">
+          <Body accessibilityRole="alert" className="text-sm text-danger">
             {errors.members}
           </Body>
         ) : null}
         {generalError ? (
-          <Body accessibilityRole="alert" className="text-sm text-velvet">
+          <Body accessibilityRole="alert" className="text-sm text-danger">
             {generalError}
           </Body>
         ) : null}

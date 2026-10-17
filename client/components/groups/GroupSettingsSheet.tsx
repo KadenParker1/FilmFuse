@@ -4,6 +4,7 @@ import { useUpdateGroup } from '../../api/groups';
 import { ApiError } from '../../lib/apiClient';
 import type { ComfortCapDTO, GroupDetailDTO } from '../../types/api';
 import { CertificationPicker } from '../comfort/CertificationPicker';
+import { limitsForCertification } from '../comfort/comfortCopy';
 import { ContentLimitsEditor } from '../comfort/ContentLevelPicker';
 import { Body, Button, Label, Sheet, TextField, errorMessage } from '../ui';
 import { ColorSwatches, EmojiPicker } from './GroupStylePickers';
@@ -42,7 +43,7 @@ function SettingsForm({ group, onDone, onDelete }: { group: GroupDetailDTO; onDo
     setNameError(errors.name ?? null);
     if (errors.name) return;
     update.mutate(
-      { groupId: group.id, body: { name: name.trim(), emoji, color, comfortCap: cap } },
+      { groupId: group.id, body: { name: name.trim(), emoji, color, comfortCap: { ...cap, contentLimits: limitsForCertification(cap.maxCertification, cap.contentLimits) } } },
       { onSuccess: onDone },
     );
   };
@@ -72,15 +73,18 @@ function SettingsForm({ group, onDone, onDelete }: { group: GroupDetailDTO; onDo
           <CertificationPicker
             title="Highest rating for this group"
             value={cap.maxCertification}
-            onChange={(maxCertification) => setCap((c) => ({ ...c, maxCertification }))}
+            onChange={(maxCertification) =>
+              setCap((c) => ({ maxCertification, contentLimits: limitsForCertification(maxCertification, c.contentLimits) }))
+            }
           />
           <ContentLimitsEditor
             value={cap.contentLimits}
+            maxCertification={cap.maxCertification}
             onChange={(contentLimits) => setCap((c) => ({ ...c, contentLimits }))}
           />
         </View>
         {update.isError && !serverNameError ? (
-          <Body accessibilityRole="alert" className="text-sm text-velvet">
+          <Body accessibilityRole="alert" className="text-sm text-danger">
             {errorMessage(update.error)}
           </Body>
         ) : null}

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, Switch, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { Image } from 'expo-image';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { RATING_NOTE_MAX, useDeleteRating, useMyRating, useUpsertRating } from '../../api/ratings';
 import { ApiError } from '../../lib/apiClient';
 import { useTheme } from '../../theme/useTheme';
 import type { MovieSummaryDTO, RatingDTO, RatingSource, RatingVisibility } from '../../types/api';
-import { Body, Button, ChoiceGroup, ErrorState, Sheet, errorMessage } from '../ui';
+import { Body, Button, ChoiceGroup, errorMessage, ErrorState, Sheet, Toggle } from '../ui';
 import { MoviePicker } from './MoviePicker';
 import { ScoreTapRow } from './ScoreTapRow';
 
@@ -75,7 +75,7 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
   return (
     <View className="gap-5">
       <View className="flex-row items-center gap-4">
-        <View className="h-24 w-16 overflow-hidden rounded-lg border border-border bg-surface-raised">
+        <View className="h-24 w-16 overflow-hidden rounded-xl bg-raised">
           {movie.posterUrl ? (
             <Image
               testID="quick-rate-poster"
@@ -86,7 +86,7 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
             />
           ) : (
             <View className="flex-1 items-center justify-center">
-              <Ionicons name="film-outline" size={24} color={colors.textMuted} />
+              <Ionicons name="film-outline" size={24} color={colors.muted} />
             </View>
           )}
         </View>
@@ -114,21 +114,20 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
             maxLength={RATING_NOTE_MAX}
             multiline
             placeholder="What did you think? (optional)"
-            placeholderTextColor={colors.textMuted}
-            className="min-h-24 rounded-xl border border-border bg-surface-raised p-3 font-body text-base text-text"
+            placeholderTextColor={colors.muted}
+            className="min-h-24 rounded-xl bg-raised p-3 font-body text-base text-text"
             textAlignVertical="top"
           />
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
-              <Switch
+              <Toggle
                 accessibilityLabel="Contains spoilers"
                 value={spoilers}
                 onValueChange={setSpoilers}
-                trackColor={{ true: colors.gold, false: colors.border }}
               />
               <Text className="font-body text-sm text-text">Contains spoilers</Text>
             </View>
-            <Text testID="note-counter" className="font-body text-xs text-text-muted">
+            <Text testID="note-counter" className="font-body text-xs text-muted">
               {note.length}/{RATING_NOTE_MAX}
             </Text>
           </View>
@@ -140,8 +139,8 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
           onPress={() => setNoteOpen(true)}
           className="flex-row items-center gap-2 self-start active:opacity-70"
         >
-          <Ionicons name="create-outline" size={18} color={colors.gold} />
-          <Text className="font-body-medium text-base text-gold">Add a note</Text>
+          <Ionicons name="create-outline" size={18} color={colors.accent} />
+          <Text className="font-body-medium text-base text-accent-ink">Add a note</Text>
         </Pressable>
       )}
 
@@ -153,11 +152,10 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
               {postToFeed ? 'Shown in your feed.' : 'Only you can see this rating.'}
             </Body>
           </View>
-          <Switch
+          <Toggle
             accessibilityLabel="Post to feed"
             value={postToFeed}
             onValueChange={setPostToFeed}
-            trackColor={{ true: colors.gold, false: colors.border }}
           />
         </View>
         {postToFeed ? (
@@ -166,7 +164,7 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
       </View>
 
       {error ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           {error}
         </Body>
       ) : null}
@@ -194,7 +192,7 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
 function QuickRateBody(props: Omit<FormProps, 'existing'>) {
   const { colors } = useTheme();
   const mine = useMyRating(props.movie.id);
-  if (mine.isPending) return <ActivityIndicator testID="quick-rate-loading" color={colors.gold} className="py-10" />;
+  if (mine.isPending) return <ActivityIndicator testID="quick-rate-loading" color={colors.accent} className="py-10" />;
   if (mine.isError) {
     return (
       <ErrorState

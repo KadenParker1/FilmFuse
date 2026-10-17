@@ -10,9 +10,9 @@ export function CertificationBadge({ certification }: { certification: Certifica
       testID="certification-badge"
       accessible
       accessibilityLabel={certification ? `Rated ${label}` : 'Not rated'}
-      className="self-start rounded border border-text-muted px-1.5 py-0.5"
+      className="self-start rounded-full border border-border px-2 py-0.5"
     >
-      <Text className="font-body-semibold text-xs text-text-muted">{label}</Text>
+      <Text className="font-body-semibold text-xs text-muted">{label}</Text>
     </View>
   );
 }
