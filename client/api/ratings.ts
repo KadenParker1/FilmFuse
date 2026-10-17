@@ -3,6 +3,7 @@ import { ApiError, apiClient } from '../lib/apiClient';
 import { queryKeys } from '../lib/queryKeys';
 import { withQuery } from '../lib/withQuery';
 import type { PageDTO, RatingDTO, RecommendationDTO, UpsertRatingDTO } from '../types/api';
+import { invalidateFeedsAfterRating } from './feed';
 import { filterInfinite, mapInfinite, type InfinitePages } from './socialCache';
 import { markTasteRebuilding } from './taste';
 
@@ -42,8 +43,12 @@ export function useMyRating(movieId: number | null | undefined, options: { enabl
   });
 }
 
-/** Every taste signal moves the vector, so the taste profile and "For you" are refetched. */
+/**
+ * Every taste signal moves the vector, so the taste profile and "For you" are refetched; the
+ * rating's feed lists (your feed, the movie's ratings, your own ratings) are refetched too.
+ */
 function afterTasteSignal(qc: QueryClient, movieId: number): void {
+  invalidateFeedsAfterRating(qc, movieId);
   // A rated movie never shows in "For you"; drop it now rather than waiting for the refetch.
   qc.setQueryData<InfinitePages<RecommendationDTO>>(queryKeys.recommendations, (data) =>
     filterInfinite(data, (r) => r.movie.id !== movieId),

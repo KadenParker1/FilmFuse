@@ -5,6 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toMovieSummary, useMovie } from '../../api/movies';
 import { useMyRating } from '../../api/ratings';
+import { MovieRatingsSection } from '../../components/feed/RatingsSections';
 import { useQuickRate } from '../../components/rating/QuickRateProvider';
 import { TmdbAttribution } from '../../components/TmdbAttribution';
 import { Body, Button, EmptyState, ErrorState, Heading, Label, Skeleton } from '../../components/ui';
@@ -137,6 +138,7 @@ function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
           <Heading size="sm">Overview</Heading>
           <Body muted={!movie.overview}>{movie.overview || 'No overview available yet.'}</Body>
         </View>
+        <MovieRatingsSection movieId={movie.id} title={movie.title} />
         <TmdbAttribution />
       </View>
     </View>

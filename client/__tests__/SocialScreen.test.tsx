@@ -11,10 +11,17 @@ jest.mock('../api/social', () => ({
 }));
 jest.mock('../api/users', () => ({ ...jest.requireActual('../api/users'), useUserSearch: jest.fn() }));
 jest.mock('../api/invites', () => ({ useCreateInvite: jest.fn() }));
+jest.mock('../api/feed', () => ({ useFeed: jest.fn(), useLikeRating: jest.fn(), useUnlikeRating: jest.fn() }));
+const mockOpenRatePicker = jest.fn();
+const mockOpenQuickRate = jest.fn();
+jest.mock('../components/rating/QuickRateProvider', () => ({
+  useQuickRate: () => ({ openQuickRate: mockOpenQuickRate, openRatePicker: mockOpenRatePicker, showTasteUpdating: jest.fn() }),
+}));
 jest.mock('../components/social/shareInvite', () => ({ shareInvite: jest.fn(() => Promise.resolve('copied')) }));
 
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import SocialScreen from '../app/(tabs)/index';
+import { useFeed, useLikeRating, useUnlikeRating } from '../api/feed';
 import { useCreateInvite } from '../api/invites';
 import {
   useAcceptRequest,
@@ -29,10 +36,10 @@ import {
 import { useUserSearch } from '../api/users';
 import { shareInvite } from '../components/social/shareInvite';
 import { ApiError, NetworkError } from '../lib/apiClient';
-import { makeFriend, makeRequest, makeSuggestion, makeUser } from '../test-utils/fixtures';
+import { makeFeedItem, makeFriend, makeMovie, makeRequest, makeSuggestion, makeUser } from '../test-utils/fixtures';
 import { infiniteResult, mutationResult, queryResult } from '../test-utils/queryResults';
 import { routerState } from '../test-utils/router';
-import type { RequestDirection } from '../types/api';
+import type { FeedScope, RequestDirection } from '../types/api';
 
 const m = {
   requests: useFriendRequests as jest.Mock,
@@ -45,7 +52,11 @@ const m = {
   setClose: useSetCloseFriend as jest.Mock,
   search: useUserSearch as jest.Mock,
   create: useCreateInvite as jest.Mock,
+  feed: useFeed as jest.Mock,
 };
+let feeds: Record<FeedScope, ReturnType<typeof infiniteResult>>;
+let like: ReturnType<typeof mutationResult>;
+let unlike: ReturnType<typeof mutationResult>;
 
 let incoming: ReturnType<typeof queryResult>;
 let outgoing: ReturnType<typeof queryResult>;
@@ -57,6 +68,14 @@ let mutations: Record<
 beforeEach(() => {
   jest.useFakeTimers();
   routerState.reset();
+  mockOpenRatePicker.mockClear();
+  mockOpenQuickRate.mockClear();
+  feeds = { FRIENDS: infiniteResult({ items: [] }), EVERYONE: infiniteResult({ items: [] }) };
+  m.feed.mockImplementation((scope: FeedScope) => feeds[scope]);
+  like = mutationResult();
+  unlike = mutationResult();
+  (useLikeRating as jest.Mock).mockImplementation(() => like);
+  (useUnlikeRating as jest.Mock).mockImplementation(() => unlike);
   incoming = queryResult({ data: [makeRequest({ id: 'r1', displayName: 'Rita Moreno', username: 'rita' })] });
   outgoing = queryResult({
     data: [makeRequest({ id: 'o1', displayName: 'Omar Sy', username: 'omar' }, 'OUTGOING')],
@@ -117,13 +136,134 @@ const typeSearch = async (text: string) => {
   });
 };
 
+const friendItems = [
+  makeFeedItem({ id: 'f1', author: makeUser({ id: 'a1', displayName: 'Rita Moreno' }), body: 'So tense', likeCount: 2 }),
+  makeFeedItem({ id: 'f2', mine: true, author: makeUser({ id: 'u1' }), movie: makeMovie({ id: 200, title: 'Up' }) }),
+];
+const scopeRadio = (name: 'Friends' | 'Everyone') =>
+  within(screen.getByLabelText('Feed audience')).getByRole('radio', { name });
+
 describe('SocialScreen — feed', () => {
-  it('starts on the Feed segment with the empty state', async () => {
+  it('starts on the Feed segment showing the FRIENDS feed', async () => {
+    feeds.FRIENDS = infiniteResult({ items: friendItems });
     await render(<SocialScreen />);
     expect(screen.getByRole('header', { name: 'Social' })).toBeOnTheScreen();
     expect(screen.getByRole('tab', { name: 'Feed' })).toBeSelected();
-    expect(screen.getByText("Your friends' ratings will appear here")).toBeOnTheScreen();
+    expect(scopeRadio('Friends')).toBeChecked();
+    expect(m.feed).toHaveBeenLastCalledWith('FRIENDS');
+    expect(screen.getByTestId('feed-card-f1')).toBeOnTheScreen();
+    expect(screen.getByTestId('feed-card-f2')).toBeOnTheScreen();
     expect(screen.queryByTestId('friends-panel')).toBeNull();
+  });
+
+  it('switches to the EVERYONE feed and back', async () => {
+    feeds.EVERYONE = infiniteResult({ items: [makeFeedItem({ id: 'p1', visibility: 'PUBLIC' })] });
+    await render(<SocialScreen />);
+    await fireEvent.press(scopeRadio('Everyone'));
+    expect(m.feed).toHaveBeenLastCalledWith('EVERYONE');
+    expect(scopeRadio('Everyone')).toBeChecked();
+    expect(screen.getByTestId('feed-list-everyone')).toBeOnTheScreen();
+    expect(screen.getByTestId('feed-card-p1')).toBeOnTheScreen();
+    await fireEvent.press(scopeRadio('Friends'));
+    expect(m.feed).toHaveBeenLastCalledWith('FRIENDS');
+    expect(screen.getByTestId('feed-list-friends')).toBeOnTheScreen();
+  });
+
+  it('Friends empty state: "Rate a movie" opens the picker, "Find friends" switches segment', async () => {
+    await render(<SocialScreen />);
+    expect(screen.getByTestId('feed-empty-friends')).toBeOnTheScreen();
+    expect(screen.getByText('Rate a movie or add friends to fill your feed')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: 'Rate a movie' }));
+    expect(mockOpenRatePicker).toHaveBeenCalled();
+    await fireEvent.press(screen.getByRole('button', { name: 'Find friends' }));
+    expect(screen.getByRole('tab', { name: /^Friends/ })).toBeSelected();
+    expect(screen.getByTestId('friends-panel')).toBeOnTheScreen();
+  });
+
+  it('Everyone empty state', async () => {
+    await render(<SocialScreen />);
+    await fireEvent.press(scopeRadio('Everyone'));
+    expect(screen.getByTestId('feed-empty-everyone')).toBeOnTheScreen();
+    expect(screen.getByText('No public ratings yet')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Rate a movie' })).toBeNull();
+  });
+
+  it.each<FeedScope>(['FRIENDS', 'EVERYONE'])('%s: skeletons while loading, then an error with retry', async (scope) => {
+    feeds[scope] = infiniteResult();
+    const { rerender } = await render(<SocialScreen />);
+    if (scope === 'EVERYONE') await fireEvent.press(scopeRadio('Everyone'));
+    const id = `feed-list-${scope.toLowerCase()}`;
+    expect(screen.getByTestId(`${id}-loading`)).toBeOnTheScreen();
+
+    const refetch = jest.fn();
+    feeds[scope] = infiniteResult({ isError: true, isPending: false, error: new NetworkError(), refetch });
+    await rerender(<SocialScreen />);
+    expect(screen.getByText("Couldn't load your feed")).toBeOnTheScreen();
+    expect(screen.getByRole('alert')).toHaveTextContent(/Couldn't reach FilmFuse/);
+    await fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it('pull-to-refresh refetches and shows the spinner only for a user refresh', async () => {
+    const refetch = jest.fn();
+    feeds.FRIENDS = infiniteResult({ items: friendItems, refetch });
+    const { rerender } = await render(<SocialScreen />);
+    expect(screen.getByTestId('feed-list-friends')).toHaveProp('refreshing', false);
+    await fireEvent(screen.getByTestId('feed-list-friends'), 'refresh');
+    expect(refetch).toHaveBeenCalled();
+
+    feeds.FRIENDS = infiniteResult({ items: friendItems, refetch, isRefetching: true });
+    await rerender(<SocialScreen />);
+    expect(screen.getByTestId('feed-list-friends')).toHaveProp('refreshing', true);
+    feeds.FRIENDS = infiniteResult({ items: friendItems, refetch, isRefetching: true, isFetchingNextPage: true });
+    await rerender(<SocialScreen />);
+    expect(screen.getByTestId('feed-list-friends')).toHaveProp('refreshing', false);
+  });
+
+  it('loads the next page at the end, once, with a spinner and a later-page error', async () => {
+    const fetchNextPage = jest.fn();
+    feeds.FRIENDS = infiniteResult({ items: friendItems, hasNextPage: true, fetchNextPage });
+    const { rerender } = await render(<SocialScreen />);
+    await fireEvent(screen.getByTestId('feed-list-friends'), 'endReached');
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+
+    feeds.FRIENDS = infiniteResult({ items: friendItems, hasNextPage: true, isFetchingNextPage: true, fetchNextPage });
+    await rerender(<SocialScreen />);
+    expect(screen.getByTestId('feed-list-friends-loading-more')).toBeOnTheScreen();
+    await fireEvent(screen.getByTestId('feed-list-friends'), 'endReached');
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+
+    feeds.FRIENDS = infiniteResult({ items: friendItems, hasNextPage: false, fetchNextPage });
+    await rerender(<SocialScreen />);
+    await fireEvent(screen.getByTestId('feed-list-friends'), 'endReached');
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+
+    feeds.FRIENDS = infiniteResult({
+      items: friendItems,
+      hasNextPage: true,
+      isError: true,
+      isPending: false,
+      error: new NetworkError(),
+      fetchNextPage,
+    });
+    await rerender(<SocialScreen />);
+    expect(screen.getByTestId('feed-card-f1')).toBeOnTheScreen();
+    expect(screen.getByText("Couldn't load more")).toBeOnTheScreen();
+    await fireEvent(screen.getByTestId('feed-list-friends'), 'endReached');
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+    await fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
+    expect(fetchNextPage).toHaveBeenCalledTimes(2);
+  });
+
+  it('cards in the feed like, edit and navigate', async () => {
+    feeds.FRIENDS = infiniteResult({ items: friendItems });
+    await render(<SocialScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Like rating, 2 likes' }));
+    expect(like.mutate).toHaveBeenCalledWith('f1');
+    await fireEvent.press(screen.getByRole('button', { name: 'Edit your rating of Up' }));
+    expect(mockOpenQuickRate).toHaveBeenCalledWith(expect.objectContaining({ id: 200 }));
+    await fireEvent.press(screen.getByRole('button', { name: /^Rita Moreno/ }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/user/a1');
   });
 
   it('shows the incoming-request count on the Friends segment', async () => {
@@ -137,13 +277,6 @@ describe('SocialScreen — feed', () => {
     await render(<SocialScreen />);
     expect(screen.getByRole('tab', { name: 'Friends' })).toBeOnTheScreen();
     expect(screen.queryByTestId('segment-badge-friends')).toBeNull();
-  });
-
-  it('"Find friends" switches to the Friends segment', async () => {
-    await render(<SocialScreen />);
-    await fireEvent.press(screen.getByRole('button', { name: 'Find friends' }));
-    expect(screen.getByRole('tab', { name: /^Friends/ })).toBeSelected();
-    expect(screen.getByTestId('friends-panel')).toBeOnTheScreen();
   });
 });
 

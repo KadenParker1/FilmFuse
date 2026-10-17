@@ -113,6 +113,42 @@ public class SocialGraphService {
         return matrix;
     }
 
+    // ---------------------------------------------------------------- SQL fragments for other modules
+
+    /*
+     * A list query that must filter by the graph (the ratings feed) cannot call the methods above
+     * per row and still paginate by keyset in one query. These fragments let such a query embed the
+     * graph test instead, while the graph-table SQL still lives only in this class. Arguments are
+     * SQL expressions (column references or named parameters) - never user input.
+     */
+
+    /** SQL: true when {@code a} and {@code b} are accepted friends (false when they are the same user). */
+    public static String sqlAreFriends(String a, String b) {
+        return """
+                exists (select 1 from app.friendships fr
+                        where fr.status = 'ACCEPTED'
+                          and fr.user_low = least(%1$s, %2$s) and fr.user_high = greatest(%1$s, %2$s))"""
+                .formatted(a, b);
+    }
+
+    /** SQL: true when either of {@code a} and {@code b} has blocked the other. */
+    public static String sqlBlockedEitherWay(String a, String b) {
+        return """
+                exists (select 1 from app.blocks bl
+                        where (bl.blocker_id = %1$s and bl.blocked_id = %2$s)
+                           or (bl.blocker_id = %2$s and bl.blocked_id = %1$s))"""
+                .formatted(a, b);
+    }
+
+    /** SQL: a subquery of the ids of {@code user}'s accepted friends (one column, {@code id}). */
+    public static String sqlFriendIds(String user) {
+        return """
+                select case when fi.user_low = %1$s then fi.user_high else fi.user_low end as id
+                from app.friendships fi
+                where fi.status = 'ACCEPTED' and (fi.user_low = %1$s or fi.user_high = %1$s)"""
+                .formatted(user);
+    }
+
     // ---------------------------------------------------------------- reads for the social module
 
     /** Everyone who has blocked {@code user}: hidden from {@code user} in every read. */

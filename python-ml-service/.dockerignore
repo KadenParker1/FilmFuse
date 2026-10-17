@@ -8,3 +8,5 @@ __pycache__/
 tests/
 testing_scripts/
 requirements-dev.txt
+eval/data/
+eval/reports/

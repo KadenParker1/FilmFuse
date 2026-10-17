@@ -1,25 +1,33 @@
 jest.mock('expo-router', () => require('../test-utils/router').expoRouterMock);
 jest.mock('../api/movies', () => ({ ...jest.requireActual('../api/movies'), useMovie: jest.fn() }));
 jest.mock('../api/ratings', () => ({ ...jest.requireActual('../api/ratings'), useMyRating: jest.fn() }));
+jest.mock('../api/feed', () => ({
+  ...jest.requireActual('../api/feed'),
+  useMovieRatings: jest.fn(),
+  useLikeRating: jest.fn(),
+  useUnlikeRating: jest.fn(),
+}));
 const mockOpenQuickRate = jest.fn();
 jest.mock('../components/rating/QuickRateProvider', () => ({
   useQuickRate: () => ({ openQuickRate: mockOpenQuickRate, openRatePicker: jest.fn(), showTasteUpdating: jest.fn() }),
 }));
 
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
 import MovieScreen from '../app/movie/[id]';
+import { useLikeRating, useMovieRatings, useUnlikeRating } from '../api/feed';
 import { useMovie } from '../api/movies';
 import { useMyRating } from '../api/ratings';
 import { TMDB_ATTRIBUTION } from '../components/TmdbAttribution';
 import { ApiError, NetworkError } from '../lib/apiClient';
 import { formatRuntime } from '../lib/format';
-import { makeRating } from '../test-utils/fixtures';
-import { queryResult } from '../test-utils/queryResults';
+import { makeFeedItem, makeRating, makeUser } from '../test-utils/fixtures';
+import { infiniteResult, mutationResult, queryResult } from '../test-utils/queryResults';
 import { routerState } from '../test-utils/router';
 import type { MovieDetailDTO } from '../types/api';
 
 const mockUseMovie = useMovie as jest.Mock;
 const mockUseMyRating = useMyRating as jest.Mock;
+const mockMovieRatings = useMovieRatings as jest.Mock;
 
 const dune: MovieDetailDTO = {
   id: 438631,
@@ -43,6 +51,9 @@ beforeEach(() => {
   mockUseMovie.mockReturnValue(queryResult({ data: dune }));
   mockUseMyRating.mockReturnValue(queryResult({ data: null, isPending: false, isSuccess: true }));
   mockOpenQuickRate.mockClear();
+  mockMovieRatings.mockReturnValue(infiniteResult({ items: [] }));
+  (useLikeRating as jest.Mock).mockReturnValue(mutationResult());
+  (useUnlikeRating as jest.Mock).mockReturnValue(mutationResult());
 });
 
 describe('formatRuntime', () => {
@@ -140,5 +151,71 @@ describe('MovieScreen', () => {
     routerState.router.canGoBack.mockReturnValue(false);
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
     expect(routerState.router.replace).toHaveBeenCalledWith('/discover');
+  });
+});
+
+describe('MovieScreen — ratings section', () => {
+  const items = [1, 2, 3, 4].map((n) =>
+    makeFeedItem({
+      id: `f${n}`,
+      author: makeUser({ id: `a${n}`, displayName: `Friend ${n}`, username: `friend${n}` }),
+      score: n + 5,
+    }),
+  );
+  const section = () => within(screen.getByTestId('movie-ratings'));
+
+  it("asks for this movie's FRIENDS ratings first and previews the first 3", async () => {
+    mockMovieRatings.mockReturnValue(infiniteResult({ items }));
+    await render(<MovieScreen />);
+    expect(mockMovieRatings).toHaveBeenLastCalledWith(438631, 'FRIENDS');
+    expect(section().getByRole('header', { name: 'Ratings' })).toBeOnTheScreen();
+    expect(section().getByRole('radio', { name: 'Friends' })).toBeChecked();
+    expect(screen.getByTestId('feed-card-f1')).toBeOnTheScreen();
+    expect(screen.getByTestId('feed-card-f3')).toBeOnTheScreen();
+    expect(screen.queryByTestId('feed-card-f4')).toBeNull();
+    // The movie is the page itself, so cards skip the poster row.
+    expect(screen.queryByRole('button', { name: /^Heat/ })).toBeNull();
+  });
+
+  it('"See all" opens the full list in the chosen scope', async () => {
+    mockMovieRatings.mockReturnValue(infiniteResult({ items }));
+    await render(<MovieScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'See all ratings of Dune' }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/movie/438631/ratings?scope=FRIENDS');
+
+    await fireEvent.press(section().getByRole('radio', { name: 'Everyone' }));
+    expect(mockMovieRatings).toHaveBeenLastCalledWith(438631, 'EVERYONE');
+    expect(section().getByRole('radio', { name: 'Everyone' })).toBeChecked();
+    await fireEvent.press(screen.getByRole('button', { name: 'See all ratings of Dune' }));
+    expect(routerState.router.push).toHaveBeenLastCalledWith('/movie/438631/ratings?scope=EVERYONE');
+  });
+
+  it('shows "See all" when only the server has more pages, and hides it otherwise', async () => {
+    mockMovieRatings.mockReturnValue(infiniteResult({ items: items.slice(0, 2), hasNextPage: true }));
+    const { rerender } = await render(<MovieScreen />);
+    expect(screen.getByRole('button', { name: 'See all ratings of Dune' })).toBeOnTheScreen();
+    mockMovieRatings.mockReturnValue(infiniteResult({ items: items.slice(0, 3) }));
+    await rerender(<MovieScreen />);
+    expect(screen.queryByRole('button', { name: 'See all ratings of Dune' })).toBeNull();
+  });
+
+  it('empty copy depends on the scope', async () => {
+    await render(<MovieScreen />);
+    expect(screen.getByTestId('movie-ratings-empty')).toHaveTextContent('None of your friends have rated this yet.');
+    await fireEvent.press(section().getByRole('radio', { name: 'Everyone' }));
+    expect(screen.getByTestId('movie-ratings-empty')).toHaveTextContent('No public ratings of this movie yet.');
+  });
+
+  it('shows skeletons while loading and an error with retry', async () => {
+    mockMovieRatings.mockReturnValue(infiniteResult());
+    const { rerender } = await render(<MovieScreen />);
+    expect(screen.getByTestId('movie-ratings-loading')).toBeOnTheScreen();
+
+    const refetch = jest.fn();
+    mockMovieRatings.mockReturnValue(infiniteResult({ isError: true, isPending: false, error: new NetworkError(), refetch }));
+    await rerender(<MovieScreen />);
+    expect(section().getByText("Couldn't load ratings")).toBeOnTheScreen();
+    await fireEvent.press(section().getByRole('button', { name: 'Try again' }));
+    expect(refetch).toHaveBeenCalled();
   });
 });
