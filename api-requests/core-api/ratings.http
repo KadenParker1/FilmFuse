@@ -1,0 +1,54 @@
+### FilmFuse core-api - ratings (quick rate / review). Token: see me.http.
+# One row per (user, movie); re-rating overwrites it. Every write marks the taste vector dirty.
+# A movie not yet cached is fetched from the catalog (404 if the catalog does not know it).
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+@movieId = 603
+
+### Quick rate (defaults: visibility FRIENDS, source QUICK_RATE)
+PUT {{baseUrl}}/api/v1/ratings/{{movieId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"score": 8}
+
+### Review: a note (<= 1000 chars), spoilers flag, visibility, watch date
+PUT {{baseUrl}}/api/v1/ratings/{{movieId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "score": 9,
+  "body": "Still holds up.",
+  "containsSpoilers": false,
+  "visibility": "PUBLIC",
+  "watchedOn": "2026-10-15",
+  "source": "POST_WATCH"
+}
+
+### My rating of one movie (404 if none)
+GET {{baseUrl}}/api/v1/me/ratings/{{movieId}}
+Authorization: Bearer {{token}}
+
+### All my ratings, newest first (pass nextCursor as ?cursor=)
+GET {{baseUrl}}/api/v1/me/ratings
+Authorization: Bearer {{token}}
+
+### Remove (204, idempotent)
+DELETE {{baseUrl}}/api/v1/ratings/{{movieId}}
+Authorization: Bearer {{token}}
+
+### Score out of range -> 400 (fieldErrors.score)
+PUT {{baseUrl}}/api/v1/ratings/{{movieId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"score": 11}
+
+### ONBOARDING_SWIPE is only for /me/ratings/batch -> 400
+PUT {{baseUrl}}/api/v1/ratings/{{movieId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"score": 5, "source": "ONBOARDING_SWIPE"}

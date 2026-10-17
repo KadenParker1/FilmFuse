@@ -3,7 +3,9 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMovie } from '../../api/movies';
+import { toMovieSummary, useMovie } from '../../api/movies';
+import { useMyRating } from '../../api/ratings';
+import { useQuickRate } from '../../components/rating/QuickRateProvider';
 import { TmdbAttribution } from '../../components/TmdbAttribution';
 import { Body, Button, EmptyState, ErrorState, Heading, Label, Skeleton } from '../../components/ui';
 import { ApiError } from '../../lib/apiClient';
@@ -56,6 +58,8 @@ function DetailSkeleton() {
 
 function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
   const { colors } = useTheme();
+  const { openQuickRate } = useQuickRate();
+  const myRating = useMyRating(movie.id);
   const meta = metaLine(movie);
   return (
     <View className="w-full max-w-4xl self-center">
@@ -107,22 +111,28 @@ function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
       <View className="gap-5 px-5 pt-6">
         <View className="flex-row gap-3">
           <Button
-            title="Rate"
-            disabled
+            title={myRating.data ? 'Edit rating' : 'Rate'}
             className="flex-1"
-            accessibilityHint="Coming in Phase 1b"
-            icon={<Ionicons name="star-outline" size={18} color={colors.onGold} />}
+            onPress={() => openQuickRate(toMovieSummary(movie))}
+            icon={<Ionicons name={myRating.data ? 'star' : 'star-outline'} size={18} color={colors.onGold} />}
           />
           <Button
             title="Add to watchlist"
             variant="secondary"
             disabled
             className="flex-1"
-            accessibilityHint="Coming in Phase 1b"
+            accessibilityHint="Coming soon"
             icon={<Ionicons name="bookmark-outline" size={18} color={colors.text} />}
           />
         </View>
-        <Label className="-mt-3 text-center text-xs">Rating and watchlist arrive in Phase 1b</Label>
+        {myRating.data ? (
+          <View testID="my-rating" className="-mt-2 flex-row items-center gap-2 self-center">
+            <Ionicons name="star" size={14} color={colors.gold} />
+            <Text className="font-body-semibold text-sm text-text">Your rating {myRating.data.score}/10</Text>
+          </View>
+        ) : (
+          <Label className="-mt-3 text-center text-xs">Watchlist is coming soon</Label>
+        )}
         <View className="gap-2">
           <Heading size="sm">Overview</Heading>
           <Body muted={!movie.overview}>{movie.overview || 'No overview available yet.'}</Body>

@@ -1,6 +1,7 @@
 package com.pm.filmfuse.reco.service;
 
 import com.pm.filmfuse.reco.ml.MlGroupRecommendation;
+import com.pm.filmfuse.reco.ml.MlUserRecommendation;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
  * not configured ({@code ML_SERVICE_URL} blank) or fails. It keeps the eligible pool's order (most
  * popular first), gives every movie and member a neutral score and explains nothing beyond "Popular
  * pick". The real ranking lives in python-ml-service and belongs to the project owner; do not grow
- * this into one.
+ * this into one. Group sessions use {@link #rank}, personal "For you" {@link #rankForUser}.
  */
 @Component
 public class FallbackRanker {
@@ -29,6 +30,15 @@ public class FallbackRanker {
                 .distinct()
                 .limit(k)
                 .map(movieId -> new MlGroupRecommendation(movieId, NEUTRAL_SCORE, neutral, EXPLANATION))
+                .toList();
+    }
+
+    /** One user's "For you": the first {@code k} of {@code pool}, in pool order, neutral score. */
+    public List<MlUserRecommendation> rankForUser(List<Integer> pool, int k) {
+        return pool.stream()
+                .distinct()
+                .limit(k)
+                .map(movieId -> new MlUserRecommendation(movieId, NEUTRAL_SCORE, EXPLANATION))
                 .toList();
     }
 }

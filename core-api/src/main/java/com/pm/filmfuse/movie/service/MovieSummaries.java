@@ -1,4 +1,4 @@
-package com.pm.filmfuse.group.service;
+package com.pm.filmfuse.movie.service;
 
 import com.pm.filmfuse.movie.catalog.TmdbProperties;
 import com.pm.filmfuse.movie.dto.MovieSummaryDTO;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
-/** Movie summaries for session results, read from the movie cache (results always reference cached movies). */
+/** Movie summaries read from the movie cache (callers only pass ids of cached movies; others are absent). */
 @Component
 public class MovieSummaries {
 

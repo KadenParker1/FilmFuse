@@ -60,3 +60,15 @@ export function useMovie(id: number) {
 export function flattenPages<T>(data: { pages: PageDTO<T>[] } | undefined): T[] {
   return data?.pages.flatMap((p) => p.items) ?? [];
 }
+
+/** A detail record trimmed to the summary shape (what the quick-rate sheet and lists take). */
+export function toMovieSummary(movie: MovieDetailDTO): MovieSummaryDTO {
+  return {
+    id: movie.id,
+    title: movie.title,
+    releaseYear: movie.releaseYear,
+    posterUrl: movie.posterUrl,
+    genreIds: movie.genres.map((g) => g.id),
+    voteAverage: movie.voteAverage,
+  };
+}

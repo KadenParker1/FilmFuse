@@ -5,7 +5,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMe } from '../../api/me';
 import { useAuth } from '../../auth/useAuth';
 import { DeleteAccountSheet } from '../../components/profile/DeleteAccountSheet';
-import { Avatar, Body, Button, Card, EmptyState, ErrorState, Heading, Label, Screen, Skeleton } from '../../components/ui';
+import { RatingsList } from '../../components/rating/RatingsList';
+import { TasteSection } from '../../components/taste/TasteSection';
+import { Avatar, Body, Button, Card, ErrorState, Heading, Label, Screen, Skeleton } from '../../components/ui';
 import { useTheme } from '../../theme/useTheme';
 
 function ProfileHeader() {
@@ -75,11 +77,10 @@ export default function ProfileScreen() {
       <Heading>Profile</Heading>
       <ProfileHeader />
 
-      <EmptyState
-        icon="film-outline"
-        title="Your taste, on display"
-        message="Your reviews, taste persona and taste editor arrive in Phase 1b."
-      />
+      <View className="gap-8 py-8">
+        <TasteSection />
+        <RatingsList />
+      </View>
 
       <View className="gap-3 pb-28">
         <Label>Settings</Label>

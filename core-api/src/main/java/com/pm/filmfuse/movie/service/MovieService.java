@@ -15,7 +15,11 @@ import com.pm.filmfuse.movie.repository.MovieRepository;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -84,6 +88,22 @@ public class MovieService {
                     return fetched;
                 });
         return MovieMapper.toDetailDTO(movie, genreService.namesById(), imageBaseUrl);
+    }
+
+    /**
+     * Makes sure every id has a row in {@code app.movies} (ratings, favourites and dismissals
+     * reference it): ids already cached are left alone, the others are fetched from the catalog
+     * and cached. An id the catalog does not know is a 404 ({@code NotFoundException}).
+     */
+    public void ensureCached(Collection<Integer> ids) {
+        Set<Integer> cached = new HashSet<>();
+        movieRepository.findAllById(ids).forEach(movie -> cached.add(movie.getId()));
+        for (Integer id : new LinkedHashSet<>(ids)) {
+            if (!cached.contains(id)) {
+                CatalogMovie fetched = catalogClient.details(id);
+                cache(List.of(fetched), clock.instant());
+            }
+        }
     }
 
     private PageDTO<MovieSummaryDTO> toPage(CatalogPage page) {

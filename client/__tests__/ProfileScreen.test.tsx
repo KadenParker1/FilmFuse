@@ -4,6 +4,15 @@ jest.mock('../auth/useAuth', () => ({
   useAuth: () => ({ user: { email: 'ada@example.com' }, signOut: mockSignOut }),
 }));
 jest.mock('../api/me', () => ({ useMe: jest.fn(), useDeleteAccount: jest.fn() }));
+// The taste and ratings sections have their own tests.
+jest.mock('../components/taste/TasteSection', () => {
+  const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
+  return { TasteSection: () => <Text testID="taste-section-stub">taste</Text> };
+});
+jest.mock('../components/rating/RatingsList', () => {
+  const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
+  return { RatingsList: () => <Text testID="ratings-list-stub">ratings</Text> };
+});
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import ProfileScreen from '../app/(tabs)/profile';
@@ -23,6 +32,14 @@ beforeEach(() => {
 });
 
 describe('ProfileScreen', () => {
+  it('shows the taste section and your ratings', async () => {
+    mockUseMe.mockReturnValue(queryResult({ data: makeProfile() }));
+    await render(<ProfileScreen />);
+    expect(screen.getByTestId('taste-section-stub')).toBeOnTheScreen();
+    expect(screen.getByTestId('ratings-list-stub')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Comfort settings' })).toBeOnTheScreen();
+  });
+
   it('shows the photo, name, username and bio', async () => {
     mockUseMe.mockReturnValue(queryResult({ data: makeProfile({ profileImageUrl: 'https://x/ada.jpg' }) }));
     await render(<ProfileScreen />);
