@@ -32,8 +32,8 @@ export function InviteCard() {
   return (
     <Card raised className="gap-3">
       <View className="flex-row items-center gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-gold">
-          <Ionicons name="ticket-outline" size={20} color={colors.onGold} />
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-accent">
+          <Ionicons name="ticket-outline" size={20} color={colors.onAccent} />
         </View>
         <Heading size="sm" className="flex-1">
           Invite friends
@@ -43,7 +43,7 @@ export function InviteCard() {
       <Button
         title="Share invite link"
         loading={sharing}
-        icon={<Ionicons name="share-outline" size={18} color={colors.onGold} />}
+        icon={<Ionicons name="share-outline" size={18} color={colors.onAccent} />}
         onPress={() => void invite()}
       />
       {copied ? (
@@ -52,7 +52,7 @@ export function InviteCard() {
         </Body>
       ) : null}
       {error ? (
-        <Body testID="invite-error" accessibilityLiveRegion="polite" className="text-center text-velvet">
+        <Body testID="invite-error" accessibilityLiveRegion="polite" className="text-center text-danger">
           {error}
         </Body>
       ) : null}

@@ -65,7 +65,7 @@ export function SessionFiltersForm({ value, onChange, yearError }: FiltersProps)
             <Skeleton className="h-9 w-full rounded-full" />
           </View>
         ) : genres.isError ? (
-          <Text className="font-body text-sm text-text-muted">Genres unavailable right now.</Text>
+          <Text className="font-body text-sm text-muted">Genres unavailable right now.</Text>
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2">
             {genres.data.map((g) => (
@@ -94,11 +94,11 @@ export function StrategyPicker({ value, onChange }: { value: Strategy; onChange:
               accessibilityState={{ checked: selected }}
               onPress={() => onChange(s.value)}
               className={`rounded-xl border px-4 py-3 active:opacity-80 ${
-                selected ? 'border-gold bg-surface-raised' : 'border-border bg-surface'
+                selected ? 'border-accent bg-raised' : 'border-border bg-surface'
               }`}
             >
-              <Text className={`font-body-semibold text-base ${selected ? 'text-gold' : 'text-text'}`}>{s.label}</Text>
-              <Text className="font-body text-sm text-text-muted">{s.description}</Text>
+              <Text className={`font-body-semibold text-base ${selected ? 'text-accent-ink' : 'text-text'}`}>{s.label}</Text>
+              <Text className="font-body text-sm text-muted">{s.description}</Text>
             </Pressable>
           );
         })}

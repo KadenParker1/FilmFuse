@@ -19,7 +19,7 @@ function PendingRow({ pending, onRate, onDismiss }: { pending: PendingRatingDTO;
   const { movie } = pending;
   return (
     <View testID={`pending-rating-${movie.id}`} className="flex-row items-center gap-3">
-      <View className="h-16 w-11 overflow-hidden rounded-md border border-border bg-surface-raised">
+      <View className="h-16 w-11 overflow-hidden rounded-lg bg-raised">
         {movie.posterUrl ? (
           <Image
             testID={`pending-poster-${movie.id}`}
@@ -29,7 +29,7 @@ function PendingRow({ pending, onRate, onDismiss }: { pending: PendingRatingDTO;
           />
         ) : (
           <View className="flex-1 items-center justify-center">
-            <Ionicons name="film-outline" size={16} color={colors.textMuted} />
+            <Ionicons name="film-outline" size={16} color={colors.muted} />
           </View>
         )}
       </View>
@@ -37,7 +37,7 @@ function PendingRow({ pending, onRate, onDismiss }: { pending: PendingRatingDTO;
         <Text className="font-body-semibold text-base text-text" numberOfLines={1}>
           {movie.title}
         </Text>
-        <Text className="font-body text-sm text-text-muted" numberOfLines={1}>
+        <Text className="font-body text-sm text-muted" numberOfLines={1}>
           {watchedWith(pending)}
         </Text>
       </View>
@@ -50,7 +50,7 @@ function PendingRow({ pending, onRate, onDismiss }: { pending: PendingRatingDTO;
         onPress={onDismiss}
         className="h-9 w-9 items-center justify-center rounded-full active:opacity-70"
       >
-        <Ionicons name="close" size={18} color={colors.textMuted} />
+        <Ionicons name="close" size={18} color={colors.muted} />
       </Pressable>
     </View>
   );
@@ -74,9 +74,9 @@ export function PendingRatingsBanner() {
   const hidden = items.length - shown.length;
 
   return (
-    <Card testID="pending-ratings" className="gap-3 border-gold">
+    <Card testID="pending-ratings" className="gap-3 border-accent">
       <View className="flex-row items-center gap-2">
-        <Ionicons name="star" size={18} color={colors.gold} />
+        <Ionicons name="star" size={18} color={colors.accent} />
         <Heading size="sm" className="flex-1">
           Rate what you watched
         </Heading>
@@ -85,7 +85,7 @@ export function PendingRatingsBanner() {
         A quick 1–10 sharpens everyone&apos;s next picks.
       </Body>
       {dismiss.isError ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           {errorMessage(dismiss.error)}
         </Body>
       ) : null}

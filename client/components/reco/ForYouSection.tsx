@@ -98,7 +98,7 @@ export function ForYouSection() {
       <Heading size="sm">For you</Heading>
       {body}
       {dismiss.isError ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           Couldn’t hide that pick. {errorMessage(dismiss.error)}
         </Body>
       ) : null}

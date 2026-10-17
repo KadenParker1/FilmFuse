@@ -3,8 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '../../theme/useTheme';
 import type { SessionMemberDTO, SessionResultDTO, Vote } from '../../types/api';
-import { Body, Button, PosterCard } from '../ui';
-import { CertificationBadge } from './CertificationBadge';
+import { Body, PosterCard } from '../ui';
 import { FuseMeter } from './FuseMeter';
 
 type Props = {
@@ -39,7 +38,7 @@ function VoteButton({
   onPress: () => void;
 }) {
   const { colors } = useTheme();
-  const tint = selected ? (danger ? colors.onVelvet : colors.onGold) : colors.text;
+  const tint = selected ? (danger ? colors.onDanger : colors.onAccent) : colors.text;
   return (
     <Pressable
       accessibilityRole="button"
@@ -47,12 +46,12 @@ function VoteButton({
       accessibilityState={{ selected, disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
-      className={`min-h-9 flex-row items-center gap-1.5 rounded-full border px-3 py-1.5 active:opacity-80 ${
-        selected ? (danger ? 'border-velvet bg-velvet' : 'border-gold bg-gold') : 'border-border bg-surface-raised'
+      className={`min-h-9 flex-row items-center gap-1.5 rounded-[10px] border px-3 py-1.5 active:opacity-80 ${
+        selected ? (danger ? 'border-danger bg-danger' : 'border-accent bg-accent') : 'border-border bg-raised'
       } ${disabled ? 'opacity-50' : ''}`}
     >
       <Ionicons name={icon} size={16} color={tint} />
-      <Text className={`font-body-semibold text-sm ${selected ? (danger ? 'text-on-velvet' : 'text-on-gold') : 'text-text'}`}>
+      <Text className={`font-body-bold text-sm ${selected ? (danger ? 'text-on-danger' : 'text-on-accent') : 'text-text'}`}>
         {count ?? label}
       </Text>
     </Pressable>
@@ -61,6 +60,7 @@ function VoteButton({
 
 /** One ranked movie: poster, rating, Fuse meter, why it was picked, votes and "Pick this". */
 export function SessionResultCard({ result, members, readOnly = false, onVote, onClearVote, onPick, onOpenMovie }: Props) {
+  const { colors } = useTheme();
   const { movie, votes, myVote } = result;
   const vetoed = votes.vetoed;
   const press = (vote: Vote) => (myVote === vote ? onClearVote() : onVote(vote));
@@ -68,22 +68,21 @@ export function SessionResultCard({ result, members, readOnly = false, onVote, o
   return (
     <View
       testID={`result-${movie.id}`}
-      className={`flex-row gap-4 rounded-2xl border border-border bg-surface p-3 ${vetoed ? 'opacity-50' : ''}`}
+      className={`flex-row gap-4 rounded-[18px] border border-border bg-surface p-3 ${vetoed ? 'opacity-50' : ''}`}
     >
       <View className="w-24">
-        <PosterCard fill title={movie.title} posterUrl={movie.posterUrl} onPress={onOpenMovie} />
+        <PosterCard fill title={movie.title} posterUrl={movie.posterUrl} certification={result.certification} onPress={onOpenMovie} />
       </View>
       <View className="flex-1 gap-2">
         <View className="flex-row items-start gap-2">
-          <Text className="flex-1 font-display text-lg text-text" numberOfLines={2}>
+          <Text className="flex-1 font-display-bold text-lg tracking-tight text-text" numberOfLines={2}>
             {vetoed ? '' : `${result.rank}. `}
             {movie.title}
           </Text>
-          <CertificationBadge certification={result.certification} />
         </View>
         {movie.releaseYear ? <Body muted className="text-xs">{movie.releaseYear}</Body> : null}
         {vetoed ? (
-          <Text testID={`vetoed-${movie.id}`} className="font-body-semibold text-sm text-velvet">
+          <Text testID={`vetoed-${movie.id}`} className="font-body-semibold text-sm text-danger">
             Vetoed
           </Text>
         ) : null}
@@ -118,13 +117,15 @@ export function SessionResultCard({ result, members, readOnly = false, onVote, o
           />
         </View>
         {!readOnly && !vetoed ? (
-          <Button
-            size="sm"
-            title="Pick this"
+          <Pressable
+            accessibilityRole="button"
             accessibilityLabel={`Pick ${movie.title}`}
-            className="self-start"
             onPress={onPick}
-          />
+            className="min-h-9 flex-row items-center gap-1.5 self-start rounded-[10px] bg-accent2 px-3.5 py-1.5 active:opacity-80"
+          >
+            <Ionicons name="checkmark-circle" size={16} color={colors.onAccent2} />
+            <Text className="font-body-bold text-sm text-on-accent2">Pick this</Text>
+          </Pressable>
         ) : null}
       </View>
     </View>

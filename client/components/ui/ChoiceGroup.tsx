@@ -15,7 +15,7 @@ type Props<T> = {
   className?: string;
 };
 
-/** Single-choice pills that read as a radio group. Gold when selected. */
+/** Single-choice pills that read as a radio group. Accent-filled when selected. */
 export function ChoiceGroup<T extends string | number | null>({
   label,
   choices,
@@ -45,11 +45,11 @@ export function ChoiceGroup<T extends string | number | null>({
             onPress={() => {
               if (!selected) onChange(c.value);
             }}
-            className={`min-h-9 items-center justify-center rounded-full border px-3 py-1.5 active:opacity-80 ${
+            className={`min-h-9 items-center justify-center rounded-xl px-3 py-1.5 active:opacity-80 ${
               layout === 'fill' ? 'flex-1' : ''
-            } ${selected ? 'border-gold bg-gold' : 'border-border bg-surface-raised'} ${disabled ? 'opacity-50' : ''}`}
+            } ${selected ? 'bg-accent' : 'bg-raised'} ${disabled ? 'opacity-50' : ''}`}
           >
-            <Text className={`font-body-medium text-sm ${selected ? 'text-on-gold' : 'text-text'}`}>{c.label}</Text>
+            <Text className={`font-body-semibold text-sm ${selected ? 'text-on-accent' : 'text-text'}`}>{c.label}</Text>
           </Pressable>
         );
       })}

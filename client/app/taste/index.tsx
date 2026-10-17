@@ -81,7 +81,7 @@ function TasteEditor({ profile }: { profile: TasteProfileDTO }) {
               onChange={(s) => set(d.key, s)}
             >
               <LearnedMarker learned={d.learned} testID={`learned-${d.key}`} />
-              <Text testID={`stated-vs-learned-${d.key}`} className="font-body text-sm text-text-muted">
+              <Text testID={`stated-vs-learned-${d.key}`} className="font-body text-sm text-muted">
                 {statedVsLearned(stated, d.learned)}
               </Text>
             </PrefSliderRow>
@@ -117,7 +117,7 @@ function TasteEditor({ profile }: { profile: TasteProfileDTO }) {
       {section('genre', 'Genres')}
       {section('mood', 'Vibes')}
       {error ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           {error}
         </Body>
       ) : saved ? (

@@ -225,7 +225,7 @@ describe('GroupScreen', () => {
   it('owner: header, filter banner, members with roles, start session, history', async () => {
     show(
       makeGroup({
-        effectiveFilter: makeEffectiveFilter({ maxCertification: 'PG', label: 'Up to PG' }),
+        effectiveFilter: makeEffectiveFilter({ maxCertification: 'PG', label: 'Rated PG or below' }),
         recentSessions: [makeSessionSummary()],
       }),
     );
@@ -233,7 +233,7 @@ describe('GroupScreen', () => {
     expect(m('useGroup')).toHaveBeenCalledWith('g1');
     expect(screen.getByRole('header', { name: 'Film club' })).toBeOnTheScreen();
     expect(screen.getByText('2 members')).toBeOnTheScreen();
-    expect(screen.getByText('Filtered to Up to PG')).toBeOnTheScreen();
+    expect(screen.getByText('Rated PG or below')).toBeOnTheScreen();
     expect(screen.getByText('Owner')).toBeOnTheScreen();
     expect(screen.getByText('Invited')).toBeOnTheScreen();
     // Owner can remove others, not themselves.

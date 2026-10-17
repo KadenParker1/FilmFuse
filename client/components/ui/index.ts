@@ -19,3 +19,4 @@ export { scoreLabel, clampScore, SCORE_MIN, SCORE_MAX } from './scoreLabel';
 export { TextField } from './TextField';
 export { Toast, type ToastTone } from './Toast';
 export { Body, Heading, Label } from './Text';
+export { Toggle } from './Toggle';

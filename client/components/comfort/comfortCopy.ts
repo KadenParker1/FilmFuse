@@ -106,6 +106,33 @@ export function sameLimits(
   return CONTENT_DIMENSIONS.every((d) => levelFor(a, d) === levelFor(b, d));
 }
 
+/**
+ * Below R (G / PG / PG-13) the rating already rules out sexual content, so the "Sex & nudity" row is
+ * hidden. It shows for R, NC-17 and No limit (null).
+ */
+export function showsSexualRow(cert: Certification | null): boolean {
+  return cert === null || cert === 'R' || cert === 'NC_17';
+}
+
+/** The dimensions that have a picker under this maximum rating. */
+export function visibleDimensions(cert: Certification | null): ContentDimension[] {
+  return showsSexualRow(cert) ? CONTENT_DIMENSIONS : CONTENT_DIMENSIONS.filter((d) => d !== 'SEXUAL');
+}
+
+/**
+ * The limits to save under this maximum rating: a hidden row's value is never sent, so SEXUAL is
+ * dropped below R (and comes back at its default, Strong / no limit, when the rating goes up again).
+ */
+export function limitsForCertification(
+  cert: Certification | null,
+  limits: Partial<Record<ContentDimension, ContentLevel>>,
+): Partial<Record<ContentDimension, ContentLevel>> {
+  if (showsSexualRow(cert) || limits.SEXUAL === undefined) return limits;
+  const next = { ...limits };
+  delete next.SEXUAL;
+  return next;
+}
+
 export const GROUP_PRIVACY_NOTE =
   'In groups, FilmFuse uses the most cautious settings of everyone present. Nobody sees whose settings set the limit.';
 

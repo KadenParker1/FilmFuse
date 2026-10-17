@@ -12,22 +12,22 @@ export function TextField({ label, error, hint, className = '', ...rest }: Props
   const { colors } = useTheme();
   return (
     <View className={`gap-1.5 ${className}`}>
-      <Text className="font-body-medium text-sm text-text">{label}</Text>
+      <Text className="font-body-semibold text-sm text-text">{label}</Text>
       <TextInput
         accessibilityLabel={label}
         accessibilityHint={error ?? hint}
-        placeholderTextColor={colors.textMuted}
-        className={`min-h-12 rounded-xl border bg-surface px-4 py-3 font-body text-base text-text ${
-          error ? 'border-velvet' : 'border-border'
+        placeholderTextColor={colors.muted}
+        className={`min-h-12 rounded-xl border bg-raised px-4 py-3 font-body text-base text-text ${
+          error ? 'border-danger' : 'border-transparent'
         }`}
         {...rest}
       />
       {error ? (
-        <Text accessibilityLiveRegion="polite" className="font-body text-sm text-velvet">
+        <Text accessibilityLiveRegion="polite" className="font-body text-sm text-danger">
           {error}
         </Text>
       ) : hint ? (
-        <Text className="font-body text-sm text-text-muted">{hint}</Text>
+        <Text className="font-body text-sm text-muted">{hint}</Text>
       ) : null}
     </View>
   );

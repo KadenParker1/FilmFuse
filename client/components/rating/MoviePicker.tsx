@@ -25,7 +25,7 @@ export function MoviePicker({ onPick }: { onPick: (movie: MovieSummaryDTO) => vo
       </Body>
     );
   } else if (search.isPending) {
-    results = <ActivityIndicator testID="movie-picker-loading" color={colors.gold} className="py-6" />;
+    results = <ActivityIndicator testID="movie-picker-loading" color={colors.accent} className="py-6" />;
   } else if (search.isError) {
     results = (
       <ErrorState compact title="Search failed" error={search.error} onRetry={() => void search.refetch()} />
@@ -45,7 +45,7 @@ export function MoviePicker({ onPick }: { onPick: (movie: MovieSummaryDTO) => vo
         onPress={() => onPick(m)}
         className="flex-row items-center gap-3 rounded-xl py-2 active:opacity-70"
       >
-        <View className="h-16 w-11 overflow-hidden rounded-md border border-border bg-surface-raised">
+        <View className="h-16 w-11 overflow-hidden rounded-lg bg-raised">
           {m.posterUrl ? (
             <Image source={{ uri: m.posterUrl }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
           ) : null}
@@ -54,7 +54,7 @@ export function MoviePicker({ onPick }: { onPick: (movie: MovieSummaryDTO) => vo
           <Text className="font-body-semibold text-base text-text" numberOfLines={1}>
             {m.title}
           </Text>
-          {m.releaseYear ? <Text className="font-body text-sm text-text-muted">{m.releaseYear}</Text> : null}
+          {m.releaseYear ? <Text className="font-body text-sm text-muted">{m.releaseYear}</Text> : null}
         </View>
       </Pressable>
     ));

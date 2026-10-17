@@ -1,6 +1,7 @@
 import { useCallback, useState, type ReactElement } from 'react';
 import { ActivityIndicator, FlatList, View, type LayoutChangeEvent } from 'react-native';
 import { useTheme } from '../../theme/useTheme';
+import type { Certification } from '../../types/api';
 import { PosterCard } from './PosterCard';
 import { Skeleton } from './Skeleton';
 
@@ -10,6 +11,7 @@ export type PosterItem = {
   posterUrl: string | null;
   subtitle?: string;
   score?: number | null;
+  certification?: Certification | null;
 };
 
 /** Target poster width; columns = how many fit, never fewer than 2 (phones) or more than 6. */
@@ -80,7 +82,7 @@ export function PosterGrid({
         ListFooterComponent={
           <View className="gap-4">
             {loadingMore ? (
-              <ActivityIndicator testID="poster-grid-loading-more" color={colors.gold} className="py-4" />
+              <ActivityIndicator testID="poster-grid-loading-more" color={colors.accent} className="py-4" />
             ) : null}
             {footer}
           </View>
@@ -99,6 +101,7 @@ export function PosterGrid({
                 posterUrl={item.posterUrl}
                 subtitle={item.subtitle}
                 score={item.score}
+                certification={item.certification}
                 onPress={onPressItem ? () => onPressItem(item) : undefined}
               />
             )}

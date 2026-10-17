@@ -22,6 +22,9 @@ export interface AuthContextValue {
   clearPasswordRecovery: () => void;
 }
 
+/** After a failed session read, how long to wait for INITIAL_SESSION before assuming signed out. */
+export const SESSION_READ_FALLBACK_MS = 5_000;
+
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -32,19 +35,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    // Route guards must not run on a guessed "signed out": if getSession() fails (e.g. the web
+    // storage lock timed out on a cold load), a null session would bounce a deep link such as
+    // /movie/12 to sign-in and then, once the INITIAL_SESSION event delivers the real session, on
+    // to "/". So only a successful read - or supabase's INITIAL_SESSION event - ends loading; a
+    // failed read waits for that event, with a timeout so a broken store can't hang the app.
+    let fallback: ReturnType<typeof setTimeout> | undefined;
+    const settle = (next: Session | null) => {
+      if (!mounted) return;
+      if (fallback) clearTimeout(fallback);
+      setSession(next);
+      setLoading(false);
+    };
     supabase.auth
       .getSession()
-      .then(({ data }) => {
-        if (mounted) setSession(data.session);
-      })
+      .then(({ data }) => settle(data.session))
       .catch(() => {
-        // unreadable storage counts as signed out
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
+        fallback = setTimeout(() => settle(null), SESSION_READ_FALLBACK_MS);
       });
 
     const { data } = supabase.auth.onAuthStateChange((event, next) => {
+      if (event === 'INITIAL_SESSION') {
+        settle(next);
+        return;
+      }
       setSession(next);
       if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true);
       // Another user's cached data must never leak into the next session.
@@ -55,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     return () => {
       mounted = false;
+      if (fallback) clearTimeout(fallback);
       data.subscription.unsubscribe();
     };
   }, [queryClient]);

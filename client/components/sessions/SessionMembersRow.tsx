@@ -30,7 +30,7 @@ export function SessionMembersRow({
   const voted = votedCount ?? members.filter((m) => m.voted).length;
   return (
     <View className="gap-2">
-      <Text className="font-body-semibold text-sm text-text-muted">
+      <Text className="font-body-semibold text-sm text-muted">
         {voted} of {memberCount} voted
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-3">
@@ -59,7 +59,7 @@ export function SessionMembersRow({
                     testID={`voted-${m.user.id}`}
                     className="absolute -bottom-1 -right-1 rounded-full bg-success"
                   >
-                    <Ionicons name="checkmark-circle" size={18} color={colors.onGold} />
+                    <Ionicons name="checkmark-circle" size={18} color={colors.onAccent} />
                   </View>
                 ) : null}
               </View>

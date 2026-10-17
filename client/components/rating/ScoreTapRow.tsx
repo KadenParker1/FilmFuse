@@ -25,10 +25,10 @@ export function ScoreTapRow({ value, onChange, disabled }: Props) {
               disabled={disabled}
               onPress={() => onChange(s)}
               className={`h-12 flex-1 items-center justify-center rounded-xl border active:opacity-80 ${
-                selected ? 'border-gold bg-gold' : 'border-border bg-surface-raised'
+                selected ? 'border-accent bg-accent' : 'border-border bg-raised'
               }`}
             >
-              <Text className={`font-body-semibold text-lg ${selected ? 'text-on-gold' : 'text-text'}`}>{s}</Text>
+              <Text className={`font-body-semibold text-lg ${selected ? 'text-on-accent' : 'text-text'}`}>{s}</Text>
             </Pressable>
           );
         })}
@@ -36,7 +36,7 @@ export function ScoreTapRow({ value, onChange, disabled }: Props) {
       <Text
         testID="score-label"
         accessibilityLiveRegion="polite"
-        className="text-center font-body-medium text-base text-text-muted"
+        className="text-center font-body-medium text-base text-muted"
       >
         {value != null ? `${value}/10 · ${scoreLabel(value)}` : 'Tap a score'}
       </Text>

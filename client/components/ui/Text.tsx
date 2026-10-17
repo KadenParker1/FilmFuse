@@ -9,25 +9,25 @@ const headingSizes = {
   sm: 'text-xl leading-7',
 } as const;
 
-/** Display heading in Fraunces. */
+/** Display heading in Bricolage Grotesque (800, tight tracking). */
 export function Heading({
   className = '',
   size = 'lg',
   ...rest
 }: Props & { size?: keyof typeof headingSizes }) {
   return (
-    <Text accessibilityRole="header" className={`font-display text-text ${headingSizes[size]} ${className}`} {...rest} />
+    <Text accessibilityRole="header" className={`font-display-bold tracking-tight text-text ${headingSizes[size]} ${className}`} {...rest} />
   );
 }
 
-/** Body copy in Inter. */
+/** Body copy in Figtree. */
 export function Body({ className = '', muted = false, ...rest }: Props & { muted?: boolean }) {
   return (
-    <Text className={`font-body text-base leading-6 ${muted ? 'text-text-muted' : 'text-text'} ${className}`} {...rest} />
+    <Text className={`font-body text-base leading-6 ${muted ? 'text-muted' : 'text-text'} ${className}`} {...rest} />
   );
 }
 
 /** Small uppercase-ish label text. */
 export function Label({ className = '', ...rest }: Props) {
-  return <Text className={`font-body-semibold text-sm text-text-muted ${className}`} {...rest} />;
+  return <Text className={`font-body-semibold text-sm text-muted ${className}`} {...rest} />;
 }

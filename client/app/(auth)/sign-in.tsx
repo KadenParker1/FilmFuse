@@ -99,9 +99,11 @@ export default function SignInScreen() {
       <Screen scroll className="justify-center">
         <View className="w-full max-w-md gap-6 self-center">
           <View className="gap-2">
-            <View className="flex-row items-center gap-2">
-              <Ionicons name="film" size={18} color={colors.gold} />
-              <Text className="font-body-semibold text-sm uppercase tracking-[3px] text-gold">FilmFuse</Text>
+            <View className="flex-row items-center gap-2.5">
+              <View className="h-8 w-8 items-center justify-center rounded-[10px] bg-accent">
+                <Ionicons name="play" size={16} color={colors.onAccent} />
+              </View>
+              <Text className="font-display-bold text-lg tracking-tight text-text">FilmFuse</Text>
             </View>
             <Heading size="xl">{copy.heading}</Heading>
             <Body muted>{copy.tagline}</Body>
@@ -109,7 +111,7 @@ export default function SignInScreen() {
 
           {!env.isSupabaseConfigured ? (
             <Card raised>
-              <Body className="text-velvet">
+              <Body className="text-danger">
                 Supabase isn&apos;t configured. Copy .env.example to .env.local and set EXPO_PUBLIC_SUPABASE_URL and
                 EXPO_PUBLIC_SUPABASE_ANON_KEY.
               </Body>
@@ -160,11 +162,11 @@ export default function SignInScreen() {
                 onPress={() => switchMode('forgot')}
                 className="-mt-1 self-end p-1 active:opacity-60"
               >
-                <Text className="font-body-medium text-sm text-gold">Forgot password?</Text>
+                <Text className="font-body-medium text-sm text-accent-ink">Forgot password?</Text>
               </Pressable>
             ) : null}
             {error ? (
-              <Body testID="auth-error" accessibilityLiveRegion="polite" className="text-velvet">
+              <Body testID="auth-error" accessibilityLiveRegion="polite" className="text-danger">
                 {error}
               </Body>
             ) : null}
@@ -210,7 +212,7 @@ export default function SignInScreen() {
           >
             <Body muted>
               {mode === 'sign-in' ? 'New here? ' : isForgot ? 'Remembered it? ' : 'Already have an account? '}
-              <Text className="font-body-semibold text-gold">{mode === 'sign-in' ? 'Create an account' : 'Sign in'}</Text>
+              <Text className="font-body-semibold text-accent-ink">{mode === 'sign-in' ? 'Create an account' : 'Sign in'}</Text>
             </Body>
           </Pressable>
         </View>

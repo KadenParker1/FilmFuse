@@ -47,19 +47,19 @@ export function OnboardingFrame({
         <View className="w-full max-w-xl flex-1 gap-6 self-center">
           <View className="gap-2">
             <View className="flex-row justify-between">
-              <Text testID="onboarding-step" className="font-body-semibold text-sm text-text-muted">
+              <Text testID="onboarding-step" className="font-body-bold text-xs uppercase tracking-widest text-accent-ink">
                 Step {step} of {TOTAL_STEPS}
               </Text>
-              <Text className="font-body text-sm text-text-muted">{ONBOARDING_STEPS[step - 1]}</Text>
+              <Text className="font-body text-sm text-muted">{ONBOARDING_STEPS[step - 1]}</Text>
             </View>
             <View
               testID="onboarding-progress"
               accessibilityRole="progressbar"
               accessibilityLabel="Onboarding progress"
               accessibilityValue={{ min: 0, max: TOTAL_STEPS, now: step, text: `Step ${step} of ${TOTAL_STEPS}` }}
-              className="h-1.5 w-full overflow-hidden rounded-full bg-border"
+              className="h-2 w-full overflow-hidden rounded-full bg-raised"
             >
-              <View className="h-1.5 rounded-full bg-gold" style={{ width: pct }} />
+              <View className="h-2 rounded-full bg-accent" style={{ width: pct }} />
             </View>
           </View>
           <View className="gap-2">
@@ -74,7 +74,7 @@ export function OnboardingFrame({
               </Body>
             ) : null}
             {error ? (
-              <Body testID="onboarding-error" accessibilityRole="alert" className="text-center text-sm text-velvet">
+              <Body testID="onboarding-error" accessibilityRole="alert" className="text-center text-sm text-danger">
                 {error}
               </Body>
             ) : null}

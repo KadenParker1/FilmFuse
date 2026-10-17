@@ -97,12 +97,13 @@ public class TasteProfileService {
     }
 
     /**
-     * At most {@code n} dims with a value, highest first: by learned when present, else stated. Ties
-     * keep the fixed vector order.
+     * At most {@code n} dims whose value (learned when present, else stated) is above neutral
+     * ({@link TasteDimensions#NEUTRAL_SCORE}), highest first - so possibly fewer than {@code n}, or
+     * none. Ties keep the fixed vector order.
      */
     static List<TasteDimensionDTO> top(List<TasteDimensionDTO> dims, int n) {
         return dims.stream()
-                .filter(d -> value(d) != null)
+                .filter(d -> value(d) != null && value(d) > TasteDimensions.NEUTRAL_SCORE)
                 .sorted(Comparator.comparingDouble((TasteDimensionDTO d) -> value(d)).reversed())
                 .limit(n)
                 .toList();
@@ -115,18 +116,20 @@ public class TasteProfileService {
         return dim.stated() == null ? null : dim.stated().doubleValue();
     }
 
+    /** Learned values only; genres and mood above neutral, with fallbacks in {@link PersonaTemplates}. */
     private static String persona(List<TasteDimensionDTO> genreDims, List<TasteDimensionDTO> moodDims) {
-        List<TasteDimensionDTO> topGenres = genreDims.stream().filter(d -> d.learned() != null)
-                .sorted(Comparator.comparingDouble(TasteDimensionDTO::learned).reversed()).limit(2).toList();
-        Optional<TasteDimensionDTO> topMood = moodDims.stream().filter(d -> d.learned() != null)
+        List<Integer> topGenres = genreDims.stream().filter(TasteProfileService::learnedAboveNeutral)
+                .sorted(Comparator.comparingDouble(TasteDimensionDTO::learned).reversed()).limit(2)
+                .map(d -> Integer.parseInt(d.key().substring("genre:".length()))).toList();
+        String topMood = moodDims.stream().filter(TasteProfileService::learnedAboveNeutral)
                 .max(Comparator.comparingDouble(TasteDimensionDTO::learned)
-                        .thenComparing(Comparator.comparingInt(moodDims::indexOf).reversed()));
-        if (topGenres.size() < 2 || topMood.isEmpty()) {
-            return null;
-        }
-        return PersonaTemplates.persona(topMood.get().key().substring("mood:".length()),
-                Integer.parseInt(topGenres.get(0).key().substring("genre:".length())),
-                Integer.parseInt(topGenres.get(1).key().substring("genre:".length())));
+                        .thenComparing(Comparator.comparingInt(moodDims::indexOf).reversed()))
+                .map(d -> d.key().substring("mood:".length())).orElse(null);
+        return PersonaTemplates.persona(topMood, topGenres);
+    }
+
+    private static boolean learnedAboveNeutral(TasteDimensionDTO dim) {
+        return dim.learned() != null && dim.learned() > TasteDimensions.NEUTRAL_SCORE;
     }
 
     private static Double learnedAt(List<Double> interpretable, int index) {

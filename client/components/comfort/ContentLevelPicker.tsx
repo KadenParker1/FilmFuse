@@ -1,13 +1,13 @@
 import { Text, View } from 'react-native';
-import type { ContentDimension, ContentLevel } from '../../types/api';
+import type { Certification, ContentDimension, ContentLevel } from '../../types/api';
 import { Body, ChoiceGroup } from '../ui';
 import {
-  CONTENT_DIMENSIONS,
   CONTENT_LEVELS,
   DIMENSION_LABELS,
   LEVEL_EXAMPLES,
   LEVEL_LABELS,
   levelFor,
+  visibleDimensions,
   withLevel,
 } from './comfortCopy';
 
@@ -46,14 +46,16 @@ export function ContentLevelPicker({ dimension, value, onChange, disabled }: Pro
 type EditorProps = {
   value: Partial<Record<ContentDimension, ContentLevel>>;
   onChange: (value: Partial<Record<ContentDimension, ContentLevel>>) => void;
+  /** The chosen maximum rating: below R the "Sex & nudity" row is hidden. */
+  maxCertification: Certification | null;
   disabled?: boolean;
 };
 
-/** Every dimension's picker, editing one limits map (a missing dimension = Strong / no limit). */
-export function ContentLimitsEditor({ value, onChange, disabled }: EditorProps) {
+/** Every visible dimension's picker, editing one limits map (a missing dimension = Strong / no limit). */
+export function ContentLimitsEditor({ value, onChange, maxCertification, disabled }: EditorProps) {
   return (
     <View className="gap-5">
-      {CONTENT_DIMENSIONS.map((d) => (
+      {visibleDimensions(maxCertification).map((d) => (
         <ContentLevelPicker
           key={d}
           dimension={d}

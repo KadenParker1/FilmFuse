@@ -41,7 +41,8 @@ describe('ComfortSettingsScreen', () => {
     await render(<ComfortSettingsScreen />);
     await fireEvent.press(screen.getByRole('radio', { name: 'PG-13' }));
     await fireEvent.press(screen.getByRole('radio', { name: 'Violence & gore: Mild' }));
-    await fireEvent.press(screen.getByRole('radio', { name: 'Sex & nudity: Strong' }));
+    // Below R the "Sex & nudity" row is hidden and its saved value dropped.
+    expect(screen.queryByText('Sex & nudity')).toBeNull();
     await fireEvent(screen.getByLabelText('Allow movies with unknown ratings'), 'valueChange', true);
     expect(save()).toBeEnabled();
     await fireEvent.press(save());
@@ -49,6 +50,27 @@ describe('ComfortSettingsScreen', () => {
       { maxCertification: 'PG_13', contentLimits: { VIOLENCE: 'MILD' }, allowUnrated: true },
       expect.anything(),
     );
+  });
+
+  it.each([['G'], ['PG'], ['PG-13']])('hides "Sex & nudity" at %s', async (label) => {
+    await render(<ComfortSettingsScreen />);
+    expect(screen.getByText('Sex & nudity')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('radio', { name: label }));
+    expect(screen.queryByText('Sex & nudity')).toBeNull();
+  });
+
+  it.each([['R'], ['NC-17'], ['No limit']])('shows "Sex & nudity" at %s', async (label) => {
+    await render(<ComfortSettingsScreen />);
+    await fireEvent.press(screen.getByRole('radio', { name: 'G' }));
+    await fireEvent.press(screen.getByRole('radio', { name: label }));
+    expect(screen.getByRole('radio', { name: 'Sex & nudity: Strong' })).toBeChecked();
+  });
+
+  it('drops SEXUAL from the payload when lowering below R', async () => {
+    await render(<ComfortSettingsScreen />);
+    await fireEvent.press(screen.getByRole('radio', { name: 'PG' }));
+    await fireEvent.press(save());
+    expect(update.mutate).toHaveBeenCalledWith({ maxCertification: 'PG', contentLimits: {}, allowUnrated: false }, expect.anything());
   });
 
   it('confirms the save and goes back to clean', async () => {

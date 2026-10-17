@@ -1,8 +1,7 @@
-import { Switch, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useNotificationSettings, useUpdateNotificationSettings } from '../../api/notifications';
 import { BackButton } from '../../components/BackButton';
-import { Body, Card, ErrorState, Heading, Screen, Skeleton, errorMessage } from '../../components/ui';
-import { useTheme } from '../../theme/useTheme';
+import { Body, Card, errorMessage, ErrorState, Heading, Screen, Skeleton, Toggle } from '../../components/ui';
 import type { NotificationSettingsDTO } from '../../types/api';
 
 type Pref = keyof NotificationSettingsDTO;
@@ -29,7 +28,6 @@ export const NOTIFICATION_PREFS: { key: Pref; label: string; description: string
 ];
 
 function NotificationsForm({ settings }: { settings: NotificationSettingsDTO }) {
-  const { colors } = useTheme();
   const update = useUpdateNotificationSettings();
 
   return (
@@ -44,21 +42,19 @@ function NotificationsForm({ settings }: { settings: NotificationSettingsDTO }) 
                 {description}
               </Body>
             </View>
-            <Switch
+            <Toggle
               accessibilityLabel={label}
               accessibilityHint={description}
               accessibilityState={{ checked: settings[key], disabled: update.isPending }}
               value={settings[key]}
               disabled={update.isPending}
               onValueChange={(next) => update.mutate({ ...settings, [key]: next })}
-              trackColor={{ true: colors.gold, false: colors.border }}
-              thumbColor={colors.surface}
             />
           </View>
         ))}
       </Card>
       {update.isError ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           Couldn&apos;t save that change. {errorMessage(update.error)}
         </Body>
       ) : update.isSuccess ? (

@@ -105,7 +105,7 @@ export default function NewSessionScreen() {
           />
         )}
         {membersError ? (
-          <Body accessibilityRole="alert" className="text-sm text-velvet">
+          <Body accessibilityRole="alert" className="text-sm text-danger">
             {membersError}
           </Body>
         ) : null}
@@ -119,7 +119,7 @@ export default function NewSessionScreen() {
         />
         <StrategyPicker value={strategy} onChange={setStrategy} />
         {create.isError ? (
-          <Body accessibilityRole="alert" className="text-sm text-velvet">
+          <Body accessibilityRole="alert" className="text-sm text-danger">
             {errorMessage(create.error)}
           </Body>
         ) : null}

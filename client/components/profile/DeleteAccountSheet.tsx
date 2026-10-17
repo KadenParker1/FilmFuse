@@ -38,7 +38,7 @@ export function DeleteAccountSheet({ visible, onClose }: Props) {
           placeholder={DELETE_CONFIRMATION}
         />
         {del.isError ? (
-          <Body testID="delete-error" accessibilityLiveRegion="polite" className="text-velvet">
+          <Body testID="delete-error" accessibilityLiveRegion="polite" className="text-danger">
             {errorMessage(del.error)}
           </Body>
         ) : null}

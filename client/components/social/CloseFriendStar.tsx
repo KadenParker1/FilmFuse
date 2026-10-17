@@ -20,7 +20,7 @@ export function CloseFriendStar({ name, closeFriend, onToggle, disabled }: Props
       <Ionicons
         name={closeFriend ? 'star' : 'star-outline'}
         size={22}
-        color={closeFriend ? colors.gold : colors.textMuted}
+        color={closeFriend ? colors.accent : colors.muted}
       />
     </Pressable>
   );

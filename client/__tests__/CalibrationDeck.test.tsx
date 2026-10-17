@@ -6,9 +6,13 @@ import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { notifyManager } from '@tanstack/react-query';
 import { CalibrationDeck } from '../components/taste/CalibrationDeck';
 import { serveRoutes, type Route } from '../test-utils/fetchRoutes';
-import { makeMovie } from '../test-utils/fixtures';
-import { renderWithClient } from '../test-utils/render';
+import { useQuery } from '@tanstack/react-query';
+import { makeMovie, makeOnboardingState } from '../test-utils/fixtures';
+import { createTestQueryClient, renderWithClient } from '../test-utils/render';
+import { queryKeys } from '../lib/queryKeys';
+import type { OnboardingStateDTO } from '../types/api';
 import type { MovieSummaryDTO } from '../types/api';
+import { slideTo } from '../test-utils/slider';
 
 notifyManager.setScheduler((cb) => cb());
 
@@ -35,7 +39,7 @@ async function renderDeck(routes: Route[], props: Partial<Parameters<typeof Cali
 }
 const card = (id: number) => screen.findByTestId(`calibration-card-${id}`);
 const rate = async (score: number, title: string) => {
-  await fireEvent(screen.getByLabelText(`Your score for ${title}`), 'valueChange', score);
+  await slideTo(`Your score for ${title}`, score);
   await fireEvent.press(screen.getByRole('button', { name: `Rate ${score}` }));
 };
 const unseen = () => fireEvent.press(screen.getByRole('button', { name: 'Haven’t seen' }));
@@ -162,5 +166,54 @@ describe('CalibrationDeck', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
     await card(1);
     expect(api.callsTo('GET', NEXT)).toHaveLength(2);
+  });
+});
+
+describe('CalibrationDeck counter (bug 2: "Rated 18" after 9 ratings)', () => {
+  /** Like onboarding step 4: the start count comes from the onboarding state in the query cache. */
+  function FromOnboardingState(props: { onFinish: () => Promise<void> }) {
+    const state = useQuery<OnboardingStateDTO>({ queryKey: queryKeys.onboarding, queryFn: () => new Promise(() => {}) });
+    return (
+      <CalibrationDeck
+        deckId="test"
+        minRated={10}
+        skipAfter={20}
+        initialRatedCount={state.data?.calibrationRatedCount ?? 0}
+        onFinish={props.onFinish}
+      />
+    );
+  }
+
+  it('counts each rating once across a batch boundary, and gates Done on the true count', async () => {
+    const api = serveRoutes(fetchMock, [...batches(batchOf(1), batchOf(11)), batchOk]);
+    const client = createTestQueryClient();
+    client.setQueryData(queryKeys.onboarding, makeOnboardingState({ step: 4, calibrationRatedCount: 0 }));
+    await renderWithClient(<FromOnboardingState onFinish={() => Promise.resolve()} />, client);
+    for (let i = 1; i <= 9; i++) {
+      await card(i);
+      await rate(7, `Movie ${i}`);
+    }
+    await card(10);
+    await unseen();
+    // The batch was submitted, which bumps the cached server count to 9 as well.
+    await card(11);
+    expect(api.callsTo('POST', '/me/ratings/batch')).toHaveLength(1);
+    expect(client.getQueryData<OnboardingStateDTO>(queryKeys.onboarding)?.calibrationRatedCount).toBe(9);
+    expect(screen.getByTestId('calibration-progress')).toHaveTextContent('Rated 9 of 10');
+    expect(screen.queryByRole('button', { name: 'Done' })).toBeNull();
+    await rate(6, 'Movie 11');
+    expect(screen.getByTestId('calibration-progress')).toHaveTextContent('Rated 10');
+    expect(screen.getByRole('button', { name: 'Done' })).toBeOnTheScreen();
+  });
+
+  it('starts from ratings saved in an earlier sitting', async () => {
+    serveRoutes(fetchMock, [...batches(batchOf(1)), batchOk]);
+    const client = createTestQueryClient();
+    client.setQueryData(queryKeys.onboarding, makeOnboardingState({ step: 4, calibrationRatedCount: 4 }));
+    await renderWithClient(<FromOnboardingState onFinish={() => Promise.resolve()} />, client);
+    await card(1);
+    expect(screen.getByTestId('calibration-progress')).toHaveTextContent('Rated 4 of 10');
+    await rate(8, 'Movie 1');
+    expect(screen.getByTestId('calibration-progress')).toHaveTextContent('Rated 5 of 10');
   });
 });

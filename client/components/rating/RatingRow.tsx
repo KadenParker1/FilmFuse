@@ -24,7 +24,7 @@ export function RatingRow({ rating, onPress }: { rating: RatingDTO; onPress: () 
       onPress={onPress}
       className="flex-row gap-3 py-2 active:opacity-70"
     >
-      <View className="h-20 w-14 overflow-hidden rounded-md border border-border bg-surface-raised">
+      <View className="h-20 w-14 overflow-hidden rounded-lg bg-raised">
         {movie.posterUrl ? (
           <Image source={{ uri: movie.posterUrl }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
         ) : null}
@@ -34,11 +34,11 @@ export function RatingRow({ rating, onPress }: { rating: RatingDTO; onPress: () 
           <Text className="flex-1 font-body-semibold text-base text-text" numberOfLines={1}>
             {movie.title}
           </Text>
-          <View className="rounded-full bg-gold px-2 py-0.5">
-            <Text className="font-body-semibold text-sm text-on-gold">{rating.score}/10</Text>
+          <View className="rounded-full bg-accent px-2 py-0.5">
+            <Text className="font-body-semibold text-sm text-on-accent">{rating.score}/10</Text>
           </View>
         </View>
-        <Text className="font-body text-sm text-text-muted">
+        <Text className="font-body text-sm text-muted">
           {scoreLabel(rating.score)}
           {movie.releaseYear ? ` · ${movie.releaseYear}` : ''}
         </Text>
@@ -48,8 +48,8 @@ export function RatingRow({ rating, onPress }: { rating: RatingDTO; onPress: () 
           </Text>
         ) : null}
         <View className="flex-row items-center gap-1">
-          <Ionicons name={vis.icon} size={12} color={colors.textMuted} />
-          <Text className="font-body text-xs text-text-muted">{vis.label}</Text>
+          <Ionicons name={vis.icon} size={12} color={colors.muted} />
+          <Text className="font-body text-xs text-muted">{vis.label}</Text>
         </View>
       </View>
     </Pressable>

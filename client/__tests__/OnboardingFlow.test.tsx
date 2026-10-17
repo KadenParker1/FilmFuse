@@ -38,6 +38,7 @@ import { queryResult } from '../test-utils/queryResults';
 import { createTestQueryClient, renderWithClient } from '../test-utils/render';
 import { routerState } from '../test-utils/router';
 import type { OnboardingStateDTO, ProfileResponseDTO } from '../types/api';
+import { slideTo } from '../test-utils/slider';
 
 notifyManager.setScheduler((cb) => cb());
 
@@ -184,6 +185,18 @@ describe('onboarding routing', () => {
 
 // ---------------------------------------------------------------------------------------------
 describe('step 1: You', () => {
+  it('shows the initials of the name being typed on the avatar (bug 4: it showed "?")', async () => {
+    await open(1, makeOnboardingState(), [], { ...profile, displayName: null, username: null, profileImageUrl: null });
+    expect(screen.getByTestId('avatar-initials')).toHaveTextContent('?');
+    await fireEvent.changeText(screen.getByLabelText('Display name'), 'Grace Hopper');
+    expect(screen.getByTestId('avatar-initials')).toHaveTextContent('GH');
+    await fireEvent.changeText(screen.getByLabelText('Display name'), 'Grace');
+    expect(screen.getByTestId('avatar-initials')).toHaveTextContent('G');
+    await fireEvent.changeText(screen.getByLabelText('Display name'), '');
+    await fireEvent.changeText(screen.getByLabelText('Username'), 'turing');
+    expect(screen.getByTestId('avatar-initials')).toHaveTextContent('T');
+  });
+
   it('shows progress, prefills the profile and has no Back', async () => {
     await open(1, makeOnboardingState());
     expect(screen.getByTestId('onboarding-step')).toHaveTextContent('Step 1 of 8');
@@ -258,7 +271,7 @@ describe('step 1: You', () => {
 // ---------------------------------------------------------------------------------------------
 describe('step 2: Genres', () => {
   const genreRoute: Route = { path: '/genres', body: GENRES };
-  const slide = (name: string, v: number) => fireEvent(screen.getByLabelText(name), 'valueChange', v);
+  const slide = (name: string, v: number) => slideTo(name, v);
 
   it('starts every slider at 5 with Continue locked and a live hint', async () => {
     await open(2, makeOnboardingState({ step: 2 }), [genreRoute]);
@@ -500,7 +513,7 @@ describe('step 5: Vibes', () => {
   it('saves touched (and previously saved) vibes', async () => {
     const { api } = await open(5, makeOnboardingState({ step: 5, moodPrefs: [{ moodTag: 'feel-good', score: 9 }] }), moodRoutes);
     await waitFor(() => expect(screen.getByTestId('mood-row-cozy')).toBeOnTheScreen());
-    await fireEvent(screen.getByLabelText('Cozy'), 'valueChange', 8);
+    await slideTo('Cozy', 8);
     await fireEvent.press(continueButton());
     await expectAdvancedTo(api, 6);
     expect(api.callsTo('PUT', '/me/preferences/moods')[0]?.body).toEqual([
@@ -515,7 +528,7 @@ describe('step 5: Vibes', () => {
       ...moodRoutes,
     ]);
     await waitFor(() => expect(screen.getByTestId('mood-row-cozy')).toBeOnTheScreen());
-    await fireEvent(screen.getByLabelText('Cozy'), 'valueChange', 2);
+    await slideTo('Cozy', 2);
     await fireEvent.press(continueButton());
     await waitFor(() => expect(screen.getByTestId('onboarding-error')).toHaveTextContent('Unknown mood tag'));
     expect(api.callsTo('PUT', '/me/onboarding/step')).toHaveLength(0);
@@ -532,13 +545,26 @@ describe('step 6: Comfort', () => {
     expect(screen.getByRole('radio', { name: 'R' })).toBeChecked();
     expect(screen.getByRole('radio', { name: 'Sex & nudity: None' })).toBeChecked();
     await fireEvent.press(screen.getByRole('radio', { name: 'PG-13' }));
+    // Below R the "Sex & nudity" row is hidden and SEXUAL is not sent.
+    expect(screen.queryByText('Sex & nudity')).toBeNull();
     await fireEvent.press(screen.getByRole('radio', { name: 'Violence & gore: Mild' }));
     await fireEvent(screen.getByLabelText('Allow movies with unknown ratings'), 'valueChange', true);
     await fireEvent.press(continueButton());
     await expectAdvancedTo(api, 7);
-    const sent = { maxCertification: 'PG_13', contentLimits: { SEXUAL: 'NONE', VIOLENCE: 'MILD' }, allowUnrated: true };
+    const sent = { maxCertification: 'PG_13', contentLimits: { VIOLENCE: 'MILD' }, allowUnrated: true };
     expect(api.callsTo('PUT', '/me/settings/comfort')[0]?.body).toEqual(sent);
     expect(client.getQueryData(queryKeys.comfortSettings)).toEqual(sent);
+  });
+
+  it.each([['G'], ['PG'], ['PG-13']])('hides "Sex & nudity" at %s and shows it again at R', async (label) => {
+    await open(6, makeOnboardingState({ step: 6, comfort: makeComfort({ maxCertification: null, contentLimits: {} }) }), []);
+    expect(screen.getByText('Sex & nudity')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('radio', { name: label }));
+    expect(screen.queryByText('Sex & nudity')).toBeNull();
+    await fireEvent.press(screen.getByRole('radio', { name: 'R' }));
+    expect(screen.getByRole('radio', { name: 'Sex & nudity: Strong' })).toBeChecked();
+    await fireEvent.press(screen.getByRole('radio', { name: 'NC-17' }));
+    expect(screen.getByText('Sex & nudity')).toBeOnTheScreen();
   });
 
   it('shows a server error and stays', async () => {

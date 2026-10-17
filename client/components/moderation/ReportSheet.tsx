@@ -39,7 +39,7 @@ export function ReportForm({ targetType, targetId, onDone }: FormProps) {
   if (report.isSuccess) {
     return (
       <View testID="report-success" className="items-center gap-3">
-        <Ionicons name="checkmark-circle" size={44} color={colors.gold} />
+        <Ionicons name="checkmark-circle" size={44} color={colors.accent} />
         <Heading size="sm" className="text-center" accessibilityLiveRegion="polite">
           {REPORT_THANKS}
         </Heading>
@@ -91,11 +91,11 @@ export function ReportForm({ targetType, targetId, onDone }: FormProps) {
           editable={!report.isPending}
           multiline
           placeholder="Anything that helps us understand (optional)"
-          placeholderTextColor={colors.textMuted}
-          className="min-h-20 rounded-xl border border-border bg-surface-raised p-3 font-body text-base text-text"
+          placeholderTextColor={colors.muted}
+          className="min-h-20 rounded-xl bg-raised p-3 font-body text-base text-text"
           textAlignVertical="top"
         />
-        <Text testID="report-details-counter" className="self-end font-body text-xs text-text-muted">
+        <Text testID="report-details-counter" className="self-end font-body text-xs text-muted">
           {details.length}/{REPORT_DETAILS_MAX}
         </Text>
       </View>
@@ -105,7 +105,7 @@ export function ReportForm({ targetType, targetId, onDone }: FormProps) {
         </Body>
       ) : null}
       {failure ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           {failure}
         </Body>
       ) : null}

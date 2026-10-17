@@ -7,18 +7,18 @@ const COPY: Record<LiveMode, string> = {
   polling: 'Updating every few seconds',
 };
 
-/** How the session screen is staying current: a pulsing-dot "Live" or the polling fallback. */
+/** How the session screen is staying current: a green "Live" pill, or the polling / connecting fallback. */
 export function LiveIndicator({ mode }: { mode: LiveMode }) {
-  const dot = mode === 'live' ? 'bg-success' : mode === 'polling' ? 'bg-gold' : 'bg-text-muted';
+  const live = mode === 'live';
   return (
     <View
       testID="live-indicator"
       accessible
-      accessibilityLabel={mode === 'live' ? 'Live updates on' : COPY[mode]}
-      className="flex-row items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1"
+      accessibilityLabel={live ? 'Live updates on' : COPY[mode]}
+      className={`flex-row items-center gap-1.5 self-start rounded-full px-2.5 py-1 ${live ? 'bg-success-soft' : 'bg-raised'}`}
     >
-      <View className={`h-2 w-2 rounded-full ${dot}`} />
-      <Text className="font-body-medium text-xs text-text-muted">{COPY[mode]}</Text>
+      <View className={`h-2 w-2 rounded-full ${live ? 'bg-success' : mode === 'polling' ? 'bg-accent' : 'bg-muted'}`} />
+      <Text className={`font-body-bold text-xs ${live ? 'text-success' : 'text-muted'}`}>{COPY[mode]}</Text>
     </View>
   );
 }

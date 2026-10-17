@@ -7,6 +7,7 @@ import { useGenres } from '../api/movies';
 import { CertificationBadge } from '../components/sessions/CertificationBadge';
 import { FuseMeter, fuseMeterLabel, fuseSegments } from '../components/sessions/FuseMeter';
 import { LiveIndicator } from '../components/sessions/LiveIndicator';
+import { fusePalettes } from '../theme/tokens';
 import { SessionMembersRow } from '../components/sessions/SessionMembersRow';
 import {
   EMPTY_FILTERS,
@@ -134,14 +135,30 @@ describe('FuseMeter', () => {
       'Fit for each person: Ada Lovelace 9 out of 10, Grace Hopper 4.5 out of 10, Alan Turing 4.5 out of 10',
     );
     expect(meter.props.accessibilityRole).toBe('image');
-    // Wide segments carry the member's avatar; narrow ones don't.
+    // The legend names each scored member with their score.
     expect(screen.getAllByTestId('avatar-initials')).toHaveLength(3);
+    expect(screen.getByTestId('fuse-legend-u1')).toHaveTextContent(/Ada 9$/);
+    expect(screen.getByTestId('fuse-legend-u2')).toHaveTextContent(/Grace 4.5$/);
   });
 
-  it('omits avatars from very thin segments and handles no scores', async () => {
+  it('colours segments with the Fuse member colours of the current scheme', async () => {
+    await render(<FuseMeter members={members} scores={{ u1: 9, u2: 4, u3: 2 }} />);
+    const bg = (id: string) => StyleSheet.flatten(screen.getByTestId(id).props.style).backgroundColor;
+    expect([bg('fuse-segment-u1'), bg('fuse-segment-u2'), bg('fuse-segment-u3')]).toEqual(fusePalettes.dark.slice(0, 3));
+    // Members keep their colour by position even when an earlier one has no score.
+    expect(fuseSegments(members, { u2: 5 }, fusePalettes.light)[0]?.color).toBe(fusePalettes.light[1]);
+    // Big groups cycle the palette.
+    const many = Array.from({ length: fusePalettes.dark.length + 1 }, (_, i) => ({ ...members[0]!, user: { ...members[0]!.user, id: `m${i}` } }));
+    const all = Object.fromEntries(many.map((m) => [m.user.id, 5]));
+    expect(fuseSegments(many, all).at(-1)?.color).toBe(fusePalettes.dark[0]);
+  });
+
+  it('legends only scored members and handles no scores', async () => {
     const { rerender } = await render(<FuseMeter members={members} scores={{ u1: 9.5, u2: 0.5 }} />);
-    expect(screen.getAllByTestId('avatar-initials')).toHaveLength(1);
+    expect(screen.getAllByTestId('avatar-initials')).toHaveLength(2);
+    expect(screen.queryByTestId('fuse-legend-u3')).toBeNull();
     await rerender(<FuseMeter members={members} scores={{}} />);
+    expect(screen.getByTestId('fuse-empty')).toBeOnTheScreen();
     expect(screen.getByText('No fit scores yet')).toBeOnTheScreen();
     expect(fuseMeterLabel([])).toBe('No fit scores yet');
   });

@@ -242,7 +242,7 @@ class GroupIntegrationTest extends AbstractGroupIntegrationTest {
                 .andExpect(jsonPath("$.effectiveFilter.contentLimits.VIOLENCE").value("MILD"))
                 // The owner never changed settings: unrated content stays excluded.
                 .andExpect(jsonPath("$.effectiveFilter.allowUnrated").value(false))
-                .andExpect(jsonPath("$.effectiveFilter.label").value("Up to PG-13 · mild violence")));
+                .andExpect(jsonPath("$.effectiveFilter.label").value("Rated PG-13 or below · mild violence at most")));
         assertThat(body).doesNotContain("\"label\":\"" + strict.username());
     }
 
@@ -263,7 +263,7 @@ class GroupIntegrationTest extends AbstractGroupIntegrationTest {
                 .andExpect(jsonPath("$.comfortCap.maxCertification").value("PG"))
                 .andExpect(jsonPath("$.comfortCap.contentLimits.FRIGHTENING").value("MILD"))
                 .andExpect(jsonPath("$.effectiveFilter.maxCertification").value("PG"))
-                .andExpect(jsonPath("$.effectiveFilter.label").value("Up to PG · mild frightening scenes"));
+                .andExpect(jsonPath("$.effectiveFilter.label").value("Rated PG or below · mild frightening scenes at most"));
 
         // Null = unchanged; empty emoji / color clears them; a cap of nulls removes it.
         mockMvc.perform(patch("/api/v1/groups/{id}", groupId).with(owner.auth()).contentType(MediaType.APPLICATION_JSON)

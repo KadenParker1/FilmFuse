@@ -28,8 +28,8 @@ export function StatusPill({
       accessibilityLabel={accessibilityLabel}
       className="min-h-9 flex-row items-center gap-1.5 rounded-full border border-border px-3 py-1.5"
     >
-      <Ionicons name={icon} size={14} color={colors.textMuted} />
-      <Text className="font-body-medium text-sm text-text-muted">{label}</Text>
+      <Ionicons name={icon} size={14} color={colors.muted} />
+      <Text className="font-body-medium text-sm text-muted">{label}</Text>
     </View>
   );
 }
@@ -56,7 +56,7 @@ export function FriendshipActionButton({ user, state }: Props) {
           title="Add"
           accessibilityLabel={`Add ${name} as a friend`}
           loading={send.isPending}
-          icon={<Ionicons name="person-add-outline" size={14} color={colors.onGold} />}
+          icon={<Ionicons name="person-add-outline" size={14} color={colors.onAccent} />}
           onPress={() => send.mutate(user.id)}
         />
       );
@@ -89,7 +89,7 @@ export function FriendshipActionButton({ user, state }: Props) {
     <View className="items-end gap-1">
       {control}
       {failed ? (
-        <Text accessibilityRole="alert" className="max-w-40 text-right font-body text-xs text-velvet" numberOfLines={2}>
+        <Text accessibilityRole="alert" className="max-w-40 text-right font-body text-xs text-danger" numberOfLines={2}>
           {errorMessage(failed)}
         </Text>
       ) : null}

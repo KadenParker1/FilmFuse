@@ -85,7 +85,7 @@ class CalibrationIntegrationTest extends AbstractTasteIntegrationTest {
         Setup s = setup();
         int mlPick = topMovie(uniqueGenre(), "PG-13");
         when(mlClient.isConfigured()).thenReturn(true);
-        when(mlClient.calibrationCandidates(any())).thenReturn(List.of(s.rated(), s.rRated(), 2147000005, mlPick));
+        when(mlClient.calibrationCandidates(any())).thenReturn(List.of(s.rated(), s.favorite(), s.rRated(), 2147000005, mlPick));
 
         assertThat(next(s.user(), 1)).containsExactly(mlPick);
         ArgumentCaptor<MlCalibrationCandidatesRequest> captor = ArgumentCaptor.forClass(MlCalibrationCandidatesRequest.class);

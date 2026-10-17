@@ -5,17 +5,17 @@ import { useTheme } from '../../theme/useTheme';
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const containerByVariant: Record<ButtonVariant, string> = {
-  primary: 'bg-gold',
-  secondary: 'bg-surface-raised border border-border',
+  primary: 'bg-accent',
+  secondary: 'bg-raised',
   ghost: 'bg-transparent',
-  danger: 'bg-velvet',
+  danger: 'bg-danger',
 };
 
 const labelByVariant: Record<ButtonVariant, string> = {
-  primary: 'text-on-gold',
+  primary: 'text-on-accent',
   secondary: 'text-text',
-  ghost: 'text-gold',
-  danger: 'text-on-velvet',
+  ghost: 'text-accent-ink',
+  danger: 'text-on-danger',
 };
 
 type Props = Omit<PressableProps, 'children'> & {
@@ -23,11 +23,12 @@ type Props = Omit<PressableProps, 'children'> & {
   variant?: ButtonVariant;
   loading?: boolean;
   icon?: ReactNode;
-  /** `sm` is the compact pill used inside list rows. */
+  /** `sm` is the compact button used inside list rows. */
   size?: 'md' | 'sm';
   className?: string;
 };
 
+/** Technicolor button: flat fills, 14-16px corners (not pills), bold Figtree label. */
 export function Button({
   title,
   variant = 'primary',
@@ -40,7 +41,8 @@ export function Button({
 }: Props) {
   const { colors } = useTheme();
   const isDisabled = disabled || loading;
-  const spinnerColor = variant === 'primary' ? colors.onGold : variant === 'danger' ? colors.onVelvet : colors.text;
+  const spinnerColor =
+    variant === 'primary' ? colors.onAccent : variant === 'danger' ? colors.onDanger : variant === 'ghost' ? colors.accentInk : colors.text;
 
   return (
     <Pressable
@@ -48,15 +50,13 @@ export function Button({
       accessibilityLabel={title}
       accessibilityState={{ disabled: !!isDisabled, busy: loading }}
       disabled={isDisabled}
-      className={`flex-row items-center justify-center rounded-full active:opacity-80 ${
-        size === 'sm' ? 'min-h-9 gap-1.5 px-4 py-1.5' : 'min-h-12 gap-2 px-5 py-3'
-      } ${
-        containerByVariant[variant]
-      } ${isDisabled ? 'opacity-50' : ''} ${className}`}
+      className={`flex-row items-center justify-center active:opacity-80 ${
+        size === 'sm' ? 'min-h-9 gap-1.5 rounded-xl px-3.5 py-1.5' : 'min-h-12 gap-2 rounded-2xl px-5 py-3'
+      } ${containerByVariant[variant]} ${isDisabled ? 'opacity-50' : ''} ${className}`}
       {...rest}
     >
       {loading ? <ActivityIndicator size="small" color={spinnerColor} /> : icon}
-      <Text className={`font-body-semibold ${size === 'sm' ? 'text-sm' : 'text-base'} ${labelByVariant[variant]}`}>{title}</Text>
+      <Text className={`font-body-bold ${size === 'sm' ? 'text-sm' : 'text-base'} ${labelByVariant[variant]}`}>{title}</Text>
     </Pressable>
   );
 }

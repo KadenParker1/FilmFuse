@@ -35,7 +35,7 @@ Stack and conventions mirror the sibling project `~/IdeaProjects/bellavera/bella
 - DTO in/out of controllers, static mapper classes (`UserMapper.toDTO/toModel`), Jakarta validation on request DTOs, errors via the common `@ControllerAdvice` returning `{message, fieldErrors?}`. Custom exceptions extend `RuntimeException` and get a handler.
 - REST under `/api/v1`, cursor pagination (`?cursor=&limit=`).
 - `.http` files for manual testing in `api-requests/<module>/`.
-- Client: keep `client/lib`, `client/api` (query hooks) and `client/types` free of platform-specific imports; platform splits via `*.web.tsx` / `*.native.tsx`. Design tokens in `client/theme/tokens.ts` ("Marquee" palette: bg `#0E0B14`, surface `#1A1523`, text `#F4EFE6`, gold `#F5B942`, velvet `#C7354A`).
+- Client: keep `client/lib`, `client/api` (query hooks) and `client/types` free of platform-specific imports; platform splits via `*.web.tsx` / `*.native.tsx`. Design tokens in `client/theme/tokens.ts` ("Technicolor" palette, dark-first: bg `#0B0D14`, surface `#131622`, text `#EEF0FB`, accent cobalt `#6B84FF`, accent2 tangerine `#FF9447`, plus a light set and `fusePalettes` member colours; WCAG AA enforced by `__tests__/tokens.test.ts`). Fonts: Bricolage Grotesque (display) + Figtree (body). Appearance (Dark default / Light / System) lives in `theme/AppearanceProvider`; every Switch goes through `components/ui/Toggle`.
 - `client/types/api.ts` mirrors core-api DTOs by hand; CI checks for drift.
 
 ## Commands

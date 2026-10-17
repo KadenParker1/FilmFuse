@@ -43,7 +43,7 @@ export function GroupCard({ group, onPress, children }: Props) {
           <Text className="font-display text-lg text-text" numberOfLines={1}>
             {group.name}
           </Text>
-          <Text className="font-body text-xs text-text-muted" numberOfLines={1}>
+          <Text className="font-body text-xs text-muted" numberOfLines={1}>
             {subtitle}
           </Text>
         </View>

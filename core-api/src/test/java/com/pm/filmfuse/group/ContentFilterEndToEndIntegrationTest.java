@@ -63,7 +63,7 @@ class ContentFilterEndToEndIntegrationTest extends AbstractGroupIntegrationTest 
         String body = json(createAdHocSession(relaxed, genre, strict)
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.effectiveFilter.maxCertification").value("PG_13"))
-                .andExpect(jsonPath("$.effectiveFilter.label").value("Up to PG-13"))
+                .andExpect(jsonPath("$.effectiveFilter.label").value("Rated PG-13 or below"))
                 .andExpect(jsonPath("$.results[0].explanation").value("Because the ranker said so"))
                 .andExpect(jsonPath("$.results[0].groupScore").value(8.5)));
 
@@ -173,7 +173,7 @@ class ContentFilterEndToEndIntegrationTest extends AbstractGroupIntegrationTest 
 
         String body = json(createAdHocSession(other, genre, careful).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.effectiveFilter.contentLimits.VIOLENCE").value("MILD"))
-                .andExpect(jsonPath("$.effectiveFilter.label").value("Mild violence")));
+                .andExpect(jsonPath("$.effectiveFilter.label").value("Mild violence at most")));
         assertThat(resultIds(body)).containsExactly(mild, none);
 
         MlGroupRecommendationRequest request = sentToMl();
@@ -227,7 +227,7 @@ class ContentFilterEndToEndIntegrationTest extends AbstractGroupIntegrationTest 
                 .andExpect(jsonPath("$.effectiveFilter.contentLimits.SEXUAL").value("NONE"))
                 .andExpect(jsonPath("$.effectiveFilter.allowUnrated").value(true))
                 .andExpect(jsonPath("$.effectiveFilter.label")
-                        .value("Up to PG-13 · mild violence · no sexual content · mild language"));
+                        .value("Rated PG-13 or below · mild violence at most · no sexual content · mild language at most"));
     }
 
     @Test

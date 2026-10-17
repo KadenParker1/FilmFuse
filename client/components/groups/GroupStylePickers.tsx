@@ -19,7 +19,7 @@ export function EmojiPicker({ value, onChange }: { value: string; onChange: (emo
               accessibilityState={{ checked: selected }}
               onPress={() => onChange(e)}
               className={`h-11 w-11 items-center justify-center rounded-xl border active:opacity-70 ${
-                selected ? 'border-gold bg-surface-raised' : 'border-border bg-surface'
+                selected ? 'border-accent bg-raised' : 'border-border bg-surface'
               }`}
             >
               <Text className="text-xl">{e}</Text>

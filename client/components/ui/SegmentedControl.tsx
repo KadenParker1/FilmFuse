@@ -16,13 +16,13 @@ type Props<T extends string> = {
   className?: string;
 };
 
-/** Pill-shaped tab switcher. The selected segment is filled gold; it reads as a tab list. */
+/** Pill-shaped tab switcher on a surface track; the selected segment is filled with the text colour. */
 export function SegmentedControl<T extends string>({ segments, value, onChange, label, className = '' }: Props<T>) {
   return (
     <View
       accessibilityRole="tablist"
       accessibilityLabel={label}
-      className={`flex-row rounded-full border border-border bg-surface p-1 ${className}`}
+      className={`flex-row gap-0.5 rounded-full border border-border bg-surface p-1 ${className}`}
     >
       {segments.map((s) => {
         const selected = s.value === value;
@@ -37,20 +37,13 @@ export function SegmentedControl<T extends string>({ segments, value, onChange, 
               if (!selected) onChange(s.value);
             }}
             className={`min-h-10 flex-1 flex-row items-center justify-center gap-2 rounded-full px-4 py-2 active:opacity-80 ${
-              selected ? 'bg-gold' : ''
+              selected ? 'bg-text' : ''
             }`}
           >
-            <Text className={`font-body-semibold text-sm ${selected ? 'text-on-gold' : 'text-text-muted'}`}>
-              {s.label}
-            </Text>
+            <Text className={`font-body-semibold text-sm ${selected ? 'text-bg' : 'text-muted'}`}>{s.label}</Text>
             {badge ? (
-              <View
-                testID={`segment-badge-${s.value}`}
-                className={`min-w-5 items-center rounded-full px-1.5 ${selected ? 'bg-on-gold' : 'bg-velvet'}`}
-              >
-                <Text className={`font-body-semibold text-xs ${selected ? 'text-gold' : 'text-on-velvet'}`}>
-                  {badge > 9 ? '9+' : badge}
-                </Text>
+              <View testID={`segment-badge-${s.value}`} className="min-w-5 items-center rounded-full bg-accent2 px-1.5">
+                <Text className="font-body-bold text-xs text-on-accent2">{badge > 9 ? '9+' : badge}</Text>
               </View>
             ) : null}
           </Pressable>

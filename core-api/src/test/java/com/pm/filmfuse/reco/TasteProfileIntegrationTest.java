@@ -54,13 +54,13 @@ class TasteProfileIntegrationTest extends AbstractTasteIntegrationTest {
     }
 
     @Test
-    void statedPrefsShowBeforeTheFirstBuildAndTopGenresFallBackToThem() throws Exception {
+    void statedPrefsShowBeforeTheFirstBuildAndTopGenresFallBackToThemAboveNeutralOnly() throws Exception {
         TestUser user = user();
         setGenres(user, "[{\"genreId\": 27, \"score\": 3}, {\"genreId\": 18, \"score\": 9}, {\"genreId\": 35, \"score\": 6}]");
         mockMvc.perform(get(PROFILE).with(user.auth()))
                 .andExpect(jsonPath("$.status").value("REBUILDING"))
                 .andExpect(jsonPath("$.persona").value(nullValue()))
-                .andExpect(jsonPath("$.topGenres[*].key").value(contains("genre:18", "genre:35", "genre:27")))
+                .andExpect(jsonPath("$.topGenres[*].key").value(contains("genre:18", "genre:35")))
                 .andExpect(jsonPath("$.topGenres[0].stated").value(9))
                 .andExpect(jsonPath("$.topGenres[0].learned").value(nullValue()));
     }
@@ -79,14 +79,11 @@ class TasteProfileIntegrationTest extends AbstractTasteIntegrationTest {
                 .andExpect(jsonPath("$.updatedAt").isNotEmpty())
                 .andExpect(jsonPath("$.modelVersion").value("fallback-0"))
                 .andExpect(jsonPath("$.persona").value("Cozy Sci-Fi Romantic"))
-                .andExpect(jsonPath("$.topGenres", hasSize(5)))
+                // Only genres above neutral 5: the rest of the vector is neutral or below.
+                .andExpect(jsonPath("$.topGenres", hasSize(2)))
                 .andExpect(jsonPath("$.topGenres[0].key").value("genre:878"))
                 .andExpect(jsonPath("$.topGenres[0].learned").value(9.0))
                 .andExpect(jsonPath("$.topGenres[1].key").value("genre:10749"))
-                // Ties at neutral 5 keep the fixed order.
-                .andExpect(jsonPath("$.topGenres[2].key").value("genre:28"))
-                .andExpect(jsonPath("$.topGenres[2].stated").value(nullValue()))
-                .andExpect(jsonPath("$.topGenres[2].learned").value(5.0))
                 .andExpect(jsonPath("$.dimensions[10].key").value("genre:27"))
                 .andExpect(jsonPath("$.dimensions[10].stated").value(1))
                 .andExpect(jsonPath("$.dimensions[10].learned").value(1.0))
@@ -101,6 +98,31 @@ class TasteProfileIntegrationTest extends AbstractTasteIntegrationTest {
                 .andExpect(jsonPath("$.status").value("REBUILDING"))
                 .andExpect(jsonPath("$.dimensions[14].stated").value(nullValue()))
                 .andExpect(jsonPath("$.dimensions[14].learned").value(9.0));
+    }
+
+    @Test
+    void nothingAboveNeutralGivesNoTopGenresAndAFallbackPersona() throws Exception {
+        TestUser user = user();
+        setGenres(user, "[{\"genreId\": 28, \"score\": 5}, {\"genreId\": 27, \"score\": 2}]");
+        setMoods(user, "[{\"moodTag\": \"cozy\", \"score\": 5}]");
+        buildVector(user);
+        mockMvc.perform(get(PROFILE).with(user.auth()))
+                .andExpect(jsonPath("$.status").value("FRESH"))
+                .andExpect(jsonPath("$.topGenres", hasSize(0)))
+                .andExpect(jsonPath("$.persona").value("Eclectic Film Buff"));
+        mockMvc.perform(get(HISTORY).with(user.auth()))
+                .andExpect(jsonPath("$[0].topGenres", hasSize(0)));
+    }
+
+    @Test
+    void oneGenreAboveNeutralGivesAOneGenrePersona() throws Exception {
+        TestUser user = user();
+        setGenres(user, "[{\"genreId\": 878, \"score\": 8}]");
+        setMoods(user, "[{\"moodTag\": \"cozy\", \"score\": 9}]");
+        buildVector(user);
+        mockMvc.perform(get(PROFILE).with(user.auth()))
+                .andExpect(jsonPath("$.topGenres[*].key").value(contains("genre:878")))
+                .andExpect(jsonPath("$.persona").value("Cozy Futurist"));
     }
 
     @Test
@@ -136,7 +158,7 @@ class TasteProfileIntegrationTest extends AbstractTasteIntegrationTest {
                 .andExpect(jsonPath("$[*].reason").value(contains("TASTE_EDIT", "RATING", "TASTE_EDIT")))
                 .andExpect(jsonPath("$[0].modelVersion").value("fallback-0"))
                 .andExpect(jsonPath("$[0].createdAt").isNotEmpty())
-                .andExpect(jsonPath("$[0].topGenres", hasSize(3)))
+                .andExpect(jsonPath("$[0].topGenres", hasSize(1)))
                 .andExpect(jsonPath("$[0].topGenres[0].key").value("genre:16"))
                 .andExpect(jsonPath("$[0].topGenres[0].stated").value(nullValue()))
                 .andExpect(jsonPath("$[0].topGenres[0].learned").value(10.0))

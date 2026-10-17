@@ -111,13 +111,16 @@ public record ContentFilter(
     }
 
     /**
-     * "Up to PG-13 · mild violence · no sexual content", or "No limits". Describes levels only - it
-     * never names a member.
+     * A self-contained phrase shown verbatim: "Rated PG-13 or below · mild violence at most · no
+     * sexual content", "Rated G only", "Moderate drug content at most", or "No limits". Describes
+     * levels only - it never names a member.
      */
     public String label() {
         List<String> parts = new ArrayList<>();
         if (maxCertification != null) {
-            parts.add("up to " + maxCertification.label());
+            parts.add(maxCertification == Certification.G
+                    ? "rated G only"
+                    : "rated " + maxCertification.label() + " or below");
         }
         contentLimits.forEach((dimension, level) -> parts.add(phrase(dimension, level)));
         if (parts.isEmpty()) {
@@ -137,9 +140,9 @@ public record ContentFilter(
         };
         return switch (level) {
             case NONE -> "no " + noun;
-            case MILD -> "mild " + noun;
-            case MODERATE -> "moderate " + noun;
-            case STRONG -> "strong " + noun;
+            case MILD -> "mild " + noun + " at most";
+            case MODERATE -> "moderate " + noun + " at most";
+            case STRONG -> "strong " + noun + " at most";
         };
     }
 

@@ -36,7 +36,7 @@ function Note({ item }: { item: FeedItemDTO }) {
         accessibilityLabel="Note hidden: contains spoilers"
         accessibilityHint="Reveals the note"
         onPress={() => setRevealed(true)}
-        className="gap-2 overflow-hidden rounded-xl border border-border bg-surface-raised p-3 active:opacity-80"
+        className="gap-2 overflow-hidden rounded-2xl bg-raised p-3 active:opacity-80"
       >
         {/* Stand-in "blurred" lines: the hidden text is never rendered, so it can't be read out. */}
         <View
@@ -48,8 +48,8 @@ function Note({ item }: { item: FeedItemDTO }) {
           <View className="h-2.5 w-4/5 rounded-full bg-border" />
         </View>
         <View className="flex-row items-center gap-1.5">
-          <Ionicons name="eye-off-outline" size={14} color={colors.textMuted} />
-          <Text className="font-body-medium text-sm text-text-muted">Contains spoilers · Tap to reveal</Text>
+          <Ionicons name="eye-off-outline" size={14} color={colors.muted} />
+          <Text className="font-body-medium text-sm text-muted">Contains spoilers · Tap to reveal</Text>
         </View>
       </Pressable>
     );
@@ -78,10 +78,10 @@ function LikeButton({ item }: { item: FeedItemDTO }) {
       <Ionicons
         name={liked ? 'heart' : 'heart-outline'}
         size={20}
-        color={liked ? colors.velvet : colors.textMuted}
+        color={liked ? colors.danger : colors.muted}
         testID={liked ? 'icon-heart-filled' : 'icon-heart-outline'}
       />
-      <Text testID={`feed-like-count-${item.id}`} className="font-body-medium text-sm text-text-muted">
+      <Text testID={`feed-like-count-${item.id}`} className="font-body-medium text-sm text-muted">
         {item.likeCount}
       </Text>
     </Pressable>
@@ -93,8 +93,8 @@ function CommentCount({ item, link }: { item: FeedItemDTO; link: boolean }) {
   const { colors } = useTheme();
   const content = (
     <>
-      <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
-      <Text testID={`feed-comment-count-${item.id}`} className="font-body-medium text-sm text-text-muted">
+      <Ionicons name="chatbubble-outline" size={18} color={colors.muted} />
+      <Text testID={`feed-comment-count-${item.id}`} className="font-body-medium text-sm text-muted">
         {item.commentCount}
       </Text>
     </>
@@ -134,7 +134,7 @@ function RatingOverflow({ item, name }: { item: FeedItemDTO; name: string }) {
         onPress={() => setOpen(true)}
         className="min-h-9 items-center justify-center rounded-full px-2 active:opacity-70"
       >
-        <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
+        <Ionicons name="ellipsis-horizontal" size={18} color={colors.muted} />
       </Pressable>
       {/* Mounted only while open: a feed has many cards and each Modal costs. */}
       {open ? (
@@ -167,19 +167,40 @@ export function FeedCard({ item, showAuthor = true, showMovie = true, linkToDeta
   const vis = VISIBILITY[item.visibility];
   const label = scoreLabel(item.score);
 
+  const score = (
+    <View
+      testID={`feed-score-${item.id}`}
+      accessible
+      accessibilityLabel={`Rated ${item.score} out of 10, ${label}`}
+      className="items-end gap-0.5"
+    >
+      <View className={`rounded-xl bg-accent-soft ${compact ? 'px-2 py-0.5' : 'px-2.5 py-1'}`}>
+        <Text
+          className={`font-display-bold text-accent-ink ${compact ? 'text-base' : 'text-xl'}`}
+          style={{ fontVariant: ['tabular-nums'] }}
+        >
+          {item.score}/10
+        </Text>
+      </View>
+      <Text className="font-body text-xs text-muted">{label}</Text>
+    </View>
+  );
+
   return (
     <View
       testID={`feed-card-${item.id}`}
       className={`rounded-2xl border border-border bg-surface ${compact ? 'gap-2 p-3' : 'gap-3 p-4'}`}
     >
       {showAuthor ? (
-        <View className="flex-row items-center gap-2">
+        // Without the movie row (a movie's own page) the score sits beside the author, so there's no
+        // empty row between them.
+        <View testID={`feed-header-${item.id}`} className="flex-row items-center gap-3">
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`${name}${when ? `, ${when}` : ''}`}
             accessibilityHint="Opens their profile"
             onPress={() => router.push(`/user/${author.id}`)}
-            className="flex-1 flex-row items-center gap-2 active:opacity-70"
+            className="flex-1 flex-row items-center gap-2.5 active:opacity-70"
           >
             <Avatar
               uri={author.profileImageUrl}
@@ -191,14 +212,15 @@ export function FeedCard({ item, showAuthor = true, showMovie = true, linkToDeta
               <Text className="font-body-semibold text-sm text-text" numberOfLines={1}>
                 {name}
               </Text>
-              {when ? <Text className="font-body text-xs text-text-muted">{when}</Text> : null}
+              {when ? <Text className="font-body text-xs text-muted">{when}</Text> : null}
             </View>
           </Pressable>
+          {showMovie ? null : score}
         </View>
       ) : null}
 
-      <View className="flex-row items-center gap-3">
-        {showMovie ? (
+      {showMovie ? (
+        <View className="flex-row items-center gap-3">
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`${movie.title}${movie.releaseYear ? `, ${movie.releaseYear}` : ''}`}
@@ -208,47 +230,33 @@ export function FeedCard({ item, showAuthor = true, showMovie = true, linkToDeta
           >
             <View
               testID={compact ? 'feed-poster-compact' : 'feed-poster'}
-              className={`overflow-hidden rounded-md border border-border bg-surface-raised ${
-                compact ? 'h-14 w-10' : 'h-24 w-16'
-              }`}
+              className={`overflow-hidden bg-raised ${compact ? 'h-14 w-10 rounded-lg' : 'h-24 w-16 rounded-xl'}`}
             >
               {movie.posterUrl ? (
                 <Image source={{ uri: movie.posterUrl }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
               ) : (
                 <View className="flex-1 items-center justify-center">
-                  <Ionicons name="film-outline" size={18} color={colors.textMuted} />
+                  <Ionicons name="film-outline" size={18} color={colors.muted} />
                 </View>
               )}
             </View>
             <View className="flex-1 gap-1">
-              <Text className="font-body-semibold text-base text-text" numberOfLines={2}>
+              <Text className="font-body-bold text-base text-text" numberOfLines={2}>
                 {movie.title}
               </Text>
               <View className="flex-row items-center gap-2">
                 {movie.releaseYear ? (
-                  <Text className="font-body text-sm text-text-muted">{movie.releaseYear}</Text>
+                  <Text className="font-body text-sm text-muted">{movie.releaseYear}</Text>
                 ) : null}
                 <CertificationBadge certification={item.certification} />
               </View>
             </View>
           </Pressable>
-        ) : (
-          <View className="flex-1" />
-        )}
-        <View
-          testID={`feed-score-${item.id}`}
-          accessible
-          accessibilityLabel={`Rated ${item.score} out of 10, ${label}`}
-          className="items-end gap-0.5"
-        >
-          <View className={`rounded-full bg-gold ${compact ? 'px-2.5 py-0.5' : 'px-3 py-1'}`}>
-            <Text className={`font-display-bold text-on-gold ${compact ? 'text-base' : 'text-xl'}`}>
-              {item.score}/10
-            </Text>
-          </View>
-          <Text className="font-body text-xs text-text-muted">{label}</Text>
+          {score}
         </View>
-      </View>
+      ) : showAuthor ? null : (
+        <View className="flex-row">{score}</View>
+      )}
 
       <Note item={item} />
 
@@ -256,7 +264,7 @@ export function FeedCard({ item, showAuthor = true, showMovie = true, linkToDeta
         <View className="flex-row items-center gap-2">
           <LikeButton item={item} />
           <CommentCount item={item} link={linkToDetail} />
-          {!showAuthor && when ? <Text className="font-body text-xs text-text-muted">{when}</Text> : null}
+          {!showAuthor && when ? <Text className="font-body text-xs text-muted">{when}</Text> : null}
         </View>
         {item.mine ? (
           <View className="flex-row items-center gap-3">
@@ -266,8 +274,8 @@ export function FeedCard({ item, showAuthor = true, showMovie = true, linkToDeta
               accessibilityLabel={`Visible to: ${vis.label}`}
               className="flex-row items-center gap-1"
             >
-              <Ionicons name={vis.icon} size={14} color={colors.textMuted} />
-              <Text className="font-body text-xs text-text-muted">{vis.label}</Text>
+              <Ionicons name={vis.icon} size={14} color={colors.muted} />
+              <Text className="font-body text-xs text-muted">{vis.label}</Text>
             </View>
             <Pressable
               accessibilityRole="button"
@@ -276,8 +284,8 @@ export function FeedCard({ item, showAuthor = true, showMovie = true, linkToDeta
               onPress={() => openQuickRate(movie)}
               className="min-h-9 flex-row items-center gap-1 rounded-full px-2 active:opacity-70"
             >
-              <Ionicons name="create-outline" size={16} color={colors.gold} />
-              <Text className="font-body-semibold text-sm text-gold">Edit</Text>
+              <Ionicons name="create-outline" size={16} color={colors.accent} />
+              <Text className="font-body-semibold text-sm text-accent-ink">Edit</Text>
             </Pressable>
           </View>
         ) : (
@@ -293,7 +301,7 @@ export function FeedCardSkeletons({ count = 3, testID }: { count?: number; testI
   return (
     <View testID={testID} className="gap-3">
       {Array.from({ length: count }, (_, i) => (
-        <View key={i} className="gap-3 rounded-2xl border border-border bg-surface p-4">
+        <View key={i} className="gap-3 rounded-2xl bg-surface p-4">
           <View className="flex-row items-center gap-2">
             <Skeleton className="h-9 w-9 rounded-full" />
             <Skeleton className="h-4 w-32" />

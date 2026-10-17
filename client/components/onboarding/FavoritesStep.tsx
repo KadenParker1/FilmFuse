@@ -33,7 +33,7 @@ function IconButton({ icon, label, onPress, disabled }: { icon: 'chevron-up' | '
       disabled={disabled}
       hitSlop={6}
       onPress={onPress}
-      className={`h-9 w-9 items-center justify-center rounded-full border border-border bg-surface-raised active:opacity-70 ${disabled ? 'opacity-40' : ''}`}
+      className={`h-9 w-9 items-center justify-center rounded-full bg-raised active:opacity-70 ${disabled ? 'opacity-40' : ''}`}
     >
       <Ionicons name={icon} size={18} color={colors.text} />
     </Pressable>
@@ -51,10 +51,10 @@ function PickPoster({ movie, picked, onPress }: { movie: MovieSummaryDTO; picked
       className="w-[30%] gap-1 active:opacity-80"
     >
       <View
-        className={`aspect-[2/3] w-full overflow-hidden rounded-xl border-2 bg-surface-raised ${picked ? 'border-gold' : 'border-transparent'}`}
+        className={`aspect-[2/3] w-full overflow-hidden rounded-xl border-2 bg-raised ${picked ? 'border-accent' : 'border-transparent'}`}
       >
         <View className="absolute inset-0 items-center justify-center p-1">
-          <Text className="text-center font-display text-xs text-text-muted" numberOfLines={3}>
+          <Text className="text-center font-display text-xs text-muted" numberOfLines={3}>
             {movie.title}
           </Text>
         </View>
@@ -62,8 +62,8 @@ function PickPoster({ movie, picked, onPress }: { movie: MovieSummaryDTO; picked
           <Image source={{ uri: movie.posterUrl }} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} contentFit="cover" />
         ) : null}
         {picked ? (
-          <View className="absolute right-1.5 top-1.5 h-6 w-6 items-center justify-center rounded-full bg-gold">
-            <Ionicons name="checkmark" size={16} color={colors.onGold} />
+          <View className="absolute right-1.5 top-1.5 h-6 w-6 items-center justify-center rounded-full bg-accent">
+            <Ionicons name="checkmark" size={16} color={colors.onAccent} />
           </View>
         ) : null}
       </View>
@@ -122,7 +122,7 @@ export function FavoritesStep({ state }: { state: OnboardingStateDTO }) {
 
   let grid;
   if (source.isPending && source.fetchStatus !== 'idle') {
-    grid = <ActivityIndicator testID="favorites-loading" color={colors.gold} className="py-6" />;
+    grid = <ActivityIndicator testID="favorites-loading" color={colors.accent} className="py-6" />;
   } else if (source.isError) {
     grid = (
       <ErrorState
@@ -167,7 +167,7 @@ export function FavoritesStep({ state }: { state: OnboardingStateDTO }) {
         </Label>
         {picks.map((m, i) => (
           <View key={m.id} testID={`favorite-${i + 1}`} className="flex-row items-center gap-2">
-            <Text className="w-6 font-body-semibold text-base text-gold">{i + 1}</Text>
+            <Text className="w-6 font-body-semibold text-base text-accent-ink">{i + 1}</Text>
             <Text className="flex-1 font-body-medium text-base text-text" numberOfLines={1}>
               {m.title}
             </Text>

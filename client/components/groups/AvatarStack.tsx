@@ -31,7 +31,7 @@ export function AvatarStack({ users, total, max = 5, size = 32 }: Props) {
       {extra > 0 ? (
         <View
           testID="avatar-stack-extra"
-          className="items-center justify-center rounded-full border-2 border-gold bg-surface-raised"
+          className="items-center justify-center rounded-full border-2 border-accent bg-raised"
           style={{ width: size, height: size, marginLeft: shown.length ? -size / 3 : 0 }}
         >
           <Text className="font-body-semibold text-xs text-text">+{extra}</Text>

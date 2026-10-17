@@ -26,7 +26,7 @@ export function Skeleton({ className = '', style, testID = 'skeleton' }: Props) 
       testID={testID}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      className={`overflow-hidden rounded-xl bg-surface-raised ${className}`}
+      className={`overflow-hidden rounded-[14px] bg-raised ${className}`}
       style={style}
     >
       <Animated.View style={[StyleSheet.absoluteFill, { opacity, backgroundColor: colors.border }]} />

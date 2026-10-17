@@ -31,7 +31,7 @@ function Section({ title, testID, children }: { title: string; testID: string; c
 
 function InlineError({ error }: { error: unknown }) {
   return (
-    <Text accessibilityRole="alert" className="py-1 font-body text-sm text-velvet">
+    <Text accessibilityRole="alert" className="py-1 font-body text-sm text-danger">
       {errorMessage(error)}
     </Text>
   );
@@ -135,7 +135,7 @@ function Suggestions() {
             title="Add"
             accessibilityLabel={`Add ${personName(user)} as a friend`}
             loading={send.isPending && send.variables === user.id}
-            icon={<Ionicons name="person-add-outline" size={14} color={colors.onGold} />}
+            icon={<Ionicons name="person-add-outline" size={14} color={colors.onAccent} />}
             onPress={() => send.mutate(user.id)}
           />
         </UserRow>

@@ -40,7 +40,7 @@ class SessionLiveComfortIntegrationTest extends AbstractGroupIntegrationTest {
 
         String body = json(getSession(a, sessionId).andExpect(status().isOk())
                 .andExpect(jsonPath("$.effectiveFilter.maxCertification").value("PG_13"))
-                .andExpect(jsonPath("$.effectiveFilter.label").value("Up to PG-13")));
+                .andExpect(jsonPath("$.effectiveFilter.label").value("Rated PG-13 or below")));
         assertThat(resultIds(body)).containsExactly(pg13);
         // Every SessionDTO response applies it, e.g. a vote.
         assertThat(resultIds(json(vote(a, sessionId, pg13, "UP").andExpect(status().isOk())))).containsExactly(pg13);

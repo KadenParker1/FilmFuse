@@ -33,8 +33,8 @@ function DecidedHero({ movie }: { movie: MovieSummaryDTO }) {
   const { colors } = useTheme();
   return (
     <Card testID="decided-hero" className="items-center gap-4 py-6">
-      <Text className="font-body-semibold text-sm uppercase tracking-widest text-gold">Tonight’s pick</Text>
-      <View className="aspect-[2/3] w-44 overflow-hidden rounded-2xl border-2 border-gold bg-surface-raised">
+      <Text className="font-body-semibold text-sm uppercase tracking-widest text-accent-ink">Tonight’s pick</Text>
+      <View className="aspect-[2/3] w-44 overflow-hidden rounded-2xl border-2 border-accent bg-raised">
         {movie.posterUrl ? (
           <Image
             testID="decided-poster"
@@ -48,9 +48,9 @@ function DecidedHero({ movie }: { movie: MovieSummaryDTO }) {
         {movie.title}
       </Heading>
       {movie.releaseYear ? <Body muted>{movie.releaseYear}</Body> : null}
-      <View testID="rate-after-watching" className="w-full gap-2 rounded-xl border border-border bg-surface-raised p-3">
+      <View testID="rate-after-watching" className="w-full gap-2 rounded-2xl bg-raised p-3">
         <View className="flex-row items-start gap-2">
-          <Ionicons name="star-outline" size={18} color={colors.gold} />
+          <Ionicons name="star-outline" size={18} color={colors.accent} />
           <Body className="flex-1 text-sm">
             Rate it after watching: it’ll wait for you under “Rate what you watched” on the Groups tab, and a quick
             1–10 helps everyone’s next picks.
@@ -82,7 +82,7 @@ function OpenResults({ session }: { session: SessionDTO }) {
   return (
     <View className="gap-4">
       {voteError ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           {errorMessage(voteError)}
         </Body>
       ) : null}
@@ -110,7 +110,7 @@ function OpenResults({ session }: { session: SessionDTO }) {
         ))
       )}
       {refresh.isError ? (
-        <Body accessibilityRole="alert" className="text-sm text-velvet">
+        <Body accessibilityRole="alert" className="text-sm text-danger">
           {errorMessage(refresh.error)}
         </Body>
       ) : null}
@@ -161,15 +161,16 @@ function SessionView({ session, mode }: { session: SessionDTO; mode: LiveMode })
   return (
     <View className="gap-5 pb-12">
       <View className="gap-2">
-        <View className="flex-row flex-wrap items-center justify-between gap-2">
-          <Heading size="md">{session.groupName ?? 'Tonight'}</Heading>
-          {session.status === 'OPEN' ? <LiveIndicator mode={mode} /> : null}
-        </View>
+        <Heading size="md">{session.groupName ?? 'Tonight'}</Heading>
         <Body muted testID="session-meta" className="text-sm">
           {STATUS_LABELS[session.status]} · {strategyLabel(session.strategy)}
         </Body>
       </View>
-      <FilterBanner filter={session.effectiveFilter} />
+      {/* Live pill and the filter pill side by side, as in the Technicolor session header. */}
+      <View className="flex-row flex-wrap items-center gap-2">
+        {session.status === 'OPEN' ? <LiveIndicator mode={mode} /> : null}
+        <FilterBanner filter={session.effectiveFilter} />
+      </View>
       <SessionMembersRow members={session.members} memberCount={session.memberCount} votedCount={session.votedCount} />
 
       {session.status === 'DECIDED' && session.pickedMovie ? <DecidedHero movie={session.pickedMovie} /> : null}

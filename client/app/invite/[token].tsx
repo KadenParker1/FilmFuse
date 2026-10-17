@@ -62,8 +62,8 @@ function RedeemInvite({ token }: { token: string }) {
             username={inviter.username}
             size={112}
           />
-          <View className="absolute -bottom-1 -right-1 h-9 w-9 items-center justify-center rounded-full bg-gold">
-            <Ionicons name="checkmark" size={20} color={colors.onGold} />
+          <View className="absolute -bottom-1 -right-1 h-9 w-9 items-center justify-center rounded-full bg-accent">
+            <Ionicons name="checkmark" size={20} color={colors.onAccent} />
           </View>
         </View>
         <Heading size="md" className="text-center">

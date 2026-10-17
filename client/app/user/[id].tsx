@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,17 +20,7 @@ import { BackButton } from '../../components/BackButton';
 import { UserRatingsSection } from '../../components/feed/RatingsSections';
 import { ReportForm } from '../../components/moderation/ReportSheet';
 import { SaveLinkAndSignIn } from '../../components/SaveLinkAndSignIn';
-import {
-  Avatar,
-  Body,
-  Button,
-  EmptyState,
-  ErrorState,
-  Heading,
-  Sheet,
-  Skeleton,
-  errorMessage,
-} from '../../components/ui';
+import { Avatar, Body, Button, EmptyState, errorMessage, ErrorState, Heading, Sheet, Skeleton, Toggle } from '../../components/ui';
 import { ApiError } from '../../lib/apiClient';
 import { personName, pluralize } from '../../lib/format';
 import { profilePath } from '../../lib/pendingLinkPath';
@@ -54,7 +44,7 @@ function ProfileSkeleton() {
 
 function ActionError({ error }: { error: unknown }) {
   return (
-    <Text testID="profile-action-error" accessibilityRole="alert" className="text-center font-body text-sm text-velvet">
+    <Text testID="profile-action-error" accessibilityRole="alert" className="text-center font-body text-sm text-danger">
       {errorMessage(error)}
     </Text>
   );
@@ -68,19 +58,17 @@ function CloseFriendSwitch({ profile }: { profile: PublicProfileDTO }) {
 
   return (
     <View className="gap-1">
-      <View className="flex-row items-center justify-between gap-4 rounded-xl border border-border bg-surface-raised px-4 py-3">
+      <View className="flex-row items-center justify-between gap-4 rounded-2xl bg-raised px-4 py-3">
         <View className="flex-1 flex-row items-center gap-2">
-          <Ionicons name="star" size={18} color={colors.gold} />
+          <Ionicons name="star" size={18} color={colors.accent} />
           <Body>Close friend</Body>
         </View>
-        <Switch
+        <Toggle
           accessibilityLabel="Close friend"
           accessibilityState={{ checked: closeFriend, disabled: setClose.isPending }}
           value={closeFriend}
           disabled={setClose.isPending}
           onValueChange={(next) => setClose.mutate({ userId: profile.id, closeFriend: next })}
-          trackColor={{ true: colors.gold, false: colors.border }}
-          thumbColor={colors.surface}
         />
       </View>
       <Body muted className="text-sm">
@@ -131,7 +119,7 @@ function ProfileView({ profile }: { profile: PublicProfileDTO }) {
           <Button
             title="Add friend"
             loading={send.isPending}
-            icon={<Ionicons name="person-add-outline" size={18} color={colors.onGold} />}
+            icon={<Ionicons name="person-add-outline" size={18} color={colors.onAccent} />}
             onPress={() => send.mutate(profile.id)}
           />
         );
@@ -296,7 +284,7 @@ function ProfileView({ profile }: { profile: PublicProfileDTO }) {
             accessibilityLabel="More options"
             hitSlop={8}
             onPress={() => setMode('menu')}
-            className="h-10 w-10 items-center justify-center rounded-full border border-border bg-surface active:opacity-70"
+            className="h-10 w-10 items-center justify-center rounded-xl bg-raised active:opacity-70"
           >
             <Ionicons name="ellipsis-horizontal" size={20} color={colors.text} />
           </Pressable>

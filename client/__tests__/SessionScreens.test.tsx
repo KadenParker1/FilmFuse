@@ -55,7 +55,7 @@ beforeEach(() => {
   );
   (useGenres as jest.Mock).mockReturnValue(queryResult({ data: [{ id: 35, name: 'Comedy' }] }));
   (useGroup as jest.Mock).mockReturnValue(
-    queryResult({ data: makeGroup({ effectiveFilter: makeEffectiveFilter({ maxCertification: 'PG', label: 'Up to PG' }) }) }),
+    queryResult({ data: makeGroup({ effectiveFilter: makeEffectiveFilter({ maxCertification: 'PG', label: 'Rated PG or below' }) }) }),
   );
   (useSessionLive as jest.Mock).mockReturnValue({ mode: 'live' });
 });
@@ -113,7 +113,7 @@ describe('NewSessionScreen', () => {
     expect(screen.getByRole('header', { name: 'Start a session' })).toBeOnTheScreen();
     expect(screen.getByText('🎬 Film club')).toBeOnTheScreen();
     expect(screen.getByText('2 members')).toBeOnTheScreen();
-    expect(screen.getByText('Filtered to Up to PG')).toBeOnTheScreen();
+    expect(screen.getByText('Rated PG or below')).toBeOnTheScreen();
     expect(screen.queryByRole('checkbox', { name: 'Grace Hopper' })).toBeNull();
     await fireEvent.press(findMovies());
     expect(muts.useCreateSession.mutate).toHaveBeenCalledWith(
@@ -164,7 +164,7 @@ describe('SessionScreen', () => {
   it('OPEN: header, live indicator, filter banner, members and ranked results', async () => {
     show(
       makeSession({
-        effectiveFilter: makeEffectiveFilter({ maxCertification: 'PG_13', label: 'Up to PG-13 · mild violence' }),
+        effectiveFilter: makeEffectiveFilter({ maxCertification: 'PG_13', label: 'PG-13 or below · mild violence at most' }),
         members: [
           makeSessionMember({ id: 'u1', displayName: 'Ada Lovelace' }, { voted: true }),
           makeSessionMember({}, { hasVector: false }),
@@ -177,7 +177,7 @@ describe('SessionScreen', () => {
     expect(screen.getByRole('header', { name: 'Film club' })).toBeOnTheScreen();
     expect(screen.getByText('Live')).toBeOnTheScreen();
     expect(screen.getByTestId('session-meta')).toHaveTextContent('Voting open · Mean');
-    expect(screen.getByText('Filtered to Up to PG-13 · mild violence')).toBeOnTheScreen();
+    expect(screen.getByText('PG-13 or below · mild violence at most')).toBeOnTheScreen();
     expect(screen.getByText('1 of 2 voted')).toBeOnTheScreen();
     expect(screen.getByTestId('no-vector-hint')).toHaveTextContent(/Grace Hopper has no taste profile yet/);
     expect(screen.getByText('1. Heat')).toBeOnTheScreen();

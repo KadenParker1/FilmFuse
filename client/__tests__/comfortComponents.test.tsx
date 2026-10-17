@@ -1,3 +1,7 @@
+import React from 'react';
+import { ComfortFields } from '../components/comfort/ComfortFields';
+import { limitsForCertification, showsSexualRow } from '../components/comfort/comfortCopy';
+import type { ComfortSettingsDTO } from '../types/api';
 import { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { CertificationPicker } from '../components/comfort/CertificationPicker';
@@ -137,7 +141,7 @@ describe('ContentLevelPicker / ContentLimitsEditor', () => {
 
   it('edits all five dimensions in one map', async () => {
     const onChange = jest.fn();
-    await render(<ContentLimitsEditor value={{ SEXUAL: 'NONE' }} onChange={onChange} />);
+    await render(<ContentLimitsEditor value={{ SEXUAL: 'NONE' }} maxCertification="R" onChange={onChange} />);
     for (const label of ['Violence & gore', 'Sex & nudity', 'Language', 'Drug use', 'Frightening & intense']) {
       expect(screen.getByText(label)).toBeOnTheScreen();
     }
@@ -150,32 +154,78 @@ describe('ContentLevelPicker / ContentLimitsEditor', () => {
   });
 });
 
+describe('Sex & nudity row follows the maximum rating', () => {
+  it.each(['G', 'PG', 'PG_13'] as const)('is hidden for %s', async (cert) => {
+    await render(<ContentLimitsEditor value={{}} maxCertification={cert} onChange={jest.fn()} />);
+    expect(screen.queryByText('Sex & nudity')).toBeNull();
+    expect(screen.getByText('Violence & gore')).toBeOnTheScreen();
+    expect(screen.getByText('Frightening & intense')).toBeOnTheScreen();
+  });
+
+  it.each(['R', 'NC_17', null] as const)('is shown for %s', async (cert) => {
+    await render(<ContentLimitsEditor value={{}} maxCertification={cert} onChange={jest.fn()} />);
+    expect(screen.getByText('Sex & nudity')).toBeOnTheScreen();
+  });
+
+  it('limitsForCertification drops SEXUAL below R only', () => {
+    const limits = { SEXUAL: 'NONE', VIOLENCE: 'MILD' } as const;
+    expect(limitsForCertification('PG_13', limits)).toEqual({ VIOLENCE: 'MILD' });
+    expect(limitsForCertification('G', limits)).toEqual({ VIOLENCE: 'MILD' });
+    expect(limitsForCertification('R', limits)).toEqual(limits);
+    expect(limitsForCertification(null, limits)).toEqual(limits);
+    expect(showsSexualRow('NC_17')).toBe(true);
+    expect(showsSexualRow('PG')).toBe(false);
+  });
+
+  it('ComfortFields drops SEXUAL when lowering below R, and the row comes back at Strong', async () => {
+    function Harness() {
+      const [v, setV] = React.useState<ComfortSettingsDTO>({
+        maxCertification: 'R',
+        contentLimits: { SEXUAL: 'MILD' },
+        allowUnrated: false,
+      });
+      latest = v;
+      return <ComfortFields value={v} onChange={(p) => setV((d) => ({ ...d, ...p }))} />;
+    }
+    let latest: ComfortSettingsDTO | null = null;
+    await render(<Harness />);
+    expect(screen.getByRole('radio', { name: 'Sex & nudity: Mild' })).toBeChecked();
+    await fireEvent.press(screen.getByRole('radio', { name: 'PG' }));
+    expect(screen.queryByText('Sex & nudity')).toBeNull();
+    expect(latest!.contentLimits).toEqual({});
+    await fireEvent.press(screen.getByRole('radio', { name: 'NC-17' }));
+    expect(screen.getByRole('radio', { name: 'Sex & nudity: Strong' })).toBeChecked();
+  });
+});
+
 describe('FilterBanner', () => {
-  it('shows the server label when anything is limited', async () => {
+  // Fixture labels: the backend owns the wording and sends a self-contained label.
+  it('renders the server label verbatim with a shield, with no prefix', async () => {
     const filter = makeEffectiveFilter({
       maxCertification: 'PG_13',
       contentLimits: { VIOLENCE: 'MILD' },
-      label: 'Up to PG-13 · mild violence',
+      label: 'PG-13 or below · mild violence at most',
     });
-    expect(filterBannerText(filter)).toBe('Filtered to Up to PG-13 · mild violence');
+    expect(filterBannerText(filter)).toBe('PG-13 or below · mild violence at most');
     await render(<FilterBanner filter={filter} />);
-    expect(screen.getByText('Filtered to Up to PG-13 · mild violence')).toBeOnTheScreen();
+    expect(screen.getByText('PG-13 or below · mild violence at most')).toBeOnTheScreen();
+    expect(screen.queryByText(/Filtered to/)).toBeNull();
+    expect(screen.getByTestId('icon-shield-checkmark')).toBeOnTheScreen();
     expect(screen.getByTestId('filter-banner').props.accessibilityLabel).toMatch(/most cautious settings/);
     // Never names a member.
     expect(screen.getByTestId('filter-banner').props.accessibilityLabel).not.toMatch(/because|set by/i);
   });
 
-  it('says "No content limits" when nothing is filtered', async () => {
+  it('shows the unfiltered label as sent, with an open shield', async () => {
     expect(isUnfiltered(makeEffectiveFilter({ contentLimits: { DRUGS: 'STRONG' } }))).toBe(true);
     expect(isUnfiltered(makeEffectiveFilter({ maxCertification: 'R' }))).toBe(false);
-    await render(<FilterBanner filter={makeEffectiveFilter()} />);
-    expect(screen.getByText('No content limits')).toBeOnTheScreen();
+    await render(<FilterBanner filter={makeEffectiveFilter({ label: 'No limits' })} />);
+    expect(screen.getByText('No limits')).toBeOnTheScreen();
+    expect(screen.getByTestId('icon-shield-outline')).toBeOnTheScreen();
   });
 
-  it('a content-only limit still counts as filtered', () => {
-    expect(filterBannerText(makeEffectiveFilter({ contentLimits: { SEXUAL: 'NONE' }, label: 'no sexual content' }))).toBe(
-      'Filtered to no sexual content',
-    );
+  it.each(['Rated G only', 'Moderate drug content at most', 'No bad language'])('passes "%s" through untouched', (label) => {
+    expect(filterBannerText(makeEffectiveFilter({ contentLimits: { LANGUAGE: 'NONE' }, label }))).toBe(label);
   });
 });
 

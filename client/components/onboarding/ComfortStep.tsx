@@ -2,11 +2,17 @@ import { useState } from 'react';
 import { useUpdateComfortSettings } from '../../api/comfort';
 import type { ComfortSettingsDTO, OnboardingStateDTO } from '../../types/api';
 import { ComfortFields } from '../comfort/ComfortFields';
-import { GROUP_PRIVACY_NOTE, validateComfort } from '../comfort/comfortCopy';
+import { GROUP_PRIVACY_NOTE, limitsForCertification, validateComfort } from '../comfort/comfortCopy';
 import { Body } from '../ui';
 import { OnboardingFrame } from './OnboardingFrame';
 import { describeError } from './steps';
 import { useAdvance } from './useAdvance';
+
+/** Never send a hidden row's value (e.g. "Sex & nudity" below R). */
+const saveable = (d: ComfortSettingsDTO): ComfortSettingsDTO => ({
+  ...d,
+  contentLimits: limitsForCertification(d.maxCertification, d.contentLimits),
+});
 
 /** Step 6: content comfort (the same pickers as Settings → Comfort), saved via PUT /me/settings/comfort. */
 export function ComfortStep({ state }: { state: OnboardingStateDTO }) {
@@ -29,7 +35,7 @@ export function ComfortStep({ state }: { state: OnboardingStateDTO }) {
       return;
     }
     try {
-      await update.mutateAsync(draft);
+      await update.mutateAsync(saveable(draft));
     } catch {
       return;
     }

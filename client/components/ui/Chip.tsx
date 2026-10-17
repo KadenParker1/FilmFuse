@@ -7,7 +7,7 @@ type Props = {
   className?: string;
 };
 
-/** Pill toggle, e.g. a genre filter. Gold when selected. */
+/** Pill toggle, e.g. a genre filter. Outlined; filled with the text colour when selected. */
 export function Chip({ label, selected = false, onPress, className = '' }: Props) {
   return (
     <Pressable
@@ -16,10 +16,10 @@ export function Chip({ label, selected = false, onPress, className = '' }: Props
       accessibilityState={{ selected }}
       onPress={onPress}
       className={`min-h-9 items-center justify-center rounded-full border px-4 py-1.5 active:opacity-80 ${
-        selected ? 'border-gold bg-gold' : 'border-border bg-surface-raised'
+        selected ? 'border-text bg-text' : 'border-border bg-transparent'
       } ${className}`}
     >
-      <Text className={`font-body-medium text-sm ${selected ? 'text-on-gold' : 'text-text'}`}>{label}</Text>
+      <Text className={`font-body-semibold text-sm ${selected ? 'text-bg' : 'text-muted'}`}>{label}</Text>
     </Pressable>
   );
 }

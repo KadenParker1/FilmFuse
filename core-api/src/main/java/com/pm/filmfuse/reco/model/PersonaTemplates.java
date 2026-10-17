@@ -1,11 +1,15 @@
 package com.pm.filmfuse.reco.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
  * <strong>Cosmetic only.</strong> Turns the top mood and the top two genres into a shareable label
  * for the taste-reveal card: {@code <mood word> <genre modifier> <genre persona>}, e.g. "Cozy Sci-Fi
- * Romantic". A fixed lookup table - no taste logic; edit the words freely.
+ * Romantic". With only one genre above neutral it is {@code <mood word> <genre persona>} ("Cozy
+ * Futurist"); with none, {@code <mood word> Film Buff}; with no mood above neutral the mood word is
+ * {@value #NO_MOOD_WORD}. A fixed lookup table - no taste logic; edit the words freely.
  */
 public final class PersonaTemplates {
 
@@ -42,7 +46,32 @@ public final class PersonaTemplates {
             Map.entry(10752, new String[] {"War", "Strategist"}),
             Map.entry(37, new String[] {"Western", "Gunslinger"}));
 
+    static final String NO_MOOD_WORD = "Eclectic";
+    static final String NO_GENRE_NOUN = "Film Buff";
+
     private PersonaTemplates() {
+    }
+
+    /**
+     * Never null. {@code topMood} is the best mood above neutral (null if none), {@code topGenres} the
+     * genres above neutral, best first (may be empty; only the first two count). Unknown tags/ids are
+     * ignored.
+     */
+    public static String persona(String topMood, List<Integer> topGenres) {
+        String mood = topMood == null ? null : MOOD_WORDS.get(topMood);
+        List<String[]> genres = new ArrayList<>();
+        for (Integer id : topGenres) {
+            String[] words = GENRE_WORDS.get(id);
+            if (words != null && genres.size() < 2) {
+                genres.add(words);
+            }
+        }
+        String lead = mood == null ? NO_MOOD_WORD : mood;
+        return switch (genres.size()) {
+            case 0 -> lead + " " + NO_GENRE_NOUN;
+            case 1 -> lead + " " + genres.get(0)[1];
+            default -> lead + " " + genres.get(0)[0] + " " + genres.get(1)[1];
+        };
     }
 
     /** E.g. ("cozy", 878, 10749) → "Cozy Sci-Fi Romantic"; null if any part is unknown. */

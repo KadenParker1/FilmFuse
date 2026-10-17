@@ -1,6 +1,5 @@
 import { Text, View } from 'react-native';
 import type { RecommendationDTO } from '../../types/api';
-import { CertificationBadge } from '../sessions/CertificationBadge';
 import { Button, PosterCard } from '../ui';
 
 type Props = {
@@ -20,10 +19,10 @@ export function RecommendationCard({ rec, onOpen, onSeen, onDismiss }: Props) {
         title={movie.title}
         posterUrl={movie.posterUrl}
         subtitle={movie.releaseYear != null ? String(movie.releaseYear) : undefined}
+        certification={rec.certification}
         onPress={onOpen}
       />
-      <CertificationBadge certification={rec.certification} />
-      <Text testID={`rec-explanation-${movie.id}`} className="font-body text-xs text-text-muted" numberOfLines={3}>
+      <Text testID={`rec-explanation-${movie.id}`} className="font-body text-xs text-muted" numberOfLines={3}>
         {rec.explanation}
       </Text>
       <Button

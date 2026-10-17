@@ -40,7 +40,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  * Personal "For you" - plumbing around the ML ranker, no ranking logic of its own:
  * <ol>
  *   <li>candidate pool: cached movies that pass the caller's own comfort settings (as the
- *       effective filter), minus everything they rated, marked unseen or dismissed;</li>
+ *       effective filter), minus everything they rated, marked unseen or dismissed, and their
+ *       favourites;</li>
  *   <li>ranked by the ML service ({@code POST /internal/user-recommendations}, ranking only within
  *       the pool) when it is configured and the caller has a vector; otherwise by the
  *       {@link FallbackRanker} (popularity, "Popular pick");</li>

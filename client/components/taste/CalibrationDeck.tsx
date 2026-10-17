@@ -15,7 +15,7 @@ type Props = {
   minRated: number;
   /** "Skip for now" appears after this many cards were answered in this sitting; null = never. */
   skipAfter: number | null;
-  /** Ratings already saved in an earlier sitting. */
+  /** Ratings already saved in an earlier sitting. Read once, when the deck opens. */
   initialRatedCount?: number;
   /** Called after the pending answers are saved; `answered` counts this sitting's cards. */
   onFinish: (summary: { answered: number }) => void | Promise<unknown>;
@@ -36,6 +36,9 @@ export function CalibrationDeck({
   finishLabel = 'Done',
 }: Props) {
   const { colors } = useTheme();
+  // Snapshot: submitting a batch also bumps the cached onboarding count this prop comes from, so
+  // adding the live prop to this sitting's `rated` would count every submitted rating twice.
+  const [startRated] = useState(initialRatedCount);
   const [batch, setBatch] = useState(0);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<CalibrationRatingDTO[]>([]);
@@ -50,7 +53,7 @@ export function CalibrationDeck({
   const list = cards.data ?? [];
   const current = list[index];
   const outOfCards = cards.isSuccess && list.length === 0;
-  const totalRated = initialRatedCount + rated;
+  const totalRated = startRated + rated;
   const canFinish = totalRated >= minRated || outOfCards;
   const canSkip = !canFinish && skipAfter != null && seen >= skipAfter;
 
@@ -100,7 +103,7 @@ export function CalibrationDeck({
 
   let card;
   if (cards.isPending) {
-    card = <ActivityIndicator testID="calibration-loading" color={colors.gold} className="py-16" />;
+    card = <ActivityIndicator testID="calibration-loading" color={colors.accent} className="py-16" />;
   } else if (cards.isError) {
     card = (
       <ErrorState
@@ -124,20 +127,20 @@ export function CalibrationDeck({
     // Past the batch's last card: it's being saved (or the save failed).
     card = saveError ? (
       <Card className="items-center gap-3 py-6">
-        <Body accessibilityRole="alert" className="text-center text-velvet">
+        <Body accessibilityRole="alert" className="text-center text-danger">
           Couldn’t save those answers. {errorMessage(saveError)}
         </Body>
         <Button title="Try again" variant="secondary" onPress={() => void retryBatch()} />
       </Card>
     ) : (
-      <ActivityIndicator testID="calibration-saving" color={colors.gold} className="py-16" />
+      <ActivityIndicator testID="calibration-saving" color={colors.accent} className="py-16" />
     );
   } else {
     card = (
       <Card testID={`calibration-card-${current.id}`} className="items-center gap-4">
-        <View className="aspect-[2/3] w-44 overflow-hidden rounded-xl border border-border bg-surface-raised">
+        <View className="aspect-[2/3] w-44 overflow-hidden rounded-2xl bg-raised">
           <View className="absolute inset-0 items-center justify-center p-2">
-            <Text className="text-center font-display text-base text-text-muted">{current.title}</Text>
+            <Text className="text-center font-display text-base text-muted">{current.title}</Text>
           </View>
           {current.posterUrl ? (
             <Image
@@ -179,7 +182,7 @@ export function CalibrationDeck({
 
   return (
     <View className="gap-4">
-      <Text testID="calibration-progress" className="text-center font-body-medium text-sm text-text-muted">
+      <Text testID="calibration-progress" className="text-center font-body-medium text-sm text-muted">
         {minRated > 0 && totalRated < minRated
           ? `Rated ${totalRated} of ${minRated}`
           : `Rated ${totalRated}`}
@@ -191,7 +194,7 @@ export function CalibrationDeck({
         <Button title="Skip for now" variant="secondary" loading={finishing || submit.isPending} onPress={() => void finish()} />
       ) : null}
       {saveError && current ? (
-        <Body testID="calibration-error" accessibilityRole="alert" className="text-center text-sm text-velvet">
+        <Body testID="calibration-error" accessibilityRole="alert" className="text-center text-sm text-danger">
           Couldn’t save your answers. {errorMessage(saveError)}
         </Body>
       ) : null}

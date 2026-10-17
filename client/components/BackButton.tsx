@@ -13,7 +13,7 @@ export function BackButton({ fallback = '/' }: { fallback?: Href }) {
       accessibilityLabel="Back"
       hitSlop={8}
       onPress={() => (router.canGoBack() ? router.back() : router.replace(fallback))}
-      className="h-10 w-10 items-center justify-center rounded-full border border-border bg-surface active:opacity-70"
+      className="h-10 w-10 items-center justify-center rounded-xl bg-raised active:opacity-70"
     >
       <Ionicons name="chevron-back" size={22} color={colors.text} />
     </Pressable>

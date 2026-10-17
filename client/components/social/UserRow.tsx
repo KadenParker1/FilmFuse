@@ -41,12 +41,12 @@ export function UserRow({ user, subtitle, onPress, children, testID }: Props) {
             {name}
           </Text>
           {showHandle ? (
-            <Text className="font-body text-sm text-text-muted" numberOfLines={1}>
+            <Text className="font-body text-sm text-muted" numberOfLines={1}>
               @{user.username}
             </Text>
           ) : null}
           {subtitle ? (
-            <Text className="font-body text-xs text-text-muted" numberOfLines={1}>
+            <Text className="font-body text-xs text-muted" numberOfLines={1}>
               {subtitle}
             </Text>
           ) : null}

@@ -50,7 +50,7 @@ export function YouStep({ profile }: { profile: ProfileResponseDTO }) {
       error={saveError ?? describeError(nav.error)}
       footer={<Button variant="ghost" title="Sign out" onPress={() => void signOut()} />}
     >
-      <ProfilePhotoSection profile={profile} />
+      <ProfilePhotoSection profile={profile} displayName={displayName} username={username} />
       <Card className="gap-4">
         <ProfileBasicsForm
           displayName={displayName}
