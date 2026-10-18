@@ -3,7 +3,9 @@ package com.pm.filmfuse.movie.repository;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -38,6 +40,16 @@ public class MovieEnrichmentRepository {
         }
         jdbc.update("update app.movies set certification_checked_at = :now where id in (:ids)",
                 new MapSqlParameterSource("ids", ids).addValue("now", Timestamp.from(now)));
+    }
+
+    /** Which of {@code ids} had details looked up at or after {@code since} (the seeder's skip rule). */
+    public Set<Integer> checkedSince(Collection<Integer> ids, Instant since) {
+        if (ids.isEmpty()) {
+            return Set.of();
+        }
+        return new HashSet<>(jdbc.queryForList("""
+                select id from app.movies where id in (:ids) and certification_checked_at >= :since
+                """, new MapSqlParameterSource("ids", ids).addValue("since", Timestamp.from(since)), Integer.class));
     }
 
     public long count() {

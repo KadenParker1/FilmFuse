@@ -72,17 +72,11 @@ public class CatalogEnrichmentService {
         int checked = 0;
         for (Integer id : queue.unchecked(limit)) {
             try {
-                CatalogMovie details = catalog.details(id);
-                tx.executeWithoutResult(status -> {
-                    Instant now = clock.instant();
-                    movies.upsertAll(List.of(details), now);
-                    contentLevels.refresh(List.of(details), now);
-                    queue.markChecked(List.of(id), now);
-                });
+                storeDetails(catalog.details(id));
                 checked++;
             } catch (NotFoundException ex) {
                 // The catalog does not know this id: there is nothing to learn, so never ask again.
-                tx.executeWithoutResult(status -> queue.markChecked(List.of(id), clock.instant()));
+                markChecked(id);
                 checked++;
             } catch (UpstreamUnavailableException ex) {
                 log.warn("Catalog enrichment stopped after {} movies: catalog unavailable", checked);
@@ -93,6 +87,31 @@ public class CatalogEnrichmentService {
             log.info("Catalog enrichment: {} movies checked", checked);
         }
         return checked;
+    }
+
+    /**
+     * Writes one details fetch in its own new transaction: upserts the movie, re-derives its content
+     * levels and stamps {@code certification_checked_at}. Shared with the catalog seeder.
+     */
+    public void storeDetails(CatalogMovie details) {
+        tx.executeWithoutResult(status -> {
+            Instant now = clock.instant();
+            movies.upsertAll(List.of(details), now);
+            contentLevels.refresh(List.of(details), now);
+            queue.markChecked(List.of(details.id()), now);
+        });
+    }
+
+    /** Stamps a cached movie checked without details (the catalog does not know it), in its own transaction. */
+    public void markChecked(int id) {
+        tx.executeWithoutResult(status -> queue.markChecked(List.of(id), clock.instant()));
+    }
+
+    /** Upserts list results (no certification / keywords; never erases known ones) in their own transaction. */
+    public void storeListResults(List<CatalogMovie> results) {
+        if (!results.isEmpty()) {
+            tx.executeWithoutResult(status -> movies.upsertAll(results, clock.instant()));
+        }
     }
 
     public boolean hasUnchecked() {
@@ -114,7 +133,7 @@ public class CatalogEnrichmentService {
             try {
                 CatalogPage result = catalog.popular(null, page);
                 if (!result.movies().isEmpty()) {
-                    tx.executeWithoutResult(status -> movies.upsertAll(result.movies(), clock.instant()));
+                    storeListResults(result.movies());
                     added = true;
                 }
                 if (!result.hasNext()) {
