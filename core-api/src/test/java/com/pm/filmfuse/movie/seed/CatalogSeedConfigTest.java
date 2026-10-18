@@ -1,7 +1,11 @@
 package com.pm.filmfuse.movie.seed;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 
@@ -62,5 +66,14 @@ class CatalogSeedConfigTest {
     void runOnStartupRegistersTheRunner() {
         runner.withPropertyValues("filmfuse.catalog.seed.run-on-startup=true", "filmfuse.catalog.seed.top-up.enabled=false")
                 .run(context -> assertThat(context).hasSingleBean(CatalogSeedRunner.class));
+    }
+
+    @Test
+    void theTopUpDoesNotHaveTheSchedulerToItself() {
+        // application.properties: a long top-up must not block the other jobs (vector refresh every 15 s).
+        runner.withInitializer(new ConfigDataApplicationContextInitializer())
+                .withConfiguration(AutoConfigurations.of(TaskSchedulingAutoConfiguration.class))
+                .run(context -> assertThat(context.getBean(ThreadPoolTaskScheduler.class)
+                        .getScheduledThreadPoolExecutor().getCorePoolSize()).isGreaterThanOrEqualTo(2));
     }
 }
