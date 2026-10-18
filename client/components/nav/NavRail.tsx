@@ -9,13 +9,17 @@ import { useQuickRate } from '../rating/QuickRateProvider';
 import { Avatar } from '../ui';
 import { NAV_TABS } from './navTabs';
 
-/** The slice of the tab navigator's tabBar props the rail needs. */
+/**
+ * The slice of the tab navigator's tabBar props the rail needs. Expo Router's bundled bottom tabs
+ * hand a custom tabBar an event `emitter` and `navigateToTab(routeKey)` - not the `navigation`
+ * object older React Navigation versions passed - so a press mirrors their BottomTabBar exactly.
+ */
 export type NavRailProps = {
-  state: { index: number; routes: { key: string; name: string; params?: object }[] };
-  navigation: {
+  state: { index: number; routes: { key: string; name: string }[] };
+  emitter: {
     emit: (e: { type: 'tabPress'; target: string; canPreventDefault: true }) => { defaultPrevented: boolean };
-    navigate: (name: string, params?: object) => void;
   };
+  navigateToTab: (routeKey: string) => void;
   /** Pending friend requests, badged on Social. */
   incomingCount: number;
 };
@@ -57,7 +61,7 @@ function MiniProfile({ onPress }: { onPress: () => void }) {
  * pill (Social carries the friend-request badge), then "Rate a movie" and your mini profile at the
  * foot. It replaces both the bottom tab bar and the floating Rate button.
  */
-export function NavRail({ state, navigation, incomingCount }: NavRailProps) {
+export function NavRail({ state, emitter, navigateToTab, incomingCount }: NavRailProps) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { openRatePicker } = useQuickRate();
@@ -66,8 +70,8 @@ export function NavRail({ state, navigation, incomingCount }: NavRailProps) {
     const route = state.routes.find((r) => r.name === name);
     if (!route) return;
     const focused = state.routes[state.index]?.key === route.key;
-    const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-    if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
+    const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+    if (!focused && !event.defaultPrevented) navigateToTab(route.key);
   };
 
   return (

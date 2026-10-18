@@ -17,7 +17,16 @@ jest.mock('expo-router', () => {
       View,
       null,
       children,
-      tabBar ? tabBar({ state: { index: 2, routes }, navigation: { emit: mockEmit, navigate: mockNavigate }, descriptors: {} }) : null,
+      // Exactly the props expo-router's BottomTabView hands a custom tabBar (no `navigation` object).
+      tabBar
+        ? tabBar({
+            state: { index: 2, routes },
+            descriptors: {},
+            emitter: { emit: mockEmit },
+            navigateToTab: mockNavigate,
+            insets: { top: 0, right: 0, bottom: 0, left: 0 },
+          })
+        : null,
     );
   };
   Tabs.Screen = ({ name, options }: { name: string; options: Record<string, unknown> }) =>
@@ -145,7 +154,7 @@ describe('TabsLayout — wide screens: nav rail on the right', () => {
     expect(screen.getByRole('tab', { name: 'Groups' })).not.toBeSelected();
     await fireEvent.press(screen.getByRole('tab', { name: 'Groups' }));
     expect(mockEmit).toHaveBeenCalledWith({ type: 'tabPress', target: 'groups-key', canPreventDefault: true });
-    expect(mockNavigate).toHaveBeenCalledWith('groups', undefined);
+    expect(mockNavigate).toHaveBeenCalledWith('groups-key');
     // Pressing the focused tab doesn't navigate.
     mockNavigate.mockClear();
     await fireEvent.press(screen.getByRole('tab', { name: 'Discover' }));
@@ -158,7 +167,7 @@ describe('TabsLayout — wide screens: nav rail on the right', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Rate a movie' }));
     expect(mockOpenRatePicker).toHaveBeenCalled();
     await fireEvent.press(screen.getByTestId('rail-me'));
-    expect(mockNavigate).toHaveBeenCalledWith('profile', undefined);
+    expect(mockNavigate).toHaveBeenCalledWith('profile-key');
   });
 
   it('copes with no persona yet and caps the badge', async () => {
@@ -175,5 +184,22 @@ describe('TabsLayout — wide screens: nav rail on the right', () => {
     await render(<TabsLayout />);
     expect(screen.queryByTestId('nav-rail')).toBeNull();
     expect(screen.getByTestId('rate-fab')).toBeOnTheScreen();
+  });
+});
+
+// The rail's props are mocked above, so pin them to what expo-router really passes: an upgrade that
+// changes the custom tabBar contract must fail here, not crash the web app on the first tab press.
+describe('expo-router custom tabBar contract', () => {
+  it('BottomTabView calls tabBar with state, emitter and navigateToTab', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fs = require('fs') as typeof import('fs');
+    const source = fs.readFileSync(
+      require.resolve('expo-router/build/react-navigation/bottom-tabs/views/BottomTabView.js'),
+      'utf8',
+    );
+    const call = source.slice(source.indexOf('tabBar({'), source.indexOf('tabBar({') + 300);
+    expect(call).toMatch(/\bstate,/);
+    expect(call).toMatch(/\bemitter,/);
+    expect(call).toMatch(/\bnavigateToTab,/);
   });
 });
