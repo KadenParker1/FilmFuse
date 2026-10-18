@@ -190,6 +190,7 @@ class TmdbMovieCatalogClientTest {
                 .andRespond(withStatus(HttpStatus.UNAUTHORIZED));
 
         assertThatThrownBy(() -> client.popular(null, 1))
+                .isInstanceOf(com.pm.filmfuse.movie.catalog.CatalogAuthenticationException.class)
                 .isInstanceOf(UpstreamUnavailableException.class)
                 .hasMessage("Movie data is temporarily unavailable.");
     }
@@ -199,7 +200,8 @@ class TmdbMovieCatalogClientTest {
         server.expect(requestTo(startsWith(BASE + "/movie/1")))
                 .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS));
 
-        assertThatThrownBy(() -> client.details(1)).isInstanceOf(UpstreamUnavailableException.class);
+        assertThatThrownBy(() -> client.details(1)).isInstanceOf(UpstreamUnavailableException.class)
+                .isNotInstanceOf(com.pm.filmfuse.movie.catalog.CatalogAuthenticationException.class);
     }
 
     @Test

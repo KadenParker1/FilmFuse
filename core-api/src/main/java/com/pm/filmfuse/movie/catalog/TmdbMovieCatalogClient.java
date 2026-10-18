@@ -19,7 +19,8 @@ import org.springframework.web.client.RestClientException;
  * TMDB v3 API, authenticated with a v4 read access token as a Bearer header. Every request asks for
  * {@code language=en-US}; list requests also send {@code include_adult=false}.
  *
- * <p>Errors: 404 becomes {@link NotFoundException}; any other error status, a timeout or an
+ * <p>Errors: 404 becomes {@link NotFoundException}; 401 (token rejected) becomes
+ * {@link CatalogAuthenticationException}, a 502 like the rest; any other error status, a timeout or an
  * unreadable body becomes {@link UpstreamUnavailableException} (502) with a fixed message - TMDB's
  * own error text never reaches the caller.
  */
@@ -51,12 +52,14 @@ public class TmdbMovieCatalogClient implements MovieCatalogClient {
                     if (response.getStatusCode().value() == HttpStatus.NOT_FOUND.value()) {
                         throw new NotFoundException(NOT_FOUND);
                     }
+                    IllegalStateException cause = new IllegalStateException(
+                            "TMDB " + request.getMethod() + " " + request.getURI().getPath()
+                                    + " returned " + response.getStatusCode().value());
                     if (response.getStatusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
                         log.error("TMDB rejected the access token (401); check TMDB_ACCESS_TOKEN");
+                        throw new CatalogAuthenticationException(UNAVAILABLE, cause);
                     }
-                    throw new UpstreamUnavailableException(UNAVAILABLE, new IllegalStateException(
-                            "TMDB " + request.getMethod() + " " + request.getURI().getPath()
-                                    + " returned " + response.getStatusCode().value()));
+                    throw new UpstreamUnavailableException(UNAVAILABLE, cause);
                 })
                 .build();
     }
