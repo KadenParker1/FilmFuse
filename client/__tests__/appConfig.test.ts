@@ -185,6 +185,20 @@ describe('build environment checks', () => {
     expect(buildEnvProblems('preview', { ...good, EXPO_PUBLIC_API_BASE_URL: 'not a url' })).toHaveLength(1);
   });
 
+  it.each(['https://172.16.0.4/api', 'https://172.31.255.1/api', 'https://kadens-mac.local:8090/api', 'https://[::1]/api'])(
+    'rejects the private-network URL %s',
+    (url) => {
+      expect(buildEnvProblems('production', { ...good, EXPO_PUBLIC_API_BASE_URL: url })).toHaveLength(1);
+    },
+  );
+
+  it.each(['https://172.15.0.4/api', 'https://172.32.0.1/api', 'https://api.local.example.com/api'])(
+    'accepts the public URL %s',
+    (url) => {
+      expect(buildEnvProblems('production', { ...good, EXPO_PUBLIC_API_BASE_URL: url })).toEqual([]);
+    },
+  );
+
   it('fails only on the EAS build worker', () => {
     expect(() => assertBuildEnv({ EAS_BUILD_PROFILE: 'production' })).not.toThrow();
     expect(() => assertBuildEnv({ EAS_BUILD_RUNNER: 'eas-build', EAS_BUILD_PROFILE: 'production' })).toThrow(

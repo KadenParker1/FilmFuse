@@ -67,6 +67,21 @@ describe('env in development on a device', () => {
     expect(env.isSupabaseConfigured).toBe(true);
   });
 
+  it('never rewrites in a release build, even with a LAN hostUri', () => {
+    process.env.EXPO_PUBLIC_API_BASE_URL = 'http://localhost:8090/api/v1';
+    process.env.EXPO_PUBLIC_SUPABASE_URL = 'http://127.0.0.1:55321';
+    const g = globalThis as { __DEV__?: boolean };
+    const savedDev = g.__DEV__;
+    g.__DEV__ = false;
+    try {
+      const env = loadEnv('192.168.1.20:8081');
+      expect(env.apiBaseUrl).toBe('http://localhost:8090/api/v1');
+      expect(env.supabaseUrl).toBe('http://127.0.0.1:55321');
+    } finally {
+      g.__DEV__ = savedDev;
+    }
+  });
+
   it('keeps localhost when Metro is local (simulator, web)', () => {
     process.env.EXPO_PUBLIC_API_BASE_URL = 'http://localhost:8090/api/v1';
     const env = loadEnv('localhost:8081');

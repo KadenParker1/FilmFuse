@@ -54,7 +54,9 @@ export type BuildProfile = 'development' | 'preview' | 'production';
 
 type Env = Record<string, string | undefined>;
 
-const LOCAL_HOST = /^(localhost|127\.\d+\.\d+\.\d+|10\.0\.2\.2|0\.0\.0\.0|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|\[::1\])$/i;
+/** Loopback, emulator, private-network (RFC 1918) and mDNS hosts: unreachable from testers' phones. */
+const LOCAL_HOST =
+  /^(localhost|127\.\d+\.\d+\.\d+|10\.0\.2\.2|0\.0\.0\.0|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|[^.]+\.local|\[::1\])$/i;
 
 function isPublicHttps(value: string | undefined): boolean {
   if (!value) return false;
