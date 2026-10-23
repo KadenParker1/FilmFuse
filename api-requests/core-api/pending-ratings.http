@@ -20,3 +20,7 @@ Content-Type: application/json
 ### Dismiss: never prompted again for this movie (204, idempotent; 404 unknown movie)
 POST {{baseUrl}}/api/v1/me/pending-ratings/{{movieId}}/dismiss
 Authorization: Bearer {{token}}
+
+### Undo a dismissal: the prompt comes back while it is still pending (204, idempotent)
+DELETE {{baseUrl}}/api/v1/me/pending-ratings/{{movieId}}/dismiss
+Authorization: Bearer {{token}}

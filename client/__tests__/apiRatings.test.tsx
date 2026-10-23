@@ -5,7 +5,18 @@ jest.mock('../lib/supabase', () => ({
 import { act, waitFor } from '@testing-library/react-native';
 import { notifyManager } from '@tanstack/react-query';
 import { flattenPages } from '../api/movies';
-import { fetchMyRating, useDeleteRating, useMyRating, useMyRatings, useUpsertRating } from '../api/ratings';
+import {
+  commitRatingRemoval,
+  fetchMyRating,
+  hideRatingForRemoval,
+  isRatingRemovalPending,
+  resetPendingRemovalsForTests,
+  undoRatingRemoval,
+  useDeleteRating,
+  useMyRating,
+  useMyRatings,
+  useUpsertRating,
+} from '../api/ratings';
 import { ApiError } from '../lib/apiClient';
 import { queryKeys } from '../lib/queryKeys';
 import { makeMovie, makeRating, makeRecommendation, makeTasteProfile } from '../test-utils/fixtures';
@@ -159,3 +170,48 @@ describe('useDeleteRating', () => {
     expect(invalidated(client, queryKeys.recommendations)).toBe(true);
   });
 });
+
+describe('deferred rating removal', () => {
+  afterEach(() => resetPendingRemovalsForTests());
+
+  it('commit sends one DELETE; after Undo or a second commit nothing is sent', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(204, undefined));
+    const client = createTestQueryClient();
+    client.setQueryData(queryKeys.myRating(100), heat);
+    hideRatingForRemoval(client, heat);
+    expect(isRatingRemovalPending(100)).toBe(true);
+    await expect(commitRatingRemoval(client, 100)).resolves.toBe(true);
+    await expect(commitRatingRemoval(client, 100)).resolves.toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(call(0).init.method).toBe('DELETE');
+
+    hideRatingForRemoval(client, alien);
+    expect(undoRatingRemoval(client, 200)).toBe(true);
+    expect(undoRatingRemoval(client, 200)).toBe(false);
+    await expect(commitRatingRemoval(client, 200)).resolves.toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('a re-rate waits for a DELETE already on its way, so the PUT lands last', async () => {
+    let finishDelete: (r: Response) => void = () => {};
+    fetchMock.mockImplementation((_url: string, init: RequestInit) =>
+      init.method === 'DELETE'
+        ? new Promise<Response>((resolve) => (finishDelete = resolve))
+        : Promise.resolve(jsonResponse(200, heat)),
+    );
+    const client = createTestQueryClient();
+    hideRatingForRemoval(client, heat);
+    const committing = commitRatingRemoval(client, 100);
+    const { result } = await renderHookWithClient(() => useUpsertRating(), client);
+    await act(async () => {
+      result.current.mutate({ movieId: 100, body: { score: 8 } });
+    });
+    expect(fetchMock.mock.calls.map((c) => (c[1] as RequestInit).method)).toEqual(['DELETE']);
+    await act(async () => {
+      finishDelete(jsonResponse(204, undefined));
+      await committing;
+    });
+    await waitFor(() => expect(fetchMock.mock.calls.map((c) => (c[1] as RequestInit).method)).toEqual(['DELETE', 'PUT']));
+  });
+});
+

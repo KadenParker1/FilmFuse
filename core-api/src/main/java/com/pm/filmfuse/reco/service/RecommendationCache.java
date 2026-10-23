@@ -52,6 +52,10 @@ final class RecommendationCache<V> {
         map.put(userId, new Slot<>(value, clock.instant()));
     }
 
+    synchronized void remove(UUID userId) {
+        map.remove(userId);
+    }
+
     synchronized int size() {
         return map.size();
     }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { Image } from 'expo-image';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useCalibrationBatch, useSubmitCalibration } from '../../api/onboarding';
 import { useTheme } from '../../theme/useTheme';
 import type { CalibrationRatingDTO } from '../../types/api';
@@ -26,6 +27,7 @@ type Props = {
  * The calibration card deck: one poster at a time with a 1–10 slider or "Haven't seen". Cards come in
  * batches from /me/calibration/next; each finished batch is submitted before the next one loads (so
  * the server can leave out what was answered). Finishing early submits the partial batch first.
+ * "Back" takes back the last answer while it is still unsaved (within the current batch).
  */
 export function CalibrationDeck({
   deckId,
@@ -56,6 +58,9 @@ export function CalibrationDeck({
   const totalRated = startRated + rated;
   const canFinish = totalRated >= minRated || outOfCards;
   const canSkip = !canFinish && skipAfter != null && seen >= skipAfter;
+  const lastAnswer = answers[answers.length - 1];
+  const canGoBack = lastAnswer != null && index > 0 && !submit.isPending && !finishing;
+  const previousTitle = index > 0 ? list[index - 1]?.title : undefined;
 
   /** Saves the pending answers; true when there was nothing to save or the save worked. */
   async function flush(pending: CalibrationRatingDTO[]): Promise<boolean> {
@@ -83,6 +88,17 @@ export function CalibrationDeck({
       setBatch((b) => b + 1);
       setIndex(0);
     }
+  }
+
+  /** Undo the last (unsaved) answer: its card comes back with the score it had. */
+  function back() {
+    if (!canGoBack) return;
+    setAnswers(answers.slice(0, -1));
+    setSeen((n) => Math.max(0, n - 1));
+    if (!lastAnswer.unseen) setRated((n) => Math.max(0, n - 1));
+    setScore(lastAnswer.score ?? START_SCORE);
+    setSaveError(null);
+    setIndex((i) => i - 1);
   }
 
   async function retryBatch() {
@@ -188,6 +204,17 @@ export function CalibrationDeck({
           : `Rated ${totalRated}`}
       </Text>
       {card}
+      {canGoBack ? (
+        <Button
+          size="sm"
+          variant="ghost"
+          title="Back"
+          accessibilityLabel={previousTitle ? `Back to ${previousTitle}` : 'Back to the last movie'}
+          accessibilityHint="Takes back your last answer"
+          icon={<Ionicons name="arrow-undo-outline" size={16} color={colors.accentInk} />}
+          onPress={back}
+        />
+      ) : null}
       {canFinish ? (
         <Button title={finishLabel} loading={finishing || submit.isPending} onPress={() => void finish()} />
       ) : canSkip ? (

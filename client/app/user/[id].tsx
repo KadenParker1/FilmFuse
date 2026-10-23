@@ -163,13 +163,20 @@ function ProfileView({ profile }: { profile: PublicProfileDTO }) {
         break;
       case 'FRIENDS':
         actions = (
-          <Button
-            title="Friends ✓"
-            variant="secondary"
-            accessibilityLabel="Friends"
-            accessibilityHint="Opens friendship options"
-            onPress={() => setMode('friends')}
-          />
+          <View className="gap-3">
+            <Button
+              title={`Movie night with ${name}`}
+              icon={<Ionicons name="film-outline" size={18} color={colors.onAccent} />}
+              onPress={() => router.push(`/sessions/new?memberIds=${encodeURIComponent(profile.id)}`)}
+            />
+            <Button
+              title="Friends ✓"
+              variant="secondary"
+              accessibilityLabel="Friends"
+              accessibilityHint="Opens friendship options"
+              onPress={() => setMode('friends')}
+            />
+          </View>
         );
         break;
       case 'BLOCKED':

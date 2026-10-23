@@ -25,4 +25,10 @@ public class DismissalRepository {
                 """, new MapSqlParameterSource("user", userId).addValue("movie", movieId)
                 .addValue("now", Timestamp.from(now))) > 0;
     }
+
+    /** Undo of "Not interested". @return whether a dismissal was removed */
+    public boolean delete(UUID userId, int movieId) {
+        return jdbc.update("delete from app.rec_dismissals where user_id = :user and movie_id = :movie",
+                new MapSqlParameterSource("user", userId).addValue("movie", movieId)) > 0;
+    }
 }

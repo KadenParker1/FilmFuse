@@ -62,4 +62,13 @@ public class PendingRatingService {
         }
         repository.dismiss(userId, movieId, clock.instant());
     }
+
+    /**
+     * Undo of {@link #dismiss}: the prompt comes back if the movie is still pending (in the window and
+     * unrated). 204, idempotent; nothing to undo is fine too.
+     */
+    @Transactional
+    public void undismiss(UUID userId, int movieId) {
+        repository.undismiss(userId, movieId);
+    }
 }

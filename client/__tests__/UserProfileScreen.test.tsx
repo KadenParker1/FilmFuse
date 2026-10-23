@@ -324,6 +324,19 @@ describe('UserProfileScreen — FRIENDS', () => {
     expect(screen.getByRole('switch', { name: 'Close friend' })).not.toBeChecked();
   });
 
+  it('"Movie night with…" starts a Tonight session with them preselected', async () => {
+    showProfile('FRIENDS');
+    await render(<UserProfileScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Movie night with Grace Hopper' }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/sessions/new?memberIds=u2');
+  });
+
+  it.each(['NONE', 'REQUEST_SENT', 'REQUEST_RECEIVED', 'BLOCKED'] as const)('no movie night for %s', async (state) => {
+    showProfile(state);
+    await render(<UserProfileScreen />);
+    expect(screen.queryByRole('button', { name: /^Movie night with/ })).toBeNull();
+  });
+
   it('toggles close friend', async () => {
     showProfile('FRIENDS');
     await render(<UserProfileScreen />);

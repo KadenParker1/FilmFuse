@@ -85,5 +85,7 @@ export const apiClient = {
   post: <T>(path: string, body?: unknown) => request<T>(path, withBody('POST', body)),
   patch: <T>(path: string, body?: unknown) => request<T>(path, withBody('PATCH', body)),
   put: <T>(path: string, body?: unknown) => request<T>(path, withBody('PUT', body)),
-  del: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+  /** `keepalive` (web) lets the request finish while the page unloads; native ignores it. */
+  del: <T>(path: string, options: { keepalive?: boolean } = {}) =>
+    request<T>(path, options.keepalive ? { method: 'DELETE', keepalive: true } : { method: 'DELETE' }),
 };

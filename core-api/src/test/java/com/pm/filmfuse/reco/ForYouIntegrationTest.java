@@ -17,12 +17,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** GET /me/recommendations and POST /me/recommendations/{movieId}/dismiss. */
+/** GET /me/recommendations and POST / DELETE /me/recommendations/{movieId}/dismiss. */
 class ForYouIntegrationTest extends AbstractTasteIntegrationTest {
 
     private static final String FOR_YOU = "/api/v1/me/recommendations";
@@ -31,6 +32,7 @@ class ForYouIntegrationTest extends AbstractTasteIntegrationTest {
     void bothRequireAToken() throws Exception {
         mockMvc.perform(get(FOR_YOU)).andExpect(status().isUnauthorized());
         mockMvc.perform(post(FOR_YOU + "/1/dismiss")).andExpect(status().isUnauthorized());
+        mockMvc.perform(delete(FOR_YOU + "/1/dismiss")).andExpect(status().isUnauthorized());
     }
 
     /** A user with a built vector, ready for the ML path. */
@@ -260,5 +262,61 @@ class ForYouIntegrationTest extends AbstractTasteIntegrationTest {
 
         mockMvc.perform(post(FOR_YOU + "/{id}/dismiss", 2147000004).with(user.auth())).andExpect(status().isNotFound());
         mockMvc.perform(post(FOR_YOU + "/abc/dismiss").with(user.auth())).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void undoingADismissalBringsThePickBackAndMarksTheVectorDirty() throws Exception {
+        TestUser user = userWithVector();
+        int genre = uniqueGenre();
+        int movie = topMovie(genre, "PG");
+        int other = topMovie(genre, "PG");
+        mlReturns(movie, other);
+        assertThat(forYouIds(user)).containsExactly(movie, other);
+
+        mockMvc.perform(post(FOR_YOU + "/{id}/dismiss", movie).with(user.auth())).andExpect(status().isNoContent());
+        // Rebuilt by the fallback; the ranker still offers both.
+        when(mlClient.isConfigured()).thenReturn(false);
+        buildVector(user);
+        mlReturns(movie, other);
+        assertThat(forYouIds(user)).containsExactly(other);
+
+        mockMvc.perform(delete(FOR_YOU + "/{id}/dismiss", movie).with(user.auth())).andExpect(status().isNoContent());
+        assertThat(count("rec_dismissals", user.id())).isZero();
+        assertThat(dirtyReason(user)).isEqualTo("DISMISS");
+        // Back at once, before any rebuild: the cached list (ranked without it) is dropped.
+        assertThat(forYouIds(user)).containsExactly(movie, other);
+    }
+
+    @Test
+    void undoIsIdempotentAndNothingToUndoIsNoSignal() throws Exception {
+        TestUser user = userWithVector();
+        int movie = topMovie(uniqueGenre(), "PG");
+        mockMvc.perform(delete(FOR_YOU + "/{id}/dismiss", movie).with(user.auth())).andExpect(status().isNoContent());
+        assertThat(isDirty(user)).isFalse();
+
+        mockMvc.perform(post(FOR_YOU + "/{id}/dismiss", movie).with(user.auth())).andExpect(status().isNoContent());
+        buildVector(user);
+        mockMvc.perform(delete(FOR_YOU + "/{id}/dismiss", movie).with(user.auth())).andExpect(status().isNoContent());
+        buildVector(user);
+        mockMvc.perform(delete(FOR_YOU + "/{id}/dismiss", movie).with(user.auth())).andExpect(status().isNoContent());
+        // The repeat removed nothing, so it is no new signal.
+        assertThat(isDirty(user)).isFalse();
+        // Unknown movies have nothing to undo; a non-numeric id is a 400.
+        mockMvc.perform(delete(FOR_YOU + "/{id}/dismiss", 2147000004).with(user.auth())).andExpect(status().isNoContent());
+        mockMvc.perform(delete(FOR_YOU + "/abc/dismiss").with(user.auth())).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void undoOnlyTouchesTheCallersOwnDismissal() throws Exception {
+        TestUser owner = userWithVector();
+        TestUser other = userWithVector();
+        int movie = topMovie(uniqueGenre(), "PG");
+        mockMvc.perform(post(FOR_YOU + "/{id}/dismiss", movie).with(owner.auth())).andExpect(status().isNoContent());
+        buildVector(owner);
+
+        mockMvc.perform(delete(FOR_YOU + "/{id}/dismiss", movie).with(other.auth())).andExpect(status().isNoContent());
+        assertThat(count("rec_dismissals", owner.id())).isEqualTo(1);
+        assertThat(isDirty(owner)).isFalse();
+        assertThat(isDirty(other)).isFalse();
     }
 }

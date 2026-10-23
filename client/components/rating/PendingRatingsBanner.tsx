@@ -2,14 +2,16 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useDismissPendingRating, usePendingRatings } from '../../api/pendingRatings';
+import { useDismissPendingRating, usePendingRatings, useUndismissPendingRating } from '../../api/pendingRatings';
 import { useTheme } from '../../theme/useTheme';
 import type { PendingRatingDTO } from '../../types/api';
-import { Body, Button, Card, Heading, errorMessage } from '../ui';
+import { Body, Button, Card, Heading, errorMessage, useUndoToast } from '../ui';
 import { useQuickRate } from './QuickRateProvider';
 
 /** How many prompts show before "Show N more". */
 export const PENDING_PREVIEW = 3;
+
+export const PROMPT_DISMISSED = 'Won’t ask about that one again';
 
 export const watchedWith = (p: Pick<PendingRatingDTO, 'groupName'>) =>
   p.groupName ? `Watched with ${p.groupName}` : 'Watched on a movie night';
@@ -58,13 +60,15 @@ function PendingRow({ pending, onRate, onDismiss }: { pending: PendingRatingDTO;
 
 /**
  * "Rate what you watched": recent session picks you haven't rated yet. Rate opens the quick-rate
- * sheet (as a post-watch rating); ✕ dismisses for good. Renders nothing while loading, on error
+ * sheet (as a post-watch rating); ✕ dismisses (with Undo in a toast). Renders nothing while loading, on error
  * or when there's nothing to rate — it's a nudge, never a blocker.
  */
 export function PendingRatingsBanner() {
   const { colors } = useTheme();
   const pending = usePendingRatings();
   const dismiss = useDismissPendingRating();
+  const undismiss = useUndismissPendingRating();
+  const { showUndo } = useUndoToast();
   const { openQuickRate } = useQuickRate();
   const [expanded, setExpanded] = useState(false);
 
@@ -94,7 +98,16 @@ export function PendingRatingsBanner() {
           key={p.movie.id}
           pending={p}
           onRate={() => openQuickRate(p.movie, { source: 'POST_WATCH' })}
-          onDismiss={() => dismiss.mutate(p.movie.id)}
+          onDismiss={() =>
+            dismiss.mutate(p.movie.id, {
+              onSuccess: () =>
+                showUndo({
+                  message: PROMPT_DISMISSED,
+                  undoAccessibilityLabel: `Undo dismissing ${p.movie.title}`,
+                  onUndo: () => undismiss.mutateAsync(p.movie.id),
+                }),
+            })
+          }
         />
       ))}
       {hidden > 0 ? (

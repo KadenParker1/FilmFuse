@@ -154,6 +154,14 @@ describe('MovieScreen', () => {
   });
 });
 
+describe('MovieScreen — Watch with…', () => {
+  it('opens a new session with the movie as context', async () => {
+    await render(<MovieScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Watch Dune with friends' }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/sessions/new?movieId=438631');
+  });
+});
+
 describe('MovieScreen — ratings section', () => {
   const items = [1, 2, 3, 4].map((n) =>
     makeFeedItem({

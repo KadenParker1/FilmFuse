@@ -11,7 +11,16 @@ import * as SecureStore from 'expo-secure-store';
 import * as nativeShare from '../components/social/shareInvite.native';
 import { INVITE_MESSAGE } from '../components/social/shareInviteTypes';
 import * as nativePending from '../lib/pendingLink.native';
-import { invitePath, isPendingLinkPath, profilePath, ratingPath } from '../lib/pendingLinkPath';
+import {
+  invitePath,
+  isGuardedLinkPath,
+  isPendingLinkPath,
+  pathFromUrl,
+  profilePath,
+  ratingPath,
+} from '../lib/pendingLinkPath';
+
+const SID = '8f14e45f-ceea-4e7a-9b1c-2a3b4c5d6e7f';
 
 // jest resolves platform files to .native (ios preset); load the web ones explicitly.
 const webShare = jest.requireActual<typeof import('../components/social/shareInvite')>(
@@ -107,7 +116,52 @@ describe('pendingLinkPath', () => {
     ['https://evil.example/user/1', false],
     ['/user/1/../../x', false],
     [null, false],
+    // Session and group links (from emails and shares): UUIDs only.
+    [`/sessions/${SID}`, true],
+    [`/groups/${SID}`, true],
+    [`/sessions/${SID.toUpperCase()}`, true],
+    ['/sessions/new', false],
+    ['/groups/new', false],
+    ['/sessions/123', false],
+    [`/sessions/${SID}/x`, false],
+    [`/sessions/${SID}?next=https://evil.example`, false],
+    [`//evil.example/sessions/${SID}`, false],
+    [`https://evil.example/sessions/${SID}`, false],
+    [`/sessions/${SID} `, false],
   ])('isPendingLinkPath(%p) → %p', (p, ok) => expect(isPendingLinkPath(p)).toBe(ok));
+
+  it('only session and group links count as guarded', () => {
+    expect(isGuardedLinkPath(`/sessions/${SID}`)).toBe(true);
+    expect(isGuardedLinkPath(`/groups/${SID}`)).toBe(true);
+    expect(isGuardedLinkPath('/user/u1')).toBe(false);
+    expect(isGuardedLinkPath('/sessions/new')).toBe(false);
+    expect(isGuardedLinkPath(null)).toBe(false);
+  });
+
+  it.each([
+    [`https://filmfuse.app/sessions/${SID}`, `/sessions/${SID}`],
+    [`https://filmfuse.app/sessions/${SID}/?utm=email#top`, `/sessions/${SID}`],
+    [`filmfuse://groups/${SID}`, `/groups/${SID}`],
+    [`filmfuse:///groups/${SID}`, `/groups/${SID}`],
+    [`exp://192.168.1.2:8081/--/sessions/${SID}`, `/sessions/${SID}`],
+    ['https://filmfuse.app', '/'],
+    ['https://filmfuse.app?x=1', '/'],
+    ['/sessions/x', null],
+    ['', null],
+    [null, null],
+  ])('pathFromUrl(%p) → %p', (url, path) => expect(pathFromUrl(url)).toBe(path));
+
+  it.each([
+    `https://evil.example//sessions/${SID}`,
+    `https://filmfuse.app/sessions/${SID}/..`,
+    `https://filmfuse.app/sessions/..%2F..%2F${SID}`,
+    `https://filmfuse.app/sessions%2F${SID}`,
+    `https://filmfuse.app/sessions/${SID}%2F..`,
+    `https://filmfuse.app/sessions\\${SID}`,
+    `filmfuse://evil.example/sessions/${SID}`,
+    `javascript://sessions/${SID}`.replace('sessions', '%0Aalert(1)//sessions'),
+    `https://filmfuse.app/sessions/${SID}x`,
+  ])('a tampered link %p is never kept', (url) => expect(isGuardedLinkPath(pathFromUrl(url))).toBe(false));
 });
 
 describe('pendingLink (native, SecureStore)', () => {

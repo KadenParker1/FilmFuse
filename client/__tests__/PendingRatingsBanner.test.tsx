@@ -5,7 +5,12 @@ jest.mock('../lib/supabase', () => ({
 
 import { fireEvent, screen, waitFor, within } from '@testing-library/react-native';
 import { notifyManager } from '@tanstack/react-query';
-import { PENDING_PREVIEW, PendingRatingsBanner, watchedWith } from '../components/rating/PendingRatingsBanner';
+import {
+  PENDING_PREVIEW,
+  PROMPT_DISMISSED,
+  PendingRatingsBanner,
+  watchedWith,
+} from '../components/rating/PendingRatingsBanner';
 import { QuickRateProvider } from '../components/rating/QuickRateProvider';
 import { serveRoutes, type Route } from '../test-utils/fetchRoutes';
 import { makeMovie, makePendingRating, makeRating, makeTasteProfile } from '../test-utils/fixtures';
@@ -156,5 +161,48 @@ describe('PendingRatingsBanner — rate', () => {
     expect(api.callsTo('PUT', '/ratings/100')[0]!.body).toMatchObject({ score: 8, source: 'POST_WATCH' });
     await waitFor(() => expect(screen.queryByTestId('pending-rating-100')).toBeNull());
     expect(screen.getByTestId('pending-rating-200')).toBeOnTheScreen();
+  });
+});
+
+describe('PendingRatingsBanner — undo a dismissal', () => {
+  it('shows an undo toast; Undo DELETEs the dismissal and the prompt comes back', async () => {
+    const api = serveRoutes(fetchMock, [
+      { method: 'POST', path: '/me/pending-ratings/100/dismiss', status: 204 },
+      { method: 'DELETE', path: '/me/pending-ratings/100/dismiss', status: 204 },
+      { path: '/me/pending-ratings', body: [heat, up], times: 1 },
+      { path: '/me/pending-ratings', body: [heat, up] },
+    ]);
+    await renderBanner();
+    await screen.findByTestId('pending-rating-100');
+    await fireEvent.press(screen.getByRole('button', { name: 'Dismiss Heat' }));
+    expect(await screen.findByTestId('undo-toast')).toHaveTextContent(PROMPT_DISMISSED + 'Undo');
+    await fireEvent.press(screen.getByRole('button', { name: 'Undo dismissing Heat' }));
+    await waitFor(() => expect(api.callsTo('DELETE', '/me/pending-ratings/100/dismiss')).toHaveLength(1));
+    expect(await screen.findByTestId('pending-rating-100')).toBeOnTheScreen();
+    expect(screen.queryByTestId('undo-toast')).toBeNull();
+  });
+
+  it('still offers Undo after dismissing the last prompt (the banner is gone)', async () => {
+    serveRoutes(fetchMock, [
+      { method: 'POST', path: '/me/pending-ratings/100/dismiss', status: 204 },
+      { path: '/me/pending-ratings', body: [heat] },
+    ]);
+    await renderBanner();
+    await screen.findByTestId('pending-ratings');
+    await fireEvent.press(screen.getByRole('button', { name: 'Dismiss Heat' }));
+    expect(await screen.findByRole('button', { name: 'Undo dismissing Heat' })).toBeOnTheScreen();
+  });
+
+  it('a failed undo says so', async () => {
+    serveRoutes(fetchMock, [
+      { method: 'POST', path: '/me/pending-ratings/100/dismiss', status: 204 },
+      { method: 'DELETE', path: '/me/pending-ratings/100/dismiss', status: 500, body: { message: 'boom' } },
+      { path: '/me/pending-ratings', body: [heat, up] },
+    ]);
+    await renderBanner();
+    await screen.findByTestId('pending-rating-100');
+    await fireEvent.press(screen.getByRole('button', { name: 'Dismiss Heat' }));
+    await fireEvent.press(await screen.findByRole('button', { name: 'Undo dismissing Heat' }));
+    await waitFor(() => expect(screen.getByTestId('undo-toast')).toHaveTextContent(/Couldn’t undo/));
   });
 });

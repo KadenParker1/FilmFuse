@@ -19,6 +19,7 @@ import { AuthProvider } from '../auth/AuthProvider';
 import { useAuth } from '../auth/useAuth';
 import { ThemeRoot } from '../components/ThemeRoot';
 import { FullScreenLoader } from '../components/FullScreenLoader';
+import { GuardedLinkSaver } from '../components/GuardedLinkSaver';
 import { QuickRateProvider } from '../components/rating/QuickRateProvider';
 import { AppearanceProvider } from '../theme/AppearanceProvider';
 import { stackScreenOptions } from '../theme/navigation';
@@ -65,7 +66,8 @@ export default function RootLayout() {
  * Route guards. Signed out → only (auth). Signed in → (onboarding) and (tabs); the (tabs) layout
  * then checks `/me` and sends unfinished profiles to onboarding (it tolerates the API being down).
  * Invite links (`/invite/<token>`), profiles (`/user/<id>`) and ratings (`/ratings/<id>`) are
- * reachable either way.
+ * reachable either way. Session and group links stay guarded: GuardedLinkSaver remembers one a
+ * signed-out visitor opened, and PendingLinkRedeemer opens it after sign-in (and onboarding).
  */
 function RootNavigator() {
   const { session, loading } = useAuth();
@@ -76,6 +78,7 @@ function RootNavigator() {
 
   return (
     <>
+      <GuardedLinkSaver signedIn={signedIn} />
       <StatusBar style={statusBarStyle(scheme)} />
       <Stack screenOptions={stackScreenOptions(colors.bg)}>
         <Stack.Protected guard={signedIn} redirectTo="/sign-in">
