@@ -76,7 +76,7 @@ The M0/M1 work that needs no paid accounts. Nothing here needs an Apple, Google 
 4. **Environments:** deploy the backend first (Supabase project, Railway core-api and ML service). Then, for `preview` and `production`:
    - `eas env:create --environment production --name EXPO_PUBLIC_API_BASE_URL --value https://<api>/api/v1 --visibility plaintext`
    - The same for `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`. Both are public by design; never use a service-role key here.
-   - Add `filmfuse://**` to the hosted Supabase Auth redirect URLs.
+   - Add `filmfuse://**` to the hosted Supabase Auth redirect URLs. Never `exp://**` there: that is for local Expo Go only, and any Expo Go project could receive the redirect.
 5. **Dev client:** `npx expo install expo-dev-client` and commit it.
 6. **First builds:** `eas build -p ios --profile development` (simulator) and `eas build -p android --profile preview`. On the first run EAS creates the iOS certificates and profiles and the Android keystore; let it manage them. Never commit `.p8` / `.p12` / `.jks` files (they're ignored).
 7. **TestFlight:**
@@ -100,7 +100,7 @@ The M0/M1 work that needs no paid accounts. Nothing here needs an Apple, Google 
 
 **Point devices at the dev machine:**
 - `localhost` doesn't work from a phone. Derive the API and Supabase host from `Constants.expoConfig.hostUri` in development, or use a tunnel.
-- Add `filmfuse://**` and the dev LAN URL to the Supabase redirect URLs.
+- Local Supabase allows `filmfuse://**` and `exp://**` (Expo Go on the LAN) redirects (`supabase/config.toml`); the hosted project gets `filmfuse://**` only.
 
 **Device end-to-end tests:**
 - Use Maestro flows: sign up → onboarding → rate → friend → group session vote. They run against the local stack (`tools/e2e`).

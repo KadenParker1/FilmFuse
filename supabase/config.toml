@@ -163,7 +163,8 @@ site_url = "http://localhost:8081"
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 # Expo web dev server (8081), the native app scheme, and Expo Go on a device/simulator
-# (exp://<LAN-ip>:8081/--/auth/callback). Local only - the hosted project lists filmfuse://** alone.
+# (exp://<LAN-ip>:8081/--/auth/callback). exp://** is local only: the hosted project allows filmfuse://**
+# (plus its https web URL) and never exp://**, which any Expo Go project could receive.
 additional_redirect_urls = ["http://localhost:8081/**", "http://127.0.0.1:8081/**", "filmfuse://**", "exp://**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
