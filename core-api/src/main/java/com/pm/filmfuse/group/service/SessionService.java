@@ -237,9 +237,13 @@ public class SessionService {
 
     // ------------------------------------------------------------------------------- votes
 
+    /** Only on a result the caller can see: one hidden by the current comfort filter is 404 like any non-result. */
     public SessionDTO vote(UUID callerId, UUID sessionId, int movieId, Vote vote) {
         return tx.execute(status -> {
             Session session = requireOpenResult(callerId, sessionId, movieId);
+            if (!passes(currentFilter(session), movieId)) {
+                throw new NotFoundException(NOT_A_RESULT);
+            }
             sessions.upsertVote(session.id(), callerId, movieId, vote, clock.instant());
             events.publishEvent(new SessionUpdatedEvent(sessionId, SessionUpdatedEvent.VOTE));
             return toDTO(callerId, session);
@@ -278,7 +282,9 @@ public class SessionService {
             List<RankedMovie> fresh = ranked.stream().filter(r -> !present.contains(r.movieId())).toList();
             int nextRank = current.stream().mapToInt(SessionResult::rank).max().orElse(0) + 1;
             sessions.insertResults(sessionId, fresh, nextRank, clock.instant());
-            sessions.updateEffectiveFilter(sessionId, effective);
+            // Someone may have joined while ranking ran: store the filter for who is in it now, never
+            // the (possibly looser) one computed before the lock.
+            sessions.updateEffectiveFilter(sessionId, currentFilter(locked));
             events.publishEvent(new SessionUpdatedEvent(sessionId, SessionUpdatedEvent.REFRESH));
             return toDTO(callerId, sessions.findSession(locked.id()).orElseThrow());
         });
@@ -295,11 +301,13 @@ public class SessionService {
             if (sessions.isVetoed(sessionId, movieId)) {
                 throw new BadRequestException(VETOED);
             }
-            MovieContent movie = contentFilter.contentOf(List.of(movieId)).get(movieId);
-            if (movie == null || !currentFilter(session).isEligible(movie)) {
+            ContentFilter closing = currentFilter(session);
+            if (!passes(closing, movieId)) {
                 throw new BadRequestException(OUTSIDE_COMFORT);
             }
             Instant now = clock.instant();
+            // History is shown under the stored filter, so store the one it closed under.
+            sessions.updateEffectiveFilter(sessionId, closing);
             sessions.decide(sessionId, movieId, now);
             List<UUID> watchers = sessions.memberIds(sessionId);
             sessions.insertWatchHistory(watchers, movieId, sessionId, now);
@@ -386,6 +394,7 @@ public class SessionService {
                 throw new ForbiddenException(CREATOR_ONLY);
             }
             requireOpen(session);
+            sessions.updateEffectiveFilter(sessionId, currentFilter(session));
             sessions.end(sessionId, clock.instant());
             events.publishEvent(new SessionUpdatedEvent(sessionId, SessionUpdatedEvent.ENDED));
             return toDTO(callerId, sessions.findSession(sessionId).orElseThrow());
@@ -437,6 +446,11 @@ public class SessionService {
         return session;
     }
 
+    private boolean passes(ContentFilter filter, int movieId) {
+        MovieContent movie = contentFilter.contentOf(List.of(movieId)).get(movieId);
+        return movie != null && filter.isEligible(movie);
+    }
+
     /**
      * The comfort filter as it stands now: the session members' current settings plus the group's
      * current cap. Comfort settings are hard constraints even mid-session.
@@ -447,26 +461,24 @@ public class SessionService {
 
     /**
      * OPEN sessions are shown under {@link #currentFilter}: results that no longer pass it are left
-     * out (and cannot be picked). DECIDED / EXPIRED sessions are history and are shown as stored.
+     * out (and cannot be picked or voted on). DECIDED / EXPIRED sessions are history, shown under the
+     * stored filter (the one in force when they closed) - so results hidden from a late joiner do not
+     * come back once the session ends.
      */
     private SessionDTO toDTO(UUID callerId, Session session) {
         Instant now = clock.instant();
         SessionStatus status = session.status(now);
         List<SessionMember> members = sessions.findMembers(session.id());
         List<SessionResult> results = sessions.findResults(session.id());
-        ContentFilter effective = session.effectiveFilter();
-        int hidden = 0;
-        if (status == SessionStatus.OPEN) {
-            effective = currentFilter(session);
-            ContentFilter filter = effective;
-            Map<Integer, MovieContent> content = contentFilter.contentOf(
-                    results.stream().map(SessionResult::movieId).toList());
-            List<SessionResult> eligible = results.stream()
-                    .filter(r -> content.containsKey(r.movieId()) && filter.isEligible(content.get(r.movieId())))
-                    .toList();
-            hidden = results.size() - eligible.size();
-            results = eligible;
-        }
+        ContentFilter effective = status == SessionStatus.OPEN ? currentFilter(session) : session.effectiveFilter();
+        ContentFilter filter = effective;
+        Map<Integer, MovieContent> content = contentFilter.contentOf(
+                results.stream().map(SessionResult::movieId).toList());
+        List<SessionResult> eligible = results.stream()
+                .filter(r -> content.containsKey(r.movieId()) && filter.isEligible(content.get(r.movieId())))
+                .toList();
+        int hidden = results.size() - eligible.size();
+        results = eligible;
         List<SessionVote> votes = sessions.findVotes(session.id());
 
         Set<UUID> userIds = new HashSet<>();

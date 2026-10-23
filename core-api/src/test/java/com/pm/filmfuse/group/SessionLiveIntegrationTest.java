@@ -286,6 +286,53 @@ class SessionLiveIntegrationTest extends AbstractGroupIntegrationTest {
         assertThat(stored).contains("PG-13");
     }
 
+    @Test
+    void resultsHiddenByALateJoinerCannotBeVotedOnAndStayHiddenInHistory() throws Exception {
+        TestUser host = user();
+        TestUser guest = user();
+        TestUser strict = user();
+        befriend(host, guest);
+        befriend(host, strict);
+        int genre = uniqueGenre();
+        int rated = movie(genre, "R", 20);
+        int pg = movie(genre, "PG", 10);
+        setComfort(strict, "{\"maxCertification\": \"PG_13\", \"allowUnrated\": true}");
+        UUID sessionId = sessionId(createAdHocSession(host, genre, guest));
+        addMembers(host, sessionId, strict).andExpect(status().isOk());
+
+        // Hidden means hidden: same 404 as a movie that was never a result.
+        vote(guest, sessionId, rated, "UP").andExpect(status().isNotFound());
+        vote(guest, sessionId, pg, "UP").andExpect(status().isOk());
+
+        // Ending early must not bring the hidden result back for anyone (the strict member included).
+        end(host, sessionId).andExpect(status().isOk());
+        for (TestUser viewer : List.of(host, guest, strict)) {
+            String history = json(getSession(viewer, sessionId).andExpect(jsonPath("$.status").value("EXPIRED"))
+                    .andExpect(jsonPath("$.hiddenResultCount").value(1))
+                    .andExpect(jsonPath("$.effectiveFilter.maxCertification").value("PG_13")));
+            assertThat(resultIds(history)).containsExactly(pg);
+        }
+    }
+
+    @Test
+    void aDecidedSessionKeepsResultsHiddenByALateJoinerOutOfItsHistory() throws Exception {
+        TestUser host = user();
+        TestUser guest = user();
+        TestUser strict = user();
+        befriend(host, guest);
+        befriend(host, strict);
+        int genre = uniqueGenre();
+        int rated = movie(genre, "R", 20);
+        int pg = movie(genre, "PG", 10);
+        setComfort(strict, "{\"maxCertification\": \"PG_13\", \"allowUnrated\": true}");
+        UUID sessionId = sessionId(createAdHocSession(host, genre, guest));
+        addMembers(host, sessionId, strict).andExpect(status().isOk());
+
+        pick(guest, sessionId, pg).andExpect(status().isOk());
+        assertThat(resultIds(json(getSession(strict, sessionId).andExpect(jsonPath("$.status").value("DECIDED")))))
+                .containsExactly(pg).doesNotContain(rated);
+    }
+
     // ------------------------------------------------------------------------------- join
 
     @Test
