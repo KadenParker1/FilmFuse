@@ -68,6 +68,18 @@ public class FixtureMovieCatalogClient implements MovieCatalogClient {
                 .toList(), page);
     }
 
+    /** Movies of {@code year}; an unknown vote count passes any minimum and sorts last. */
+    @Override
+    public CatalogPage discoverByYear(int year, int minVoteCount, int page) {
+        return paginate(byPopularity.stream()
+                .filter(movie -> movie.releaseYear() != null && movie.releaseYear() == year)
+                .filter(movie -> movie.voteCount() == null || movie.voteCount() >= minVoteCount)
+                .sorted(Comparator.comparing((CatalogMovie m) -> m.voteCount() == null ? -1 : m.voteCount())
+                        .reversed()
+                        .thenComparingInt(CatalogMovie::id))
+                .toList(), page);
+    }
+
     @Override
     public CatalogMovie details(int id) {
         CatalogMovie movie = byId.get(id);

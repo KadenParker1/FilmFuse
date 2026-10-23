@@ -76,4 +76,50 @@ class CatalogSeedConfigTest {
                 .run(context -> assertThat(context.getBean(ThreadPoolTaskScheduler.class)
                         .getScheduledThreadPoolExecutor().getCorePoolSize()).isGreaterThanOrEqualTo(2));
     }
+
+    @Test
+    void bulkSeedingSettingsBindFromProperties() {
+        runner.withPropertyValues("filmfuse.catalog.seed.sources=popular,EXPORT,discover",
+                        "filmfuse.catalog.seed.max-database-mb=300",
+                        "filmfuse.catalog.seed.export.max-movies=400000",
+                        "filmfuse.catalog.seed.export.base-url=https://mirror.test/exports/",
+                        "filmfuse.catalog.seed.discover.from-year=1990",
+                        "filmfuse.catalog.seed.discover.to-year=",
+                        "filmfuse.catalog.seed.quality.sources=export",
+                        "filmfuse.catalog.seed.quality.require-runtime=false",
+                        "filmfuse.catalog.seed.quality.reject-ttl=P14D")
+                .run(context -> {
+                    CatalogSeedProperties p = context.getBean(CatalogSeedProperties.class);
+                    assertThat(p.sources()).containsExactly(CatalogSeedProperties.Source.POPULAR,
+                            CatalogSeedProperties.Source.EXPORT, CatalogSeedProperties.Source.DISCOVER);
+                    assertThat(p.maxDatabaseMb()).isEqualTo(300);
+                    assertThat(p.export().maxMovies()).isEqualTo(400_000);
+                    assertThat(p.export().baseUrl()).isEqualTo("https://mirror.test/exports");
+                    assertThat(p.discover().fromYear()).isEqualTo(1990);
+                    assertThat(p.discover().toYear()).isNull();
+                    assertThat(p.quality().appliesTo(CatalogSeedProperties.Source.DISCOVER)).isFalse();
+                    assertThat(p.quality().requireRuntime()).isFalse();
+                    assertThat(p.quality().rejectTtl()).isEqualTo(java.time.Duration.ofDays(14));
+                    assertThat(context).hasSingleBean(TmdbIdExport.class);
+                    assertThat(context).hasSingleBean(ExportFetcher.class);
+                });
+    }
+
+    @Test
+    void theShippedDefaultsKeepTheOldSourcesAndGuardTheFreeTier() {
+        runner.withInitializer(new ConfigDataApplicationContextInitializer())
+                .run(context -> {
+                    CatalogSeedProperties p = context.getBean(CatalogSeedProperties.class);
+                    assertThat(p.sources()).containsExactly(CatalogSeedProperties.Source.POPULAR,
+                            CatalogSeedProperties.Source.IDS);
+                    assertThat(p.requestsPerSecond()).isEqualTo(20d);
+                    assertThat(p.maxDatabaseMb()).isEqualTo(450);
+                    assertThat(p.export().maxMovies()).isEqualTo(150_000);
+                    assertThat(p.export().baseUrl()).isEqualTo("https://files.tmdb.org/p/exports");
+                    assertThat(p.discover().toYear()).isNull();
+                    assertThat(p.quality().minVotes()).isEqualTo(5);
+                    assertThat(p.quality().appliesTo(CatalogSeedProperties.Source.EXPORT)).isTrue();
+                    assertThat(p.quality().appliesTo(CatalogSeedProperties.Source.POPULAR)).isFalse();
+                });
+    }
 }

@@ -7,14 +7,22 @@ import com.pm.filmfuse.movie.catalog.CatalogMovie;
 import com.pm.filmfuse.movie.catalog.CatalogPage;
 import com.pm.filmfuse.movie.catalog.MovieCatalogClient;
 import com.pm.filmfuse.movie.repository.MovieEnrichmentRepository;
+import com.pm.filmfuse.movie.seed.CatalogSeedProperties.Source;
+import com.pm.filmfuse.movie.seed.CatalogSeedStateRepository.Cursor;
 import com.pm.filmfuse.movie.service.CatalogEnrichmentService;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -27,29 +35,40 @@ import org.springframework.stereotype.Service;
  * Bulk-fills {@code app.movies} (and {@code movie_content_levels}) from the catalog so
  * recommendations have a deep candidate pool. Plumbing only: it decides nothing about ranking.
  *
- * <p><b>Sources</b> (both optional, combined, de-duplicated): the catalog's popular pages
- * 1..{@code popular-pages}, then the ids in {@code id-file}.
+ * <p><b>Sources</b> (each optional, combined, de-duplicated, in this order; {@code sources} picks them
+ * for a full seed): the catalog's popular pages 1..{@code popular-pages}; the ids in {@code id-file};
+ * TMDB's daily id export ({@link TmdbIdExport}: the {@code export.max-movies} most popular ids);
+ * discover-by-year ({@code /discover/movie} per release year, most votes first).
  *
  * <p><b>Per movie</b>: skipped when its details were fetched within {@code refresh-after}
  * ({@code certification_checked_at}, which only a details fetch stamps - list upserts never touch
- * it; 7 days, as {@code MovieService}'s details TTL). Otherwise {@code details(id)} (which carries
+ * it; 7 days, as {@code MovieService}'s details TTL), or - for a quality-filtered source - when it was
+ * rejected within {@code quality.reject-ttl}. Otherwise {@code details(id)} (which carries
  * release_dates and keywords) is stored by {@link CatalogEnrichmentService#storeDetails} - the same
  * upsert, content-level derivation and checked stamp the enrichment job uses - in its own small
- * transaction. Each popular page's list results are upserted first, so a movie whose details fail
- * still gets a row that {@code CatalogEnrichmentJob} will finish later.
+ * transaction. For an unfiltered list source (popular pages) each page's list results are upserted
+ * first, so a movie whose details fail still gets a row that {@code CatalogEnrichmentJob} finishes.
+ *
+ * <p><b>Quality</b> ({@code quality.*}, by default for the export and discover sources only): a
+ * movie without poster / runtime / overview or with fewer than {@code min-votes} votes is not stored
+ * (an existing row is left as it is), counted {@code rejectedQuality} and recorded in
+ * {@code app.catalog_seed_rejects}. Discover list results that already fail (no poster, overview or
+ * votes) are rejected without a details request.
  *
  * <p><b>Errors</b>: unknown id - counted {@code notFound} (a cached row is stamped checked, as
  * enrichment does); 5xx / 429 / timeout - retried {@code max-retries} times with exponential
  * backoff, then counted {@code failed}; any other failure storing one movie - counted failed. One
  * movie never stops the run. A rejected token (401) is retried like an outage, but
- * {@code auth-failure-limit} consecutive 401s abort the run. A popular page that still fails after
- * its retries aborts too (the catalog is down; the cursor is kept).
+ * {@code auth-failure-limit} consecutive 401s abort the run. A list page that still fails after its
+ * retries, an unreadable export, or a database over {@code max-database-mb} (checked before every
+ * page / batch) abort too, keeping the cursors.
  *
- * <p><b>Resume</b>: a resumable (full) run stores the next popular page in
- * {@code app.catalog_seed_state} after each page and deletes it when the pass completes, so a
- * stopped run continues at the page it stopped on; the skip rule makes everything else idempotent.
- * TMDB's popular order drifts day to day, so a resumed pass is approximate - the nightly top-up and
- * the next full pass catch what moved.
+ * <p><b>Resume</b>: a resumable (full) run keeps one cursor per source in
+ * {@code app.catalog_seed_state} ({@code popular}: next page; {@code export}: next position in the
+ * sorted id list, valid only for the same export date; {@code discover}: next year and page, valid
+ * only for the same discover settings) and deletes it when that source completes. The skip rule
+ * makes everything else idempotent. TMDB's popular order drifts day to day, so a resumed pass is
+ * approximate - the nightly top-up and the next full pass catch what moved.
  *
  * <p>Every catalog request (retries included) goes through a {@link RequestPacer}
  * ({@code requests-per-second}). One run at a time per process.
@@ -58,9 +77,12 @@ import org.springframework.stereotype.Service;
 public class CatalogSeedService {
 
     static final String POPULAR_CURSOR = "popular";
+    static final String EXPORT_CURSOR = "export";
+    static final String DISCOVER_CURSOR = "discover";
     private static final Duration MAX_BACKOFF = Duration.ofMinutes(1);
-    /** Ids per skip-rule query when working through the id file. */
-    private static final int ID_CHUNK = 200;
+    /** Ids per skip-rule query (and per cursor save / size check) for the id file and the export. */
+    static final int ID_CHUNK = 200;
+    private static final long MB = 1024L * 1024;
 
     private static final Logger log = LoggerFactory.getLogger(CatalogSeedService.class);
 
@@ -68,7 +90,11 @@ public class CatalogSeedService {
     private final CatalogEnrichmentService store;
     private final MovieEnrichmentRepository movies;
     private final CatalogSeedStateRepository state;
+    private final CatalogSeedRejectRepository rejects;
+    private final TmdbIdExport export;
+    private final DatabaseSizeProbe databaseSize;
     private final CatalogSeedProperties properties;
+    private final QualityFilter quality;
     private final Clock clock;
     private final RequestPacer pacer;
     private final Sleeper sleeper;
@@ -77,19 +103,25 @@ public class CatalogSeedService {
     @Autowired
     public CatalogSeedService(MovieCatalogClient catalog, CatalogEnrichmentService store,
                               MovieEnrichmentRepository movies, CatalogSeedStateRepository state,
-                              CatalogSeedProperties properties, Clock clock) {
-        this(catalog, store, movies, state, properties, clock, RequestPacer.system(properties.requestsPerSecond()),
-                Sleeper.SYSTEM);
+                              CatalogSeedRejectRepository rejects, TmdbIdExport export,
+                              DatabaseSizeProbe databaseSize, CatalogSeedProperties properties, Clock clock) {
+        this(catalog, store, movies, state, rejects, export, databaseSize, properties, clock,
+                RequestPacer.system(properties.requestsPerSecond()), Sleeper.SYSTEM);
     }
 
     CatalogSeedService(MovieCatalogClient catalog, CatalogEnrichmentService store, MovieEnrichmentRepository movies,
-                       CatalogSeedStateRepository state, CatalogSeedProperties properties, Clock clock,
+                       CatalogSeedStateRepository state, CatalogSeedRejectRepository rejects, TmdbIdExport export,
+                       DatabaseSizeProbe databaseSize, CatalogSeedProperties properties, Clock clock,
                        RequestPacer pacer, Sleeper sleeper) {
         this.catalog = catalog;
         this.store = store;
         this.movies = movies;
         this.state = state;
+        this.rejects = rejects;
+        this.export = export;
+        this.databaseSize = databaseSize;
         this.properties = properties;
+        this.quality = new QualityFilter(properties.quality());
         this.clock = clock;
         this.pacer = pacer;
         this.sleeper = sleeper;
@@ -100,23 +132,32 @@ public class CatalogSeedService {
      *
      * @param popularPages popular pages 1..n (0 = none; capped at {@link MovieCatalogClient#MAX_PAGE})
      * @param ids          explicit ids, after the popular pages
-     * @param resumable    keep the popular-page cursor in {@code app.catalog_seed_state}
+     * @param resumable    keep the per-source cursors in {@code app.catalog_seed_state}
+     * @param export       the TMDB daily id export, after the ids
+     * @param discover     discover-by-year, last
      */
-    public record SeedPlan(int popularPages, List<Integer> ids, boolean resumable) {
+    public record SeedPlan(int popularPages, List<Integer> ids, boolean resumable, boolean export, boolean discover) {
 
         public SeedPlan {
             popularPages = Math.max(0, Math.min(popularPages, MovieCatalogClient.MAX_PAGE));
             ids = ids == null ? List.of() : List.copyOf(ids);
         }
+
+        /** Popular pages and ids only. */
+        public SeedPlan(int popularPages, List<Integer> ids, boolean resumable) {
+            this(popularPages, ids, resumable, false, false);
+        }
     }
 
-    /** The full seed: {@code popular-pages} plus the {@code id-file}, resumable. */
+    /** The full seed: the configured {@code sources}, resumable. */
     public SeedReport seedAll() {
-        List<Integer> ids = properties.idFile() == null ? List.of() : SeedIdFile.read(Path.of(properties.idFile()));
-        if (properties.idFile() != null) {
+        List<Integer> ids = List.of();
+        if (properties.uses(Source.IDS) && properties.idFile() != null) {
+            ids = SeedIdFile.read(Path.of(properties.idFile()));
             log.info("Catalog seed: {} ids from {}", ids.size(), properties.idFile());
         }
-        return seed(new SeedPlan(properties.popularPages(), ids, true));
+        return seed(new SeedPlan(properties.uses(Source.POPULAR) ? properties.popularPages() : 0, ids, true,
+                properties.uses(Source.EXPORT), properties.uses(Source.DISCOVER)));
     }
 
     /** The nightly top-up: popular pages 1..{@code top-up.pages}, from page 1 every time. */
@@ -133,13 +174,24 @@ public class CatalogSeedService {
         Run run = new Run(started);
         SeedReport.Outcome outcome = SeedReport.Outcome.COMPLETED;
         try {
-            log.info("Catalog seed starting: popular pages {}, {} explicit ids, {} requests/s",
-                    plan.popularPages(), plan.ids().size(), properties.requestsPerSecond());
+            log.info("Catalog seed starting: popular pages {}, {} explicit ids, export {}, discover {}, {} requests/s, "
+                            + "max database {}", plan.popularPages(), plan.ids().size(), plan.export(), plan.discover(),
+                    properties.requestsPerSecond(),
+                    properties.maxDatabaseMb() == 0 ? "off" : properties.maxDatabaseMb() + " MB");
+            pruneRejects(plan);
             if (plan.popularPages() > 0) {
                 seedPopular(plan, run);
             }
             for (int from = 0; from < plan.ids().size(); from += ID_CHUNK) {
-                seedCandidates(plan.ids().subList(from, Math.min(from + ID_CHUNK, plan.ids().size())), run);
+                checkDatabaseSize();
+                seedCandidates(plan.ids().subList(from, Math.min(from + ID_CHUNK, plan.ids().size())), Map.of(),
+                        Source.IDS, run);
+            }
+            if (plan.export()) {
+                seedExport(plan, run);
+            }
+            if (plan.discover()) {
+                seedDiscover(plan, run);
             }
         } catch (AbortRun ex) {
             log.error("Catalog seed aborted: {}", ex.getMessage());
@@ -156,6 +208,19 @@ public class CatalogSeedService {
         return report;
     }
 
+    private void pruneRejects(SeedPlan plan) {
+        boolean filtered = (plan.popularPages() > 0 && properties.quality().appliesTo(Source.POPULAR))
+                || (!plan.ids().isEmpty() && properties.quality().appliesTo(Source.IDS))
+                || (plan.export() && properties.quality().appliesTo(Source.EXPORT))
+                || (plan.discover() && properties.quality().appliesTo(Source.DISCOVER));
+        if (filtered) {
+            int pruned = rejects.pruneBefore(clock.instant().minus(properties.quality().rejectTtl()));
+            if (pruned > 0) {
+                log.info("Catalog seed: {} expired quality rejections dropped", pruned);
+            }
+        }
+    }
+
     private void seedPopular(SeedPlan plan, Run run) throws InterruptedException {
         int first = 1;
         if (plan.resumable()) {
@@ -165,6 +230,7 @@ public class CatalogSeedService {
             }
         }
         for (int page = first; page <= plan.popularPages(); page++) {
+            checkDatabaseSize();
             int current = page;
             CatalogPage result;
             try {
@@ -176,8 +242,7 @@ public class CatalogSeedService {
                         + " retries; the next run resumes here");
             }
             run.pages++;
-            store.storeListResults(result.movies());
-            seedCandidates(result.movies().stream().map(CatalogMovie::id).toList(), run);
+            seedListPage(result, Source.POPULAR, run);
             if (plan.resumable()) {
                 state.saveNextPage(POPULAR_CURSOR, page + 1);
             }
@@ -190,7 +255,127 @@ public class CatalogSeedService {
         }
     }
 
-    private void seedCandidates(List<Integer> ids, Run run) throws InterruptedException {
+    /**
+     * The export's ids in chunks. The cursor (next 1-based position) is tied to the export date: a new
+     * day's file has a different order, so an old cursor is dropped - the skip rule still saves every
+     * already-seeded id the details request.
+     */
+    private void seedExport(SeedPlan plan, Run run) throws InterruptedException {
+        checkDatabaseSize();
+        TmdbIdExport.Ids loaded;
+        try {
+            loaded = export.load(LocalDate.ofInstant(clock.instant(), ZoneOffset.UTC));
+        } catch (IOException | TmdbIdExport.ExportUnavailableException ex) {
+            throw new AbortRun("TMDB id export could not be read: " + ex.getMessage());
+        }
+        String version = loaded.date().toString();
+        int start = 0;
+        if (plan.resumable()) {
+            Optional<Cursor> cursor = state.cursor(EXPORT_CURSOR);
+            if (cursor.isPresent() && version.equals(cursor.get().version())
+                    && cursor.get().next() <= loaded.size() + 1) {
+                start = cursor.get().next() - 1;
+                log.info("Catalog seed resuming the {} export at position {} of {}", version, start + 1,
+                        loaded.size());
+            } else if (cursor.isPresent()) {
+                log.info("Catalog seed: export cursor for {} does not match the {} export; starting over "
+                        + "(already-seeded ids are skipped)", cursor.get().version(), version);
+            }
+        }
+        int[] ids = loaded.ids();
+        for (int from = start; from < ids.length; from += ID_CHUNK) {
+            checkDatabaseSize();
+            int to = Math.min(from + ID_CHUNK, ids.length);
+            List<Integer> chunk = new ArrayList<>(to - from);
+            for (int i = from; i < to; i++) {
+                chunk.add(ids[i]);
+            }
+            seedCandidates(chunk, Map.of(), Source.EXPORT, run);
+            if (plan.resumable()) {
+                state.save(EXPORT_CURSOR, to + 1, version);
+            }
+        }
+        if (plan.resumable()) {
+            state.clear(EXPORT_CURSOR);
+        }
+    }
+
+    /** {@code discover.from-year}..{@code to-year} (default this year), {@code pages-per-year} pages each. */
+    private void seedDiscover(SeedPlan plan, Run run) throws InterruptedException {
+        CatalogSeedProperties.Discover settings = properties.discover();
+        int lastYear = settings.toYear() != null ? settings.toYear()
+                : LocalDate.ofInstant(clock.instant(), ZoneOffset.UTC).getYear();
+        String version = settings.fromYear() + ".." + lastYear + "/" + settings.pagesPerYear() + "/"
+                + settings.minVotes();
+        int startYear = settings.fromYear();
+        int startPage = 1;
+        if (plan.resumable()) {
+            Optional<Cursor> cursor = state.cursor(DISCOVER_CURSOR);
+            if (cursor.isPresent() && version.equals(cursor.get().version())) {
+                int year = cursor.get().next() / 1000;
+                int page = cursor.get().next() % 1000;
+                if (year >= settings.fromYear() && year <= lastYear && page >= 1 && page <= settings.pagesPerYear()) {
+                    startYear = year;
+                    startPage = page;
+                    log.info("Catalog seed resuming discover at {} page {}", year, page);
+                }
+            } else if (cursor.isPresent()) {
+                log.info("Catalog seed: discover settings changed ({} -> {}); starting over", cursor.get().version(),
+                        version);
+            }
+        }
+        for (int year = startYear; year <= lastYear; year++) {
+            for (int page = year == startYear ? startPage : 1; page <= settings.pagesPerYear(); page++) {
+                checkDatabaseSize();
+                int y = year;
+                int p = page;
+                CatalogPage result;
+                try {
+                    result = call(run, () -> catalog.discoverByYear(y, settings.minVotes(), p));
+                } catch (NotFoundException ex) {
+                    break;
+                } catch (UpstreamUnavailableException ex) {
+                    throw new AbortRun("discover " + year + " page " + page + " still failing after "
+                            + properties.maxRetries() + " retries; the next run resumes here");
+                } catch (UnsupportedOperationException ex) {
+                    throw new AbortRun("this catalog client cannot discover by year");
+                }
+                run.pages++;
+                seedListPage(result, Source.DISCOVER, run);
+                boolean lastPage = result.movies().isEmpty() || !result.hasNext() || page == settings.pagesPerYear();
+                if (plan.resumable()) {
+                    state.save(DISCOVER_CURSOR, lastPage ? (year + 1) * 1000 + 1 : year * 1000 + page + 1, version);
+                }
+                if (lastPage) {
+                    break;
+                }
+            }
+        }
+        if (plan.resumable()) {
+            state.clear(DISCOVER_CURSOR);
+        }
+    }
+
+    /**
+     * One list page: an unfiltered source caches the list results first (so failed details still
+     * reach the enrichment queue); a filtered one does not - those rows may fail the bar.
+     */
+    private void seedListPage(CatalogPage result, Source source, Run run) throws InterruptedException {
+        boolean filtered = properties.quality().appliesTo(source);
+        if (!filtered) {
+            store.storeListResults(result.movies());
+        }
+        Map<Integer, CatalogMovie> listed = new HashMap<>();
+        result.movies().forEach(movie -> listed.putIfAbsent(movie.id(), movie));
+        seedCandidates(result.movies().stream().map(CatalogMovie::id).toList(), listed, source, run);
+    }
+
+    /**
+     * @param listed list results by id (empty for id sources), used to reject a filtered source's
+     *               obvious misses without a details request
+     */
+    private void seedCandidates(List<Integer> ids, Map<Integer, CatalogMovie> listed, Source source, Run run)
+            throws InterruptedException {
         List<Integer> fresh = new ArrayList<>();
         for (Integer id : ids) {
             if (run.seen.add(id)) {
@@ -200,25 +385,42 @@ public class CatalogSeedService {
         if (fresh.isEmpty()) {
             return;
         }
-        Set<Integer> seeded = movies.checkedSince(fresh, clock.instant().minus(properties.refreshAfter()));
+        Instant now = clock.instant();
+        boolean filtered = properties.quality().appliesTo(source);
+        Set<Integer> seeded = movies.checkedSince(fresh, now.minus(properties.refreshAfter()));
+        Set<Integer> rejected = Set.of();
+        if (filtered) {
+            List<Integer> unseeded = fresh.stream().filter(id -> !seeded.contains(id)).toList();
+            rejected = rejects.rejectedSince(unseeded, now.minus(properties.quality().rejectTtl()));
+        }
         for (Integer id : fresh) {
             run.candidates++;
             if (seeded.contains(id)) {
                 run.skipped++;
+            } else if (rejected.contains(id)) {
+                run.skippedRejected++;
+            } else if (filtered && listed.containsKey(id) && !quality.listFailures(listed.get(id)).isEmpty()) {
+                reject(id, quality.listFailures(listed.get(id)), run);
             } else {
-                seedOne(id, run);
+                seedOne(id, filtered, run);
             }
             if (run.candidates % properties.progressEvery() == 0) {
                 log.info("Catalog seed progress: {} candidates, {} fetched, {} already seeded, {} not found, "
-                        + "{} failed, {} pages", run.candidates, run.fetched, run.skipped, run.notFound, run.failed,
-                        run.pages);
+                                + "{} failed, {} rejected (quality), {} skipped (rejected earlier), {} pages",
+                        run.candidates, run.fetched, run.skipped, run.notFound, run.failed, run.rejectedQuality,
+                        run.skippedRejected, run.pages);
             }
         }
     }
 
-    private void seedOne(int id, Run run) throws InterruptedException {
+    private void seedOne(int id, boolean filtered, Run run) throws InterruptedException {
         try {
             CatalogMovie details = call(run, () -> catalog.details(id));
+            List<String> failures = filtered ? quality.failures(details) : List.of();
+            if (!failures.isEmpty()) {
+                reject(id, failures, run);
+                return;
+            }
             store.storeDetails(details);
             run.fetched++;
         } catch (NotFoundException ex) {
@@ -232,6 +434,38 @@ public class CatalogSeedService {
         } catch (RuntimeException ex) {
             log.warn("Catalog seed: could not store movie {}", id, ex);
             run.failed++;
+        }
+    }
+
+    /** Not stored (an existing row is left as it is); remembered so re-runs skip it for reject-ttl. */
+    private void reject(int id, List<String> failures, Run run) {
+        try {
+            rejects.record(id, clock.instant());
+            run.rejectedQuality++;
+            log.debug("Catalog seed: movie {} rejected (missing {})", id, failures);
+        } catch (RuntimeException ex) {
+            log.warn("Catalog seed: could not record the rejection of movie {}", id, ex);
+            run.failed++;
+        }
+    }
+
+    /** The {@code max-database-mb} guard, before every page / batch. */
+    private void checkDatabaseSize() {
+        int limitMb = properties.maxDatabaseMb();
+        if (limitMb == 0) {
+            return;
+        }
+        long bytes;
+        try {
+            bytes = databaseSize.currentBytes();
+        } catch (RuntimeException ex) {
+            throw new AbortRun("could not read the database size for the max-database-mb guard (" + ex.getMessage()
+                    + "); set filmfuse.catalog.seed.max-database-mb=0 to run without it");
+        }
+        if (bytes > limitMb * MB) {
+            throw new AbortRun("database size " + bytes / MB + " MB exceeds max-database-mb=" + limitMb
+                    + " - stopping before it fills up. Cursors are kept: raise filmfuse.catalog.seed.max-database-mb "
+                    + "(e.g. after a plan upgrade) and run again to resume");
         }
     }
 
@@ -288,6 +522,8 @@ public class CatalogSeedService {
         int skipped;
         int notFound;
         int failed;
+        int rejectedQuality;
+        int skippedRejected;
         int consecutiveAuthFailures;
 
         Run(Instant started) {
@@ -295,8 +531,8 @@ public class CatalogSeedService {
         }
 
         SeedReport report(SeedReport.Outcome outcome) {
-            return new SeedReport(outcome, pages, candidates, fetched, skipped, notFound, failed,
-                    Duration.between(started, clock.instant()));
+            return new SeedReport(outcome, pages, candidates, fetched, skipped, notFound, failed, rejectedQuality,
+                    skippedRejected, Duration.between(started, clock.instant()));
         }
     }
 }

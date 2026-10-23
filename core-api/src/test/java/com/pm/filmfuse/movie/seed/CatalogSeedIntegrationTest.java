@@ -43,6 +43,8 @@ class CatalogSeedIntegrationTest extends AbstractIntegrationTest {
     private MovieEnrichmentRepository movies;
     @Autowired
     private CatalogSeedStateRepository state;
+    @Autowired
+    private CatalogSeedRejectRepository rejects;
 
     private final MutableClock clock = new MutableClock();
     private List<Integer> ids;
@@ -97,7 +99,7 @@ class CatalogSeedIntegrationTest extends AbstractIntegrationTest {
     private CatalogSeedService seeder() {
         CatalogSeedProperties properties = new CatalogSeedProperties(null, null, null, 1000d, 0, Duration.ZERO, null,
                 1, null, null);
-        return new CatalogSeedService(recording, store, movies, state, properties, clock,
+        return new CatalogSeedService(recording, store, movies, state, rejects, null, () -> 0L, properties, clock,
                 new RequestPacer(1000, System::nanoTime, duration -> { }), duration -> { });
     }
 

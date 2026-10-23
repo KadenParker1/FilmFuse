@@ -21,6 +21,17 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableConfigurationProperties(CatalogSeedProperties.class)
 public class CatalogSeedConfig {
 
+    /** Downloads TMDB's daily id export over plain HTTP(S); tests construct the seeder with their own. */
+    @Bean
+    ExportFetcher catalogExportFetcher() {
+        return ExportFetcher.http();
+    }
+
+    @Bean
+    TmdbIdExport tmdbIdExport(ExportFetcher catalogExportFetcher, CatalogSeedProperties properties) {
+        return new TmdbIdExport(catalogExportFetcher, properties.export());
+    }
+
     @Bean
     @ConditionalOnProperty(name = "filmfuse.catalog.seed.run-on-startup", havingValue = "true")
     CatalogSeedRunner catalogSeedRunner(CatalogSeedService seeder, ConfigurableApplicationContext context,

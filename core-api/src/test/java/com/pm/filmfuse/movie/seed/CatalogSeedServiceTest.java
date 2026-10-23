@@ -62,6 +62,10 @@ class CatalogSeedServiceTest {
     private final MovieEnrichmentRepository movies = mock(MovieEnrichmentRepository.class);
     private final CatalogSeedStateRepository state = mock(CatalogSeedStateRepository.class);
     private final MovieCatalogClient catalog = mock(MovieCatalogClient.class);
+    private final CatalogSeedRejectRepository rejects = mock(CatalogSeedRejectRepository.class);
+    private final TmdbIdExport export = mock(TmdbIdExport.class);
+    /** The fake database size, in bytes. */
+    private final AtomicLong databaseBytes = new AtomicLong();
     private final Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
 
     private final AtomicLong nanos = new AtomicLong();
@@ -86,8 +90,8 @@ class CatalogSeedServiceTest {
             paced++;
             return nanos.get();
         }, duration -> nanos.addAndGet(duration.toNanos()));
-        return new CatalogSeedService(client, store, movies, state, properties, clock, pacer,
-                duration -> backoffSleeper.sleep(duration));
+        return new CatalogSeedService(client, store, movies, state, rejects, export, databaseBytes::get, properties,
+                clock, pacer, duration -> backoffSleeper.sleep(duration));
     }
 
     private CatalogSeedService service() {
@@ -381,6 +385,8 @@ class CatalogSeedServiceTest {
     void theReportSummaryNamesEveryCount() {
         SeedReport report = new SeedReport(Outcome.COMPLETED, 3, 49, 40, 5, 3, 1, Duration.ofSeconds(12));
         assertThat(report.summary()).isEqualTo("Catalog seed COMPLETED in 12 s: 3 pages, 49 candidates, 40 fetched, "
-                + "5 already seeded, 3 not found, 1 failed");
+                + "5 already seeded, 3 not found, 1 failed, 0 rejected (quality), 0 skipped (rejected earlier)");
+        assertThat(new SeedReport(Outcome.ABORTED, 0, 9, 1, 0, 0, 0, 6, 2, Duration.ZERO).summary())
+                .endsWith("6 rejected (quality), 2 skipped (rejected earlier)");
     }
 }
