@@ -2,33 +2,35 @@ import type { ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { AvatarStack } from '../groups/AvatarStack';
 import type { SessionSummaryDTO } from '../../types/api';
-import { timeLeft } from './tally';
+import { useCountdown } from './useCountdown';
 
 /**
  * An open session on the Groups tab: group (or "Tonight"), who's in, how many voted, time left, and
  * a "Your vote" nudge when the caller hasn't voted. `children` holds extra actions (e.g. Join).
+ * The countdown ticks live (quietly: it's part of the card's label, not a live region); `onExpire`
+ * fires when it reaches zero so the list can refetch and drop the closed session.
  */
 export function LiveSessionCard({
   session,
   onPress,
-  now,
+  onExpire,
   children,
 }: {
   session: SessionSummaryDTO;
   onPress: () => void;
-  now?: Date;
+  onExpire?: () => void;
   children?: ReactNode;
 }) {
   const name = session.groupName ?? 'Tonight';
   const voted = `${session.votedCount} of ${session.memberCount} voted`;
-  const left = timeLeft(session.closesAt, now);
+  const countdown = useCountdown(session.closesAt, onExpire);
   const needsVote = !session.votedByMe;
   return (
     <View className="gap-3 rounded-[18px] border border-border bg-surface p-4">
       <Pressable
         testID={`live-session-${session.id}`}
         accessibilityRole="button"
-        accessibilityLabel={`${name}, ${voted}, ${left}${needsVote ? ', waiting on your vote' : ''}`}
+        accessibilityLabel={`${name}, ${voted}, ${countdown.spoken.toLowerCase()}${needsVote ? ', waiting on your vote' : ''}`}
         onPress={onPress}
         className="gap-2 active:opacity-80"
       >
@@ -45,8 +47,8 @@ export function LiveSessionCard({
         </View>
         <View className="flex-row items-center gap-3">
           <AvatarStack users={session.memberPreview} total={session.memberCount} size={28} />
-          <Text className="flex-1 font-body text-xs text-muted">
-            {voted} · {left}
+          <Text testID={`live-session-meta-${session.id}`} className="flex-1 font-body text-xs text-muted">
+            {voted} · {countdown.label}
           </Text>
         </View>
       </Pressable>

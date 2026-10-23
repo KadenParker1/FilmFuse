@@ -17,7 +17,10 @@ SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" ML_SERVICE_URL=http://127.0.0.1:80
   java -jar target/core-api-0.0.1-SNAPSHOT.jar --spring.profiles.active=local &
 
 # 4. API flow smoke test (signup → onboarding → vector via ML → friends → comfort → group session
-#    → ratings/feed → For you → photo upload to Storage → account deletion)
+#    → ratings/feed → For you + undo dismiss → late joiners (add a friend, join as a group member, 403/404
+#    rules) → end early (creator only) → pending-rating undo → a stricter late joiner hiding over-limit picks
+#    for everyone → photo upload to Storage → account deletion). Creates its own throwaway accounts; prints
+#    SKIP (not counted) for the comfort check if every result is already rated G.
 ANON_KEY="$ANON_KEY" python3 -I tools/e2e/smoke.py
 
 # 5. Realtime: a member receives session_updated on the private channel; an outsider is refused.

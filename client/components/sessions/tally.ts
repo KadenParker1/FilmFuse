@@ -75,12 +75,3 @@ export function leaderNote(tally: Tally): string | null {
   if (tally.isTie) return `Tied with ${tally.tied.length - 1} other${tally.tied.length > 2 ? 's' : ''} — the higher-ranked pick goes first`;
   return null;
 }
-
-/** "18h left" / "45m left" / "Closing" for an OPEN session's closesAt. */
-export function timeLeft(closesAt: string, now: Date = new Date()): string {
-  const ms = new Date(closesAt).getTime() - now.getTime();
-  if (!Number.isFinite(ms) || ms <= 60_000) return 'Closing';
-  const minutes = Math.floor(ms / 60_000);
-  if (minutes < 60) return `${minutes}m left`;
-  return `${Math.floor(minutes / 60)}h left`;
-}

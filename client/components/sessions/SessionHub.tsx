@@ -8,7 +8,7 @@ import { SessionSummaryRow } from './SessionSummaryRow';
 
 /**
  * "Live now" on the Groups tab: every open session the caller is in (saved-group and ad-hoc), with
- * who's in, how many voted and time left. Hidden entirely when there are none.
+ * who's in, how many voted and a live countdown (refetched when one closes). Hidden entirely when there are none.
  */
 export function LiveNowSection() {
   const router = useRouter();
@@ -36,7 +36,12 @@ export function LiveNowSection() {
     <View testID="live-now" className="gap-3">
       <Label accessibilityRole="header">Live now · {items.length}</Label>
       {items.map((s) => (
-        <LiveSessionCard key={s.id} session={s} onPress={() => router.push(`/sessions/${s.id}`)} />
+        <LiveSessionCard
+          key={s.id}
+          session={s}
+          onPress={() => router.push(`/sessions/${s.id}`)}
+          onExpire={() => void live.refetch()}
+        />
       ))}
     </View>
   );

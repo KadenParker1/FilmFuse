@@ -1,6 +1,6 @@
 import { unvotedCount } from '../api/sessions';
 import { NAV_TABS, tabAccessibilityLabel } from '../components/nav/navTabs';
-import { compareByVotes, computeTally, leaderNote, tallySummary, timeLeft } from '../components/sessions/tally';
+import { compareByVotes, computeTally, leaderNote, tallySummary } from '../components/sessions/tally';
 import { makeMovie, makeResult, makeSessionSummary } from '../test-utils/fixtures';
 import type { SessionResultDTO } from '../types/api';
 
@@ -68,19 +68,6 @@ describe('computeTally', () => {
     const t = computeTally([r(1, 1, 0)], 0, 0);
     expect(t.everyoneLikes.size).toBe(0);
     expect(t.everyoneVoted).toBe(false);
-  });
-});
-
-describe('timeLeft', () => {
-  const now = new Date('2026-10-16T12:00:00Z');
-  it.each([
-    ['2026-10-17T06:30:00Z', '18h left'],
-    ['2026-10-16T12:45:00Z', '45m left'],
-    ['2026-10-16T12:00:30Z', 'Closing'],
-    ['2026-10-16T11:00:00Z', 'Closing'],
-    ['not a date', 'Closing'],
-  ])('%s → %s', (closesAt, label) => {
-    expect(timeLeft(closesAt, now)).toBe(label);
   });
 });
 
