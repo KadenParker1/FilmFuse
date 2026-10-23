@@ -128,6 +128,33 @@ describe('UndoToastProvider', () => {
     expect(screen.queryByTestId('undo-toast')).toBeNull();
   });
 
+  it('a double tap on Undo undoes once', async () => {
+    const onUndo = await show();
+    const button = screen.getByRole('button', { name: 'Undo' });
+    // Pressability's click handler, called twice before the re-render that hides the button.
+    const click = button.props.onClick as (e: object) => void;
+    const event = { nativeEvent: {}, persist: () => {}, stopPropagation: () => {} };
+    await act(async () => {
+      click(event);
+      click(event);
+    });
+    expect(onUndo).toHaveBeenCalledTimes(1);
+  });
+
+  it('a failed undo does not cover a newer toast', async () => {
+    let reject: (e: Error) => void = () => {};
+    const onUndo = jest.fn(() => new Promise((_resolve, r) => (reject = r)));
+    await show({ onUndo });
+    await fireEvent.press(screen.getByRole('button', { name: 'Undo' }));
+    // Another action shows its own Undo while the first undo is still in flight.
+    await fireEvent.press(screen.getByRole('button', { name: 'do it' }));
+    await act(async () => {
+      reject(new Error('down'));
+    });
+    expect(screen.getByTestId('undo-toast')).toHaveTextContent('RemovedUndo');
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeOnTheScreen();
+  });
+
   it('useUndoToast throws outside the provider', async () => {
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
     await expect(render(<Trigger options={{ message: 'x', onUndo: jest.fn() }} />)).rejects.toThrow(

@@ -61,10 +61,16 @@ export function UndoToastProvider({ children, bottomOffset }: { children: ReactN
     return () => clearTimeout(t);
   }, [shown]);
 
+  // The toast whose Undo already ran: a double tap (before the re-render hides the button) undoes once.
+  const undone = useRef<number | null>(null);
   const undo = useCallback(() => {
-    if (!shown || shown.failed) return;
+    if (!shown || shown.failed || undone.current === shown.key) return;
+    undone.current = shown.key;
+    const keyAtUndo = nextKey.current;
     setShown(null);
     const fail = () => {
+      // A newer toast (another action's Undo) is up: keep it rather than covering it with this failure.
+      if (nextKey.current !== keyAtUndo) return;
       nextKey.current += 1;
       setShown({ key: nextKey.current, failed: true, message: UNDO_FAILED_MESSAGE });
     };
