@@ -16,15 +16,17 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   onDelete: () => void;
+  /** iOS: the sheet finished closing (see useSheetHandoff). */
+  onDismiss?: () => void;
 };
 
 /**
  * Owner-only settings: rename, emoji, colour, and the group comfort cap (e.g. a "Kids" group capped
  * at PG). Mounted fresh each time it opens, so the draft starts from the current group.
  */
-export function GroupSettingsSheet({ group, visible, onClose, onDelete }: Props) {
+export function GroupSettingsSheet({ group, visible, onClose, onDelete, onDismiss }: Props) {
   return (
-    <Sheet visible={visible} onClose={onClose} title="Group settings">
+    <Sheet visible={visible} onClose={onClose} onDismiss={onDismiss} title="Group settings">
       {visible ? <SettingsForm group={group} onDone={onClose} onDelete={onDelete} /> : null}
     </Sheet>
   );

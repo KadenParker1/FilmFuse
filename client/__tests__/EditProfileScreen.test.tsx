@@ -21,6 +21,7 @@ import { ApiError, NetworkError } from '../lib/apiClient';
 import { makeProfile } from '../test-utils/fixtures';
 import { queryResult } from '../test-utils/queryResults';
 import { routerState } from '../test-utils/router';
+import { finishSheetDismiss } from '../test-utils/sheets';
 
 const mockUseMe = useMe as jest.Mock;
 const mockUseUpdate = useUpdateMe as jest.Mock;
@@ -169,10 +170,22 @@ describe('EditProfileScreen', () => {
       await render(<EditProfileScreen />);
       await fireEvent.press(screen.getByRole('button', { name: 'Change photo' }));
       await fireEvent.press(screen.getByRole('button', { name: 'Choose from library' }));
-      await act(async () => {});
+      await finishSheetDismiss();
       expect(mockPick).toHaveBeenCalledWith('library');
       expect(mockPrepare).toHaveBeenCalledWith('file:///picked.jpg');
       expect(upload.mutateAsync).toHaveBeenCalledWith('file:///resized.jpg');
+    });
+
+    it('opens the picker only once the menu sheet has closed (iOS cannot present over it)', async () => {
+      mockPick.mockResolvedValue({ cancelled: true });
+      await render(<EditProfileScreen />);
+      await fireEvent.press(screen.getByRole('button', { name: 'Change photo' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Choose from library' }));
+      await act(async () => {});
+      expect(screen.queryByRole('button', { name: 'Choose from library' })).toBeNull();
+      expect(mockPick).not.toHaveBeenCalled();
+      await finishSheetDismiss();
+      expect(mockPick).toHaveBeenCalledTimes(1);
     });
 
     it('offers the camera on native', async () => {
@@ -180,7 +193,7 @@ describe('EditProfileScreen', () => {
       await render(<EditProfileScreen />);
       await fireEvent.press(screen.getByRole('button', { name: 'Change photo' }));
       await fireEvent.press(screen.getByRole('button', { name: 'Take photo' }));
-      await act(async () => {});
+      await finishSheetDismiss();
       expect(mockPick).toHaveBeenCalledWith('camera');
       expect(upload.mutateAsync).not.toHaveBeenCalled();
     });
@@ -204,7 +217,7 @@ describe('EditProfileScreen', () => {
       await render(<EditProfileScreen />);
       await fireEvent.press(screen.getByRole('button', { name: 'Change photo' }));
       await fireEvent.press(screen.getByRole('button', { name: 'Take photo' }));
-      await act(async () => {});
+      await finishSheetDismiss();
       expect(screen.getByTestId('photo-error')).toHaveTextContent('FilmFuse needs camera access');
 
       mockPick.mockResolvedValue({ uri: 'file:///p.jpg' });
@@ -212,7 +225,7 @@ describe('EditProfileScreen', () => {
       upload.mutateAsync.mockRejectedValue(new ApiError(400, 'Path must end with .jpg'));
       await fireEvent.press(screen.getByRole('button', { name: 'Change photo' }));
       await fireEvent.press(screen.getByRole('button', { name: 'Choose from library' }));
-      await act(async () => {});
+      await finishSheetDismiss();
       expect(screen.getByTestId('photo-error')).toHaveTextContent('Path must end with .jpg');
     });
 

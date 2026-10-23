@@ -13,6 +13,7 @@ export { Screen } from './Screen';
 export { SearchBar } from './SearchBar';
 export { SegmentedControl, type Segment } from './SegmentedControl';
 export { Sheet } from './Sheet';
+export { SHEET_DISMISS_FALLBACK_MS, useSheetHandoff } from './useSheetHandoff';
 export { Skeleton } from './Skeleton';
 export { Slider1to10 } from './Slider1to10';
 export { scoreLabel, clampScore, SCORE_MIN, SCORE_MAX } from './scoreLabel';

@@ -26,7 +26,13 @@ export function Screen({ children, scroll = false, edges = ['top', 'bottom'], cl
   return (
     <View className="flex-1 bg-bg" style={padding}>
       {scroll ? (
-        <ScrollView contentContainerClassName="flex-grow" keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerClassName="flex-grow"
+          keyboardShouldPersistTaps="handled"
+          // iOS: scroll a focused field (a comment box, a form) clear of the keyboard; ignored elsewhere.
+          automaticallyAdjustKeyboardInsets
+          keyboardDismissMode="interactive"
+        >
           {inner}
         </ScrollView>
       ) : (

@@ -4,7 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRemoveProfilePhoto, useUploadProfilePhoto } from '../../api/profilePhoto';
 import { useTheme } from '../../theme/useTheme';
 import type { ProfileResponseDTO } from '../../types/api';
-import { Avatar, Body, Button, Sheet, errorMessage } from '../ui';
+import { Avatar, Body, Button, Sheet, errorMessage, useSheetHandoff } from '../ui';
 import { canUseCamera, pickSquarePhoto, prepareProfilePhoto, type PhotoSource } from './profilePhoto';
 
 /**
@@ -25,6 +25,8 @@ export function ProfilePhotoSection({
   const upload = useUploadProfilePhoto();
   const remove = useRemoveProfilePhoto();
   const [menuOpen, setMenuOpen] = useState(false);
+  // iOS can't present the picker while the menu sheet is still animating out.
+  const handoff = useSheetHandoff();
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busy = preparing || upload.isPending || remove.isPending;
@@ -48,6 +50,12 @@ export function ProfilePhotoSection({
     } finally {
       setPreparing(false);
     }
+  }
+
+  /** From the native menu: close it, then open the picker once it has gone. */
+  function chooseFromMenu(source: PhotoSource) {
+    setMenuOpen(false);
+    handoff.after(() => void choose(source));
   }
 
   async function removePhoto() {
@@ -85,10 +93,10 @@ export function ProfilePhotoSection({
           {error}
         </Body>
       ) : null}
-      <Sheet visible={menuOpen} onClose={() => setMenuOpen(false)} title="Profile photo">
+      <Sheet visible={menuOpen} onClose={() => setMenuOpen(false)} onDismiss={handoff.onDismiss} title="Profile photo">
         <View className="gap-3">
-          <Button title="Choose from library" variant="secondary" onPress={() => void choose('library')} />
-          <Button title="Take photo" variant="secondary" onPress={() => void choose('camera')} />
+          <Button title="Choose from library" variant="secondary" onPress={() => chooseFromMenu('library')} />
+          <Button title="Take photo" variant="secondary" onPress={() => chooseFromMenu('camera')} />
           {profile.profileImageUrl ? (
             <Button title="Remove photo" variant="danger" onPress={() => void removePhoto()} />
           ) : null}

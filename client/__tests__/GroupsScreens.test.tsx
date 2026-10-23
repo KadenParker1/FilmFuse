@@ -45,6 +45,7 @@ import {
 } from '../test-utils/fixtures';
 import { infiniteResult, mutationResult, queryResult } from '../test-utils/queryResults';
 import { routerState } from '../test-utils/router';
+import { finishSheetDismiss } from '../test-utils/sheets';
 
 const m = <K extends keyof typeof groups>(k: K) => groups[k] as unknown as jest.Mock;
 let muts: Record<string, ReturnType<typeof mutationResult>>;
@@ -62,6 +63,10 @@ const MUTATIONS = [
 const friends = Array.from({ length: 20 }, (_, i) =>
   makeFriend({ id: `f${i}`, displayName: `Friend ${i}`, username: `friend${i}` }),
 );
+
+afterEach(() => {
+  jest.useRealTimers();
+});
 
 beforeEach(() => {
   routerState.reset();
@@ -283,12 +288,16 @@ describe('GroupScreen', () => {
   });
 
   it('owner opens settings and can delete the group', async () => {
+    jest.useFakeTimers();
     show();
     muts.useDeleteGroup!.mutate.mockImplementation((_v: unknown, o: { onSuccess: () => void }) => o.onSuccess());
     await render(<GroupScreen />);
     await fireEvent.press(screen.getByRole('button', { name: 'Group settings' }));
     expect(screen.getByText('Group comfort cap')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Delete group' }));
+    // The confirm sheet opens once the settings sheet has closed (iOS can't stack them mid-animation).
+    expect(screen.queryByText('Delete Film club?')).toBeNull();
+    await finishSheetDismiss();
     expect(screen.getByText('Delete Film club?')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Delete group' }));
     expect(muts.useDeleteGroup!.mutate).toHaveBeenCalledWith('g1', expect.anything());
