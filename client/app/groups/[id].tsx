@@ -35,6 +35,7 @@ import {
   Sheet,
   Skeleton,
   errorMessage,
+  useSheetHandoff,
 } from '../../components/ui';
 import { ApiError } from '../../lib/apiClient';
 import { personName, pluralize } from '../../lib/format';
@@ -164,6 +165,8 @@ function GroupDetail({ group, onSessionClosed }: { group: GroupDetailDTO; onSess
   const del = useDeleteGroup();
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Settings → "Delete group" opens the confirm sheet once the settings sheet has closed (iOS).
+  const settingsHandoff = useSheetHandoff();
   const [inviting, setInviting] = useState(false);
 
   const isOwner = group.role === 'OWNER';
@@ -299,9 +302,10 @@ function GroupDetail({ group, onSessionClosed }: { group: GroupDetailDTO; onSess
           group={group}
           visible={settingsOpen}
           onClose={() => setSettingsOpen(false)}
+          onDismiss={settingsHandoff.onDismiss}
           onDelete={() => {
             setSettingsOpen(false);
-            setConfirm({ kind: 'delete' });
+            settingsHandoff.after(() => setConfirm({ kind: 'delete' }));
           }}
         />
       ) : null}
