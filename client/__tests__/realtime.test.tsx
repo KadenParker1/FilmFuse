@@ -175,10 +175,29 @@ describe('useSessionLive', () => {
     await act(async () => mockState.status?.('SUBSCRIBED'));
     const before = sessionFetches();
     client.setQueryData(queryKeys.sessionList(null), { pages: [], pageParams: [] });
+    client.setQueryData(queryKeys.groupList, []);
     await act(async () => mockState.broadcast?.({ payload: { sessionId: 's1', type: 'vote' } }));
     await flush();
     expect(sessionFetches()).toBe(before + 1);
-    expect(client.getQueryState(queryKeys.sessionList(null))?.isInvalidated).toBe(false);
+    // Votes move "Live now" counts and the badge, but not groups.
+    expect(client.getQueryState(queryKeys.sessionList(null))?.isInvalidated).toBe(true);
+    expect(client.getQueryState(queryKeys.groupList)?.isInvalidated).toBe(false);
+  });
+
+  it.each(['ended', 'members'] as const)('a %s broadcast invalidates history and groups', async (type) => {
+    const { client } = await mount();
+    client.setQueryData(queryKeys.liveSessions, { items: [], nextCursor: null });
+    client.setQueryData(queryKeys.groupList, []);
+    await act(async () => mockState.broadcast?.({ payload: { sessionId: 's1', type } }));
+    expect(client.getQueryState(queryKeys.liveSessions)?.isInvalidated).toBe(true);
+    expect(client.getQueryState(queryKeys.groupList)?.isInvalidated).toBe(true);
+  });
+
+  it('a refresh broadcast leaves the lists alone', async () => {
+    const { client } = await mount();
+    client.setQueryData(queryKeys.liveSessions, { items: [], nextCursor: null });
+    await act(async () => mockState.broadcast?.({ payload: { sessionId: 's1', type: 'refresh' } }));
+    expect(client.getQueryState(queryKeys.liveSessions)?.isInvalidated).toBe(false);
   });
 
   it('a pick broadcast also invalidates history and groups', async () => {
@@ -252,6 +271,26 @@ describe('useSessionLive', () => {
     await renderHook(() => useSessionLive('s1'), { wrapper: createWrapper(client) });
     await flush();
     expect(mockSupabase.channel).not.toHaveBeenCalled();
+  });
+
+  it('a group member who has to join first subscribes once they are in (not stuck polling)', async () => {
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(jsonResponse(403, { message: "You're not in this session yet. Join it to vote." })),
+    );
+    const { client, result } = await mount();
+    await advance(0);
+    // The optimistic subscription is dropped once the 403 arrives; the rejected channel is closed.
+    expect(mockSupabase.removeChannel).toHaveBeenCalled();
+    mockSupabase.channel.mockClear();
+
+    // Joining stores the session (what useJoinSession does on success).
+    await act(async () => {
+      client.setQueryData(queryKeys.session('s1'), makeSession({ id: 's1', status: 'OPEN' }));
+    });
+    await flush();
+    expect(mockSupabase.channel).toHaveBeenCalledWith('session:s1', { config: { private: true } });
+    await act(async () => mockState.status?.('SUBSCRIBED'));
+    expect(result.current.mode).toBe('live');
   });
 
   it('stops polling after unmount', async () => {

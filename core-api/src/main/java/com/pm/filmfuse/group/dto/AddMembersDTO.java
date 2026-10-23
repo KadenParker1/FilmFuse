@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * {@code POST /groups/{id}/members}: invite 1-19 of the caller's friends. People already in the
- * group (ACTIVE or INVITED) are ignored. Mirrored in client/types/api.ts.
+ * {@code POST /groups/{id}/members} and {@code POST /sessions/{id}/members}: add 1-19 of the
+ * caller's friends. People already in the group (ACTIVE or INVITED) / session are ignored.
+ * Mirrored in client/types/api.ts.
  */
 public record AddMembersDTO(
         @NotNull(message = "userIds is required")

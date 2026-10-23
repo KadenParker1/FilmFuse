@@ -10,7 +10,10 @@ import java.util.UUID;
  * {@code members}: ACTIVE first (earliest joined first), then INVITED - leaving out anyone blocked
  * either way with the caller (so it can be shorter than the counts; SECURITY.md #15).
  * {@code effectiveFilter} = the ACTIVE members' comfort settings plus the cap, without attribution.
- * {@code recentSessions}: up to 5 of the group's sessions the caller took part in, newest first.
+ * {@code recentSessions}: up to 5 of the group's sessions the caller took part in, newest first
+ * (page through all of them with {@code GET /sessions?groupId=}). {@code joinableSessions}: the
+ * group's OPEN sessions the caller is not in yet (empty unless the caller is ACTIVE); they join with
+ * {@code POST /sessions/{id}/join}.
  * Mirrored in client/types/api.ts.
  */
 public record GroupDetailDTO(
@@ -26,5 +29,6 @@ public record GroupDetailDTO(
         List<GroupMemberDTO> members,
         ComfortCapDTO comfortCap,
         EffectiveFilterDTO effectiveFilter,
-        List<SessionSummaryDTO> recentSessions) {
+        List<SessionSummaryDTO> recentSessions,
+        List<SessionSummaryDTO> joinableSessions) {
 }

@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 
 /**
  * Supabase Realtime for live session voting. core-api broadcasts `session_updated` on the private
- * topic `session:{id}` after every vote / refresh / pick; the payload carries no data, so clients
+ * topic `session:{id}` after every vote / refresh / pick / member change / early end; the payload carries no data, so clients
  * just refetch. RLS on `realtime.messages` only lets session members join.
  */
 
@@ -13,7 +13,7 @@ export const SUBSCRIBE_TIMEOUT_MS = 3_000;
 /** Polling interval while the channel is down. */
 export const POLL_INTERVAL_MS = 5_000;
 
-export type SessionUpdateType = 'vote' | 'refresh' | 'pick';
+export type SessionUpdateType = 'vote' | 'refresh' | 'pick' | 'members' | 'ended';
 
 export type SessionUpdatedPayload = { sessionId: string; type: SessionUpdateType };
 

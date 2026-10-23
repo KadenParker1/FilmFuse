@@ -9,8 +9,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * A row of {@code app.rec_sessions} (plus the group's current name). {@code storedStatus} is OPEN or
- * DECIDED; use {@link #status} for what the API reports.
+ * A row of {@code app.rec_sessions} (plus the group's current name). {@code storedStatus} is OPEN,
+ * DECIDED, or EXPIRED once the creator ended it early; use {@link #status} for what the API reports.
  */
 public record Session(
         UUID id,
@@ -34,5 +34,15 @@ public record Session(
             return SessionStatus.EXPIRED;
         }
         return storedStatus;
+    }
+
+    /** When an OPEN session stops taking votes on its own. */
+    public Instant closesAt() {
+        return createdAt.plus(OPEN_FOR);
+    }
+
+    /** Ended by its creator before it was decided or timed out (stored EXPIRED). */
+    public boolean endedEarly() {
+        return storedStatus == SessionStatus.EXPIRED;
     }
 }

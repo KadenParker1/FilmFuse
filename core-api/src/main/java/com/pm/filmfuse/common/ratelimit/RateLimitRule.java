@@ -27,9 +27,10 @@ public enum RateLimitRule {
     /** Sending a friend request emails the target. */
     FRIEND_REQUESTS("friend-requests", 30, Duration.ofHours(1),
             "/api/v1/friends/requests"),
-    /** Invite links, redeeming them, and group invites (which email every invitee). */
+    /** Invite links, redeeming them, group invites and adding people to a session (which email every invitee). */
     INVITES("invites", 20, Duration.ofHours(1),
-            "/api/v1/invites", "/api/v1/invites/{token}/redeem", "/api/v1/groups", "/api/v1/groups/{id}/members"),
+            "/api/v1/invites", "/api/v1/invites/{token}/redeem", "/api/v1/groups", "/api/v1/groups/{id}/members",
+            "/api/v1/sessions/{id}/members"),
     REPORTS("reports", 20, Duration.ofHours(1),
             "/api/v1/reports"),
     /** Each comment emails the rating's author. */

@@ -45,7 +45,10 @@ distributed addresses. In-app rate limits only blunt the second; it needs an edg
   deleted account (tombstone) or a suspended one, checked on every request.
 - Every resource is scoped to the caller in SQL or the service:
   - Groups and sessions are members-only. Strangers get a 404, so existence is never revealed. Owner-only
-    actions return 403.
+    actions return 403 (ending a session early is creator-only). The one 403 for a non-member: an ACTIVE
+    member of a session's group asking for one of its OPEN sessions, which they may join (and already see
+    in the group's `joinableSessions`). Adding people to a session uses the same rule as creating one: the
+    caller's own friends, no block either way.
   - Comment deletion is limited to the comment's author or the rating's author.
   - Settings and preferences always use the caller's own id.
   - Photo paths must match `<callerId>/<uuid>.jpg`.
@@ -65,7 +68,7 @@ distributed addresses. In-app rate limits only blunt the second; it needs an edg
   - Limits: 600 req/min per client address and 120 req/min per user (JWT `sub`).
   - Per-user categories on top: friend requests 30/h, invites 20/h, reports 20/h, comments 60/h,
     session creation 30/h, photo upload URLs 20/h. Invites covers invite links, redeem,
-    `POST /groups` and group invites.
+    `POST /groups`, group invites and adding people to a session (each emails the invitees).
   - Over the limit the response is 429 with `Retry-After` and `{message}`, carrying CORS headers.
   - Every limit is configurable (`filmfuse.rate-limit.limits.<name>.capacity|period`).
   - Memory is capped at 100k buckets, and buckets that have refilled are evicted.

@@ -49,4 +49,22 @@ public class GroupEmailNotifier {
                 """.formatted(name, where, sender.webUrl() + "/sessions/" + event.sessionId()));
         sender.send(recipients, NotificationType.SESSION_STARTED, id -> draft);
     }
+
+    /** Late joiners added by another member get the "session started" email's equivalent (same preference). */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onMembersAdded(SessionMembersAddedEvent event) {
+        List<java.util.UUID> recipients = event.addedIds().stream()
+                .filter(id -> !id.equals(event.adderId()))
+                .toList();
+        if (recipients.isEmpty()) {
+            return;
+        }
+        String name = sender.nameOf(event.adderId());
+        String where = event.groupName() == null ? "" : " in " + event.groupName();
+        Draft draft = new Draft("%s added you to a movie session".formatted(name), """
+                %s added you to a movie session%s on FilmFuse. Come vote on what to watch:
+                %s
+                """.formatted(name, where, sender.webUrl() + "/sessions/" + event.sessionId()));
+        sender.send(recipients, NotificationType.SESSION_STARTED, id -> draft);
+    }
 }

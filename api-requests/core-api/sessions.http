@@ -80,3 +80,26 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {"movieId": {{movieId}}}
+
+### "Live now": my OPEN sessions (votedCount, votedByMe, memberPreview, closesAt), up to 50
+GET {{baseUrl}}/api/v1/sessions?status=OPEN&limit=50
+Authorization: Bearer {{token}}
+
+### History: DECIDED / EXPIRED / ended early, newest first
+GET {{baseUrl}}/api/v1/sessions?status=CLOSED
+Authorization: Bearer {{token}}
+
+### Add friends to an open session (any member; own unblocked friends only; 20 people max). Emails them.
+POST {{baseUrl}}/api/v1/sessions/{{sessionId}}/members
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"userIds": ["{{friendId}}"]}
+
+### Join an open session of my group (ACTIVE group members; idempotent)
+POST {{baseUrl}}/api/v1/sessions/{{sessionId}}/join
+Authorization: Bearer {{otherToken}}
+
+### End early without a pick (creator only): EXPIRED + endedEarly
+POST {{baseUrl}}/api/v1/sessions/{{sessionId}}/end
+Authorization: Bearer {{token}}

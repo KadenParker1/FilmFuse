@@ -3,11 +3,13 @@ import { apiClient } from '../lib/apiClient';
 import { queryKeys } from '../lib/queryKeys';
 import { withQuery } from '../lib/withQuery';
 import type {
+  AddMembersDTO,
   CastVoteDTO,
   CreateSessionDTO,
   PageDTO,
   PickMovieDTO,
   SessionDTO,
+  SessionListStatus,
   SessionResultDTO,
   SessionSummaryDTO,
   Vote,
@@ -17,8 +19,22 @@ const id = (value: string) => encodeURIComponent(value);
 
 export const fetchSession = (sessionId: string) => apiClient.get<SessionDTO>(`/sessions/${id(sessionId)}`);
 
-export const fetchSessions = (groupId?: string | null, cursor?: string | null) =>
-  apiClient.get<PageDTO<SessionSummaryDTO>>(withQuery('/sessions', { groupId, cursor }));
+export const fetchSessions = (
+  groupId?: string | null,
+  cursor?: string | null,
+  status?: SessionListStatus | null,
+  limit?: number | null,
+) => apiClient.get<PageDTO<SessionSummaryDTO>>(withQuery('/sessions', { groupId, status, cursor, limit }));
+
+/** "Live now" fits on one page: the server allows 50 and sessions close after 24 hours. */
+export const LIVE_PAGE_SIZE = 50;
+/** How often "Live now" and the Groups badge re-check while nothing else invalidates them. */
+export const LIVE_REFETCH_MS = 60_000;
+
+/** Open sessions waiting on the caller's vote (the Groups tab badge counts these plus group invites). */
+export function unvotedCount(live: SessionSummaryDTO[] | undefined): number {
+  return (live ?? []).filter((s) => s.status === 'OPEN' && !s.votedByMe).length;
+}
 
 /**
  * The caller's vote on one result changes from `result.myVote` to `next` (null = cleared). The
@@ -53,14 +69,31 @@ export function useSession(sessionId: string | undefined) {
   });
 }
 
-/** Session history, newest first; a group's only when `groupId` is given. Paged. */
-export function useSessions(groupId?: string | null) {
+/**
+ * The caller's sessions, newest first; a group's only when `groupId` is given, only OPEN or CLOSED
+ * (history) ones when `status` is. Paged.
+ */
+export function useSessions(groupId?: string | null, status?: SessionListStatus | null) {
   const group = groupId ?? null;
+  const which = status ?? null;
   return useInfiniteQuery({
-    queryKey: queryKeys.sessionList(group),
-    queryFn: ({ pageParam }) => fetchSessions(group, pageParam),
+    queryKey: queryKeys.sessionList(group, which),
+    queryFn: ({ pageParam }) => fetchSessions(group, pageParam, which),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.nextCursor,
+  });
+}
+
+/**
+ * "Live now": the caller's OPEN sessions (one page of up to 50), re-checked every minute. Shared by
+ * the Groups tab and its badge, so both make one request.
+ */
+export function useLiveSessions(enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.liveSessions,
+    queryFn: () => fetchSessions(null, null, 'OPEN', LIVE_PAGE_SIZE),
+    refetchInterval: LIVE_REFETCH_MS,
+    enabled,
   });
 }
 
@@ -100,6 +133,12 @@ function rollback(qc: QueryClient, sessionId: string, context: VoteContext | und
   if (context?.previous) qc.setQueryData(queryKeys.session(sessionId), context.previous);
 }
 
+/** A vote's answer; "Live now" (votedByMe, voted counts) and the Groups badge move with it. */
+function storeVote(qc: QueryClient, session: SessionDTO): void {
+  qc.setQueryData(queryKeys.session(session.id), session);
+  void qc.invalidateQueries({ queryKey: queryKeys.liveSessions });
+}
+
 type CastVoteVars = { sessionId: string; movieId: number; vote: Vote };
 
 /** Up / Down / Veto one result. The tally and highlight change at once and roll back on failure. */
@@ -112,7 +151,7 @@ export function useCastVote() {
     },
     onMutate: ({ sessionId, movieId, vote }: CastVoteVars) => optimisticVote(qc, sessionId, movieId, vote),
     onError: (_error, { sessionId }, context) => rollback(qc, sessionId, context),
-    onSuccess: (session) => qc.setQueryData(queryKeys.session(session.id), session),
+    onSuccess: (session) => storeVote(qc, session),
   });
 }
 
@@ -126,7 +165,7 @@ export function useClearVote() {
       apiClient.del<SessionDTO>(`/sessions/${id(sessionId)}/votes/${movieId}`),
     onMutate: ({ sessionId, movieId }: ClearVoteVars) => optimisticVote(qc, sessionId, movieId, null),
     onError: (_error, { sessionId }, context) => rollback(qc, sessionId, context),
-    onSuccess: (session) => qc.setQueryData(queryKeys.session(session.id), session),
+    onSuccess: (session) => storeVote(qc, session),
   });
 }
 
@@ -154,6 +193,49 @@ export function usePickMovie() {
       invalidateHistory(qc, session.groupId);
       // The pick goes into watch history, so it becomes a "Rate what you watched" prompt.
       void qc.invalidateQueries({ queryKey: queryKeys.pendingRatings });
+    },
+  });
+}
+
+/** Caches the new state of a session whose membership or status changed, and marks every list stale. */
+function storeChanged(qc: QueryClient, session: SessionDTO): void {
+  qc.setQueryData(queryKeys.session(session.id), session);
+  invalidateHistory(qc, session.groupId);
+}
+
+type AddSessionMembersVars = { sessionId: string; userIds: string[] };
+
+/** Any member adds some of their own friends to an open session (they're emailed like the original invitees). */
+export function useAddSessionMembers() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ sessionId, userIds }: AddSessionMembersVars) => {
+      const body: AddMembersDTO = { userIds };
+      return apiClient.post<SessionDTO>(`/sessions/${id(sessionId)}/members`, body);
+    },
+    onSuccess: (session) => storeChanged(qc, session),
+  });
+}
+
+/** An active member of the session's group joins one of its open sessions (e.g. after joining the group). */
+export function useJoinSession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (sessionId: string) => apiClient.post<SessionDTO>(`/sessions/${id(sessionId)}/join`),
+    onSuccess: (session) => storeChanged(qc, session),
+  });
+}
+
+/** The creator ends an open session without a pick; it leaves "Live now" for everyone. */
+export function useEndSession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (sessionId: string) => apiClient.post<SessionDTO>(`/sessions/${id(sessionId)}/end`),
+    onSuccess: (session) => {
+      qc.setQueryData<PageDTO<SessionSummaryDTO>>(queryKeys.liveSessions, (page) =>
+        page ? { ...page, items: page.items.filter((s) => s.id !== session.id) } : page,
+      );
+      storeChanged(qc, session);
     },
   });
 }

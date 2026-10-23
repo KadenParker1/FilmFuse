@@ -2,6 +2,7 @@ package com.pm.filmfuse.group.repository;
 
 import com.pm.filmfuse.common.json.JsonColumns;
 import com.pm.filmfuse.group.dto.SessionFiltersDTO;
+import com.pm.filmfuse.group.dto.SessionListStatus;
 import com.pm.filmfuse.group.dto.SessionStatus;
 import com.pm.filmfuse.group.dto.Strategy;
 import com.pm.filmfuse.group.dto.Vote;
@@ -16,11 +17,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -201,9 +206,11 @@ public class SessionRepository {
 
     /**
      * Sessions {@code userId} is a member of, newest first (ties by id, descending), optionally only
-     * those of {@code groupId}, strictly after the keyset ({@code afterCreatedAt}, {@code afterId}).
+     * those of {@code groupId} and only OPEN (still taking votes at {@code now}) or CLOSED ones,
+     * strictly after the keyset ({@code afterCreatedAt}, {@code afterId}).
      */
-    public List<Session> listFor(UUID userId, UUID groupId, Instant afterCreatedAt, UUID afterId, int limit) {
+    public List<Session> listFor(UUID userId, UUID groupId, SessionListStatus status, Instant now,
+                                 Instant afterCreatedAt, UUID afterId, int limit) {
         MapSqlParameterSource params = new MapSqlParameterSource("user", userId).addValue("limit", limit);
         StringBuilder sql = new StringBuilder("select " + SESSION_COLUMNS + FROM + """
                 where exists (select 1 from app.rec_session_members m where m.session_id = s.id and m.user_id = :user)
@@ -212,12 +219,88 @@ public class SessionRepository {
             sql.append(" and s.group_id = :group");
             params.addValue("group", groupId);
         }
+        appendStatus(sql, params, status, now);
         if (afterCreatedAt != null) {
             sql.append(" and (s.created_at, s.id) < (:afterCreatedAt, :afterId)");
             params.addValue("afterCreatedAt", Timestamp.from(afterCreatedAt)).addValue("afterId", afterId);
         }
         sql.append(" order by s.created_at desc, s.id desc limit :limit");
         return jdbc.query(sql.toString(), params, (rs, i) -> session(rs));
+    }
+
+    /** {@code groupId}'s sessions still taking votes at {@code now} that {@code userId} is not in, newest first. */
+    public List<Session> openWithout(UUID groupId, UUID userId, Instant now, int limit) {
+        MapSqlParameterSource params = new MapSqlParameterSource("user", userId).addValue("group", groupId)
+                .addValue("limit", limit);
+        StringBuilder sql = new StringBuilder("select " + SESSION_COLUMNS + FROM + """
+                where s.group_id = :group
+                  and not exists (select 1 from app.rec_session_members m where m.session_id = s.id and m.user_id = :user)
+                """);
+        appendStatus(sql, params, SessionListStatus.OPEN, now);
+        sql.append(" order by s.created_at desc, s.id desc limit :limit");
+        return jdbc.query(sql.toString(), params, (rs, i) -> session(rs));
+    }
+
+    /** Mirrors {@link Session#status}: OPEN = stored OPEN and not older than {@link Session#OPEN_FOR}. */
+    private static void appendStatus(StringBuilder sql, MapSqlParameterSource params, SessionListStatus status,
+                                     Instant now) {
+        if (status == null) {
+            return;
+        }
+        params.addValue("openSince", Timestamp.from(now.minus(Session.OPEN_FOR)));
+        sql.append(status == SessionListStatus.OPEN
+                ? " and s.status = 'OPEN' and s.created_at >= :openSince"
+                : " and (s.status <> 'OPEN' or s.created_at < :openSince)");
+    }
+
+    /** How many members of each session have voted on anything (sessions nobody voted in are absent). */
+    public Map<UUID, Integer> votedCounts(Collection<UUID> sessionIds) {
+        Map<UUID, Integer> counts = new HashMap<>();
+        if (sessionIds.isEmpty()) {
+            return counts;
+        }
+        jdbc.query("""
+                select session_id, count(distinct user_id) as voters from app.rec_session_votes
+                where session_id in (:ids) group by session_id
+                """, new MapSqlParameterSource("ids", sessionIds),
+                rs -> {
+                    counts.put(rs.getObject("session_id", UUID.class), rs.getInt("voters"));
+                });
+        return counts;
+    }
+
+    /** The sessions among {@code sessionIds} that {@code userId} has voted in. */
+    public Set<UUID> votedIn(UUID userId, Collection<UUID> sessionIds) {
+        if (sessionIds.isEmpty()) {
+            return Set.of();
+        }
+        return new HashSet<>(jdbc.queryForList("""
+                select distinct session_id from app.rec_session_votes where user_id = :user and session_id in (:ids)
+                """, new MapSqlParameterSource("user", userId).addValue("ids", sessionIds), UUID.class));
+    }
+
+    /** Every member of each session: {@code viewer} last, the rest by user id. */
+    public Map<UUID, List<UUID>> membersOf(Collection<UUID> sessionIds, UUID viewer) {
+        Map<UUID, List<UUID>> members = new LinkedHashMap<>();
+        if (sessionIds.isEmpty()) {
+            return members;
+        }
+        jdbc.query("""
+                select session_id, user_id from app.rec_session_members where session_id in (:ids)
+                order by session_id, (user_id = :viewer), user_id
+                """, new MapSqlParameterSource("ids", sessionIds).addValue("viewer", viewer),
+                rs -> {
+                    members.computeIfAbsent(rs.getObject("session_id", UUID.class), k -> new ArrayList<>())
+                            .add(rs.getObject("user_id", UUID.class));
+                });
+        return members;
+    }
+
+    /** Ends an OPEN session without a pick: stored EXPIRED, {@code decided_at} = when it ended. */
+    public void end(UUID sessionId, Instant now) {
+        jdbc.update("""
+                update app.rec_sessions set status = 'EXPIRED', decided_at = :now where id = :id and status = 'OPEN'
+                """, new MapSqlParameterSource("id", sessionId).addValue("now", Timestamp.from(now)));
     }
 
     private static Session session(ResultSet rs) throws SQLException {

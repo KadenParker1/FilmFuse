@@ -20,14 +20,18 @@ export function SessionMembersRow({
   members,
   memberCount = members.length,
   votedCount,
+  showWaiting = false,
 }: {
   members: SessionMemberDTO[];
   memberCount?: number;
   votedCount?: number;
+  /** OPEN sessions: name the people still to vote. */
+  showWaiting?: boolean;
 }) {
   const { colors } = useTheme();
   const noVector = members.filter((m) => !m.hasVector).map((m) => personName(m.user));
   const voted = votedCount ?? members.filter((m) => m.voted).length;
+  const waiting = members.filter((m) => !m.voted).map((m) => personName(m.user));
   return (
     <View className="gap-2">
       <Text className="font-body-semibold text-sm text-muted">
@@ -70,6 +74,11 @@ export function SessionMembersRow({
           );
         })}
       </ScrollView>
+      {showWaiting && waiting.length ? (
+        <Body muted testID="waiting-on" className="text-xs">
+          Waiting on {waiting.join(', ')}
+        </Body>
+      ) : null}
       {noVector.length ? (
         <Body muted testID="no-vector-hint" className="text-xs">
           {joinNames(noVector)} no taste profile yet, so their fit leans on what’s popular.

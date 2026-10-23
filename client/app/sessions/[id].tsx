@@ -4,13 +4,26 @@ import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { Image } from 'expo-image';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSessionLive } from '../../api/sessionLive';
-import { useCastVote, useClearVote, usePickMovie, useRefreshSession, useSession } from '../../api/sessions';
+import {
+  useCastVote,
+  useClearVote,
+  useEndSession,
+  useJoinSession,
+  usePickMovie,
+  useRefreshSession,
+  useSession,
+} from '../../api/sessions';
+import { useAuth } from '../../auth/useAuth';
 import { BackButton } from '../../components/BackButton';
 import { FilterBanner } from '../../components/comfort/FilterBanner';
+import { AddPeopleSheet } from '../../components/sessions/AddPeopleSheet';
 import { LiveIndicator } from '../../components/sessions/LiveIndicator';
 import { SessionMembersRow } from '../../components/sessions/SessionMembersRow';
 import { SessionResultCard } from '../../components/sessions/SessionResultCard';
+import { ShareSessionButton } from '../../components/sessions/ShareSessionButton';
+import { TallyPanel } from '../../components/sessions/TallyPanel';
 import { STATUS_LABELS, orderResults, strategyLabel } from '../../components/sessions/sessionCopy';
+import { computeTally, timeLeft } from '../../components/sessions/tally';
 import {
   Body,
   Button,
@@ -24,6 +37,7 @@ import {
   errorMessage,
 } from '../../components/ui';
 import { ApiError } from '../../lib/apiClient';
+import { pluralize } from '../../lib/format';
 import type { LiveMode } from '../../lib/realtime';
 import { useTheme } from '../../theme/useTheme';
 import type { MovieSummaryDTO, SessionDTO, SessionResultDTO } from '../../types/api';
@@ -68,7 +82,7 @@ function DecidedHero({ movie }: { movie: MovieSummaryDTO }) {
   );
 }
 
-function OpenResults({ session }: { session: SessionDTO }) {
+function OpenResults({ session, myId }: { session: SessionDTO; myId: string | undefined }) {
   const router = useRouter();
   const vote = useCastVote();
   const clear = useClearVote();
@@ -76,11 +90,33 @@ function OpenResults({ session }: { session: SessionDTO }) {
   const pick = usePickMovie();
   const [vetoing, setVetoing] = useState<SessionResultDTO | null>(null);
   const [picking, setPicking] = useState<SessionResultDTO | null>(null);
+  // Display order stays the ML rank order; the tally only highlights.
   const results = orderResults(session.results);
+  const tally = computeTally(session.results, session.memberCount, session.votedCount);
+  const tiedIds = new Set(tally.isTie ? tally.tied.map((r) => r.movie.id) : []);
   const voteError = vote.isError ? vote.error : clear.isError ? clear.error : null;
+  // Joined after these picks were ranked: none of them carries the caller's fit.
+  const joinedLate =
+    !!myId && results.length > 0 && session.members.some((m) => m.user.id === myId) &&
+    results.every((r) => r.memberScores[myId] === undefined);
 
   return (
     <View className="gap-4">
+      {results.length ? <TallyPanel tally={tally} onPickLeader={setPicking} /> : null}
+      {session.hiddenResultCount > 0 ? (
+        <Card testID="hidden-results" className="gap-2">
+          <Body className="text-sm">
+            {pluralize(session.hiddenResultCount, 'pick')} no longer {session.hiddenResultCount === 1 ? 'fits' : 'fit'}{' '}
+            everyone’s comfort settings, so {session.hiddenResultCount === 1 ? 'it’s' : 'they’re'} hidden.
+          </Body>
+          <Button size="sm" variant="ghost" title="Get more options" onPress={() => refresh.mutate(session.id)} />
+        </Card>
+      ) : null}
+      {joinedLate ? (
+        <Body muted testID="joined-late" className="text-sm">
+          You joined after these picks were made. “More options” adds picks that include your taste.
+        </Body>
+      ) : null}
       {voteError ? (
         <Body accessibilityRole="alert" className="text-sm text-danger">
           {errorMessage(voteError)}
@@ -98,6 +134,9 @@ function OpenResults({ session }: { session: SessionDTO }) {
             key={r.movie.id}
             result={r}
             members={session.members}
+            leader={!tally.isTie && tally.leader?.movie.id === r.movie.id}
+            tied={tiedIds.has(r.movie.id)}
+            everyoneLikes={tally.everyoneLikes.has(r.movie.id)}
             onOpenMovie={() => router.push(`/movie/${r.movie.id}`)}
             onVote={(v) =>
               v === 'VETO'
@@ -156,29 +195,74 @@ function OpenResults({ session }: { session: SessionDTO }) {
   );
 }
 
-function SessionView({ session, mode }: { session: SessionDTO; mode: LiveMode }) {
+/** Share for everyone; Add people for members of an open session; End for its creator. */
+function SessionActions({ session, myId }: { session: SessionDTO; myId: string | undefined }) {
+  const end = useEndSession();
+  const [adding, setAdding] = useState(false);
+  const [ending, setEnding] = useState(false);
+  const open = session.status === 'OPEN';
+  const isCreator = !!myId && session.createdBy?.id === myId;
+  return (
+    <View className="flex-row flex-wrap items-start gap-2">
+      <ShareSessionButton url={session.shareUrl} />
+      {open ? <Button size="sm" variant="secondary" title="Add people" onPress={() => setAdding(true)} /> : null}
+      {open && isCreator ? (
+        <Button size="sm" variant="ghost" title="End session" onPress={() => setEnding(true)} />
+      ) : null}
+      {open ? <AddPeopleSheet session={session} visible={adding} onClose={() => setAdding(false)} /> : null}
+      <ConfirmSheet
+        visible={ending}
+        title="End this session?"
+        message="Voting stops for everyone and nothing gets picked. It moves to your history."
+        confirmLabel="End session"
+        danger
+        loading={end.isPending}
+        error={end.isError ? end.error : undefined}
+        onConfirm={() => end.mutate(session.id, { onSuccess: () => setEnding(false) })}
+        onClose={() => {
+          end.reset();
+          setEnding(false);
+        }}
+      />
+    </View>
+  );
+}
+
+function SessionView({ session, mode, myId }: { session: SessionDTO; mode: LiveMode; myId: string | undefined }) {
   const router = useRouter();
+  const open = session.status === 'OPEN';
   return (
     <View className="gap-5 pb-12">
       <View className="gap-2">
         <Heading size="md">{session.groupName ?? 'Tonight'}</Heading>
         <Body muted testID="session-meta" className="text-sm">
-          {STATUS_LABELS[session.status]} · {strategyLabel(session.strategy)}
+          {session.endedEarly ? 'Ended early' : STATUS_LABELS[session.status]} · {strategyLabel(session.strategy)}
+          {open ? ` · ${timeLeft(session.closesAt)}` : ''}
         </Body>
       </View>
       {/* Live pill and the filter pill side by side, as in the Technicolor session header. */}
       <View className="flex-row flex-wrap items-center gap-2">
-        {session.status === 'OPEN' ? <LiveIndicator mode={mode} /> : null}
+        {open ? <LiveIndicator mode={mode} /> : null}
         <FilterBanner filter={session.effectiveFilter} />
       </View>
-      <SessionMembersRow members={session.members} memberCount={session.memberCount} votedCount={session.votedCount} />
+      <SessionActions session={session} myId={myId} />
+      <SessionMembersRow
+        members={session.members}
+        memberCount={session.memberCount}
+        votedCount={session.votedCount}
+        showWaiting={open}
+      />
 
       {session.status === 'DECIDED' && session.pickedMovie ? <DecidedHero movie={session.pickedMovie} /> : null}
 
       {session.status === 'EXPIRED' ? (
         <View className="gap-4">
           <Card testID="expired-banner">
-            <Body>This session expired — voting closes 24 hours after it starts.</Body>
+            <Body>
+              {session.endedEarly
+                ? 'This session was ended early — nothing was picked.'
+                : 'This session expired — voting closes 24 hours after it starts.'}
+            </Body>
           </Card>
           {orderResults(session.results).map((r) => (
             <SessionResultCard
@@ -195,14 +279,31 @@ function SessionView({ session, mode }: { session: SessionDTO; mode: LiveMode })
         </View>
       ) : null}
 
-      {session.status === 'OPEN' ? <OpenResults session={session} /> : null}
+      {open ? <OpenResults session={session} myId={myId} /> : null}
     </View>
   );
 }
 
-/** A live recommendation session: ranked picks with the Fuse meter, voting, veto, refresh and pick. */
+/** A group member who isn't in this open session yet (403 from the server): offer to join. */
+function JoinPrompt({ sessionId, message }: { sessionId: string; message: string }) {
+  const join = useJoinSession();
+  return (
+    <Card testID="join-session" className="gap-3">
+      <Body>{message}</Body>
+      {join.isError ? (
+        <Body accessibilityRole="alert" className="text-sm text-danger">
+          {errorMessage(join.error)}
+        </Body>
+      ) : null}
+      <Button title="Join session" loading={join.isPending} onPress={() => join.mutate(sessionId)} />
+    </Card>
+  );
+}
+
+/** A live recommendation session: ranked picks with the Fuse meter, live tally, voting, veto, refresh and pick. */
 export default function SessionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { user } = useAuth();
   const session = useSession(id);
   const { mode } = useSessionLive(id);
   const groupId = session.data?.groupId;
@@ -219,10 +320,19 @@ export default function SessionScreen() {
       </View>
     );
   } else if (session.isError) {
-    content =
-      session.error instanceof ApiError && session.error.status === 404 ? (
-        <EmptyState icon="film-outline" title="Session not found" message="Only people in a session can see it." />
-      ) : (
+    const status = session.error instanceof ApiError ? session.error.status : null;
+    if (status === 403 && id) {
+      content = <JoinPrompt sessionId={id} message={errorMessage(session.error)} />;
+    } else if (status === 404) {
+      content = (
+        <EmptyState
+          icon="film-outline"
+          title="Session not found"
+          message="Only people in a session can see it. Ask someone in it to add you."
+        />
+      );
+    } else {
+      content = (
         <ErrorState
           title="Couldn't load this session"
           error={session.error}
@@ -230,8 +340,9 @@ export default function SessionScreen() {
           retrying={session.isFetching}
         />
       );
+    }
   } else {
-    content = <SessionView session={session.data} mode={mode} />;
+    content = <SessionView session={session.data} mode={mode} myId={user?.id} />;
   }
 
   return (

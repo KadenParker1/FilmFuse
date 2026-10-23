@@ -16,6 +16,12 @@ type Props = {
   onClearVote: () => void;
   onPick: () => void;
   onOpenMovie?: () => void;
+  /** The live tally's leader (highlighted). */
+  leader?: boolean;
+  /** Level with the leader on ups and downs. */
+  tied?: boolean;
+  /** Every member gave it a thumbs-up. */
+  everyoneLikes?: boolean;
 };
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -46,7 +52,7 @@ function VoteButton({
       accessibilityState={{ selected, disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
-      className={`min-h-9 flex-row items-center gap-1.5 rounded-[10px] border px-3 py-1.5 active:opacity-80 ${
+      className={`min-h-11 min-w-11 flex-row items-center justify-center gap-1.5 rounded-[10px] border px-3 py-1.5 active:opacity-80 ${
         selected ? (danger ? 'border-danger bg-danger' : 'border-accent bg-accent') : 'border-border bg-raised'
       } ${disabled ? 'opacity-50' : ''}`}
     >
@@ -59,7 +65,18 @@ function VoteButton({
 }
 
 /** One ranked movie: poster, rating, Fuse meter, why it was picked, votes and "Pick this". */
-export function SessionResultCard({ result, members, readOnly = false, onVote, onClearVote, onPick, onOpenMovie }: Props) {
+export function SessionResultCard({
+  result,
+  members,
+  readOnly = false,
+  onVote,
+  onClearVote,
+  onPick,
+  onOpenMovie,
+  leader = false,
+  tied = false,
+  everyoneLikes = false,
+}: Props) {
   const { colors } = useTheme();
   const { movie, votes, myVote } = result;
   const vetoed = votes.vetoed;
@@ -68,7 +85,9 @@ export function SessionResultCard({ result, members, readOnly = false, onVote, o
   return (
     <View
       testID={`result-${movie.id}`}
-      className={`flex-row gap-4 rounded-[18px] border border-border bg-surface p-3 ${vetoed ? 'opacity-50' : ''}`}
+      className={`flex-row gap-4 rounded-[18px] border bg-surface p-3 ${leader ? 'border-2 border-accent2' : 'border-border'} ${
+        vetoed ? 'opacity-50' : ''
+      }`}
     >
       <View className="w-24">
         <PosterCard fill title={movie.title} posterUrl={movie.posterUrl} certification={result.certification} onPress={onOpenMovie} />
@@ -81,6 +100,21 @@ export function SessionResultCard({ result, members, readOnly = false, onVote, o
           </Text>
         </View>
         {movie.releaseYear ? <Body muted className="text-xs">{movie.releaseYear}</Body> : null}
+        {!vetoed && (leader || tied || everyoneLikes) ? (
+          <View className="flex-row flex-wrap gap-1.5">
+            {leader || tied ? (
+              <View testID={`${tied ? 'tied' : 'leader'}-${movie.id}`} className="rounded-full bg-accent2 px-2.5 py-0.5">
+                <Text className="font-body-bold text-xs text-on-accent2">{tied ? 'Tied' : 'Leading'}</Text>
+              </View>
+            ) : null}
+            {everyoneLikes ? (
+              <View testID={`everyone-likes-${movie.id}`} className="flex-row items-center gap-1 rounded-full bg-raised px-2.5 py-0.5">
+                <Ionicons name="heart" size={12} color={colors.accent2} />
+                <Text className="font-body-semibold text-xs text-text">Everyone likes this</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
         {vetoed ? (
           <Text testID={`vetoed-${movie.id}`} className="font-body-semibold text-sm text-danger">
             Vetoed
@@ -121,7 +155,7 @@ export function SessionResultCard({ result, members, readOnly = false, onVote, o
             accessibilityRole="button"
             accessibilityLabel={`Pick ${movie.title}`}
             onPress={onPick}
-            className="min-h-9 flex-row items-center gap-1.5 self-start rounded-[10px] bg-accent2 px-3.5 py-1.5 active:opacity-80"
+            className="min-h-11 flex-row items-center gap-1.5 self-start rounded-[10px] bg-accent2 px-4 py-2 active:opacity-80"
           >
             <Ionicons name="checkmark-circle" size={16} color={colors.onAccent2} />
             <Text className="font-body-bold text-sm text-on-accent2">Pick this</Text>

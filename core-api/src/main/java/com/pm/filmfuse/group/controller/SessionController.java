@@ -1,15 +1,19 @@
 package com.pm.filmfuse.group.controller;
 
 import com.pm.filmfuse.common.dto.PageDTO;
+import com.pm.filmfuse.group.dto.AddMembersDTO;
 import com.pm.filmfuse.group.dto.CastVoteDTO;
 import com.pm.filmfuse.group.dto.CreateSessionDTO;
 import com.pm.filmfuse.group.dto.PickMovieDTO;
 import com.pm.filmfuse.group.dto.SessionDTO;
+import com.pm.filmfuse.group.dto.SessionListStatus;
 import com.pm.filmfuse.group.dto.SessionSummaryDTO;
 import com.pm.filmfuse.group.service.SessionService;
 import com.pm.filmfuse.user.model.Profile;
 import com.pm.filmfuse.user.security.CurrentUser;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,14 +45,22 @@ public class SessionController {
         return sessionService.create(caller.getId(), request);
     }
 
-    /** The caller's sessions, newest first, 20 per page. */
+    /**
+     * The caller's sessions, newest first, {@code limit} (1-50, default 20) per page; only a
+     * group's with {@code groupId}, only OPEN ("Live now") or CLOSED (history) with {@code status}.
+     */
     @GetMapping
-    public PageDTO<SessionSummaryDTO> list(@CurrentUser Profile caller,
-                                           @RequestParam(required = false) UUID groupId,
-                                           @RequestParam(required = false) String cursor) {
-        return sessionService.list(caller.getId(), groupId, cursor);
+    public PageDTO<SessionSummaryDTO> list(
+            @CurrentUser Profile caller,
+            @RequestParam(required = false) UUID groupId,
+            @RequestParam(required = false) SessionListStatus status,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) @Min(value = 1, message = "Must be between 1 and 50")
+            @Max(value = 50, message = "Must be between 1 and 50") Integer limit) {
+        return sessionService.list(caller.getId(), groupId, status, cursor, limit);
     }
 
+    /** 404 for non-members; 403 for an ACTIVE group member not in this OPEN group session yet (they may join). */
     @GetMapping("/{sessionId}")
     public SessionDTO get(@CurrentUser Profile caller, @PathVariable UUID sessionId) {
         return sessionService.get(caller.getId(), sessionId);
@@ -78,5 +90,24 @@ public class SessionController {
     public SessionDTO pick(@CurrentUser Profile caller, @PathVariable UUID sessionId,
                            @Valid @RequestBody PickMovieDTO request) {
         return sessionService.pick(caller.getId(), sessionId, request.movieId());
+    }
+
+    /** Any member adds their own friends (400 otherwise, blocks included). 409 unless OPEN or past 20 people. */
+    @PostMapping("/{sessionId}/members")
+    public SessionDTO addMembers(@CurrentUser Profile caller, @PathVariable UUID sessionId,
+                                 @Valid @RequestBody AddMembersDTO request) {
+        return sessionService.addMembers(caller.getId(), sessionId, request.userIds());
+    }
+
+    /** An ACTIVE member of the session's group joins it (idempotent). 404 otherwise; 409 unless OPEN or when full. */
+    @PostMapping("/{sessionId}/join")
+    public SessionDTO join(@CurrentUser Profile caller, @PathVariable UUID sessionId) {
+        return sessionService.join(caller.getId(), sessionId);
+    }
+
+    /** The creator ends it without a pick (403 for other members). 409 unless OPEN. */
+    @PostMapping("/{sessionId}/end")
+    public SessionDTO end(@CurrentUser Profile caller, @PathVariable UUID sessionId) {
+        return sessionService.end(caller.getId(), sessionId);
     }
 }

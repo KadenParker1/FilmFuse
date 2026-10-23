@@ -205,8 +205,11 @@ export type GroupRole = 'OWNER' | 'MEMBER';
 /** Java enum `MemberStatus`. */
 export type MemberStatus = 'INVITED' | 'ACTIVE';
 
-/** Java enum `SessionStatus` — OPEN sessions older than 24h report EXPIRED. */
+/** Java enum `SessionStatus` — OPEN sessions older than 24h report EXPIRED; so does one its creator ended (`endedEarly`). */
 export type SessionStatus = 'OPEN' | 'DECIDED' | 'EXPIRED';
+
+/** Java enum `SessionListStatus` — `GET /sessions?status=`: OPEN = "Live now", CLOSED = history. */
+export type SessionListStatus = 'OPEN' | 'CLOSED';
 
 /** Java enum `Vote`. */
 export type Vote = 'UP' | 'DOWN' | 'VETO';
@@ -281,8 +284,10 @@ export interface GroupDetailDTO {
   members: GroupMemberDTO[];
   comfortCap: ComfortCapDTO;
   effectiveFilter: EffectiveFilterDTO;
-  /** At most 5, newest first. */
+  /** At most 5, newest first (page through all with `GET /sessions?groupId=`). */
   recentSessions: SessionSummaryDTO[];
+  /** OPEN sessions of the group the caller isn't in yet (ACTIVE callers only); `POST /sessions/{id}/join`. */
+  joinableSessions: SessionSummaryDTO[];
 }
 
 /** com.pm.filmfuse.group.dto.CreateGroupDTO — name 1–40 (trimmed), emoji ≤ 8 chars, color `#RRGGBB`, 0–19 friends. */
@@ -366,10 +371,18 @@ export interface SessionDTO {
   members: SessionMemberDTO[];
   results: SessionResultDTO[];
   pickedMovie: MovieSummaryDTO | null;
+  /** OPEN only: results hidden because they no longer fit everyone's comfort settings (never says whose). */
+  hiddenResultCount: number;
+  /** When voting closes on its own (created + 24 h). */
+  closesAt: string;
+  /** EXPIRED because the creator ended it early. */
+  endedEarly: boolean;
+  /** The web link to this session (`APP_WEB_URL/sessions/{id}`). */
+  shareUrl: string;
   createdAt: string;
 }
 
-/** com.pm.filmfuse.group.dto.SessionSummaryDTO */
+/** com.pm.filmfuse.group.dto.SessionSummaryDTO — counts include everyone; preview ≤ 5, others before the viewer, blocks left out. */
 export interface SessionSummaryDTO {
   id: string;
   groupId: string | null;
@@ -377,6 +390,11 @@ export interface SessionSummaryDTO {
   status: SessionStatus;
   pickedMovie: MovieSummaryDTO | null;
   memberCount: number;
+  votedCount: number;
+  votedByMe: boolean;
+  memberPreview: UserSummaryDTO[];
+  closesAt: string;
+  endedEarly: boolean;
   createdAt: string;
 }
 

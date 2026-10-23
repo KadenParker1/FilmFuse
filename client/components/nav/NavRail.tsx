@@ -3,11 +3,11 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMe } from '../../api/me';
 import { useTasteProfile } from '../../api/taste';
-import { badgeCount, pluralize } from '../../lib/format';
+import { badgeCount } from '../../lib/format';
 import { useTheme } from '../../theme/useTheme';
 import { useQuickRate } from '../rating/QuickRateProvider';
 import { Avatar } from '../ui';
-import { NAV_TABS } from './navTabs';
+import { NAV_TABS, tabAccessibilityLabel, type TabBadges } from './navTabs';
 
 /**
  * The slice of the tab navigator's tabBar props the rail needs. Expo Router's bundled bottom tabs
@@ -20,8 +20,8 @@ export type NavRailProps = {
     emit: (e: { type: 'tabPress'; target: string; canPreventDefault: true }) => { defaultPrevented: boolean };
   };
   navigateToTab: (routeKey: string) => void;
-  /** Pending friend requests, badged on Social. */
-  incomingCount: number;
+  /** Badge counts by tab name: Social = friend requests, Groups = sessions to vote in + group invites. */
+  badges: TabBadges;
 };
 
 export const NAV_RAIL_WIDTH = 232;
@@ -58,10 +58,10 @@ function MiniProfile({ onPress }: { onPress: () => void }) {
 
 /**
  * Wide screens: the navigation rail on the right - brand at the top, the four tabs with an active
- * pill (Social carries the friend-request badge), then "Rate a movie" and your mini profile at the
+ * pill (Social and Groups carry badges), then "Rate a movie" and your mini profile at the
  * foot. It replaces both the bottom tab bar and the floating Rate button.
  */
-export function NavRail({ state, emitter, navigateToTab, incomingCount }: NavRailProps) {
+export function NavRail({ state, emitter, navigateToTab, badges }: NavRailProps) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { openRatePicker } = useQuickRate();
@@ -95,14 +95,14 @@ export function NavRail({ state, emitter, navigateToTab, incomingCount }: NavRai
         {NAV_TABS.map((tab) => {
           const route = state.routes.find((r) => r.name === tab.name);
           const focused = !!route && state.routes[state.index]?.key === route.key;
-          const count = tab.name === 'index' ? incomingCount : 0;
+          const count = badges[tab.name] ?? 0;
           const badge = badgeCount(count);
           return (
             <Pressable
               key={tab.name}
               testID={`rail-${tab.name}`}
               accessibilityRole="tab"
-              accessibilityLabel={count > 0 ? `${tab.title}, ${pluralize(count, 'friend request')}` : tab.title}
+              accessibilityLabel={tabAccessibilityLabel(tab, count)}
               accessibilityState={{ selected: focused }}
               onPress={() => go(tab.name)}
               className={`min-h-11 flex-row items-center gap-3 rounded-xl px-3 py-2.5 active:opacity-80 ${
