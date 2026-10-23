@@ -1,4 +1,4 @@
-import type { FeedScope } from '../types/api';
+import type { FeedScope, SessionListStatus } from '../types/api';
 
 /**
  * Every TanStack Query key in the app, in one place. A prefix is the parent node and specific keys
@@ -68,8 +68,11 @@ export const queryKeys = {
   session: (id: string) => [...sessions, 'detail', id] as const,
   /** Every GET /sessions history list (prefix). */
   sessionListAll,
-  /** GET /sessions?groupId= (infinite); null = all of the caller's sessions */
-  sessionList: (groupId: string | null) => [...sessionListAll, groupId] as const,
+  /** GET /sessions?groupId=&status= (infinite); null = all of the caller's sessions / every status */
+  sessionList: (groupId: string | null, status: SessionListStatus | null = null) =>
+    [...sessionListAll, groupId, status] as const,
+  /** GET /sessions?status=OPEN&limit=50 — "Live now" and the Groups tab badge (one page). */
+  liveSessions: [...sessionListAll, 'live'] as const,
   /** GET /moods */
   moods: ['moods'] as const,
   /** GET /me/onboarding */

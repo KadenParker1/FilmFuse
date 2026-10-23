@@ -11,7 +11,11 @@ jest.mock('../api/sessions', () => ({
   useClearVote: jest.fn(),
   useRefreshSession: jest.fn(),
   usePickMovie: jest.fn(),
+  useEndSession: jest.fn(),
+  useJoinSession: jest.fn(),
+  useAddSessionMembers: jest.fn(),
 }));
+jest.mock('../auth/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1' } }) }));
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import SessionScreen from '../app/sessions/[id]';
@@ -35,7 +39,16 @@ import { infiniteResult, mutationResult, queryResult } from '../test-utils/query
 import { routerState } from '../test-utils/router';
 
 const m = <K extends keyof typeof sessions>(k: K) => sessions[k] as unknown as jest.Mock;
-const MUTATIONS = ['useCreateSession', 'useCastVote', 'useClearVote', 'useRefreshSession', 'usePickMovie'] as const;
+const MUTATIONS = [
+  'useCreateSession',
+  'useCastVote',
+  'useClearVote',
+  'useRefreshSession',
+  'usePickMovie',
+  'useEndSession',
+  'useJoinSession',
+  'useAddSessionMembers',
+] as const;
 let muts: Record<(typeof MUTATIONS)[number], ReturnType<typeof mutationResult>>;
 
 beforeEach(() => {
@@ -176,7 +189,8 @@ describe('SessionScreen', () => {
     expect(useSessionLive).toHaveBeenCalledWith('s1');
     expect(screen.getByRole('header', { name: 'Film club' })).toBeOnTheScreen();
     expect(screen.getByText('Live')).toBeOnTheScreen();
-    expect(screen.getByTestId('session-meta')).toHaveTextContent('Voting open · Mean');
+    // Followed by the time left (see SessionLive.test.tsx).
+    expect(screen.getByTestId('session-meta')).toHaveTextContent(/^Voting open · Mean · /);
     expect(screen.getByText('PG-13 or below · mild violence at most')).toBeOnTheScreen();
     expect(screen.getByText('1 of 2 voted')).toBeOnTheScreen();
     expect(screen.getByTestId('no-vector-hint')).toHaveTextContent(/Grace Hopper has no taste profile yet/);

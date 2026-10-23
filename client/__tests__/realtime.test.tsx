@@ -175,10 +175,29 @@ describe('useSessionLive', () => {
     await act(async () => mockState.status?.('SUBSCRIBED'));
     const before = sessionFetches();
     client.setQueryData(queryKeys.sessionList(null), { pages: [], pageParams: [] });
+    client.setQueryData(queryKeys.groupList, []);
     await act(async () => mockState.broadcast?.({ payload: { sessionId: 's1', type: 'vote' } }));
     await flush();
     expect(sessionFetches()).toBe(before + 1);
-    expect(client.getQueryState(queryKeys.sessionList(null))?.isInvalidated).toBe(false);
+    // Votes move "Live now" counts and the badge, but not groups.
+    expect(client.getQueryState(queryKeys.sessionList(null))?.isInvalidated).toBe(true);
+    expect(client.getQueryState(queryKeys.groupList)?.isInvalidated).toBe(false);
+  });
+
+  it.each(['ended', 'members'] as const)('a %s broadcast invalidates history and groups', async (type) => {
+    const { client } = await mount();
+    client.setQueryData(queryKeys.liveSessions, { items: [], nextCursor: null });
+    client.setQueryData(queryKeys.groupList, []);
+    await act(async () => mockState.broadcast?.({ payload: { sessionId: 's1', type } }));
+    expect(client.getQueryState(queryKeys.liveSessions)?.isInvalidated).toBe(true);
+    expect(client.getQueryState(queryKeys.groupList)?.isInvalidated).toBe(true);
+  });
+
+  it('a refresh broadcast leaves the lists alone', async () => {
+    const { client } = await mount();
+    client.setQueryData(queryKeys.liveSessions, { items: [], nextCursor: null });
+    await act(async () => mockState.broadcast?.({ payload: { sessionId: 's1', type: 'refresh' } }));
+    expect(client.getQueryState(queryKeys.liveSessions)?.isInvalidated).toBe(false);
   });
 
   it('a pick broadcast also invalidates history and groups', async () => {

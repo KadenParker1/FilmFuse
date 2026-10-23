@@ -126,6 +126,11 @@ export const makeSessionSummary = (overrides: Partial<SessionSummaryDTO> = {}): 
   status: 'DECIDED',
   pickedMovie: makeMovie(),
   memberCount: 3,
+  votedCount: 2,
+  votedByMe: true,
+  memberPreview: [],
+  closesAt: '2026-10-11T20:00:00Z',
+  endedEarly: false,
   createdAt: '2026-10-10T20:00:00Z',
   ...overrides,
 });
@@ -172,6 +177,7 @@ export const makeGroup = (overrides: Partial<GroupDetailDTO> = {}): GroupDetailD
   comfortCap: { maxCertification: null, contentLimits: {} },
   effectiveFilter: makeEffectiveFilter(),
   recentSessions: [],
+  joinableSessions: [],
   ...overrides,
 });
 
@@ -217,6 +223,10 @@ export const makeSession = (overrides: Partial<SessionDTO> = {}): SessionDTO => 
     makeResult({ rank: 2, movie: makeMovie({ id: 200, title: 'Up' }), certification: 'PG', memberScores: { u1: 5, u2: 8 } }),
   ],
   pickedMovie: null,
+  hiddenResultCount: 0,
+  closesAt: '2026-10-17T19:00:00Z',
+  endedEarly: false,
+  shareUrl: 'https://filmfuse.test/sessions/s1',
   createdAt: '2026-10-16T19:00:00Z',
   ...overrides,
 });

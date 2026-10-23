@@ -57,6 +57,7 @@ jest.mock('../components/social/PendingLinkRedeemer', () => ({
   },
 }));
 jest.mock('../api/social', () => ({ useFriendRequests: jest.fn() }));
+jest.mock('../api/groupsBadge', () => ({ useGroupsBadgeCount: jest.fn(() => 0) }));
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useMe } from '../api/me';
@@ -64,6 +65,7 @@ import { useTasteProfile } from '../api/taste';
 import { WIDE_BREAKPOINT } from '../theme/tokens';
 import TabsLayout from '../app/(tabs)/_layout';
 import { useFriendRequests } from '../api/social';
+import { useGroupsBadgeCount } from '../api/groupsBadge';
 import { makeProfile, makeRequest, makeTasteProfile } from '../test-utils/fixtures';
 import { queryResult } from '../test-utils/queryResults';
 
@@ -75,6 +77,7 @@ beforeEach(() => {
   mockNavigate.mockClear();
   mockEmit.mockClear();
   mockOpenRatePicker.mockClear();
+  (useGroupsBadgeCount as jest.Mock).mockReturnValue(0);
 });
 const requests = (n: number) =>
   queryResult({ data: Array.from({ length: n }, (_, i) => makeRequest({ id: `r${i}` })) });
@@ -106,6 +109,15 @@ describe('TabsLayout', () => {
     expect(screen.getByLabelText('Social')).toBeOnTheScreen();
     mockRequests.mockReturnValue(requests(0));
     await rerender(<TabsLayout />);
+    expect(screen.getByTestId('tab-index')).toHaveTextContent('badge:none');
+  });
+
+  it('badges the Groups tab with sessions to vote in plus group invites', async () => {
+    mockRequests.mockReturnValue(requests(0));
+    (useGroupsBadgeCount as jest.Mock).mockReturnValue(3);
+    await render(<TabsLayout />);
+    expect(screen.getByTestId('tab-groups')).toHaveTextContent('badge:3');
+    expect(screen.getByLabelText('Groups, 3 waiting on you')).toBeOnTheScreen();
     expect(screen.getByTestId('tab-index')).toHaveTextContent('badge:none');
   });
 
@@ -145,6 +157,15 @@ describe('TabsLayout — wide screens: nav rail on the right', () => {
     expect(screen.queryByTestId('rate-fab')).toBeNull();
     expect(screen.getByTestId('rail-me')).toHaveTextContent(/Kaden Parker/);
     expect(screen.getByTestId('rail-persona')).toHaveTextContent('Cerebral Action Explorer');
+  });
+
+  it('badges Groups on the rail too', async () => {
+    mockRequests.mockReturnValue(requests(0));
+    (useGroupsBadgeCount as jest.Mock).mockReturnValue(12);
+    await render(<TabsLayout />);
+    expect(screen.getByTestId('rail-badge-groups')).toHaveTextContent('9+');
+    expect(screen.getByRole('tab', { name: 'Groups, 12 waiting on you' })).toBeOnTheScreen();
+    expect(screen.queryByTestId('rail-badge-index')).toBeNull();
   });
 
   it('marks the focused tab and navigates to others via tabPress', async () => {

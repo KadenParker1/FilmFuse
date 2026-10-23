@@ -24,9 +24,10 @@ export function useSessionLive(sessionId: string | undefined): { mode: LiveMode 
       onMode: setMode,
       onUpdate: (payload) => {
         void qc.invalidateQueries({ queryKey: queryKeys.session(sessionId) });
-        if (payload.type === 'pick') {
-          // Decided: history lists and the group's "last session" change too.
-          void qc.invalidateQueries({ queryKey: queryKeys.sessionListAll });
+        // Votes move "Live now" counts and the Groups badge; picks, early ends and new members also
+        // move history lists and the group's sessions.
+        if (payload.type !== 'refresh') void qc.invalidateQueries({ queryKey: queryKeys.sessionListAll });
+        if (payload.type === 'pick' || payload.type === 'ended' || payload.type === 'members') {
           void qc.invalidateQueries({ queryKey: queryKeys.groups });
         }
       },

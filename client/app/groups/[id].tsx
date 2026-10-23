@@ -18,7 +18,9 @@ import { FilterBanner } from '../../components/comfort/FilterBanner';
 import { FriendPicker } from '../../components/groups/FriendPicker';
 import { GroupSettingsSheet } from '../../components/groups/GroupSettingsSheet';
 import { groupColor, groupEmoji } from '../../components/groups/groupStyle';
-import { SessionSummaryRow } from '../../components/sessions/SessionSummaryRow';
+import { useJoinSession } from '../../api/sessions';
+import { LiveSessionCard } from '../../components/sessions/LiveSessionCard';
+import { SessionHistorySection } from '../../components/sessions/SessionHub';
 import { UserRow } from '../../components/social/UserRow';
 import {
   Body,
@@ -116,6 +118,33 @@ function InvitedView({ group }: { group: GroupDetailDTO }) {
         />
       </View>
     </Card>
+  );
+}
+
+/** Open sessions of the group the caller isn't in yet (e.g. started before they joined). */
+function JoinableSessions({ group }: { group: GroupDetailDTO }) {
+  const router = useRouter();
+  const join = useJoinSession();
+  return (
+    <View testID="joinable-sessions" className="gap-2">
+      <Label accessibilityRole="header">Happening now</Label>
+      {join.isError ? (
+        <Body accessibilityRole="alert" className="text-sm text-danger">
+          {errorMessage(join.error)}
+        </Body>
+      ) : null}
+      {group.joinableSessions.map((s) => (
+        <LiveSessionCard key={s.id} session={s} onPress={() => router.push(`/sessions/${s.id}`)}>
+          <Button
+            size="sm"
+            title="Join"
+            accessibilityLabel="Join this session"
+            loading={join.isPending && join.variables === s.id}
+            onPress={() => join.mutate(s.id, { onSuccess: () => router.push(`/sessions/${s.id}`) })}
+          />
+        </LiveSessionCard>
+      ))}
+    </View>
   );
 }
 
@@ -242,22 +271,8 @@ function GroupDetail({ group }: { group: GroupDetailDTO }) {
         </Card>
       </View>
 
-      {!invited ? (
-        <View className="gap-2">
-          <Label accessibilityRole="header">Recent movie nights</Label>
-          <Card className="gap-1 py-2">
-            {group.recentSessions.length ? (
-              group.recentSessions.map((s) => (
-                <SessionSummaryRow key={s.id} session={s} onPress={() => router.push(`/sessions/${s.id}`)} />
-              ))
-            ) : (
-              <Body muted testID="no-sessions" className="py-3 text-center">
-                No movie nights yet.
-              </Body>
-            )}
-          </Card>
-        </View>
-      ) : null}
+      {!invited && group.joinableSessions.length ? <JoinableSessions group={group} /> : null}
+      {!invited ? <SessionHistorySection groupId={group.id} title="Movie nights" /> : null}
 
       {!invited ? (
         <Button title="Leave group" variant="secondary" onPress={() => setConfirm({ kind: 'leave' })} />

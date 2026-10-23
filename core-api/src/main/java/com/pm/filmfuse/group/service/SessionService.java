@@ -1,13 +1,16 @@
 package com.pm.filmfuse.group.service;
 
+import com.pm.filmfuse.common.config.AppProperties;
 import com.pm.filmfuse.common.dto.PageDTO;
 import com.pm.filmfuse.common.exception.BadRequestException;
 import com.pm.filmfuse.common.exception.ConflictException;
+import com.pm.filmfuse.common.exception.ForbiddenException;
 import com.pm.filmfuse.common.exception.NotFoundException;
 import com.pm.filmfuse.common.pagination.CursorCodec;
 import com.pm.filmfuse.group.dto.CreateSessionDTO;
 import com.pm.filmfuse.group.dto.SessionDTO;
 import com.pm.filmfuse.group.dto.SessionFiltersDTO;
+import com.pm.filmfuse.group.dto.SessionListStatus;
 import com.pm.filmfuse.group.dto.SessionMemberDTO;
 import com.pm.filmfuse.group.dto.SessionResultDTO;
 import com.pm.filmfuse.group.dto.SessionStatus;
@@ -15,7 +18,6 @@ import com.pm.filmfuse.group.dto.SessionSummaryDTO;
 import com.pm.filmfuse.group.dto.Strategy;
 import com.pm.filmfuse.group.dto.Vote;
 import com.pm.filmfuse.group.dto.VoteTallyDTO;
-import com.pm.filmfuse.group.mapper.GroupMapper;
 import com.pm.filmfuse.group.model.Group;
 import com.pm.filmfuse.group.model.Session;
 import com.pm.filmfuse.group.model.SessionMember;
@@ -48,7 +50,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -60,11 +61,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Recommendation sessions: create (for a group or an ad-hoc set of friends), view, history, votes,
- * refresh, pick.
+ * refresh, pick, adding late joiners, and ending early.
  *
- * <p>Only the session's members (snapshotted at creation) can see or touch it; anyone else gets
- * 404. Votes, refresh and pick need the session OPEN (not DECIDED, not older than 24 hours) - 409
- * otherwise. Each of them broadcasts {@code session_updated} after commit.
+ * <p>Only the session's members (snapshotted at creation, plus anyone added or joined since) can
+ * see or touch it; anyone else gets 404. Votes, refresh, pick, adding members, joining and ending
+ * need the session OPEN (not DECIDED, not ended, not older than 24 hours) - 409 otherwise. Each of
+ * them broadcasts {@code session_updated} after commit.
  *
  * <p>Ranking runs outside any transaction ({@link GroupRecommender} may wait on the ML service);
  * the writes that follow run in a short transaction that re-checks the session under a row lock.
@@ -74,6 +76,9 @@ public class SessionService {
 
     public static final int K = 20;
     static final int PAGE_SIZE = 20;
+    public static final int MAX_PAGE_SIZE = 50;
+    /** A session holds at most as many people as a group. */
+    public static final int MAX_MEMBERS = GroupService.MAX_MEMBERS;
 
     static final String SESSION_NOT_FOUND = "Session not found.";
     static final String GROUP_OR_FRIENDS = "Choose either a group or friends for the session, not both.";
@@ -82,6 +87,9 @@ public class SessionService {
     static final String NOT_A_RESULT = "That movie is not in this session's results.";
     static final String VETOED = "That movie was vetoed.";
     static final String OUTSIDE_COMFORT = "This movie is outside the group's comfort settings.";
+    static final String SESSION_FULL = "A session can have at most " + MAX_MEMBERS + " people.";
+    static final String CREATOR_ONLY = "Only the person who started this session can end it.";
+    static final String JOIN_TO_SEE = "You're not in this session yet. Join it to vote.";
 
     private final SessionRepository sessions;
     private final GroupService groupService;
@@ -95,12 +103,17 @@ public class SessionService {
     private final TransactionTemplate tx;
     private final TransactionTemplate readTx;
     private final VectorDirtyMarker dirtyMarker;
+    private final SessionSummaries summaries;
+    private final String webUrl;
     private final Clock clock;
 
     public SessionService(SessionRepository sessions, GroupService groupService, ContentFilterService contentFilter,
                           GroupRecommender recommender, UserVectorLookup vectorLookup, SocialGraphService graph,
                           SocialUsers users, MovieSummaries movieSummaries, ApplicationEventPublisher events,
-                          TransactionTemplate transactionTemplate, VectorDirtyMarker dirtyMarker, Clock clock) {
+                          TransactionTemplate transactionTemplate, VectorDirtyMarker dirtyMarker,
+                          SessionSummaries summaries, AppProperties appProperties, Clock clock) {
+        this.summaries = summaries;
+        this.webUrl = appProperties.webUrl();
         this.sessions = sessions;
         this.groupService = groupService;
         this.contentFilter = contentFilter;
@@ -169,12 +182,33 @@ public class SessionService {
 
     // ------------------------------------------------------------------------------- reads
 
+    /**
+     * Members only (404). The one exception: an ACTIVE member of the session's group who is not in an
+     * OPEN session yet gets 403 {@value #JOIN_TO_SEE} - they may join it, and could see it in the
+     * group's {@code joinableSessions} anyway - so a shared link can offer "Join".
+     */
     public SessionDTO get(UUID callerId, UUID sessionId) {
-        return readTx.execute(status -> toDTO(callerId, requireMember(callerId, sessionId)));
+        return readTx.execute(status -> {
+            Session session = sessions.findSession(sessionId)
+                    .orElseThrow(() -> new NotFoundException(SESSION_NOT_FOUND));
+            if (!sessions.isMember(sessionId, callerId)) {
+                if (session.status(clock.instant()) == SessionStatus.OPEN
+                        && groupService.isActiveMember(callerId, session.groupId())) {
+                    throw new ForbiddenException(JOIN_TO_SEE);
+                }
+                throw new NotFoundException(SESSION_NOT_FOUND);
+            }
+            return toDTO(callerId, session);
+        });
     }
 
-    /** The caller's sessions, newest first; only those of {@code groupId} when given. */
-    public PageDTO<SessionSummaryDTO> list(UUID callerId, UUID groupId, String cursor) {
+    /**
+     * The caller's sessions, newest first; only those of {@code groupId} when given, and only OPEN
+     * ("Live now") or CLOSED (history) ones when {@code listStatus} is given.
+     */
+    public PageDTO<SessionSummaryDTO> list(UUID callerId, UUID groupId, SessionListStatus listStatus, String cursor,
+                                           Integer limit) {
+        int pageSize = limit == null ? PAGE_SIZE : Math.clamp(limit, 1, MAX_PAGE_SIZE);
         Instant afterCreatedAt = null;
         UUID afterId = null;
         if (cursor != null && !cursor.isBlank()) {
@@ -189,15 +223,11 @@ public class SessionService {
         Instant after = afterCreatedAt;
         UUID afterSession = afterId;
         return readTx.execute(status -> {
-            List<Session> rows = sessions.listFor(callerId, groupId, after, afterSession, PAGE_SIZE + 1);
-            boolean more = rows.size() > PAGE_SIZE;
-            List<Session> page = more ? rows.subList(0, PAGE_SIZE) : rows;
-            Map<Integer, MovieSummaryDTO> movies = movieSummaries.of(
-                    page.stream().map(Session::pickedMovieId).filter(Objects::nonNull).toList());
-            Instant now = clock.instant();
-            List<SessionSummaryDTO> items = page.stream()
-                    .map(s -> GroupMapper.toSummaryDTO(s, s.pickedMovieId() == null ? null : movies.get(s.pickedMovieId()), now))
-                    .toList();
+            List<Session> rows = sessions.listFor(callerId, groupId, listStatus, clock.instant(), after, afterSession,
+                    pageSize + 1);
+            boolean more = rows.size() > pageSize;
+            List<Session> page = more ? rows.subList(0, pageSize) : rows;
+            List<SessionSummaryDTO> items = summaries.of(callerId, page);
             String next = more
                     ? CursorCodec.encode(List.of(page.getLast().createdAt().toString(), page.getLast().id().toString()))
                     : null;
@@ -280,6 +310,95 @@ public class SessionService {
         });
     }
 
+    // ------------------------------------------------------------------------------- late joiners / end
+
+    /**
+     * Any member adds some of their own friends to an OPEN session (404 non-member, 409 not OPEN,
+     * 400 unless every id is the caller's friend with no block either way - the same rule as
+     * creating a session, so a blocked person can never be added; 409 past {@value #MAX_MEMBERS}).
+     * People already in it are skipped. New members are emailed like the original invitees, the
+     * session is broadcast as {@code members}, and their votes count from now on.
+     *
+     * <p>Comfort: the new members' settings join the effective filter at once. Results ranked
+     * before they joined are not re-ranked; results that no longer pass are hidden for everyone
+     * (see {@link #toDTO}) and become unpickable. Only the combined filter and a count are shown,
+     * never whose settings caused it. A refresh ({@link #refresh}) tops the list up for the new
+     * group.
+     */
+    public SessionDTO addMembers(UUID callerId, UUID sessionId, List<UUID> userIds) {
+        readTx.executeWithoutResult(status -> requireOpen(requireMember(callerId, sessionId)));
+        List<UUID> friends = groupService.requireInvitableFriends(callerId, userIds);
+        Set<UUID> withVector = vectorLookup.vectorsOf(friends).keySet();
+        return tx.execute(status -> {
+            sessions.lockSession(sessionId);
+            Session session = requireOpen(requireMember(callerId, sessionId));
+            Set<UUID> existing = new HashSet<>(sessions.memberIds(sessionId));
+            List<UUID> added = friends.stream().filter(id -> !existing.contains(id)).toList();
+            if (existing.size() + added.size() > MAX_MEMBERS) {
+                throw new ConflictException(SESSION_FULL);
+            }
+            if (!added.isEmpty()) {
+                Map<UUID, Boolean> hasVector = new LinkedHashMap<>();
+                added.forEach(id -> hasVector.put(id, withVector.contains(id)));
+                admit(session, hasVector);
+                events.publishEvent(new SessionMembersAddedEvent(sessionId, callerId, session.groupName(), added));
+            }
+            return toDTO(callerId, sessions.findSession(sessionId).orElseThrow());
+        });
+    }
+
+    /**
+     * An ACTIVE member of the session's group joins one of its OPEN sessions they are not in yet
+     * (e.g. they joined the group after it started). Idempotent for a member. 404 for anyone else
+     * (ad-hoc sessions included), 409 when not OPEN or full. Broadcast as {@code members}; no email,
+     * since they joined themselves.
+     */
+    public SessionDTO join(UUID callerId, UUID sessionId) {
+        return tx.execute(status -> {
+            sessions.lockSession(sessionId);
+            Session session = sessions.findSession(sessionId)
+                    .orElseThrow(() -> new NotFoundException(SESSION_NOT_FOUND));
+            boolean member = sessions.isMember(sessionId, callerId);
+            if (!member && !groupService.isActiveMember(callerId, session.groupId())) {
+                throw new NotFoundException(SESSION_NOT_FOUND);
+            }
+            requireOpen(session);
+            if (!member) {
+                if (sessions.memberIds(sessionId).size() >= MAX_MEMBERS) {
+                    throw new ConflictException(SESSION_FULL);
+                }
+                admit(session, Map.of(callerId, vectorLookup.vectorsOf(List.of(callerId)).containsKey(callerId)));
+            }
+            return toDTO(callerId, sessions.findSession(sessionId).orElseThrow());
+        });
+    }
+
+    /**
+     * The creator ends an OPEN session without a pick (stored EXPIRED, {@code endedEarly}). 404
+     * non-member, 403 any other member, 409 not OPEN. Broadcast as {@code ended}; nothing goes into
+     * watch history.
+     */
+    public SessionDTO end(UUID callerId, UUID sessionId) {
+        return tx.execute(status -> {
+            sessions.lockSession(sessionId);
+            Session session = requireMember(callerId, sessionId);
+            if (!callerId.equals(session.createdBy())) {
+                throw new ForbiddenException(CREATOR_ONLY);
+            }
+            requireOpen(session);
+            sessions.end(sessionId, clock.instant());
+            events.publishEvent(new SessionUpdatedEvent(sessionId, SessionUpdatedEvent.ENDED));
+            return toDTO(callerId, sessions.findSession(sessionId).orElseThrow());
+        });
+    }
+
+    /** Inserts members (inside the locked transaction), re-stores the now-effective filter and broadcasts. */
+    private void admit(Session session, Map<UUID, Boolean> hasVector) {
+        sessions.insertMembers(session.id(), hasVector);
+        sessions.updateEffectiveFilter(session.id(), currentFilter(session));
+        events.publishEvent(new SessionUpdatedEvent(session.id(), SessionUpdatedEvent.MEMBERS));
+    }
+
     // ------------------------------------------------------------------------------- helpers
 
     private GroupRecommendationInput input(List<UUID> memberIds, ContentFilter effective, SessionFiltersDTO filters,
@@ -336,14 +455,17 @@ public class SessionService {
         List<SessionMember> members = sessions.findMembers(session.id());
         List<SessionResult> results = sessions.findResults(session.id());
         ContentFilter effective = session.effectiveFilter();
+        int hidden = 0;
         if (status == SessionStatus.OPEN) {
             effective = currentFilter(session);
             ContentFilter filter = effective;
             Map<Integer, MovieContent> content = contentFilter.contentOf(
                     results.stream().map(SessionResult::movieId).toList());
-            results = results.stream()
+            List<SessionResult> eligible = results.stream()
                     .filter(r -> content.containsKey(r.movieId()) && filter.isEligible(content.get(r.movieId())))
                     .toList();
+            hidden = results.size() - eligible.size();
+            results = eligible;
         }
         List<SessionVote> votes = sessions.findVotes(session.id());
 
@@ -383,7 +505,8 @@ public class SessionService {
                 session.createdBy() == null ? null : summaries.get(session.createdBy()),
                 status, session.strategy(), session.filters(),
                 effective.toDTO(), members.size(), votedCount, memberDTOs, resultDTOs,
-                session.pickedMovieId() == null ? null : movies.get(session.pickedMovieId()), session.createdAt());
+                session.pickedMovieId() == null ? null : movies.get(session.pickedMovieId()), hidden,
+                session.closesAt(), session.endedEarly(), webUrl + "/sessions/" + session.id(), session.createdAt());
     }
 
     private static SessionResultDTO toResultDTO(SessionResult result, MovieSummaryDTO movie, List<SessionVote> votes,

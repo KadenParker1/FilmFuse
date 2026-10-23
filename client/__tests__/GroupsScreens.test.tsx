@@ -6,6 +6,13 @@ jest.mock('../components/rating/PendingRatingsBanner', () => {
 });
 jest.mock('../auth/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1' } }) }));
 jest.mock('../api/social', () => ({ useFriends: jest.fn() }));
+// "Live now", history and joining have their own tests (SessionHub.test.tsx).
+jest.mock('../api/sessions', () => ({
+  ...jest.requireActual('../api/sessions'),
+  useLiveSessions: jest.fn(),
+  useSessions: jest.fn(),
+  useJoinSession: jest.fn(),
+}));
 jest.mock('../api/groups', () => ({
   ...jest.requireActual('../api/groups'),
   useGroups: jest.fn(),
@@ -25,6 +32,7 @@ import GroupsScreen from '../app/(tabs)/groups';
 import GroupScreen from '../app/groups/[id]';
 import NewGroupScreen from '../app/groups/new';
 import * as groups from '../api/groups';
+import * as sessionsApi from '../api/sessions';
 import { useFriends } from '../api/social';
 import { ApiError, NetworkError } from '../lib/apiClient';
 import {
@@ -63,6 +71,9 @@ beforeEach(() => {
     m(name).mockImplementation(() => muts[name]);
   }
   (useFriends as jest.Mock).mockReturnValue(infiniteResult({ items: friends }));
+  (sessionsApi.useLiveSessions as jest.Mock).mockReturnValue(queryResult({ data: { items: [], nextCursor: null } }));
+  (sessionsApi.useSessions as jest.Mock).mockReturnValue(infiniteResult({ items: [] }));
+  (sessionsApi.useJoinSession as jest.Mock).mockReturnValue(mutationResult());
 });
 
 // ---- Groups tab -------------------------------------------------------------------------------
@@ -226,10 +237,11 @@ describe('GroupScreen', () => {
     show(
       makeGroup({
         effectiveFilter: makeEffectiveFilter({ maxCertification: 'PG', label: 'Rated PG or below' }),
-        recentSessions: [makeSessionSummary()],
       }),
     );
+    (sessionsApi.useSessions as jest.Mock).mockReturnValue(infiniteResult({ items: [makeSessionSummary()] }));
     await render(<GroupScreen />);
+    expect(sessionsApi.useSessions).toHaveBeenCalledWith('g1', null);
     expect(m('useGroup')).toHaveBeenCalledWith('g1');
     expect(screen.getByRole('header', { name: 'Film club' })).toBeOnTheScreen();
     expect(screen.getByText('2 members')).toBeOnTheScreen();

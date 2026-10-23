@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAcceptGroupInvite, useDeclineGroupInvite, useGroups } from '../../api/groups';
 import { GroupCard } from '../../components/groups/GroupCard';
 import { PendingRatingsBanner } from '../../components/rating/PendingRatingsBanner';
+import { LiveNowSection, SessionHistorySection } from '../../components/sessions/SessionHub';
 import { Body, Button, EmptyState, ErrorState, Heading, Label, Screen, Skeleton, errorMessage } from '../../components/ui';
 import { useTheme } from '../../theme/useTheme';
 
@@ -132,8 +133,10 @@ export default function GroupsScreen() {
       <View className="gap-6 pb-28">
         <Heading>Groups</Heading>
         <TonightCta onPress={() => router.push('/sessions/new')} />
+        <LiveNowSection />
         <PendingRatingsBanner />
         {content}
+        <SessionHistorySection title="Past movie nights" />
       </View>
     </Screen>
   );

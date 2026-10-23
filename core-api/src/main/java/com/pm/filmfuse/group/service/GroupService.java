@@ -11,7 +11,6 @@ import com.pm.filmfuse.group.dto.GroupMemberDTO;
 import com.pm.filmfuse.group.dto.GroupRole;
 import com.pm.filmfuse.group.dto.GroupSummaryDTO;
 import com.pm.filmfuse.group.dto.MemberStatus;
-import com.pm.filmfuse.group.dto.SessionSummaryDTO;
 import com.pm.filmfuse.group.dto.UpdateGroupDTO;
 import com.pm.filmfuse.group.mapper.GroupMapper;
 import com.pm.filmfuse.group.model.Group;
@@ -20,8 +19,6 @@ import com.pm.filmfuse.group.model.GroupMember;
 import com.pm.filmfuse.group.model.Session;
 import com.pm.filmfuse.group.repository.GroupRepository;
 import com.pm.filmfuse.group.repository.SessionRepository;
-import com.pm.filmfuse.movie.dto.MovieSummaryDTO;
-import com.pm.filmfuse.movie.service.MovieSummaries;
 import com.pm.filmfuse.reco.model.ContentFilter;
 import com.pm.filmfuse.reco.service.ContentFilterService;
 import com.pm.filmfuse.social.dto.UserSummaryDTO;
@@ -76,19 +73,19 @@ public class GroupService {
     private final SocialGraphService graph;
     private final SocialUsers users;
     private final ContentFilterService contentFilter;
-    private final MovieSummaries movieSummaries;
+    private final SessionSummaries sessionSummaries;
     private final ApplicationEventPublisher events;
     private final Clock clock;
 
     public GroupService(GroupRepository groups, SessionRepository sessions, SocialGraphService graph, SocialUsers users,
-                        ContentFilterService contentFilter, MovieSummaries movieSummaries,
+                        ContentFilterService contentFilter, SessionSummaries sessionSummaries,
                         ApplicationEventPublisher events, Clock clock) {
         this.groups = groups;
         this.sessions = sessions;
         this.graph = graph;
         this.users = users;
         this.contentFilter = contentFilter;
-        this.movieSummaries = movieSummaries;
+        this.sessionSummaries = sessionSummaries;
         this.events = events;
         this.clock = clock;
     }
@@ -230,6 +227,12 @@ public class GroupService {
         return group;
     }
 
+    /** Whether {@code userId} is an ACTIVE member of {@code groupId} (false for a null or deleted group). */
+    @Transactional(readOnly = true)
+    public boolean isActiveMember(UUID userId, UUID groupId) {
+        return groupId != null && groups.findMembership(groupId, userId).map(GroupMember::isActive).orElse(false);
+    }
+
     /** ACTIVE member ids: owner first, then by join time. */
     @Transactional(readOnly = true)
     public List<UUID> activeMemberIds(UUID groupId) {
@@ -332,19 +335,14 @@ public class GroupService {
         List<UUID> activeIds = members.stream().filter(GroupMember::isActive).map(GroupMember::userId).toList();
         int invitedCount = (int) members.stream().filter(m -> m.status() == MemberStatus.INVITED).count();
         ContentFilter effective = contentFilter.effectiveFor(activeIds, group.cap());
+        Instant now = clock.instant();
+        List<Session> recent = sessions.listFor(callerId, groupId, null, now, null, null, RECENT_SESSIONS);
+        List<Session> joinable = mine.isActive()
+                ? sessions.openWithout(groupId, callerId, now, RECENT_SESSIONS)
+                : List.of();
         return new GroupDetailDTO(group.id(), group.name(), group.emoji(), group.color(), group.ownerId(), mine.role(),
                 mine.status(), activeIds.size(), invitedCount, memberDTOs, GroupMapper.toCapDTO(group.cap()), effective.toDTO(),
-                recentSessions(callerId, groupId));
-    }
-
-    private List<SessionSummaryDTO> recentSessions(UUID callerId, UUID groupId) {
-        List<Session> recent = sessions.listFor(callerId, groupId, null, null, RECENT_SESSIONS);
-        Map<Integer, MovieSummaryDTO> movies = movieSummaries.of(recent.stream()
-                .map(Session::pickedMovieId).filter(Objects::nonNull).toList());
-        Instant now = clock.instant();
-        return recent.stream()
-                .map(s -> GroupMapper.toSummaryDTO(s, s.pickedMovieId() == null ? null : movies.get(s.pickedMovieId()), now))
-                .toList();
+                sessionSummaries.of(callerId, recent), sessionSummaries.of(callerId, joinable));
     }
 
     private Map<UUID, UserSummaryDTO> summaries(UUID viewer, Collection<UUID> ids) {

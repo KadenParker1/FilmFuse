@@ -2,13 +2,14 @@ import { useWindowDimensions, View } from 'react-native';
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useGroupsBadgeCount } from '../../api/groupsBadge';
 import { useFriendRequests } from '../../api/social';
 import { ProfileGate } from '../../components/ProfileGate';
 import { RateFab } from '../../components/RateFab';
 import { NavRail, type NavRailProps } from '../../components/nav/NavRail';
-import { NAV_TABS } from '../../components/nav/navTabs';
+import { NAV_TABS, tabAccessibilityLabel, type TabBadges } from '../../components/nav/navTabs';
 import { PendingLinkRedeemer } from '../../components/social/PendingLinkRedeemer';
-import { badgeCount, pluralize } from '../../lib/format';
+import { badgeCount } from '../../lib/format';
 import { fonts, WIDE_BREAKPOINT } from '../../theme/tokens';
 import { useTheme } from '../../theme/useTheme';
 
@@ -36,13 +37,15 @@ function TabsShell() {
   const wide = width >= WIDE_BREAKPOINT;
   const incoming = useFriendRequests('INCOMING');
   const incomingCount = incoming.data?.length ?? 0;
+  const groupsCount = useGroupsBadgeCount();
+  const badges: TabBadges = { index: incomingCount, groups: groupsCount };
 
   return (
     <View className="flex-1">
       <Tabs
         tabBar={
           wide
-            ? (props) => <NavRail {...(props as unknown as Omit<NavRailProps, 'incomingCount'>)} incomingCount={incomingCount} />
+            ? (props) => <NavRail {...(props as unknown as Omit<NavRailProps, 'badges'>)} badges={badges} />
             : undefined
         }
         screenOptions={{
@@ -62,8 +65,8 @@ function TabsShell() {
         }}
       >
         {NAV_TABS.map((tab) => {
-          // The Social tab carries the pending friend-request count.
-          const count = tab.name === 'index' ? incomingCount : 0;
+          // Social: pending friend requests. Groups: open sessions I haven't voted in + group invites.
+          const count = badges[tab.name] ?? 0;
           return (
             <Tabs.Screen
               key={tab.name}
@@ -71,7 +74,7 @@ function TabsShell() {
               options={{
                 title: tab.title,
                 tabBarBadge: badgeCount(count),
-                tabBarAccessibilityLabel: count > 0 ? `${tab.title}, ${pluralize(count, 'friend request')}` : tab.title,
+                tabBarAccessibilityLabel: tabAccessibilityLabel(tab, count),
                 tabBarIcon: ({ focused, color, size }) => (
                   <Ionicons name={focused ? tab.iconFocused : tab.icon} size={size} color={color as string} />
                 ),

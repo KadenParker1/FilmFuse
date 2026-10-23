@@ -245,7 +245,7 @@ class SessionIntegrationTest extends AbstractGroupIntegrationTest {
     }
 
     @Test
-    void laterGroupMembersDoNotSeeEarlierSessions() throws Exception {
+    void laterGroupMembersAreNotInEarlierSessionsUntilTheyJoin() throws Exception {
         TestUser owner = user();
         TestUser early = user();
         TestUser late = user();
@@ -256,8 +256,11 @@ class SessionIntegrationTest extends AbstractGroupIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON).content("{\"userIds\": [\"" + late.id() + "\"]}"));
         acceptGroupInvite(late, groupId).andExpect(status().isOk());
 
-        getSession(late, sessionId).andExpect(status().isNotFound());
-        getGroup(late, groupId).andExpect(jsonPath("$.recentSessions", hasSize(0)));
+        // Not a member (no votes, no results), but may join: see SessionLiveIntegrationTest.
+        getSession(late, sessionId).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("You're not in this session yet. Join it to vote."));
+        getGroup(late, groupId).andExpect(jsonPath("$.recentSessions", hasSize(0)))
+                .andExpect(jsonPath("$.joinableSessions[0].id").value(sessionId.toString()));
         getGroup(early, groupId).andExpect(jsonPath("$.recentSessions[0].id").value(sessionId.toString()));
     }
 
