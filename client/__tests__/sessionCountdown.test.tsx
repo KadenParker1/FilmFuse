@@ -174,6 +174,58 @@ describe('useCountdown', () => {
     expect(remove).toHaveBeenCalled();
   });
 
+  it('stops ticking on unmount', async () => {
+    const onExpire = jest.fn();
+    let renders = 0;
+    const { unmount } = await renderHook(() => {
+      renders += 1;
+      return useCountdown(at(2 * SECOND_MS), onExpire);
+    });
+    await act(() => jest.advanceTimersByTime(0));
+    await unmount();
+    const before = renders;
+    await act(() => jest.advanceTimersByTime(HOUR_MS));
+    expect(renders).toBe(before);
+    expect(onExpire).not.toHaveBeenCalled();
+  });
+
+  it('after the retry it goes quiet: no more ticks or refetches while the server still says open', async () => {
+    const onExpire = jest.fn();
+    let renders = 0;
+    const { result, rerender } = await renderHook(
+      ({ c }: { c: string }) => {
+        renders += 1;
+        return useCountdown(c, onExpire);
+      },
+      { initialProps: { c: at(5 * MINUTE_MS) } },
+    );
+    // A closesAt change (e.g. a refetch) restarts the one timer rather than adding a second.
+    await rerender({ c: at(SECOND_MS) });
+    await act(() => jest.advanceTimersByTime(SECOND_MS + 1));
+    expect(onExpire).toHaveBeenCalledTimes(1);
+    await act(() => jest.advanceTimersByTime(EXPIRE_RETRY_MS));
+    expect(onExpire).toHaveBeenCalledTimes(2);
+    // The refetch came back with the same closesAt and a fresh onExpire: still nothing more.
+    await rerender({ c: at(SECOND_MS) });
+    const before = renders;
+    await act(() => jest.advanceTimersByTime(HOUR_MS));
+    expect(renders).toBe(before);
+    expect(onExpire).toHaveBeenCalledTimes(2);
+    expect(result.current.label).toBe('Closing…');
+  });
+
+  it('ticks at most once a minute with hours left (no per-second re-renders)', async () => {
+    let renders = 0;
+    await renderHook(() => {
+      renders += 1;
+      return useCountdown(at(5 * HOUR_MS));
+    });
+    await act(() => jest.advanceTimersByTime(0));
+    const before = renders;
+    await act(() => jest.advanceTimersByTime(10 * MINUTE_MS));
+    expect(renders - before).toBeLessThanOrEqual(10);
+  });
+
   it('restarts when closesAt changes', async () => {
     const { result, rerender } = await renderHook(({ c }: { c: string }) => useCountdown(c), {
       initialProps: { c: at(5 * MINUTE_MS) },
