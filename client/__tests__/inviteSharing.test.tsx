@@ -142,6 +142,7 @@ describe('pendingLinkPath', () => {
     [`https://filmfuse.app/sessions/${SID}`, `/sessions/${SID}`],
     [`https://filmfuse.app/sessions/${SID}/?utm=email#top`, `/sessions/${SID}`],
     [`filmfuse://groups/${SID}`, `/groups/${SID}`],
+    [`filmfuse:///groups/${SID}`, `/groups/${SID}`],
     [`exp://192.168.1.2:8081/--/sessions/${SID}`, `/sessions/${SID}`],
     ['https://filmfuse.app', '/'],
     ['https://filmfuse.app?x=1', '/'],
@@ -149,6 +150,18 @@ describe('pendingLinkPath', () => {
     ['', null],
     [null, null],
   ])('pathFromUrl(%p) → %p', (url, path) => expect(pathFromUrl(url)).toBe(path));
+
+  it.each([
+    `https://evil.example//sessions/${SID}`,
+    `https://filmfuse.app/sessions/${SID}/..`,
+    `https://filmfuse.app/sessions/..%2F..%2F${SID}`,
+    `https://filmfuse.app/sessions%2F${SID}`,
+    `https://filmfuse.app/sessions/${SID}%2F..`,
+    `https://filmfuse.app/sessions\\${SID}`,
+    `filmfuse://evil.example/sessions/${SID}`,
+    `javascript://sessions/${SID}`.replace('sessions', '%0Aalert(1)//sessions'),
+    `https://filmfuse.app/sessions/${SID}x`,
+  ])('a tampered link %p is never kept', (url) => expect(isGuardedLinkPath(pathFromUrl(url))).toBe(false));
 });
 
 describe('pendingLink (native, SecureStore)', () => {

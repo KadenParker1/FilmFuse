@@ -44,8 +44,9 @@ export function pathFromUrl(url: string | null | undefined): string | null {
     const slash = after.search(/[/?#]/);
     rest = slash >= 0 && after[slash] === '/' ? after.slice(slash) : '/';
   } else {
-    // A custom scheme's "host" is the first path segment (filmfuse://sessions/x).
-    rest = `/${after}`;
+    // A custom scheme's "host" is the first path segment (filmfuse://sessions/x); the empty-host form
+    // (filmfuse:///sessions/x) means the same.
+    rest = `/${after.replace(/^\/+/, '')}`;
   }
   const path = rest.split(/[?#]/)[0] ?? '/';
   const trimmed = path.length > 1 ? path.replace(/\/+$/, '') : path;
