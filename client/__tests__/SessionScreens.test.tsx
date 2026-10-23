@@ -61,6 +61,8 @@ beforeEach(() => {
 });
 
 // ---- New session ------------------------------------------------------------------------------
+// (Shortcuts — same crew again, save as group, route params — are covered in NewSessionShortcuts.test.tsx.)
+jest.mock('../api/sessionSetup', () => ({ useLastSessionSetup: () => ({ data: null }) }));
 
 describe('NewSessionScreen', () => {
   const findMovies = () => screen.getByRole('button', { name: 'Find movies' });
@@ -84,6 +86,9 @@ describe('NewSessionScreen', () => {
     await fireEvent.press(screen.getByRole('radio', { name: 'Under 1h 30' }));
     await fireEvent.changeText(screen.getByLabelText('Released from (year)'), '1985');
     await fireEvent.press(screen.getByRole('button', { name: 'Comedy' }));
+    // The strategy lives in the collapsed Advanced section.
+    expect(screen.queryByRole('radio', { name: /^Fairness:/ })).toBeNull();
+    await fireEvent.press(screen.getByRole('button', { name: 'Advanced, Mean' }));
     await fireEvent.press(screen.getByRole('radio', { name: /^Fairness:/ }));
     await fireEvent.press(findMovies());
     expect(muts.useCreateSession.mutate).toHaveBeenCalledWith(

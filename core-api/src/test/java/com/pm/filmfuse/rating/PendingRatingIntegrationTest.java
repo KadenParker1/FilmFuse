@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** GET /me/pending-ratings and POST /me/pending-ratings/{movieId}/dismiss (contract section A). */
+/** GET /me/pending-ratings and POST / DELETE /me/pending-ratings/{movieId}/dismiss (contract section A). */
 class PendingRatingIntegrationTest extends AbstractPhase5IntegrationTest {
 
     private List<Integer> pendingMovieIds(TestUser user) throws Exception {
@@ -167,6 +167,51 @@ class PendingRatingIntegrationTest extends AbstractPhase5IntegrationTest {
                 .andExpect(jsonPath("$.message").value("Movie not found."));
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                         .post("/api/v1/me/pending-ratings/abc/dismiss").with(a.auth()))
+                .andExpect(status().isBadRequest());
+    }
+
+    private org.springframework.test.web.servlet.ResultActions undismissPending(TestUser user, int movieId)
+            throws Exception {
+        return mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                .delete("/api/v1/me/pending-ratings/{id}/dismiss", movieId).with(user.auth()));
+    }
+
+    @Test
+    void undoingADismissalBringsThePromptBackIdempotently() throws Exception {
+        TestUser a = user();
+        TestUser b = user();
+        befriend(a, b);
+        Watched first = watchAdHoc(a, b);
+        Watched second = watchAdHoc(a, b);
+        dismissPending(a, first.movieId()).andExpect(status().isNoContent());
+        assertThat(pendingMovieIds(a)).containsExactly(second.movieId());
+
+        undismissPending(a, first.movieId()).andExpect(status().isNoContent());
+        undismissPending(a, first.movieId()).andExpect(status().isNoContent());
+        assertThat(rows("select count(*) from app.pending_rating_dismissals where user_id = ?", a.id())).isZero();
+        assertThat(pendingMovieIds(a)).containsExactly(second.movieId(), first.movieId());
+        // Nothing to undo (never dismissed, unknown movie) is fine too.
+        undismissPending(a, second.movieId()).andExpect(status().isNoContent());
+        undismissPending(a, -7).andExpect(status().isNoContent());
+        undismissPending(a, 0).andExpect(status().isNoContent());
+    }
+
+    @Test
+    void undoNeedsATokenAndOnlyTouchesTheCallersDismissal() throws Exception {
+        TestUser a = user();
+        TestUser b = user();
+        befriend(a, b);
+        Watched watched = watchAdHoc(a, b);
+        dismissPending(a, watched.movieId()).andExpect(status().isNoContent());
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                .delete("/api/v1/me/pending-ratings/{id}/dismiss", watched.movieId()))
+                .andExpect(status().isUnauthorized());
+        undismissPending(b, watched.movieId()).andExpect(status().isNoContent());
+        assertThat(pendingMovieIds(a)).isEmpty();
+        assertThat(rows("select count(*) from app.pending_rating_dismissals where user_id = ?", a.id())).isEqualTo(1);
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .delete("/api/v1/me/pending-ratings/abc/dismiss").with(a.auth()))
                 .andExpect(status().isBadRequest());
     }
 }

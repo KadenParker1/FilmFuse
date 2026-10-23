@@ -59,6 +59,7 @@ function DetailSkeleton() {
 
 function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
   const { colors } = useTheme();
+  const router = useRouter();
   const { openQuickRate } = useQuickRate();
   const myRating = useMyRating(movie.id);
   const meta = metaLine(movie);
@@ -126,6 +127,14 @@ function MovieDetail({ movie }: { movie: MovieDetailDTO }) {
             icon={<Ionicons name="bookmark-outline" size={18} color={colors.text} />}
           />
         </View>
+        <Button
+          title="Watch with…"
+          variant="secondary"
+          accessibilityLabel={`Watch ${movie.title} with friends`}
+          accessibilityHint="Starts a movie night"
+          icon={<Ionicons name="people-outline" size={18} color={colors.text} />}
+          onPress={() => router.push(`/sessions/new?movieId=${movie.id}`)}
+        />
         {myRating.data ? (
           <View testID="my-rating" className="-mt-2 flex-row items-center gap-2 self-center">
             <Ionicons name="star" size={14} color={colors.accent} />

@@ -33,3 +33,12 @@ export function useDismissPendingRating() {
     },
   });
 }
+
+/** Undo of a dismissal: the prompt comes back (refetched, so it lands in its place). */
+export function useUndismissPendingRating() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (movieId: number) => apiClient.del<void>(`${PENDING_RATINGS_PATH}/${movieId}/dismiss`),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: queryKeys.pendingRatings }),
+  });
+}

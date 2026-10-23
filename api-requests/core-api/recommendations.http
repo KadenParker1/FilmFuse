@@ -18,6 +18,10 @@ Authorization: Bearer {{token}}
 POST {{baseUrl}}/api/v1/me/recommendations/550/dismiss
 Authorization: Bearer {{token}}
 
+### Undo "Not interested" (204, idempotent; marks the vector dirty again when a dismissal was removed)
+DELETE {{baseUrl}}/api/v1/me/recommendations/550/dismiss
+Authorization: Bearer {{token}}
+
 ### Recalibrate: next swipe posters (count 1-30, default 10)
 GET {{baseUrl}}/api/v1/me/calibration/next
 Authorization: Bearer {{token}}

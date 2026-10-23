@@ -9,6 +9,8 @@ import { notifyManager } from '@tanstack/react-query';
 import { RateFab } from '../components/RateFab';
 import {
   QuickRateProvider,
+  RATING_REMOVED,
+  restoreRatingBody,
   TASTE_UPDATED,
   TASTE_UPDATING,
   TASTE_WAIT_MAX_MS,
@@ -238,6 +240,40 @@ describe('QuickRateSheet: re-rating', () => {
     await waitFor(() => expect(sheetOpen()).toBe(false));
     expect(api.callsTo('DELETE', '/ratings/100')).toHaveLength(1);
     expect(screen.getByTestId('toast')).toHaveTextContent(TASTE_UPDATING);
+  });
+
+  it('"Rating removed" offers Undo, which PUTs the old rating back exactly', async () => {
+    const withDate = { ...existing, watchedOn: '2026-10-01' };
+    const { api } = await openHeat([
+      { path: '/me/ratings/100', body: withDate, times: 1 },
+      { method: 'DELETE', path: '/ratings/100', status: 204 },
+      { method: 'PUT', path: '/ratings/100', body: withDate },
+      ...tasteRoutes('REBUILDING'),
+    ]);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Remove rating' })).toBeOnTheScreen());
+    await fireEvent.press(screen.getByRole('button', { name: 'Remove rating' }));
+    await waitFor(() => expect(screen.getByTestId('undo-toast')).toHaveTextContent(`${RATING_REMOVED}Undo`));
+    // Both toasts are up; the taste one moves out of the way.
+    expect(screen.getByTestId('toast')).toHaveTextContent(TASTE_UPDATING);
+    await fireEvent.press(screen.getByRole('button', { name: 'Undo removing your rating of Heat' }));
+    await waitFor(() => expect(api.callsTo('PUT', '/ratings/100')).toHaveLength(1));
+    expect(api.callsTo('PUT', '/ratings/100')[0]?.body).toEqual({
+      score: 7,
+      body: 'Tense',
+      containsSpoilers: true,
+      visibility: 'PUBLIC',
+      watchedOn: '2026-10-01',
+      source: 'POST_WATCH',
+    });
+    expect(screen.queryByTestId('undo-toast')).toBeNull();
+  });
+
+  it('restoreRatingBody turns a calibration swipe into a quick rate (PUT refuses swipes)', () => {
+    expect(restoreRatingBody(makeRating({ source: 'ONBOARDING_SWIPE', score: 4, visibility: 'PRIVATE' }))).toMatchObject({
+      score: 4,
+      visibility: 'PRIVATE',
+      source: 'QUICK_RATE',
+    });
   });
 
   it('shows a failed removal inline', async () => {

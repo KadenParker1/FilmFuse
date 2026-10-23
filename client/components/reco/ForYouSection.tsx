@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { flattenPages } from '../../api/movies';
-import { useDismissRecommendation, useRecommendations } from '../../api/recommendations';
+import { useDismissRecommendation, useRecommendations, useUndismissRecommendation } from '../../api/recommendations';
 import { useTasteProfile } from '../../api/taste';
 import { useQuickRate } from '../rating/QuickRateProvider';
-import { Body, Button, Card, ErrorState, Heading, Skeleton, errorMessage } from '../ui';
+import { Body, Button, Card, ErrorState, Heading, Skeleton, errorMessage, useUndoToast } from '../ui';
 import { RecommendationCard } from './RecommendationCard';
 
 function ForYouSkeleton() {
@@ -21,13 +21,20 @@ function ForYouSkeleton() {
   );
 }
 
-/** Discover: personal picks from the caller's taste vector, with Seen it (quick rate) / Not interested. */
+export const DISMISSED_MESSAGE = 'Removed from For you';
+
+/**
+ * Discover: personal picks from the caller's taste vector, with Seen it (quick rate) / Not interested.
+ * "Not interested" can be taken back from the undo toast.
+ */
 export function ForYouSection() {
   const router = useRouter();
   const { openQuickRate, openRatePicker } = useQuickRate();
   const taste = useTasteProfile();
   const recs = useRecommendations();
   const dismiss = useDismissRecommendation();
+  const undismiss = useUndismissRecommendation();
+  const { showUndo } = useUndoToast();
   const items = useMemo(() => flattenPages(recs.data), [recs.data]);
   const noVector = taste.data?.status === 'NONE';
 
@@ -76,7 +83,16 @@ export function ForYouSection() {
             rec={rec}
             onOpen={() => router.push(`/movie/${rec.movie.id}`)}
             onSeen={() => openQuickRate(rec.movie)}
-            onDismiss={() => dismiss.mutate(rec.movie.id)}
+            onDismiss={() =>
+              dismiss.mutate(rec.movie.id, {
+                onSuccess: () =>
+                  showUndo({
+                    message: DISMISSED_MESSAGE,
+                    undoAccessibilityLabel: `Undo hiding ${rec.movie.title}`,
+                    onUndo: () => undismiss.mutateAsync(rec.movie.id),
+                  }),
+              })
+            }
           />
         ))}
         {recs.hasNextPage ? (

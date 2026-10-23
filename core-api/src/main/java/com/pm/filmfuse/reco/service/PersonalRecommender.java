@@ -156,6 +156,20 @@ public class PersonalRecommender {
         });
     }
 
+    /**
+     * Undo of "Not interested": the movie may be recommended again. Removing a dismissal changes the
+     * taste signals too (vector dirty, DISMISS). The cached list was ranked without the movie, so it is
+     * dropped. 204, idempotent; a movie that was never dismissed is a no-op.
+     */
+    public void undismiss(UUID userId, int movieId) {
+        tx.executeWithoutResult(status -> {
+            if (dismissals.delete(userId, movieId)) {
+                dirtyMarker.markDirty(userId, VectorChangeReason.DISMISS);
+            }
+        });
+        cache.remove(userId);
+    }
+
     private List<MlUserRecommendation> rank(UUID userId, StoredVector vector, ContentFilter filter,
                                             Set<Integer> excluded) {
         List<Integer> pool = contentFilter.eligiblePool(filter, CandidateCriteria.NONE, excluded,

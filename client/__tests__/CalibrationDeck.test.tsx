@@ -217,3 +217,62 @@ describe('CalibrationDeck counter (bug 2: "Rated 18" after 9 ratings)', () => {
     expect(screen.getByTestId('calibration-progress')).toHaveTextContent('Rated 5 of 10');
   });
 });
+
+describe('CalibrationDeck Back (undo the last card)', () => {
+  it('has no Back before the first answer', async () => {
+    await renderDeck(batches(batchOf(1)));
+    await card(1);
+    expect(screen.queryByRole('button', { name: /^Back/ })).toBeNull();
+  });
+
+  it('takes back a score: the card returns with that score and the count drops', async () => {
+    const { api } = await renderDeck([...batches(batchOf(1, 3), []), batchOk], { minRated: 0 });
+    await card(1);
+    await rate(8, 'Movie 1');
+    await card(2);
+    expect(screen.getByTestId('calibration-progress')).toHaveTextContent('Rated 1');
+    await fireEvent.press(screen.getByRole('button', { name: 'Back to Movie 1' }));
+    await card(1);
+    expect(screen.getByLabelText('Your score for Movie 1').props.accessibilityValue.now).toBe(8);
+    expect(screen.getByTestId('calibration-progress')).toHaveTextContent('Rated 0');
+    expect(screen.queryByRole('button', { name: /^Back/ })).toBeNull();
+
+    // Re-answer differently; only the new answers are submitted.
+    await unseen();
+    await card(2);
+    await rate(6, 'Movie 2');
+    await card(3);
+    await fireEvent.press(screen.getByRole('button', { name: 'Back to Movie 2' }));
+    await card(2);
+    await rate(3, 'Movie 2');
+    await card(3);
+    await unseen();
+    await waitFor(() => expect(api.callsTo('POST', '/me/ratings/batch')).toHaveLength(1));
+    expect(api.callsTo('POST', '/me/ratings/batch')[0]?.body).toEqual([
+      { movieId: 1, score: null, unseen: true },
+      { movieId: 2, score: 3, unseen: false },
+      { movieId: 3, score: null, unseen: true },
+    ]);
+  });
+
+  it('taking back "Haven’t seen" resets the slider and leaves the rated count alone', async () => {
+    await renderDeck(batches(batchOf(1, 3)));
+    await card(1);
+    await rate(9, 'Movie 1');
+    await card(2);
+    await unseen();
+    await card(3);
+    await fireEvent.press(screen.getByRole('button', { name: 'Back to Movie 2' }));
+    await card(2);
+    expect(screen.getByLabelText('Your score for Movie 2').props.accessibilityValue.now).toBe(5);
+    expect(screen.getByTestId('calibration-progress')).toHaveTextContent('Rated 1 of 10');
+  });
+
+  it('a saved batch can no longer be taken back', async () => {
+    await renderDeck([...batches(batchOf(1, 1), batchOf(2, 2)), batchOk]);
+    await card(1);
+    await rate(7, 'Movie 1');
+    await card(2);
+    expect(screen.queryByRole('button', { name: /^Back/ })).toBeNull();
+  });
+});

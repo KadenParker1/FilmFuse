@@ -20,7 +20,8 @@ export function PendingLinkRedeemer() {
       const path = await getPendingLink().catch(() => null);
       if (!path) return;
       await clearPendingLink().catch(() => {});
-      // Only the allow-listed shapes (/invite/…, /user/…, /ratings/…) are ever stored or read back.
+      // Only the allow-listed shapes (/invite/…, /user/…, /ratings/…, /sessions/<uuid>, /groups/<uuid>)
+      // are ever stored or read back. Mounted inside ProfileGate, so this waits for onboarding too.
       router.push(path as Href);
     })();
   }, [navReady, router]);

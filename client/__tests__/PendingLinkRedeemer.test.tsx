@@ -45,6 +45,16 @@ describe('PendingLinkRedeemer', () => {
     await waitFor(() => expect(routerState.router.push).toHaveBeenCalledWith('/ratings/r9'));
   });
 
+  it.each(['/sessions/8f14e45f-ceea-4e7a-9b1c-2a3b4c5d6e7f', '/groups/8f14e45f-ceea-4e7a-9b1c-2a3b4c5d6e7f'])(
+    'reopens a saved session or group link (%s)',
+    async (path) => {
+      getPending.mockResolvedValue(path);
+      await render(<PendingLinkRedeemer />);
+      await waitFor(() => expect(routerState.router.push).toHaveBeenCalledWith(path));
+      expect(clearPending).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it('does nothing without a saved link', async () => {
     getPending.mockResolvedValue(null);
     await render(<PendingLinkRedeemer />);

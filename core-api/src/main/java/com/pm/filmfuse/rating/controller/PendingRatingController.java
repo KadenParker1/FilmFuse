@@ -6,6 +6,7 @@ import com.pm.filmfuse.user.model.Profile;
 import com.pm.filmfuse.user.security.CurrentUser;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,5 +36,12 @@ public class PendingRatingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void dismiss(@CurrentUser Profile caller, @PathVariable int movieId) {
         service.dismiss(caller.getId(), movieId);
+    }
+
+    /** Undo a dismissal. 204, idempotent. */
+    @DeleteMapping("/{movieId}/dismiss")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void undismiss(@CurrentUser Profile caller, @PathVariable int movieId) {
+        service.undismiss(caller.getId(), movieId);
     }
 }

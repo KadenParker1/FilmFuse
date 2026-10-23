@@ -41,3 +41,18 @@ export function useDismissRecommendation() {
     onSuccess: () => markTasteRebuilding(qc),
   });
 }
+
+/**
+ * Undo of "Not interested": the server forgets the dismissal (and marks the taste stale again), so
+ * "For you" is refetched and the pick comes back where the ranking puts it.
+ */
+export function useUndismissRecommendation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (movieId: number) => apiClient.del<void>(`/me/recommendations/${movieId}/dismiss`),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.recommendations });
+      markTasteRebuilding(qc);
+    },
+  });
+}

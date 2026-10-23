@@ -22,7 +22,8 @@ type FormProps = {
   existing: RatingDTO | null;
   source: RatingSource;
   onSaved: (rating: RatingDTO) => void;
-  onRemoved: () => void;
+  /** Gets the rating as it was before removal (for Undo). */
+  onRemoved: (previous: RatingDTO) => void;
 };
 
 function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProps) {
@@ -59,8 +60,9 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
   };
 
   const removeRating = () => {
+    if (!existing) return;
     upsert.reset();
-    remove.mutate(movie.id, { onSuccess: onRemoved });
+    remove.mutate(movie.id, { onSuccess: () => onRemoved(existing) });
   };
 
   const fieldErrors = upsert.error instanceof ApiError ? upsert.error.fieldErrors : {};
@@ -215,7 +217,7 @@ type Props = {
   onPickMovie: (movie: MovieSummaryDTO) => void;
   onClose: () => void;
   onSaved: (rating: RatingDTO) => void;
-  onRemoved: () => void;
+  onRemoved: (previous: RatingDTO) => void;
   source?: RatingSource;
 };
 

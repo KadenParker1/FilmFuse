@@ -55,4 +55,10 @@ public class PendingRatingRepository {
                 """, new MapSqlParameterSource("user", userId).addValue("movie", movieId)
                 .addValue("now", Timestamp.from(now)));
     }
+
+    /** Undo of a dismissal; idempotent. */
+    public void undismiss(UUID userId, int movieId) {
+        jdbc.update("delete from app.pending_rating_dismissals where user_id = :user and movie_id = :movie",
+                new MapSqlParameterSource("user", userId).addValue("movie", movieId));
+    }
 }

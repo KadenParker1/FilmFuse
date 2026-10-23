@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,6 +45,13 @@ public class RecommendationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void dismiss(@CurrentUser Profile caller, @PathVariable int movieId) {
         personalRecommender.dismiss(caller.getId(), movieId);
+    }
+
+    /** Undo "Not interested". 204, idempotent (nothing to undo is fine too). */
+    @DeleteMapping("/recommendations/{movieId}/dismiss")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void undismiss(@CurrentUser Profile caller, @PathVariable int movieId) {
+        personalRecommender.undismiss(caller.getId(), movieId);
     }
 
     /** The next calibration posters: never rated, unseen or favourite movies. */
