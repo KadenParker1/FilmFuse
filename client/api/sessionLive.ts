@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect } from 'expo-router';
+import { ApiError } from '../lib/apiClient';
 import { queryKeys } from '../lib/queryKeys';
 import { POLL_INTERVAL_MS, subscribeToSession, type LiveMode } from '../lib/realtime';
 import { useSession } from './sessions';
@@ -16,10 +17,14 @@ export function useSessionLive(sessionId: string | undefined): { mode: LiveMode 
   const status = session.data?.status;
   // Before the first load we don't know the status yet; listen optimistically.
   const open = status === undefined || status === 'OPEN';
+  // A group member who isn't in the session yet (403, "Join") can't join the private channel: RLS
+  // only lets members in. Wait until they join - the session then loads - and subscribe afresh,
+  // rather than staying on the polling fallback from the rejected attempt.
+  const notMember = !session.data && session.error instanceof ApiError && session.error.status === 403;
   const [mode, setMode] = useState<LiveMode>('connecting');
 
   useEffect(() => {
-    if (!sessionId || !open) return;
+    if (!sessionId || !open || notMember) return;
     return subscribeToSession(sessionId, {
       onMode: setMode,
       onUpdate: (payload) => {
@@ -32,7 +37,7 @@ export function useSessionLive(sessionId: string | undefined): { mode: LiveMode 
         }
       },
     });
-  }, [qc, sessionId, open]);
+  }, [qc, sessionId, open, notMember]);
 
   const polling = !!sessionId && status === 'OPEN' && mode === 'polling';
   useFocusEffect(

@@ -273,6 +273,26 @@ describe('useSessionLive', () => {
     expect(mockSupabase.channel).not.toHaveBeenCalled();
   });
 
+  it('a group member who has to join first subscribes once they are in (not stuck polling)', async () => {
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(jsonResponse(403, { message: "You're not in this session yet. Join it to vote." })),
+    );
+    const { client, result } = await mount();
+    await advance(0);
+    // The optimistic subscription is dropped once the 403 arrives; the rejected channel is closed.
+    expect(mockSupabase.removeChannel).toHaveBeenCalled();
+    mockSupabase.channel.mockClear();
+
+    // Joining stores the session (what useJoinSession does on success).
+    await act(async () => {
+      client.setQueryData(queryKeys.session('s1'), makeSession({ id: 's1', status: 'OPEN' }));
+    });
+    await flush();
+    expect(mockSupabase.channel).toHaveBeenCalledWith('session:s1', { config: { private: true } });
+    await act(async () => mockState.status?.('SUBSCRIBED'));
+    expect(result.current.mode).toBe('live');
+  });
+
   it('stops polling after unmount', async () => {
     const { unmount } = await mount();
     await act(async () => mockState.status?.('TIMED_OUT'));
