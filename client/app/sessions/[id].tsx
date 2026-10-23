@@ -22,8 +22,9 @@ import { SessionMembersRow } from '../../components/sessions/SessionMembersRow';
 import { SessionResultCard } from '../../components/sessions/SessionResultCard';
 import { ShareSessionButton } from '../../components/sessions/ShareSessionButton';
 import { TallyPanel } from '../../components/sessions/TallyPanel';
+import { SessionCountdown } from '../../components/sessions/SessionCountdown';
 import { STATUS_LABELS, orderResults, strategyLabel } from '../../components/sessions/sessionCopy';
-import { computeTally, timeLeft } from '../../components/sessions/tally';
+import { computeTally } from '../../components/sessions/tally';
 import {
   Body,
   Button,
@@ -228,7 +229,18 @@ function SessionActions({ session, myId }: { session: SessionDTO; myId: string |
   );
 }
 
-function SessionView({ session, mode, myId }: { session: SessionDTO; mode: LiveMode; myId: string | undefined }) {
+function SessionView({
+  session,
+  mode,
+  myId,
+  onClosing,
+}: {
+  session: SessionDTO;
+  mode: LiveMode;
+  myId: string | undefined;
+  /** The countdown reached zero: refetch so the screen flips to closed. */
+  onClosing: () => void;
+}) {
   const router = useRouter();
   const open = session.status === 'OPEN';
   return (
@@ -237,8 +249,8 @@ function SessionView({ session, mode, myId }: { session: SessionDTO; mode: LiveM
         <Heading size="md">{session.groupName ?? 'Tonight'}</Heading>
         <Body muted testID="session-meta" className="text-sm">
           {session.endedEarly ? 'Ended early' : STATUS_LABELS[session.status]} · {strategyLabel(session.strategy)}
-          {open ? ` · ${timeLeft(session.closesAt)}` : ''}
         </Body>
+        {open ? <SessionCountdown closesAt={session.closesAt} onExpire={onClosing} /> : null}
       </View>
       {/* Live pill and the filter pill side by side, as in the Technicolor session header. */}
       <View className="flex-row flex-wrap items-center gap-2">
@@ -342,7 +354,9 @@ export default function SessionScreen() {
       );
     }
   } else {
-    content = <SessionView session={session.data} mode={mode} myId={user?.id} />;
+    content = (
+      <SessionView session={session.data} mode={mode} myId={user?.id} onClosing={() => void session.refetch()} />
+    );
   }
 
   return (

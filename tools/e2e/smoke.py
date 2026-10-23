@@ -1,6 +1,8 @@
 """End-to-end smoke test: real local Supabase (auth/storage) + core-api (:8090) + ML service (:8001).
 
 Usage: ANON_KEY=... python3 smoke.py
+
+Creates its own throwaway accounts (A-D). Prints SKIP for a check the local catalog cannot set up.
 """
 import json
 import os
@@ -122,6 +124,122 @@ check("FRIENDS rating not in EVERYONE feed", not any(i["author"]["id"] == ida fo
 s, fy = http("GET", f"{API}/me/recommendations", token=ta)
 check("For you returns items", s == 200 and len(fy["items"]) > 0, (s, fy))
 check("For you excludes rated movie", all(i["movie"]["id"] != mid for i in fy["items"]), fy)
+
+# Undo "Not interested" on For you (204, idempotent; the movie comes back)
+fy_id = fy["items"][0]["movie"]["id"]
+s, _ = http("POST", f"{API}/me/recommendations/{fy_id}/dismiss", token=ta)
+check("dismiss a For you pick", s == 204, s)
+s, fy2 = http("GET", f"{API}/me/recommendations", token=ta)
+check("dismissed pick leaves For you", s == 200 and all(i["movie"]["id"] != fy_id for i in fy2["items"]), fy2)
+s1, _ = http("DELETE", f"{API}/me/recommendations/{fy_id}/dismiss", token=ta)
+s2, _ = http("DELETE", f"{API}/me/recommendations/{fy_id}/dismiss", token=ta)
+check("undo For you dismiss -> 204, again -> 204", (s1, s2) == (204, 204), (s1, s2))
+s, fy3 = http("GET", f"{API}/me/recommendations", token=ta)
+check("undone pick is back in For you", s == 200 and any(i["movie"]["id"] == fy_id for i in fy3["items"]), fy3)
+
+# Late joiners: C is A's friend, D is nobody's friend
+tc, idc = signup("c")
+td, idd = signup("d")
+for tok in (tc, td):
+    http("GET", f"{API}/me", token=tok)
+s, _ = http("POST", f"{API}/friends/requests", {"targetUserId": idc}, token=ta)
+s2, _ = http("POST", f"{API}/friends/requests/{ida}/accept", token=tc)
+check("A and C become friends", (s, s2) == (200, 200), (s, s2))
+
+s, adhoc = http("POST", f"{API}/sessions", {"memberIds": [idb]}, token=ta)
+check("create ad-hoc session A+B", s == 201 and adhoc["groupId"] is None, (s, adhoc))
+ADHOC = adhoc["id"]
+s, _ = http("GET", f"{API}/sessions/{ADHOC}", token=tc)
+check("C (not in ad-hoc session) GET -> 404", s == 404, s)
+s, b = http("POST", f"{API}/sessions/{ADHOC}/members", {"userIds": [idd]}, token=ta)
+check("adding a non-friend to a session -> 400", s == 400, (s, b))
+s, b = http("POST", f"{API}/sessions/{ADHOC}/members", {"userIds": [idc]}, token=tc)
+check("non-member can't add people -> 404", s == 404, (s, b))
+s, b = http("POST", f"{API}/sessions/{ADHOC}/members", {"userIds": [idc]}, token=ta)
+check("A adds friend C to the open session", s == 200 and any(m["user"]["id"] == idc for m in b["members"]), (s, b))
+s, c_view = http("GET", f"{API}/sessions/{ADHOC}", token=tc)
+check("added C can GET the session", s == 200 and c_view["memberCount"] == 3, (s, c_view))
+adhoc_mid = c_view["results"][0]["movie"]["id"]
+s, b = http("PUT", f"{API}/sessions/{ADHOC}/votes/{adhoc_mid}", {"vote": "UP"}, token=tc)
+check("added C can vote", s == 200, (s, b))
+s, _ = http("GET", f"{API}/sessions/{ADHOC}", token=td)
+check("outsider D GET ad-hoc session -> 404", s == 404, s)
+s, _ = http("POST", f"{API}/sessions/{ADHOC}/join", token=tc)
+check("join is idempotent for a member", s == 200, s)
+s, _ = http("POST", f"{API}/sessions/{ADHOC}/join", token=td)
+check("outsider can't join an ad-hoc session -> 404", s == 404, s)
+
+# End early: creator only
+s, b = http("POST", f"{API}/sessions/{ADHOC}/end", token=tb)
+check("non-creator member ends session -> 403", s == 403, (s, b))
+s, b = http("POST", f"{API}/sessions/{ADHOC}/end", token=td)
+check("outsider ends session -> 404", s == 404, (s, b))
+s, b = http("POST", f"{API}/sessions/{ADHOC}/end", token=ta)
+check("creator ends session early", s == 200 and b["status"] == "EXPIRED" and b["endedEarly"], (s, b))
+s, b = http("GET", f"{API}/sessions/{ADHOC}", token=tb)
+check("everyone sees it ended early", s == 200 and b["status"] == "EXPIRED" and b["endedEarly"], (s, b))
+s, b = http("PUT", f"{API}/sessions/{ADHOC}/votes/{adhoc_mid}", {"vote": "DOWN"}, token=tc)
+check("voting after end -> 409", s == 409, (s, b))
+s, _ = http("POST", f"{API}/sessions/{ADHOC}/end", token=ta)
+check("ending twice -> 409", s == 409, s)
+s, live = http("GET", f"{API}/sessions?status=OPEN", token=tb)
+check("ended session leaves B's Live now", s == 200 and all(i["id"] != ADHOC for i in live["items"]), live)
+
+# Pending rating undo: a pick lands in C's "Rate what you watched"
+s, picked = http("POST", f"{API}/sessions", {"memberIds": [idc]}, token=ta)
+check("create ad-hoc session A+C", s == 201 and picked["results"], (s, picked))
+pick_mid = picked["results"][0]["movie"]["id"]
+s, b = http("POST", f"{API}/sessions/{picked['id']}/pick", {"movieId": pick_mid}, token=ta)
+check("pick a movie", s == 200 and b["status"] == "DECIDED", (s, b))
+s, pend = http("GET", f"{API}/me/pending-ratings", token=tc)
+check("pick shows up in C's pending ratings", s == 200 and any(p["movie"]["id"] == pick_mid for p in pend), pend)
+s, _ = http("POST", f"{API}/me/pending-ratings/{pick_mid}/dismiss", token=tc)
+s2, pend = http("GET", f"{API}/me/pending-ratings", token=tc)
+check("dismissed pending rating disappears", s == 204 and all(p["movie"]["id"] != pick_mid for p in pend), (s, pend))
+s1, _ = http("DELETE", f"{API}/me/pending-ratings/{pick_mid}/dismiss", token=tc)
+s2, _ = http("DELETE", f"{API}/me/pending-ratings/{pick_mid}/dismiss", token=tc)
+check("undo pending dismiss -> 204, again -> 204", (s1, s2) == (204, 204), (s1, s2))
+s, pend = http("GET", f"{API}/me/pending-ratings", token=tc)
+check("undone pending rating is back", s == 200 and any(p["movie"]["id"] == pick_mid for p in pend), pend)
+
+# Group member joins an open group session late
+s, _ = http("POST", f"{API}/groups/{g['id']}/members", {"userIds": [idc]}, token=ta)
+s2, _ = http("POST", f"{API}/groups/{g['id']}/invites/accept", token=tc)
+check("C joins the group after the session started", (s, s2) == (200, 200), (s, s2))
+s, b = http("GET", f"{API}/sessions/{SESSION_ID}", token=tc)
+check("group member not in session GET -> 403 'join'", s == 403 and "join" in str(b.get("message", "")).lower(), (s, b))
+s, _ = http("GET", f"{API}/sessions/{SESSION_ID}", token=td)
+check("outsider GET group session -> 404", s == 404, s)
+s, _ = http("POST", f"{API}/sessions/{SESSION_ID}/join", token=td)
+check("outsider join group session -> 404", s == 404, s)
+
+# Comfort tightening: C caps at G before joining, so non-G picks disappear for everyone
+s, before = http("GET", f"{API}/sessions/{SESSION_ID}", token=ta)
+over_limit = [r["movie"]["id"] for r in before["results"] if r["certification"] != "G"]
+tighten = s == 200 and before["hiddenResultCount"] == 0 and bool(over_limit)
+if tighten:
+    s, _ = http("PUT", f"{API}/me/settings/comfort", {"maxCertification": "G", "contentLimits": {}, "allowUnrated": False}, token=tc)
+    check("C comfort G", s == 200, s)
+else:
+    print(f"SKIP comfort tightening: every visible result is already G ({before.get('hiddenResultCount')} hidden)")
+s, b = http("POST", f"{API}/sessions/{SESSION_ID}/join", token=tc)
+check("active group member joins the open session", s == 200 and any(m["user"]["id"] == idc for m in b["members"]), (s, b))
+s, b = http("GET", f"{API}/sessions/{SESSION_ID}", token=tc)
+check("joined C can GET the session", s == 200, (s, b))
+visible = [r for r in b["results"] if r["votes"]["vetoed"] is False] if s == 200 else []
+if visible:
+    s, v = http("PUT", f"{API}/sessions/{SESSION_ID}/votes/{visible[0]['movie']['id']}", {"vote": "UP"}, token=tc)
+    check("joined C can vote", s == 200, (s, v))
+if tighten:
+    for tok, who in ((ta, "A"), (tb, "B"), (tc, "C")):
+        s, view = http("GET", f"{API}/sessions/{SESSION_ID}", token=tok)
+        check(f"stricter late joiner hides over-limit picks for {who}",
+              s == 200 and view["hiddenResultCount"] == len(over_limit)
+              and all(r["certification"] == "G" for r in view["results"])
+              and not any(r["movie"]["id"] in over_limit for r in view["results"]), (s, view))
+    s, v = http("PUT", f"{API}/sessions/{SESSION_ID}/votes/{over_limit[0]}", {"vote": "UP"}, token=ta)
+    check("hidden pick can't be voted on -> 404", s == 404, (s, v))
+    check("effective filter is now G only", view["effectiveFilter"]["maxCertification"] == "G" and view["effectiveFilter"]["label"].startswith("Rated G only"), view["effectiveFilter"])
 
 # Profile photo via real Storage signed upload
 s, up = http("POST", f"{API}/me/profile-photo/upload-url", token=ta)

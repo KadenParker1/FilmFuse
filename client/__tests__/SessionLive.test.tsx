@@ -17,7 +17,7 @@ jest.mock('../auth/useAuth', () => ({ useAuth: () => ({ user: { id: mockUserId }
 jest.mock('../components/sessions/shareSession', () => ({ shareSession: jest.fn() }));
 
 import { AccessibilityInfo, Platform } from 'react-native';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import SessionScreen from '../app/sessions/[id]';
 import * as sessions from '../api/sessions';
 import { useFriends } from '../api/social';
@@ -235,11 +235,44 @@ describe('SessionScreen — live tally', () => {
     expect(muts.usePickMovie.mutate).toHaveBeenCalledWith({ sessionId: 's1', movieId: 1 }, expect.any(Object));
   });
 
-  it('names who still has to vote and shows the time left', async () => {
-    show(makeSession({ closesAt: new Date(Date.now() + 5 * 3_600_000 + 60_000).toISOString() }));
+  it('names who still has to vote and shows a quiet countdown', async () => {
+    show(makeSession({ closesAt: new Date(Date.now() + 5 * 3_600_000 + 12 * 60_000 + 30_000).toISOString() }));
     await render(<SessionScreen />);
     expect(screen.getByTestId('waiting-on')).toHaveTextContent('Waiting on Ada Lovelace');
-    expect(screen.getByTestId('session-meta')).toHaveTextContent('Voting open · Mean · 5h left');
+    expect(screen.getByTestId('session-meta')).toHaveTextContent('Voting open · Mean');
+    const countdown = screen.getByTestId('session-countdown');
+    expect(countdown).toHaveTextContent('Closes in 5h 12m');
+    expect(countdown.props.accessibilityLabel).toBe('Voting closes in 5 hours 12 minutes');
+    // Never a live region: it would announce every tick.
+    expect(countdown.props.accessibilityLiveRegion).toBe('none');
+    expect(countdown.props['aria-live']).toBe('off');
+  });
+
+  it('the countdown ticks every second in the last hour and refetches the session at zero', async () => {
+    jest.useFakeTimers({ now: new Date('2026-10-16T12:00:00Z') });
+    try {
+      const refetch = jest.fn();
+      m('useSession').mockReturnValue(
+        queryResult({ data: makeSession({ closesAt: '2026-10-16T12:02:05Z' }), refetch }),
+      );
+      await render(<SessionScreen />);
+      const countdown = () => screen.getByTestId('session-countdown');
+      expect(countdown()).toHaveTextContent('Closes in 2m 05s');
+      await act(() => jest.advanceTimersByTime(1_000));
+      expect(countdown()).toHaveTextContent('Closes in 2m 04s');
+      expect(countdown().props.accessibilityLabel).toBe('Voting closes in 2 minutes');
+      await act(() => jest.advanceTimersByTime(124_001));
+      expect(countdown()).toHaveTextContent('Closing…');
+      expect(refetch).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('closed sessions show no countdown', async () => {
+    show(makeSession({ status: 'EXPIRED' }));
+    await render(<SessionScreen />);
+    expect(screen.queryByTestId('session-countdown')).toBeNull();
   });
 
   it('explains hidden results without naming anyone, and offers more options', async () => {

@@ -194,8 +194,9 @@ describe('SessionScreen', () => {
     expect(useSessionLive).toHaveBeenCalledWith('s1');
     expect(screen.getByRole('header', { name: 'Film club' })).toBeOnTheScreen();
     expect(screen.getByText('Live')).toBeOnTheScreen();
-    // Followed by the time left (see SessionLive.test.tsx).
-    expect(screen.getByTestId('session-meta')).toHaveTextContent(/^Voting open · Mean · /);
+    // The live countdown sits under it (see SessionLive.test.tsx and sessionCountdown.test.tsx).
+    expect(screen.getByTestId('session-meta')).toHaveTextContent('Voting open · Mean');
+    expect(screen.getByTestId('session-countdown')).toBeOnTheScreen();
     expect(screen.getByText('PG-13 or below · mild violence at most')).toBeOnTheScreen();
     expect(screen.getByText('1 of 2 voted')).toBeOnTheScreen();
     expect(screen.getByTestId('no-vector-hint')).toHaveTextContent(/Grace Hopper has no taste profile yet/);

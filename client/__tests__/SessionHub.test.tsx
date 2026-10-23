@@ -21,7 +21,7 @@ jest.mock('../api/sessions', () => ({
   useJoinSession: jest.fn(),
 }));
 
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import GroupsScreen from '../app/(tabs)/groups';
 import GroupScreen from '../app/groups/[id]';
 import * as groups from '../api/groups';
@@ -75,12 +75,16 @@ beforeEach(() => {
 });
 
 describe('LiveSessionCard', () => {
-  it('shows who is in, how many voted, time left and a nudge to vote', async () => {
+  beforeEach(() => jest.useFakeTimers({ now: NOW }));
+  afterEach(() => jest.useRealTimers());
+
+  it('shows who is in, how many voted, the countdown and a nudge to vote', async () => {
     const onPress = jest.fn();
-    await render(<LiveSessionCard session={live()} onPress={onPress} now={NOW} />);
+    await render(<LiveSessionCard session={live()} onPress={onPress} />);
     const card = screen.getByRole('button', {
-      name: 'Tonight, 1 of 4 voted, 18h left, waiting on your vote',
+      name: 'Tonight, 1 of 4 voted, voting closes in 18 hours, waiting on your vote',
     });
+    expect(screen.getByTestId('live-session-meta-live1')).toHaveTextContent('1 of 4 voted · Closes in 18h 00m');
     expect(screen.getByTestId('needs-vote-live1')).toHaveTextContent('Your vote');
     expect(screen.getByLabelText('Grace Hopper, Alan Turing and 2 more')).toBeOnTheScreen();
     await fireEvent.press(card);
@@ -88,9 +92,29 @@ describe('LiveSessionCard', () => {
   });
 
   it('no nudge once I voted; names the group', async () => {
-    await render(<LiveSessionCard session={live({ votedByMe: true, groupName: 'Film club' })} onPress={jest.fn()} now={NOW} />);
+    await render(<LiveSessionCard session={live({ votedByMe: true, groupName: 'Film club' })} onPress={jest.fn()} />);
     expect(screen.queryByTestId('needs-vote-live1')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Film club, 1 of 4 voted, 18h left' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Film club, 1 of 4 voted, voting closes in 18 hours' })).toBeOnTheScreen();
+  });
+
+  it('ticks down live and calls onExpire at zero', async () => {
+    const onExpire = jest.fn();
+    // 61 minutes left.
+    await render(<LiveSessionCard session={live({ closesAt: '2026-10-16T13:01:00Z' })} onPress={jest.fn()} onExpire={onExpire} />);
+    const meta = () => screen.getByTestId('live-session-meta-live1');
+    expect(meta()).toHaveTextContent('1 of 4 voted · Closes in 1h 01m');
+    await act(() => jest.advanceTimersByTime(60_000));
+    expect(meta()).toHaveTextContent('1 of 4 voted · Closes in 1h 00m');
+    await act(() => jest.advanceTimersByTime(1_000));
+    expect(meta()).toHaveTextContent('1 of 4 voted · Closes in 59m 59s');
+    await act(() => jest.advanceTimersByTime(3_540_000));
+    expect(meta()).toHaveTextContent('1 of 4 voted · Closes in 0m 59s');
+    await act(() => jest.advanceTimersByTime(58_500));
+    expect(meta()).toHaveTextContent('1 of 4 voted · Closing…');
+    expect(onExpire).not.toHaveBeenCalled();
+    await act(() => jest.advanceTimersByTime(600));
+    expect(onExpire).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: /voting is closing/ })).toBeOnTheScreen();
   });
 });
 
@@ -121,6 +145,24 @@ describe('Groups tab — session hub', () => {
     expect(screen.getByRole('header', { name: 'Live now · 2' })).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId('live-session-live2'));
     expect(routerState.router.push).toHaveBeenCalledWith('/sessions/live2');
+  });
+
+  it('"Live now" refetches when a session’s countdown runs out', async () => {
+    jest.useFakeTimers({ now: NOW });
+    try {
+      const refetch = jest.fn();
+      s('useLiveSessions').mockReturnValue(
+        queryResult({ data: { items: [live({ closesAt: '2026-10-16T12:00:30Z' })], nextCursor: null }, refetch }),
+      );
+      await render(<GroupsScreen />);
+      expect(screen.getByTestId('live-session-meta-live1')).toHaveTextContent('1 of 4 voted · Closes in 0m 30s');
+      expect(refetch).not.toHaveBeenCalled();
+      await act(() => jest.advanceTimersByTime(30_001));
+      expect(refetch).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('live-session-meta-live1')).toHaveTextContent('1 of 4 voted · Closing…');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('"Live now" is hidden with nothing open; shows loading and errors', async () => {
@@ -193,6 +235,21 @@ describe('Group detail — sessions', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Join this session' }));
     expect(join.mutate).toHaveBeenCalledWith('j1', expect.any(Object));
     expect(routerState.router.push).toHaveBeenCalledWith('/sessions/j1');
+  });
+
+  it('refetches the group when a joinable session closes', async () => {
+    jest.useFakeTimers({ now: NOW });
+    try {
+      const refetch = jest.fn();
+      g('useGroup').mockReturnValue(
+        queryResult({ data: makeGroup({ joinableSessions: [live({ id: 'j1', closesAt: '2026-10-16T12:00:05Z' })] }), refetch }),
+      );
+      await render(<GroupScreen />);
+      await act(() => jest.advanceTimersByTime(5_001));
+      expect(refetch).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('join errors show; nothing joinable means no section', async () => {

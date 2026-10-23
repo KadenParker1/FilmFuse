@@ -122,7 +122,7 @@ function InvitedView({ group }: { group: GroupDetailDTO }) {
 }
 
 /** Open sessions of the group the caller isn't in yet (e.g. started before they joined). */
-function JoinableSessions({ group }: { group: GroupDetailDTO }) {
+function JoinableSessions({ group, onSessionClosed }: { group: GroupDetailDTO; onSessionClosed: () => void }) {
   const router = useRouter();
   const join = useJoinSession();
   return (
@@ -134,7 +134,12 @@ function JoinableSessions({ group }: { group: GroupDetailDTO }) {
         </Body>
       ) : null}
       {group.joinableSessions.map((s) => (
-        <LiveSessionCard key={s.id} session={s} onPress={() => router.push(`/sessions/${s.id}`)}>
+        <LiveSessionCard
+          key={s.id}
+          session={s}
+          onPress={() => router.push(`/sessions/${s.id}`)}
+          onExpire={onSessionClosed}
+        >
           <Button
             size="sm"
             title="Join"
@@ -150,7 +155,7 @@ function JoinableSessions({ group }: { group: GroupDetailDTO }) {
 
 type Confirm = { kind: 'remove'; member: GroupMemberDTO } | { kind: 'leave' } | { kind: 'delete' } | null;
 
-function GroupDetail({ group }: { group: GroupDetailDTO }) {
+function GroupDetail({ group, onSessionClosed }: { group: GroupDetailDTO; onSessionClosed: () => void }) {
   const router = useRouter();
   const { colors } = useTheme();
   const { user } = useAuth();
@@ -271,7 +276,7 @@ function GroupDetail({ group }: { group: GroupDetailDTO }) {
         </Card>
       </View>
 
-      {!invited && group.joinableSessions.length ? <JoinableSessions group={group} /> : null}
+      {!invited && group.joinableSessions.length ? <JoinableSessions group={group} onSessionClosed={onSessionClosed} /> : null}
       {!invited ? <SessionHistorySection groupId={group.id} title="Movie nights" /> : null}
 
       {!invited ? (
@@ -332,7 +337,7 @@ export default function GroupScreen() {
         />
       );
   } else {
-    content = <GroupDetail group={group.data} />;
+    content = <GroupDetail group={group.data} onSessionClosed={() => void group.refetch()} />;
   }
 
   return (
