@@ -195,7 +195,7 @@ s, pend = http("GET", f"{API}/me/pending-ratings", token=tc)
 check("pick shows up in C's pending ratings", s == 200 and any(p["movie"]["id"] == pick_mid for p in pend), pend)
 s, _ = http("POST", f"{API}/me/pending-ratings/{pick_mid}/dismiss", token=tc)
 s2, pend = http("GET", f"{API}/me/pending-ratings", token=tc)
-check("dismissed pending rating disappears", s == 204 and all(p["movie"]["id"] != pick_mid for p in pend), (s, pend))
+check("dismissed pending rating disappears", (s, s2) == (204, 200) and all(p["movie"]["id"] != pick_mid for p in pend), (s, pend))
 s1, _ = http("DELETE", f"{API}/me/pending-ratings/{pick_mid}/dismiss", token=tc)
 s2, _ = http("DELETE", f"{API}/me/pending-ratings/{pick_mid}/dismiss", token=tc)
 check("undo pending dismiss -> 204, again -> 204", (s1, s2) == (204, 204), (s1, s2))
@@ -237,9 +237,10 @@ if tighten:
               s == 200 and view["hiddenResultCount"] == len(over_limit)
               and all(r["certification"] == "G" for r in view["results"])
               and not any(r["movie"]["id"] in over_limit for r in view["results"]), (s, view))
+    view_ok = s == 200
     s, v = http("PUT", f"{API}/sessions/{SESSION_ID}/votes/{over_limit[0]}", {"vote": "UP"}, token=ta)
     check("hidden pick can't be voted on -> 404", s == 404, (s, v))
-    check("effective filter is now G only", view["effectiveFilter"]["maxCertification"] == "G" and view["effectiveFilter"]["label"].startswith("Rated G only"), view["effectiveFilter"])
+    check("effective filter is now G only", view_ok and view["effectiveFilter"]["maxCertification"] == "G" and view["effectiveFilter"]["label"].startswith("Rated G only"), view["effectiveFilter"] if view_ok else view)
 
 # Profile photo via real Storage signed upload
 s, up = http("POST", f"{API}/me/profile-photo/upload-url", token=ta)
