@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { Image } from 'expo-image';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { RATING_NOTE_MAX, useDeleteRating, useMyRating, useUpsertRating } from '../../api/ratings';
+import { RATING_NOTE_MAX, useMyRating, useUpsertRating } from '../../api/ratings';
 import { ApiError } from '../../lib/apiClient';
 import { useTheme } from '../../theme/useTheme';
 import type { MovieSummaryDTO, RatingDTO, RatingSource, RatingVisibility } from '../../types/api';
@@ -22,14 +22,13 @@ type FormProps = {
   existing: RatingDTO | null;
   source: RatingSource;
   onSaved: (rating: RatingDTO) => void;
-  /** Gets the rating as it was before removal (for Undo). */
+  /** "Remove rating": the rating being removed (the caller hides it and owns the deferred DELETE). */
   onRemoved: (previous: RatingDTO) => void;
 };
 
 function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProps) {
   const { colors } = useTheme();
   const upsert = useUpsertRating();
-  const remove = useDeleteRating();
   const [score, setScore] = useState<number | null>(existing?.score ?? null);
   const [note, setNote] = useState(existing?.body ?? '');
   const [spoilers, setSpoilers] = useState(existing?.containsSpoilers ?? false);
@@ -37,11 +36,10 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
   // New ratings go to friends by default (the server's default too).
   const [postToFeed, setPostToFeed] = useState(existing ? existing.visibility !== 'PRIVATE' : true);
   const [audience, setAudience] = useState<FeedAudience>(existing?.visibility === 'PUBLIC' ? 'PUBLIC' : 'FRIENDS');
-  const busy = upsert.isPending || remove.isPending;
+  const busy = upsert.isPending;
 
   const save = () => {
     if (score == null) return;
-    remove.reset();
     const trimmed = note.trim();
     upsert.mutate(
       {
@@ -59,10 +57,11 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
     );
   };
 
+  // Removal is deferred (the provider hides it and offers Undo), so there is nothing to wait for here.
   const removeRating = () => {
     if (!existing) return;
     upsert.reset();
-    remove.mutate(movie.id, { onSuccess: () => onRemoved(existing) });
+    onRemoved(existing);
   };
 
   const fieldErrors = upsert.error instanceof ApiError ? upsert.error.fieldErrors : {};
@@ -70,9 +69,7 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
     ? Object.keys(fieldErrors).length
       ? Object.values(fieldErrors).join(' ')
       : errorMessage(upsert.error)
-    : remove.isError
-      ? errorMessage(remove.error)
-      : null;
+    : null;
 
   return (
     <View className="gap-5">
@@ -174,14 +171,13 @@ function QuickRateForm({ movie, existing, source, onSaved, onRemoved }: FormProp
       <Button
         title={existing ? 'Update rating' : 'Save rating'}
         loading={upsert.isPending}
-        disabled={score == null || remove.isPending}
+        disabled={score == null}
         onPress={save}
       />
       {existing ? (
         <Button
           title="Remove rating"
           variant="ghost"
-          loading={remove.isPending}
           disabled={upsert.isPending}
           onPress={removeRating}
         />

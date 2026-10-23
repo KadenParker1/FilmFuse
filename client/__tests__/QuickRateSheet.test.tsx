@@ -3,24 +3,28 @@ jest.mock('../lib/supabase', () => ({
   supabase: { auth: { getSession: jest.fn(() => Promise.resolve({ data: { session: { access_token: 'tok' } } })) } },
 }));
 
-import { Pressable, Text } from 'react-native';
+import type { ReactElement } from 'react';
+import { AppState, Pressable, Text } from 'react-native';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { notifyManager } from '@tanstack/react-query';
+import { notifyManager, type QueryClient } from '@tanstack/react-query';
 import { RateFab } from '../components/RateFab';
 import {
   QuickRateProvider,
+  RATING_REMOVE_FAILED,
   RATING_REMOVED,
-  restoreRatingBody,
   TASTE_UPDATED,
   TASTE_UPDATING,
   TASTE_WAIT_MAX_MS,
   TOAST_HIDE_MS,
   useQuickRate,
 } from '../components/rating/QuickRateProvider';
+import { resetPendingRemovalsForTests } from '../api/ratings';
 import { TASTE_POLL_MS } from '../api/taste';
-import { serveRoutes, type Route } from '../test-utils/fetchRoutes';
-import { makeMovie, makeRating, makeTasteProfile } from '../test-utils/fixtures';
-import { renderWithClient } from '../test-utils/render';
+import { UNDO_TOAST_MS, useUndoToast } from '../components/ui';
+import { queryKeys } from '../lib/queryKeys';
+import { serveRoutes, type Route, type Served } from '../test-utils/fetchRoutes';
+import { makeFeedItem, makeMovie, makeRating, makeTasteProfile } from '../test-utils/fixtures';
+import { createTestQueryClient, renderWithClient } from '../test-utils/render';
 import { routerState } from '../test-utils/router';
 
 notifyManager.setScheduler((cb) => cb());
@@ -52,6 +56,20 @@ function Openers() {
         <Text>open picker</Text>
       </Pressable>
     </>
+  );
+}
+
+/** Some other action's undo toast (replaces "Rating removed"). */
+function OtherUndo() {
+  const { showUndo } = useUndoToast();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="other action"
+      onPress={() => showUndo({ message: 'Something else', onUndo: () => {} })}
+    >
+      <Text>other action</Text>
+    </Pressable>
   );
 }
 
@@ -229,62 +247,151 @@ describe('QuickRateSheet: re-rating', () => {
     expect(api.callsTo('PUT', '/ratings/100')[0]?.body).toMatchObject({ score: 6, visibility: 'PRIVATE', source: 'QUICK_RATE' });
   });
 
-  it('removes the rating, closes and shows the toast', async () => {
-    const { api } = await openHeat([
+});
+
+describe('QuickRateSheet: Remove rating (deferred, with Undo)', () => {
+  const existing = makeRating({ id: 'r100', movie: heat, score: 7, body: 'Tense', visibility: 'PUBLIC' });
+  const mine = makeFeedItem({ id: 'r100', movie: heat, score: 7, mine: true });
+  const other = makeFeedItem({ id: 'r-other', movie: heat, score: 4 });
+  const deletes = (api: Served) => api.callsTo('DELETE', '/ratings/100');
+  const advance = async (ms: number) => {
+    await act(async () => {
+      jest.advanceTimersByTime(ms);
+    });
+  };
+
+  /** Opens Heat on an existing rating with the caches it shows up in, then presses Remove rating. */
+  async function removeHeat(extra: Route[] = [], ui?: ReactElement) {
+    jest.useFakeTimers();
+    const api = serveRoutes(fetchMock, [
+      ...extra,
       { path: '/me/ratings/100', body: existing },
       { method: 'DELETE', path: '/ratings/100', status: 204 },
       ...tasteRoutes('REBUILDING'),
     ]);
+    const client = createTestQueryClient();
+    client.setQueryData(queryKeys.myRatings, { pages: [{ items: [existing], nextCursor: null }], pageParams: [null] });
+    client.setQueryData(queryKeys.movieRatings(100, 'FRIENDS'), {
+      pages: [{ items: [mine, other], nextCursor: null }],
+      pageParams: [null],
+    });
+    const utils = await renderWithClient(
+      ui ?? (
+        <QuickRateProvider>
+          <Openers />
+        </QuickRateProvider>
+      ),
+      client,
+    );
+    await fireEvent.press(screen.getByRole('button', { name: 'open heat' }));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Remove rating' })).toBeOnTheScreen());
     await fireEvent.press(screen.getByRole('button', { name: 'Remove rating' }));
-    await waitFor(() => expect(sheetOpen()).toBe(false));
-    expect(api.callsTo('DELETE', '/ratings/100')).toHaveLength(1);
-    expect(screen.getByTestId('toast')).toHaveTextContent(TASTE_UPDATING);
+    return { ...utils, api, client };
+  }
+  const feedIds = (client: QueryClient) =>
+    (client.getQueryData(queryKeys.movieRatings(100, 'FRIENDS')) as { pages: { items: { id: string }[] }[] }).pages[0]!.items.map(
+      (i) => i.id,
+    );
+  const myListIds = (client: QueryClient) =>
+    (client.getQueryData(queryKeys.myRatings) as { pages: { items: { id: string }[] }[] }).pages[0]!.items.map((i) => i.id);
+
+  afterEach(() => resetPendingRemovalsForTests());
+
+  it('hides the rating at once and offers Undo; nothing is sent yet', async () => {
+    const { api, client } = await removeHeat();
+    expect(sheetOpen()).toBe(false);
+    expect(screen.getByTestId('undo-toast')).toHaveTextContent(`${RATING_REMOVED}Undo`);
+    expect(client.getQueryData(queryKeys.myRating(100))).toBeNull();
+    expect(myListIds(client)).toEqual([]);
+    expect(feedIds(client)).toEqual(['r-other']);
+    expect(deletes(api)).toHaveLength(0);
+    // The taste only starts rebuilding once the DELETE goes out.
+    expect(screen.queryByTestId('toast')).toBeNull();
   });
 
-  it('"Rating removed" offers Undo, which PUTs the old rating back exactly', async () => {
-    const withDate = { ...existing, watchedOn: '2026-10-01' };
-    const { api } = await openHeat([
-      { path: '/me/ratings/100', body: withDate, times: 1 },
-      { method: 'DELETE', path: '/ratings/100', status: 204 },
-      { method: 'PUT', path: '/ratings/100', body: withDate },
-      ...tasteRoutes('REBUILDING'),
-    ]);
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Remove rating' })).toBeOnTheScreen());
-    await fireEvent.press(screen.getByRole('button', { name: 'Remove rating' }));
-    await waitFor(() => expect(screen.getByTestId('undo-toast')).toHaveTextContent(`${RATING_REMOVED}Undo`));
-    // Both toasts are up; the taste one moves out of the way.
-    expect(screen.getByTestId('toast')).toHaveTextContent(TASTE_UPDATING);
+  it('Undo restores every cache with no request at all', async () => {
+    const { api, client } = await removeHeat();
+    const before = api.calls().length;
     await fireEvent.press(screen.getByRole('button', { name: 'Undo removing your rating of Heat' }));
-    await waitFor(() => expect(api.callsTo('PUT', '/ratings/100')).toHaveLength(1));
-    expect(api.callsTo('PUT', '/ratings/100')[0]?.body).toEqual({
-      score: 7,
-      body: 'Tense',
-      containsSpoilers: true,
-      visibility: 'PUBLIC',
-      watchedOn: '2026-10-01',
-      source: 'POST_WATCH',
-    });
+    expect(client.getQueryData(queryKeys.myRating(100))).toEqual(existing);
+    expect(myListIds(client)).toEqual(['r100']);
+    expect(feedIds(client)).toEqual(['r100', 'r-other']);
+    await advance(UNDO_TOAST_MS * 2);
+    expect(api.calls()).toHaveLength(before);
+    expect(deletes(api)).toHaveLength(0);
+  });
+
+  it('when the undo window expires the DELETE goes out and the taste starts rebuilding', async () => {
+    const { api } = await removeHeat();
+    await advance(UNDO_TOAST_MS - 1);
+    expect(deletes(api)).toHaveLength(0);
+    await advance(1);
+    await waitFor(() => expect(deletes(api)).toHaveLength(1));
+    expect(screen.getByTestId('toast')).toHaveTextContent(TASTE_UPDATING);
     expect(screen.queryByTestId('undo-toast')).toBeNull();
   });
 
-  it('restoreRatingBody turns a calibration swipe into a quick rate (PUT refuses swipes)', () => {
-    expect(restoreRatingBody(makeRating({ source: 'ONBOARDING_SWIPE', score: 4, visibility: 'PRIVATE' }))).toMatchObject({
-      score: 4,
-      visibility: 'PRIVATE',
-      source: 'QUICK_RATE',
-    });
+  it('another undo toast replacing it sends the DELETE', async () => {
+    const { api } = await removeHeat(
+      [],
+      <QuickRateProvider>
+        <Openers />
+        <OtherUndo />
+      </QuickRateProvider>,
+    );
+    await fireEvent.press(screen.getByRole('button', { name: 'other action' }));
+    await waitFor(() => expect(deletes(api)).toHaveLength(1));
+    expect(screen.getByTestId('undo-toast')).toHaveTextContent('Something elseUndo');
   });
 
-  it('shows a failed removal inline', async () => {
-    await openHeat([
-      { path: '/me/ratings/100', body: existing },
+  it('re-rating the movie cancels the pending removal (no DELETE; Undo cannot overwrite it)', async () => {
+    const newer = makeRating({ id: 'r100', movie: heat, score: 9 });
+    const { api, client } = await removeHeat([{ method: 'PUT', path: '/ratings/100', body: newer }]);
+    // Reopened, it reads as unrated (the hidden rating); rate it 9.
+    await fireEvent.press(screen.getByRole('button', { name: 'open heat' }));
+    await waitFor(() => expect(score(9)).toBeOnTheScreen());
+    await fireEvent.press(score(9));
+    await fireEvent.press(saveButton());
+    await waitFor(() => expect(api.callsTo('PUT', '/ratings/100')).toHaveLength(1));
+    await waitFor(() => expect(screen.queryByTestId('undo-toast')).toBeNull());
+    await advance(UNDO_TOAST_MS * 2);
+    expect(deletes(api)).toHaveLength(0);
+    expect(client.getQueryData(queryKeys.myRating(100))).toEqual(newer);
+  });
+
+  it('a failed DELETE brings the rating back and says so', async () => {
+    const { api, client } = await removeHeat([
       { method: 'DELETE', path: '/ratings/100', status: 500, body: { message: 'boom' } },
     ]);
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Remove rating' })).toBeOnTheScreen());
-    await fireEvent.press(screen.getByRole('button', { name: 'Remove rating' }));
-    await waitFor(() => expect(screen.getByText(/server had a problem/)).toBeOnTheScreen());
-    expect(screen.getByRole('header', { name: 'Quick rate' })).toBeOnTheScreen();
+    await advance(UNDO_TOAST_MS);
+    await waitFor(() => expect(deletes(api)).toHaveLength(1));
+    await waitFor(() => expect(screen.getByTestId('undo-toast')).toHaveTextContent(RATING_REMOVE_FAILED));
+    expect(screen.queryByRole('button', { name: /Undo/ })).toBeNull();
+    expect(client.getQueryData(queryKeys.myRating(100))).toEqual(existing);
+    expect(feedIds(client)).toEqual(['r100', 'r-other']);
+  });
+
+  it('going to the background flushes the DELETE (keepalive)', async () => {
+    let onAppState: ((s: string) => void) | undefined;
+    const spy = jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, handler) => {
+      onAppState = handler as (s: string) => void;
+      return { remove: jest.fn() } as unknown as ReturnType<typeof AppState.addEventListener>;
+    });
+    const { api } = await removeHeat();
+    await act(async () => {
+      onAppState?.('background');
+    });
+    await waitFor(() => expect(deletes(api)).toHaveLength(1));
+    const init = fetchMock.mock.calls.find((c) => (c[1] as RequestInit | undefined)?.method === 'DELETE')?.[1] as RequestInit;
+    expect(init.keepalive).toBe(true);
+    expect(screen.queryByTestId('undo-toast')).toBeNull();
+    spy.mockRestore();
+  });
+
+  it('unmounting the provider flushes the DELETE too', async () => {
+    const { api, unmount } = await removeHeat();
+    await unmount();
+    await waitFor(() => expect(deletes(api)).toHaveLength(1));
   });
 });
 

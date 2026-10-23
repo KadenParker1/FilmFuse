@@ -2,7 +2,7 @@ jest.mock('../lib/supabase', () => ({
   supabase: { auth: { getSession: jest.fn(() => Promise.resolve({ data: { session: { access_token: 'tok' } } })) } },
 }));
 
-import { AccessibilityInfo, Pressable, Text } from 'react-native';
+import { AccessibilityInfo, AppState, Pressable, Text } from 'react-native';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { notifyManager } from '@tanstack/react-query';
 import { useUndismissPendingRating } from '../api/pendingRatings';
@@ -30,7 +30,7 @@ function Trigger({ options }: { options: UndoOptions }) {
       <Pressable accessibilityRole="button" accessibilityLabel="do it" onPress={() => showUndo(options)}>
         <Text>do it</Text>
       </Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel="hide" onPress={hideUndo}>
+      <Pressable accessibilityRole="button" accessibilityLabel="hide" onPress={() => hideUndo()}>
         <Text>hide</Text>
       </Pressable>
       <Text testID="visible">{String(visible)}</Text>
@@ -153,6 +153,131 @@ describe('UndoToastProvider', () => {
     });
     expect(screen.getByTestId('undo-toast')).toHaveTextContent('RemovedUndo');
     expect(screen.getByRole('button', { name: 'Undo' })).toBeOnTheScreen();
+  });
+
+  describe('deferred actions (onCommit)', () => {
+    it('commits once when the window expires', async () => {
+      jest.useFakeTimers();
+      const onCommit = jest.fn();
+      await show({ onCommit });
+      await advance(UNDO_TOAST_MS);
+      await advance(UNDO_TOAST_MS);
+      expect(onCommit).toHaveBeenCalledTimes(1);
+      expect(onCommit).toHaveBeenCalledWith('expired');
+    });
+
+    it('never commits after Undo', async () => {
+      jest.useFakeTimers();
+      const onCommit = jest.fn();
+      const onUndo = await show({ onCommit });
+      await fireEvent.press(screen.getByRole('button', { name: 'Undo' }));
+      await advance(UNDO_TOAST_MS * 2);
+      expect(onUndo).toHaveBeenCalled();
+      expect(onCommit).not.toHaveBeenCalled();
+    });
+
+    it('commits when another toast replaces it, and when hidden', async () => {
+      const onCommit = jest.fn();
+      await show({ onCommit });
+      await fireEvent.press(screen.getByRole('button', { name: 'do it' }));
+      expect(onCommit).toHaveBeenCalledWith('replaced');
+      onCommit.mockClear();
+      await fireEvent.press(screen.getByRole('button', { name: 'hide' }));
+      expect(onCommit).toHaveBeenCalledWith('hidden');
+    });
+
+    it('hideUndo(key) only hides that toast', async () => {
+      const first = jest.fn();
+      let firstKey = 0;
+      function Keyed() {
+        const { showUndo, hideUndo } = useUndoToast();
+        return (
+          <>
+            <Pressable accessibilityRole="button" accessibilityLabel="first" onPress={() => (firstKey = showUndo({ message: 'One', onUndo: jest.fn(), onCommit: first }))}>
+              <Text>first</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="second" onPress={() => showUndo({ message: 'Two', onUndo: jest.fn() })}>
+              <Text>second</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="hide first" onPress={() => hideUndo(firstKey)}>
+              <Text>hide first</Text>
+            </Pressable>
+          </>
+        );
+      }
+      await render(
+        <UndoToastProvider>
+          <Keyed />
+        </UndoToastProvider>,
+      );
+      await fireEvent.press(screen.getByRole('button', { name: 'first' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'second' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'hide first' }));
+      expect(screen.getByTestId('undo-toast')).toHaveTextContent('TwoUndo');
+      expect(first).toHaveBeenCalledTimes(1);
+    });
+
+    it('commits on unmount and when the app goes to the background', async () => {
+      let onAppState: ((s: string) => void) | undefined;
+      const spy = jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, handler) => {
+        onAppState = handler as (s: string) => void;
+        return { remove: jest.fn() } as unknown as ReturnType<typeof AppState.addEventListener>;
+      });
+      const onCommit = jest.fn();
+      await show({ onCommit });
+      await act(async () => {
+        onAppState?.('active');
+      });
+      expect(onCommit).not.toHaveBeenCalled();
+      await act(async () => {
+        onAppState?.('background');
+      });
+      expect(onCommit).toHaveBeenCalledWith('background');
+      expect(screen.queryByTestId('undo-toast')).toBeNull();
+
+      onCommit.mockClear();
+      await fireEvent.press(screen.getByRole('button', { name: 'do it' }));
+      await screen.unmount();
+      expect(onCommit).toHaveBeenCalledWith('unmount');
+      spy.mockRestore();
+    });
+
+    it('a throwing commit does not break the toast', async () => {
+      await show({
+        onCommit: () => {
+          throw new Error('boom');
+        },
+      });
+      await fireEvent.press(screen.getByRole('button', { name: 'do it' }));
+      expect(screen.getByTestId('undo-toast')).toHaveTextContent('RemovedUndo');
+    });
+
+    it('showError shows a message with no button and commits what was up', async () => {
+      const onCommit = jest.fn();
+      function Err() {
+        const { showUndo, showError } = useUndoToast();
+        return (
+          <>
+            <Pressable accessibilityRole="button" accessibilityLabel="act" onPress={() => showUndo({ message: 'Did', onUndo: jest.fn(), onCommit })}>
+              <Text>act</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="fail" onPress={() => showError('It failed')}>
+              <Text>fail</Text>
+            </Pressable>
+          </>
+        );
+      }
+      await render(
+        <UndoToastProvider>
+          <Err />
+        </UndoToastProvider>,
+      );
+      await fireEvent.press(screen.getByRole('button', { name: 'act' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'fail' }));
+      expect(onCommit).toHaveBeenCalledWith('replaced');
+      expect(screen.getByTestId('undo-toast')).toHaveTextContent('It failed');
+      expect(screen.queryByRole('button', { name: 'Undo' })).toBeNull();
+    });
   });
 
   it('useUndoToast throws outside the provider', async () => {

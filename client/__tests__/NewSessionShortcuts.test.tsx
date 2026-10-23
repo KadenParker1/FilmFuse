@@ -113,6 +113,17 @@ describe('route params', () => {
     expect(routerState.router.replace).toHaveBeenCalledWith('/sessions/s9');
   });
 
+  it('takes new people when the memberIds param changes while mounted', async () => {
+    routerState.params = { memberIds: ALAN };
+    serveRoutes(fetchMock, base);
+    const { rerender } = await renderWithClient(<NewSessionScreen />);
+    await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Alan Turing' })).toBeChecked());
+    routerState.params = { memberIds: GRACE };
+    await rerender(<NewSessionScreen />);
+    expect(screen.getByRole('checkbox', { name: 'Grace Hopper' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Alan Turing' })).not.toBeChecked();
+  });
+
   it('"Watch with…" shows the movie as context (the session is not seeded with it)', async () => {
     routerState.params = { movieId: '100' };
     const api = serveRoutes(fetchMock, [
@@ -227,6 +238,26 @@ describe('Save these people as a group', () => {
     await fireEvent.press(findMovies());
     await waitFor(() => expect(api.callsTo('POST', '/sessions')).toHaveLength(1));
     expect(api.callsTo('POST', '/sessions')[0]?.body).toMatchObject({ memberIds: [GRACE, ALAN] });
+  });
+
+  it('offers saving again once the picked friends change', async () => {
+    serveRoutes(fetchMock, [
+      ...base,
+      { path: '/sessions', body: { items: [], nextCursor: null } },
+      { method: 'POST', path: '/groups', body: makeGroup({ id: 'g9', name: 'Duo', emoji: '🎬' }) },
+    ]);
+    await renderWithClient(<NewSessionScreen />);
+    await fireEvent.press(await screen.findByRole('checkbox', { name: 'Grace Hopper' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Save these people as a group' }));
+    await fireEvent.changeText(screen.getByLabelText('Group name'), 'Duo');
+    await fireEvent.press(screen.getByRole('button', { name: 'Save group' }));
+    await screen.findByTestId('save-crew-done');
+    await fireEvent.press(screen.getByRole('checkbox', { name: 'Alan Turing' }));
+    expect(screen.queryByTestId('save-crew-done')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Save these people as a group' })).toBeOnTheScreen();
+    // Back to the saved crew: it says saved again.
+    await fireEvent.press(screen.getByRole('checkbox', { name: 'Alan Turing' }));
+    expect(screen.getByTestId('save-crew-done')).toBeOnTheScreen();
   });
 
   it('shows a save failure and can be cancelled', async () => {

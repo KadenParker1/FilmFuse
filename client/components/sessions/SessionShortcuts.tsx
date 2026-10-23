@@ -210,14 +210,16 @@ function SaveCrewForm({
 export function SaveCrewAsGroup({ memberIds }: { memberIds: string[] }) {
   const { colors } = useTheme();
   const [open, setOpen] = useState(false);
-  const [saved, setSaved] = useState<GroupDetailDTO | null>(null);
+  // Remembers who was saved: picking different people offers saving again.
+  const [saved, setSaved] = useState<{ group: GroupDetailDTO; memberKey: string } | null>(null);
+  const memberKey = [...memberIds].sort().join(',');
 
-  if (saved) {
+  if (saved && saved.memberKey === memberKey) {
     return (
       <View testID="save-crew-done" accessibilityLiveRegion="polite" className="flex-row items-center gap-2">
         <Ionicons name="checkmark-circle" size={18} color={colors.success} />
         <Body className="text-sm">
-          Saved as {saved.emoji ?? DEFAULT_GROUP_EMOJI} {saved.name}. Invites are on their way.
+          Saved as {saved.group.emoji ?? DEFAULT_GROUP_EMOJI} {saved.group.name}. Invites are on their way.
         </Body>
       </View>
     );
@@ -229,7 +231,7 @@ export function SaveCrewAsGroup({ memberIds }: { memberIds: string[] }) {
         memberIds={memberIds}
         onCancel={() => setOpen(false)}
         onSaved={(group) => {
-          setSaved(group);
+          setSaved({ group, memberKey });
           setOpen(false);
         }}
       />

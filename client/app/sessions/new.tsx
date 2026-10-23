@@ -91,6 +91,18 @@ export default function NewSessionScreen() {
   const [yearError, setYearError] = useState<string | null>(null);
   const [membersError, setMembersError] = useState<string | null>(null);
   const [usedSetup, setUsedSetup] = useState(false);
+  // Opened again with other people (e.g. "Movie night with…" from another profile while this screen
+  // is still mounted): take the new ones.
+  const presetKey = presetIds.join(',');
+  const [seenPresetKey, setSeenPresetKey] = useState(presetKey);
+  if (seenPresetKey !== presetKey) {
+    // Adjusting state while rendering (React's pattern for "reset when a prop changes").
+    setSeenPresetKey(presetKey);
+    if (presetIds.length) {
+      setMemberIds(presetIds);
+      setMembersError(null);
+    }
+  }
   // A link that already says who's watching doesn't need the last crew.
   const lastSetup = useLastSessionSetup(groupId, { enabled: presetIds.length === 0 });
   const setup = lastSetup.data ?? null;
