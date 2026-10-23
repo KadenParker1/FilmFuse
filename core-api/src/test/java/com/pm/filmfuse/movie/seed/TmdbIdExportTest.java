@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import java.util.zip.GZIPOutputStream;
 import org.junit.jupiter.api.Test;
@@ -282,5 +287,44 @@ class TmdbIdExportTest {
         } finally {
             server.stop(0);
         }
+    }
+
+    @Test
+    void aDownloadThatStallsMidBodyTimesOutInsteadOfHanging() throws Exception {
+        CountDownLatch release = new CountDownLatch(1);
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/stall", exchange -> {
+            exchange.sendResponseHeaders(200, 1_000);
+            OutputStream out = exchange.getResponseBody();
+            out.write(new byte[10]);
+            out.flush();
+            try {
+                release.await(10, TimeUnit.SECONDS);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+            exchange.close();
+        });
+        server.setExecutor(Executors.newCachedThreadPool());
+        server.start();
+        try {
+            ExportFetcher http = ExportFetcher.http(Duration.ofSeconds(2), Duration.ofMillis(300));
+            long started = System.nanoTime();
+            try (InputStream body = http.open(URI.create("http://127.0.0.1:" + server.getAddress().getPort()
+                    + "/stall")).orElseThrow()) {
+                assertThatThrownBy(body::readAllBytes).isInstanceOf(SocketTimeoutException.class);
+            }
+            assertThat(Duration.ofNanos(System.nanoTime() - started)).isLessThan(Duration.ofSeconds(5));
+        } finally {
+            release.countDown();
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void theHttpFetcherOnlyOpensHttpUrls() {
+        assertThatThrownBy(() -> ExportFetcher.http().open(URI.create("file:///etc/passwd")))
+                .isInstanceOf(IOException.class)
+                .hasMessageContaining("scheme");
     }
 }
