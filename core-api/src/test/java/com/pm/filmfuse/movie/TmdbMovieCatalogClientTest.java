@@ -302,4 +302,45 @@ class TmdbMovieCatalogClientTest {
         assertThat(new CatalogMovie(1, "T", null, null, null, null, null, null, null, null, "TV-MA", null)
                 .certification()).isNull();
     }
+
+    @Test
+    void discoverByYearSortsByVoteCountAndMapsVoteCounts() {
+        server.expect(requestTo(startsWith(BASE + "/discover/movie?")))
+                .andExpect(header("Authorization", "Bearer test-token"))
+                .andExpect(queryParam("primary_release_year", "1994"))
+                .andExpect(queryParam("sort_by", "vote_count.desc"))
+                .andExpect(queryParam("vote_count.gte", "25"))
+                .andExpect(queryParam("include_adult", "false"))
+                .andExpect(queryParam("include_video", "false"))
+                .andExpect(queryParam("language", "en-US"))
+                .andExpect(queryParam("page", "4"))
+                .andExpect(queryParamCount(7))
+                .andRespond(withSuccess("""
+                        {"page": 4, "total_pages": 12, "results": [
+                          {"id": 680, "title": "Pulp Fiction", "release_date": "1994-09-10", "poster_path": "/p.jpg",
+                           "overview": "Crime.", "genre_ids": [53, 80], "popularity": 60.5, "vote_average": 8.5,
+                           "vote_count": 29001}
+                        ]}
+                        """, MediaType.APPLICATION_JSON));
+
+        CatalogPage page = client.discoverByYear(1994, 25, 4);
+
+        server.verify();
+        assertThat(page.hasNext()).isTrue();
+        assertThat(page.movies()).singleElement().satisfies(movie -> {
+            assertThat(movie.id()).isEqualTo(680);
+            assertThat(movie.voteCount()).isEqualTo(29001);
+            assertThat(movie.runtime()).isNull();
+        });
+    }
+
+    @Test
+    void detailsCarryTheVoteCount() {
+        server.expect(requestTo(startsWith(BASE + "/movie/680?")))
+                .andRespond(withSuccess("""
+                        {"id": 680, "title": "Pulp Fiction", "runtime": 154, "vote_count": 29001}
+                        """, MediaType.APPLICATION_JSON));
+
+        assertThat(client.details(680).voteCount()).isEqualTo(29001);
+    }
 }

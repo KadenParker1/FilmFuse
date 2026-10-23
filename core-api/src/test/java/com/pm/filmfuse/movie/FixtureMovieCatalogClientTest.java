@@ -142,4 +142,22 @@ class FixtureMovieCatalogClientTest {
                 .flatMap(List::stream)
                 .toList();
     }
+
+    @Test
+    void discoverByYearListsOnlyThatYearsMoviesWithEnoughVotesMostVotedFirst() {
+        CatalogMovie a = new CatalogMovie(1, "A", 1999, 90, null, null, "a", List.of(18), 5.0, 7.0, null, List.of(), 10);
+        CatalogMovie b = new CatalogMovie(2, "B", 1999, 90, null, null, "b", List.of(18), 9.0, 7.0, null, List.of(), 900);
+        CatalogMovie c = new CatalogMovie(3, "C", 1999, 90, null, null, "c", List.of(18), 1.0, 7.0, null, List.of(), 2);
+        CatalogMovie d = new CatalogMovie(4, "D", 2000, 90, null, null, "d", List.of(18), 1.0, 7.0, null, List.of(), 500);
+        CatalogMovie unknownVotes = new CatalogMovie(5, "E", 1999, 90, null, null, "e", List.of(18), 1.0, 7.0);
+        FixtureMovieCatalogClient small = new FixtureMovieCatalogClient(List.of(a, b, c, d, unknownVotes));
+
+        CatalogPage page = small.discoverByYear(1999, 5, 1);
+
+        assertThat(page.movies()).extracting(CatalogMovie::id).containsExactly(2, 1, 5);
+        assertThat(page.movies()).allMatch(movie -> movie.runtime() == null);
+        assertThat(page.movies().getFirst().voteCount()).isEqualTo(900);
+        assertThat(page.hasNext()).isFalse();
+        assertThat(small.discoverByYear(1850, 0, 1).movies()).isEmpty();
+    }
 }

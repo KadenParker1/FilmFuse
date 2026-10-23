@@ -98,6 +98,23 @@ public class TmdbMovieCatalogClient implements MovieCatalogClient {
     }
 
     @Override
+    public CatalogPage discoverByYear(int year, int minVoteCount, int page) {
+        TmdbPage body = call(() -> restClient.get()
+                .uri(uri -> uri.path("/discover/movie")
+                        .queryParam("primary_release_year", year)
+                        .queryParam("sort_by", "vote_count.desc")
+                        .queryParam("vote_count.gte", Math.max(0, minVoteCount))
+                        .queryParam("include_adult", false)
+                        .queryParam("include_video", false)
+                        .queryParam("language", LANGUAGE)
+                        .queryParam("page", page)
+                        .build())
+                .retrieve()
+                .body(TmdbPage.class));
+        return toPage(body, page);
+    }
+
+    @Override
     public CatalogMovie details(int id) {
         TmdbMovie body = call(() -> restClient.get()
                 .uri(uri -> uri.path("/movie/{id}")
@@ -214,6 +231,7 @@ public class TmdbMovieCatalogClient implements MovieCatalogClient {
             List<TmdbGenre> genres,
             Double popularity,
             @JsonProperty("vote_average") Double voteAverage,
+            @JsonProperty("vote_count") Integer voteCount,
             @JsonProperty("release_dates") TmdbReleaseDates releaseDates,
             TmdbKeywords keywords) {
 
@@ -226,7 +244,7 @@ public class TmdbMovieCatalogClient implements MovieCatalogClient {
             return new CatalogMovie(id, title, yearOf(releaseDate),
                     runtime != null && runtime > 0 ? runtime : null,
                     posterPath, backdropPath, overview == null || overview.isBlank() ? null : overview,
-                    ids, popularity, voteAverage, usCertification(releaseDates), keywordNames);
+                    ids, popularity, voteAverage, usCertification(releaseDates), keywordNames, voteCount);
         }
     }
 }
