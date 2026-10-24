@@ -1,5 +1,7 @@
 package com.pm.filmfuse.movie.catalog;
 
+import java.time.LocalDate;
+
 /**
  * The port to the external movie catalog. {@link TmdbMovieCatalogClient} in any environment with a
  * TMDB token; {@link FixtureMovieCatalogClient} otherwise (local dev, tests). Selected in
@@ -28,5 +30,15 @@ public interface MovieCatalogClient {
      */
     default CatalogPage discoverByYear(int year, int minVoteCount, int page) {
         throw new UnsupportedOperationException("discoverByYear is not supported by " + getClass().getSimpleName());
+    }
+
+    /**
+     * TMDB's movie change list ({@code GET /movie/changes}): ids whose data changed between
+     * {@code from} and {@code to} (inclusive dates, UTC; TMDB allows at most 14 days), 100 per page,
+     * adult titles left out. Used by the weekly catalog refresh for the long tail. The default throws,
+     * like {@link #discoverByYear}; both real clients implement it.
+     */
+    default ChangedIdsPage changedMovieIds(LocalDate from, LocalDate to, int page) {
+        throw new UnsupportedOperationException("changedMovieIds is not supported by " + getClass().getSimpleName());
     }
 }

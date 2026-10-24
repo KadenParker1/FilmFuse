@@ -3,6 +3,7 @@ package com.pm.filmfuse.movie;
 import com.pm.filmfuse.common.exception.NotFoundException;
 import com.pm.filmfuse.movie.catalog.CatalogMovie;
 import com.pm.filmfuse.movie.catalog.CatalogPage;
+import com.pm.filmfuse.movie.catalog.ChangedIdsPage;
 import com.pm.filmfuse.movie.catalog.FixtureMovieCatalogClient;
 import java.util.List;
 import java.util.Set;
@@ -159,5 +160,24 @@ class FixtureMovieCatalogClientTest {
         assertThat(page.movies().getFirst().voteCount()).isEqualTo(900);
         assertThat(page.hasNext()).isFalse();
         assertThat(small.discoverByYear(1850, 0, 1).movies()).isEmpty();
+    }
+
+    @Test
+    void everyFixtureMovieCountsAsChangedAHundredIdsAPageInIdOrder() {
+        List<CatalogMovie> many = IntStream.rangeClosed(1, 150).mapToObj(id -> new CatalogMovie(1000 - id, "M" + id,
+                2000, 90, null, null, "o", List.of(18), (double) id, 7.0)).toList();
+        FixtureMovieCatalogClient big = new FixtureMovieCatalogClient(many);
+        java.time.LocalDate today = java.time.LocalDate.of(2026, 10, 18);
+
+        ChangedIdsPage first = big.changedMovieIds(today.minusDays(7), today, 1);
+        ChangedIdsPage second = big.changedMovieIds(today.minusDays(7), today, 2);
+
+        assertThat(first.ids()).hasSize(100).isSorted().startsWith(850);
+        assertThat(first.totalPages()).isEqualTo(2);
+        assertThat(first.hasNext()).isTrue();
+        assertThat(second.ids()).hasSize(50).endsWith(999);
+        assertThat(second.hasNext()).isFalse();
+        assertThat(big.changedMovieIds(today, today, 3).ids()).isEmpty();
+        assertThat(client.changedMovieIds(today, today, 1).ids()).hasSize(49);
     }
 }

@@ -4,6 +4,7 @@ import com.pm.filmfuse.common.exception.NotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +29,8 @@ public class FixtureMovieCatalogClient implements MovieCatalogClient {
 
     public static final String RESOURCE = "catalog/fixture-movies.json";
     public static final int PAGE_SIZE = 20;
+    /** TMDB's change list pages hold 100 ids. */
+    public static final int CHANGES_PAGE_SIZE = 100;
 
     private final List<CatalogMovie> byPopularity;
     private final Map<Integer, CatalogMovie> byId;
@@ -78,6 +81,19 @@ public class FixtureMovieCatalogClient implements MovieCatalogClient {
                         .reversed()
                         .thenComparingInt(CatalogMovie::id))
                 .toList(), page);
+    }
+
+    /**
+     * The fixture has no history, so every fixture movie counts as changed in any window (id order,
+     * {@value #CHANGES_PAGE_SIZE} per page) - enough to exercise the refresh offline.
+     */
+    @Override
+    public ChangedIdsPage changedMovieIds(LocalDate from, LocalDate to, int page) {
+        List<Integer> ids = byId.keySet().stream().sorted().toList();
+        int totalPages = Math.max(1, (ids.size() + CHANGES_PAGE_SIZE - 1) / CHANGES_PAGE_SIZE);
+        int start = Math.min((Math.max(page, 1) - 1) * CHANGES_PAGE_SIZE, ids.size());
+        return new ChangedIdsPage(ids.subList(start, Math.min(start + CHANGES_PAGE_SIZE, ids.size())), page,
+                totalPages);
     }
 
     @Override
