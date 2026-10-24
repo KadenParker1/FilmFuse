@@ -27,6 +27,8 @@ export interface ProfileResponseDTO {
   onboardingCompletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** UI gating only (shows the Admin entry); every /admin endpoint is enforced server-side. */
+  isAdmin: boolean;
 }
 
 /**
@@ -626,4 +628,199 @@ export interface NotificationSettingsDTO {
   sessionStarted: boolean;
   comments: boolean;
   weeklyDigest: boolean;
+}
+
+// ------------------------------------------------------------------------------------ admin portal
+
+/** Java enum `AdminSettingType` (admin module). */
+export type AdminSettingType = 'INTEGER' | 'BOOLEAN';
+
+/** Java enum `AdminAction` (admin module) — what an audit-log row records. */
+export type AdminAction =
+  | 'SETTING_UPDATE'
+  | 'SETTING_RESET'
+  | 'JOB_RUN'
+  | 'JOB_PAUSE'
+  | 'JOB_RESUME'
+  | 'REPORT_RESOLVE'
+  | 'REPORT_DISMISS';
+
+/** Java enum `ReportStatus` (admin module). */
+export type ReportStatus = 'OPEN' | 'RESOLVED' | 'DISMISSED';
+
+/** Java enum `ReportResolution` (admin module). */
+export type ReportResolution = 'RESOLVED' | 'DISMISSED';
+
+/** com.pm.filmfuse.admin.dto.AdminUserRefDTO — a user as admin lists name them (no email). */
+export interface AdminUserRefDTO {
+  id: string;
+  username: string | null;
+  displayName: string | null;
+}
+
+/**
+ * com.pm.filmfuse.admin.dto.AdminSettingDTO — `value` is the effective value (override or default):
+ * a number for INTEGER, a boolean for BOOLEAN; `min`/`max` are inclusive bounds (INTEGER only).
+ */
+export interface AdminSettingDTO {
+  key: string;
+  group: string;
+  label: string;
+  description: string;
+  unit: string | null;
+  type: AdminSettingType;
+  value: number | boolean;
+  defaultValue: number | boolean;
+  overridden: boolean;
+  min: number | null;
+  max: number | null;
+  updatedAt: string | null;
+  updatedBy: AdminUserRefDTO | null;
+}
+
+/** com.pm.filmfuse.admin.dto.UpdateAdminSettingDTO — PUT /admin/settings/{key}. */
+export interface UpdateAdminSettingDTO {
+  value: number | boolean;
+}
+
+/** com.pm.filmfuse.admin.dto.AdminAuditEntryDTO — `admin` is null once that account is deleted. */
+export interface AdminAuditEntryDTO {
+  id: string;
+  admin: AdminUserRefDTO | null;
+  action: AdminAction;
+  target: string | null;
+  oldValue: unknown;
+  newValue: unknown;
+  createdAt: string;
+}
+
+/** com.pm.filmfuse.admin.dto.ReportTargetPreviewDTO — `exists` is false once the target was deleted. */
+export interface ReportTargetPreviewDTO {
+  exists: boolean;
+  author: AdminUserRefDTO | null;
+  text: string | null;
+  movieId: number | null;
+  movieTitle: string | null;
+  score: number | null;
+  authorStatus: AccountStatus | null;
+}
+
+/** com.pm.filmfuse.admin.dto.AdminReportDTO — one report in the moderation queue. */
+export interface AdminReportDTO {
+  id: string;
+  targetType: ReportTargetType;
+  targetId: string;
+  reason: ReportReason;
+  details: string | null;
+  status: ReportStatus;
+  createdAt: string;
+  reporter: AdminUserRefDTO;
+  target: ReportTargetPreviewDTO;
+  openReportsOnTarget: number;
+  resolvedAt: string | null;
+  resolvedBy: AdminUserRefDTO | null;
+  resolutionNote: string | null;
+}
+
+/** com.pm.filmfuse.admin.dto.ResolveReportDTO — POST /admin/reports/{id}/resolve; note ≤ 500 chars. */
+export interface ResolveReportDTO {
+  resolution: ReportResolution;
+  note?: string | null;
+}
+
+/** com.pm.filmfuse.admin.dto.VoteTiersDTO — exclusive TMDB vote-count bins. */
+export interface VoteTiersDTO {
+  votes1000Plus: number;
+  votes100To999: number;
+  votes20To99: number;
+  votesUnder20: number;
+  votesUnknown: number;
+}
+
+/** com.pm.filmfuse.admin.dto.CatalogMetricsDTO — GET /admin/metrics/catalog. */
+export interface CatalogMetricsDTO {
+  totalMovies: number;
+  withCertification: number;
+  voteTiers: VoteTiersDTO;
+  rejected: number;
+  databaseBytes: number;
+  maxDatabaseMb: number;
+  maxDatabaseMbCeiling: number;
+  planLimitMb: number;
+  generatedAt: string;
+}
+
+/** com.pm.filmfuse.admin.dto.DailyCountDTO — `date` is a UTC day, yyyy-MM-dd. */
+export interface DailyCountDTO {
+  date: string;
+  count: number;
+}
+
+/** com.pm.filmfuse.admin.dto.UsageMetricsDTO — GET /admin/metrics/usage; ratingsPerDay = 30 UTC days, oldest first. */
+export interface UsageMetricsDTO {
+  usersTotal: number;
+  usersNew7d: number;
+  usersOnboarded: number;
+  ratingsPerDay: DailyCountDTO[];
+  sessionsStarted7d: number;
+  sessionsStarted30d: number;
+  sessionsPicked7d: number;
+  sessionsPicked30d: number;
+  activeGroups30d: number;
+  generatedAt: string;
+}
+
+/** com.pm.filmfuse.admin.dto.MlHealthDTO — python-ml-service GET /health. */
+export interface MlHealthDTO {
+  configured: boolean;
+  reachable: boolean;
+  status: string | null;
+  modelVersion: string | null;
+  latencyMs: number | null;
+}
+
+/** com.pm.filmfuse.admin.dto.HealthMetricsDTO — GET /admin/metrics/health. */
+export interface HealthMetricsDTO {
+  ml: MlHealthDTO;
+  vectorsDirty: number;
+  vectorsDirtyOldest: string | null;
+  vectorsNeverBuilt: number;
+  openReports: number;
+  generatedAt: string;
+}
+
+/** Java enum `JobOutcome` (common.job) — how a recorded job run ended. */
+export type JobOutcome = 'RUNNING' | 'COMPLETED' | 'ABORTED' | 'INTERRUPTED' | 'FAILED' | 'SKIPPED';
+
+/** com.pm.filmfuse.admin.dto.JobRunDTO — one app.job_runs row; finishedAt null while running. */
+export interface JobRunDTO {
+  id: number;
+  startedAt: string;
+  finishedAt: string | null;
+  outcome: JobOutcome;
+  summary: Record<string, unknown>;
+  triggeredBy: string | null;
+}
+
+/** com.pm.filmfuse.admin.dto.AdminJobDTO — GET /admin/jobs. `controllable` = Run now / Pause / Resume apply. */
+export interface AdminJobDTO {
+  name: string;
+  label: string;
+  scheduled: boolean;
+  paused: boolean;
+  controllable: boolean;
+  schedule: string | null;
+  nextRunAt: string | null;
+  running: boolean;
+  /** The last run never finished and nothing runs it any more (the process died): outcome unknown. */
+  lastRunStale: boolean;
+  lastRun: JobRunDTO | null;
+  recentRuns: JobRunDTO[];
+}
+
+/** com.pm.filmfuse.admin.dto.JobRunStartedDTO — 202 from POST /admin/jobs/{name}/run. */
+export interface JobRunStartedDTO {
+  jobName: string;
+  runId: number | null;
+  triggeredBy: string;
 }

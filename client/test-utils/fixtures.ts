@@ -40,6 +40,7 @@ export const makeProfile = (overrides: Partial<ProfileResponseDTO> = {}): Profil
   onboardingCompletedAt: '2026-01-01T00:00:00Z',
   createdAt: '2026-01-01T00:00:00Z',
   updatedAt: '2026-01-01T00:00:00Z',
+  isAdmin: false,
   ...overrides,
 });
 

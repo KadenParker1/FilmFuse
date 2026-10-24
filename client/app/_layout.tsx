@@ -99,6 +99,8 @@ function RootNavigator() {
           <Stack.Screen name="taste/index" />
           <Stack.Screen name="taste/history" />
           <Stack.Screen name="taste/recalibrate" />
+          {/* Admins only: app/admin/_layout shows the not-found screen to everyone else. */}
+          <Stack.Screen name="admin" />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn} redirectTo="/">
           <Stack.Screen name="(auth)" />

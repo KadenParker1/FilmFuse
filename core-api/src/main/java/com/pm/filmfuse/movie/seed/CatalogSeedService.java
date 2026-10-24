@@ -92,10 +92,14 @@ public class CatalogSeedService {
     private final CatalogSeedRejectRepository rejects;
     private final TmdbIdExport export;
     private final DatabaseSizeProbe databaseSize;
-    private final CatalogSeedProperties properties;
-    private final QualityFilter quality;
+    private final CatalogSeedProperties configured;
     private final Clock clock;
-    private final RequestPacer pacer;
+    private final RequestPacer configuredPacer;
+    private CatalogSeedOverrides overrides = CatalogSeedOverrides.NONE;
+    // The effective values of the current (or last) run; see applyOverrides().
+    private volatile CatalogSeedProperties properties;
+    private volatile QualityFilter quality;
+    private volatile RequestPacer pacer;
     private final Sleeper sleeper;
     private final AtomicBoolean running = new AtomicBoolean();
 
@@ -119,9 +123,11 @@ public class CatalogSeedService {
         this.rejects = rejects;
         this.export = export;
         this.databaseSize = databaseSize;
+        this.configured = properties;
         this.properties = properties;
         this.quality = new QualityFilter(properties.quality());
         this.clock = clock;
+        this.configuredPacer = pacer;
         this.pacer = pacer;
         this.sleeper = sleeper;
     }
@@ -146,6 +152,36 @@ public class CatalogSeedService {
         public SeedPlan(int popularPages, List<Integer> ids, boolean resumable) {
             this(popularPages, ids, resumable, false, false);
         }
+    }
+
+    /** Runtime overrides (the admin portal's settings); applied at the start of every run. */
+    @Autowired(required = false)
+    void setOverrides(CatalogSeedOverrides overrides) {
+        this.overrides = overrides == null ? CatalogSeedOverrides.NONE : overrides;
+    }
+
+    /**
+     * Re-reads the overridable values for the run about to start (called under the running flag, so
+     * one run sees one consistent set). A changed request rate gets its own pacer; otherwise the
+     * configured (or a test's injected) pacer is kept.
+     */
+    private void applyOverrides() {
+        CatalogSeedProperties effective;
+        try {
+            effective = overrides.apply(configured);
+        } catch (RuntimeException ex) {
+            log.warn("Catalog setting overrides unavailable, using the configured values: {}", ex.getMessage());
+            effective = configured;
+        }
+        List<String> changed = CatalogSeedOverrides.changes(configured, effective);
+        if (!changed.isEmpty()) {
+            log.warn("Admin settings (app.admin_settings) override the configured catalog values for this run: {}",
+                    String.join(", ", changed));
+        }
+        this.properties = effective;
+        this.quality = new QualityFilter(effective.quality());
+        this.pacer = effective.requestsPerSecond().equals(configured.requestsPerSecond()) ? configuredPacer
+                : RequestPacer.system(effective.requestsPerSecond());
     }
 
     /** The full seed: the configured {@code sources}, resumable. */
@@ -175,6 +211,7 @@ public class CatalogSeedService {
             log.warn("Catalog seed not started: another run is in progress");
             return new Run(started).report(SeedReport.Outcome.ALREADY_RUNNING);
         }
+        applyOverrides();
         Run run = new Run(started);
         SeedReport.Outcome outcome = SeedReport.Outcome.COMPLETED;
         try {

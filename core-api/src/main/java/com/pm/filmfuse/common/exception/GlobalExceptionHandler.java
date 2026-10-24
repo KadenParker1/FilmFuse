@@ -92,6 +92,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ErrorResponseDTO.of(ex.getMessage()));
     }
 
+    @ExceptionHandler(FieldValidationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleFieldValidation(FieldValidationException ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponseDTO(ex.getMessage(), ex.fieldErrors()));
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleNotFound(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponseDTO.of(ex.getMessage()));

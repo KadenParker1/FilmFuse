@@ -1,4 +1,4 @@
-import type { FeedScope, SessionListStatus } from '../types/api';
+import type { AdminAction, FeedScope, ReportStatus, SessionListStatus } from '../types/api';
 
 /**
  * Every TanStack Query key in the app, in one place. A prefix is the parent node and specific keys
@@ -19,6 +19,9 @@ const feed = ['feed'] as const;
 const movieRatingsAll = [...feed, 'movie'] as const;
 const ratingDetailAll = ['ratingDetail'] as const;
 const commentsAll = ['comments'] as const;
+const admin = ['admin'] as const;
+const adminReportsAll = [...admin, 'reports'] as const;
+const adminAuditAll = [...admin, 'audit'] as const;
 
 export const queryKeys = {
   /** The signed-in user's own profile (GET /me). */
@@ -119,4 +122,24 @@ export const queryKeys = {
   pendingRatings: ['pendingRatings'] as const,
   /** GET /me/settings/notifications */
   notificationSettings: ['settings', 'notifications'] as const,
+  /** Everything in the admin portal (prefix). */
+  admin,
+  /** GET /admin/metrics/catalog */
+  adminCatalogMetrics: [...admin, 'metrics', 'catalog'] as const,
+  /** GET /admin/metrics/usage */
+  adminUsageMetrics: [...admin, 'metrics', 'usage'] as const,
+  /** GET /admin/metrics/health */
+  adminHealthMetrics: [...admin, 'metrics', 'health'] as const,
+  /** GET /admin/jobs */
+  adminJobs: [...admin, 'jobs'] as const,
+  /** GET /admin/settings */
+  adminSettings: [...admin, 'settings'] as const,
+  /** Every reports queue (prefix). */
+  adminReportsAll,
+  /** GET /admin/reports?status= (infinite) */
+  adminReports: (status: ReportStatus) => [...adminReportsAll, status] as const,
+  /** Every audit-log list (prefix). */
+  adminAuditAll,
+  /** GET /admin/audit-log?action= (infinite); null = every action */
+  adminAudit: (action: AdminAction | null) => [...adminAuditAll, action] as const,
 } as const;

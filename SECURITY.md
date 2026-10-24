@@ -131,6 +131,31 @@ distributed addresses. In-app rate limits only blunt the second; it needs an edg
 - CORS uses exact origins with credentials off. It is a bearer-token API, so it has no cookies and no
   CSRF surface.
 
+### Admin portal (`/api/v1/admin/**`, client `/admin`)
+- **Who:** `profiles.role = 'admin'`, granted only by hand in SQL (CLAUDE.md, "Admin portal"). No
+  endpoint writes a role; the JPA column is `insertable = false, updatable = false`, and token claims
+  (`role`, `app_metadata`) are ignored. `SupabaseJwtAuthenticationConverter` reads the row on every
+  request, so a revoke applies to the next request. A suspended admin is refused like any suspended user.
+- **Enforcement in one place:** `SecurityConfig` requires `ROLE_ADMIN` for the whole prefix; controllers
+  carry no checks of their own, so a new admin endpoint cannot forget one.
+- **Not revealed:** a signed-in non-admin gets `sendError(404)`, the same response as a path that does
+  not exist (`AdminAccessIntegrationTest` compares them for every endpoint). The admin rate-limit
+  category is applied to admins only, so a non-admin never gets a 429 that would show the surface.
+  The client shows the portal only when `/me` says `isAdmin`; that is cosmetic.
+- **Abuse by an admin (or a stolen admin token):** writes are limited (`admin-writes`, 60 per 10 min);
+  every write is in `admin_audit_log` in the same transaction; settings accept registered keys only,
+  with hard bounds (the size guard can never exceed `filmfuse.admin.max-database-mb-ceiling`, 480 MB by
+  default, below the free tier's 500 MB; request rate ≤ 40/s, under TMDB's ~50/s). Run now runs one
+  job at a time on its own thread and respects the cross-process catalog lock, so it cannot stack runs.
+- **Data shown:** reporter and author names and ids, report text and bios; never email addresses
+  (`AdminReportsIntegrationTest` checks). Errors stay `{message}` with no SQL.
+- **ML service:** `ml_reader` cannot read `profiles.role`, `admin_settings` or `admin_audit_log`. The
+  health probe calls the ML service's public `/health` with short timeouts; nothing from its body
+  beyond a short `status` / `model_version` string is shown.
+- **Residual risks:** an admin account without MFA is only as strong as its password (Supabase MFA is
+  recommended for admins; not enforced by core-api yet); the rate limiter is per replica and in memory
+  (#13); settings changes are not reviewed by a second admin.
+
 ### python-ml-service
 - `/internal/*` requires `X-Internal-Key`, compared with `hmac.compare_digest`. The key is mandatory,
   and at least 32 characters, unless `ENV=local`. `ENV` defaults to `production`.
@@ -213,6 +238,12 @@ before the fix.
   413 for declared and chunked bodies, and the `ENV` default. `tests/test_config.py` covers the
   32-character key minimum outside `ENV=local`: the key is never echoed, whitespace padding does not
   count, and short keys are fine locally.
+- **core-api, admin portal**: `AdminAccessIntegrationTest` (401 / identical 404 / served for every admin
+  endpoint, role from the row, grant and revoke on the next request, `PATCH /me` cannot set a role,
+  suspended admins refused), `RateLimitIntegrationTest` (admin-writes for admins only),
+  `AdminSettingsIntegrationTest` (unknown keys, types, bounds, clamping, audit),
+  `AdminReportsIntegrationTest` (no emails in the queue), `AdminJobsIntegrationTest` (409 under the lock),
+  `MigrationIntegrationTest.mlReaderCannotReadAdminData`, `AdminUnitTest` (token claims ignored).
 - **client**:
   - `__tests__/safeText.test.ts` covers the mirrored rules, plus the `validateGroupForm` and
     `validateComment` pre-checks.

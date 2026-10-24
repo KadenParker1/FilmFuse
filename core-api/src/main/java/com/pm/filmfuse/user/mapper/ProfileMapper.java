@@ -21,7 +21,8 @@ public final class ProfileMapper {
                 profile.getOnboardingCompletedAt() != null,
                 profile.getOnboardingCompletedAt(),
                 profile.getCreatedAt(),
-                profile.getUpdatedAt());
+                profile.getUpdatedAt(),
+                profile.isAdmin());
     }
 
     /**

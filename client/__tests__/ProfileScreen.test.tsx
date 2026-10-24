@@ -90,3 +90,18 @@ describe('ProfileScreen', () => {
     expect(screen.getByText('Delete your account?')).toBeOnTheScreen();
   });
 });
+
+describe('ProfileScreen — admin entry', () => {
+  it('is hidden for everyone who is not an admin', async () => {
+    mockUseMe.mockReturnValue(queryResult({ data: makeProfile({ isAdmin: false }) }));
+    await render(<ProfileScreen />);
+    expect(screen.queryByRole('button', { name: 'Admin' })).toBeNull();
+  });
+
+  it('shows for admins and opens /admin', async () => {
+    mockUseMe.mockReturnValue(queryResult({ data: makeProfile({ isAdmin: true }) }));
+    await render(<ProfileScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Admin' }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/admin');
+  });
+});

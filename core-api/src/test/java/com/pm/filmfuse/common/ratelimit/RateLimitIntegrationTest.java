@@ -44,6 +44,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
         "filmfuse.rate-limit.limits.comments.capacity=3",
         "filmfuse.rate-limit.limits.sessions.capacity=3",
         "filmfuse.rate-limit.limits.photo-upload.capacity=3",
+        "filmfuse.rate-limit.limits.admin-writes.capacity=3",
 })
 class RateLimitIntegrationTest extends AbstractIntegrationTest {
 
@@ -192,5 +193,38 @@ class RateLimitIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/v1/me").with(from).header("Origin", "http://localhost:8081"))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:8081"));
+    }
+
+    private static RequestPostProcessor admin(UUID id) {
+        return JwtTestSupport.supabaseUser(id).authorities(
+                new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"),
+                new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"));
+    }
+
+    /** An unknown setting key: a 400 that stores nothing, so the shared database is untouched. */
+    private static MockHttpServletRequestBuilder adminWrite() {
+        return org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/admin/settings/no.such.key")
+                .contentType(MediaType.APPLICATION_JSON).content("{\"value\": 1}");
+    }
+
+    @Test
+    void adminWritesHaveTheirOwnCategory() throws Exception {
+        UUID me = UUID.randomUUID();
+        RequestPostProcessor from = freshAddress();
+        for (int i = 0; i < 3; i++) {
+            mockMvc.perform(adminWrite().with(admin(me)).with(from)).andExpect(status().isBadRequest());
+        }
+        mockMvc.perform(adminWrite().with(admin(me)).with(from)).andExpect(status().isTooManyRequests());
+        // Admin reads are not in the category.
+        mockMvc.perform(get("/api/v1/admin/settings").with(admin(me)).with(from)).andExpect(status().isOk());
+    }
+
+    @Test
+    void nonAdminsNeverSeeA429FromTheAdminCategoryOnlyTheNotFound() throws Exception {
+        UUID me = UUID.randomUUID();
+        RequestPostProcessor from = freshAddress();
+        for (int i = 0; i < 10; i++) {
+            mockMvc.perform(adminWrite().with(user(me)).with(from)).andExpect(status().isNotFound());
+        }
     }
 }
