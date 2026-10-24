@@ -53,6 +53,24 @@ class SessionAdvisoryLockIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void isHeldIgnoresTheSameKeyHeldInAnotherDatabaseOfTheCluster() throws Exception {
+        SessionAdvisoryLock lock = lock();
+        // Same server, the always-present "postgres" database: advisory keys are per database.
+        String otherDatabase = url.replaceFirst("(jdbc:postgresql://[^/]+/)[^?]*", "$1postgres");
+        assertThat(otherDatabase).isNotEqualTo(url);
+        try (Connection other = DriverManager.getConnection(otherDatabase, username, password);
+             PreparedStatement take = other.prepareStatement("select pg_try_advisory_lock(?)")) {
+            take.setLong(1, lock.key());
+            try (ResultSet rs = take.executeQuery()) {
+                assertThat(rs.next() && rs.getBoolean(1)).isTrue();
+            }
+
+            assertThat(lock.isHeld()).isFalse();
+            assertThat(lock.tryRun(() -> "ran")).contains("ran");
+        }
+    }
+
+    @Test
     void ofTwoConcurrentAttemptsOneRunsAndTheOtherSkips() throws Exception {
         SessionAdvisoryLock lock = lock();
         CountDownLatch holding = new CountDownLatch(1);
