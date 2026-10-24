@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { apiClient } from '../lib/apiClient';
 import { queryKeys } from '../lib/queryKeys';
 import { withQuery } from '../lib/withQuery';
+import { fetchMe } from './me';
 import type {
   AdminAction,
   AdminAuditEntryDTO,
@@ -19,8 +20,19 @@ import type {
 
 /*
  * Admin portal hooks. Every endpoint is admin-only server-side (non-admins get a 404); the client
- * only shows the portal when `me.isAdmin`, and never relies on that for security.
+ * only shows the portal when `me.isAdmin`, and never relies on that for security. As defence in depth,
+ * every admin query is also disabled unless the cached `/me` says `isAdmin`, so no admin request is
+ * ever sent for a non-admin even if an admin screen were mounted outside the gated layout.
  */
+
+/**
+ * Whether the cached `/me` says the caller is an admin. Reads the cache only (the admin layout's
+ * `useMe` does the fetching), so it never sends a request of its own.
+ */
+export function useIsAdmin(): boolean {
+  const { data } = useQuery({ queryKey: queryKeys.me, queryFn: fetchMe, enabled: false });
+  return data?.isAdmin === true;
+}
 
 /** Metrics are cached ~30 s server-side; refetching more often than that only re-reads the cache. */
 const METRICS_STALE_MS = 30_000;
@@ -39,20 +51,34 @@ export const fetchAdminJobs = () => apiClient.get<AdminJobDTO[]>('/admin/jobs');
 const settingPath = (key: string) => `/admin/settings/${encodeURIComponent(key)}`;
 
 export function useCatalogMetrics() {
-  return useQuery({ queryKey: queryKeys.adminCatalogMetrics, queryFn: fetchCatalogMetrics, staleTime: METRICS_STALE_MS });
+  const enabled = useIsAdmin();
+  return useQuery({
+    queryKey: queryKeys.adminCatalogMetrics,
+    queryFn: fetchCatalogMetrics,
+    staleTime: METRICS_STALE_MS,
+    enabled,
+  });
 }
 
 export function useUsageMetrics() {
-  return useQuery({ queryKey: queryKeys.adminUsageMetrics, queryFn: fetchUsageMetrics, staleTime: METRICS_STALE_MS });
+  const enabled = useIsAdmin();
+  return useQuery({ queryKey: queryKeys.adminUsageMetrics, queryFn: fetchUsageMetrics, staleTime: METRICS_STALE_MS, enabled });
 }
 
 export function useHealthMetrics() {
-  return useQuery({ queryKey: queryKeys.adminHealthMetrics, queryFn: fetchHealthMetrics, staleTime: METRICS_STALE_MS });
+  const enabled = useIsAdmin();
+  return useQuery({
+    queryKey: queryKeys.adminHealthMetrics,
+    queryFn: fetchHealthMetrics,
+    staleTime: METRICS_STALE_MS,
+    enabled,
+  });
 }
 
 /** Every runtime setting with its effective value, default and bounds. */
 export function useAdminSettings() {
-  return useQuery({ queryKey: queryKeys.adminSettings, queryFn: fetchAdminSettings });
+  const enabled = useIsAdmin();
+  return useQuery({ queryKey: queryKeys.adminSettings, queryFn: fetchAdminSettings, enabled });
 }
 
 /** Replaces one setting in the cached list with the server's answer. */
@@ -89,7 +115,9 @@ export function useResetAdminSetting() {
 
 /** The reports queue for one status (OPEN oldest first; closed ones newest first). */
 export function useAdminReports(status: ReportStatus) {
+  const enabled = useIsAdmin();
   return useInfiniteQuery({
+    enabled,
     queryKey: queryKeys.adminReports(status),
     queryFn: ({ pageParam }) => fetchAdminReports(status, pageParam),
     initialPageParam: null as string | null,
@@ -118,7 +146,9 @@ export function useResolveReport() {
 
 /** The audit log, newest first; null = every action. */
 export function useAdminAudit(action: AdminAction | null) {
+  const enabled = useIsAdmin();
   return useInfiniteQuery({
+    enabled,
     queryKey: queryKeys.adminAudit(action),
     queryFn: ({ pageParam }) => fetchAdminAudit(action, pageParam),
     initialPageParam: null as string | null,
@@ -131,7 +161,9 @@ export const JOBS_POLL_MS = 5_000;
 
 /** Every background job with its schedule and recent runs; polls while one is running. */
 export function useAdminJobs() {
+  const enabled = useIsAdmin();
   return useQuery({
+    enabled,
     queryKey: queryKeys.adminJobs,
     queryFn: fetchAdminJobs,
     refetchInterval: (query) => (query.state.data?.some((job) => job.running) ? JOBS_POLL_MS : false),

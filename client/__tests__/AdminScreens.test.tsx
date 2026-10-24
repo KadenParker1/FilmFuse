@@ -18,6 +18,7 @@ import AdminCatalogScreen, { groupSettings, SIZE_GUARD_NOTE } from '../app/admin
 import AdminOverviewScreen from '../app/admin/index';
 import AdminReportsScreen from '../app/admin/reports';
 import {
+  adminClient,
   makeAuditEntry,
   makeBoolSetting,
   makeCatalog,
@@ -82,7 +83,7 @@ describe('Overview', () => {
 
   it('shows skeletons while loading', async () => {
     serveRoutes(fetchMock, [{ path: /\/admin\/metrics/, hang: true }]);
-    await renderWithClient(<AdminOverviewScreen />);
+    await renderWithClient(<AdminOverviewScreen />, adminClient());
     expect(screen.getByTestId('usage-loading')).toBeOnTheScreen();
     expect(screen.getByTestId('health-loading')).toBeOnTheScreen();
     expect(screen.getByTestId('catalog-loading')).toBeOnTheScreen();
@@ -90,7 +91,7 @@ describe('Overview', () => {
 
   it('shows usage, ratings per day, health and the catalog', async () => {
     routes();
-    await renderWithClient(<AdminOverviewScreen />);
+    await renderWithClient(<AdminOverviewScreen />, adminClient());
     expect(await screen.findByLabelText('Users, 1,204, 38 new this week')).toBeOnTheScreen();
     expect(screen.getByLabelText('Onboarded, 903, 75% of users')).toBeOnTheScreen();
     expect(screen.getByLabelText('Active groups, 17, a session in 30 days')).toBeOnTheScreen();
@@ -103,7 +104,7 @@ describe('Overview', () => {
 
   it('links open reports to the queue', async () => {
     routes();
-    await renderWithClient(<AdminOverviewScreen />);
+    await renderWithClient(<AdminOverviewScreen />, adminClient());
     await fireEvent.press(await screen.findByRole('button', { name: 'Review reports' }));
     expect(routerState.router.replace).toHaveBeenCalledWith('/admin/reports');
   });
@@ -116,7 +117,7 @@ describe('Overview', () => {
       { path: '/admin/metrics/health', body: makeHealth({ ml, openReports: 0 }) },
       { path: /\/admin\/metrics/, hang: true },
     ]);
-    await renderWithClient(<AdminOverviewScreen />);
+    await renderWithClient(<AdminOverviewScreen />, adminClient());
     expect(await screen.findByLabelText(label)).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Review reports' })).toBeNull();
   });
@@ -128,7 +129,7 @@ describe('Overview', () => {
       { path: '/admin/metrics/health', body: makeHealth() },
       { path: '/admin/metrics/catalog', body: makeCatalog() },
     ]);
-    await renderWithClient(<AdminOverviewScreen />);
+    await renderWithClient(<AdminOverviewScreen />, adminClient());
     expect(await screen.findByText("Couldn't load usage")).toBeOnTheScreen();
     expect(await screen.findByLabelText('Open reports, 4')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
@@ -159,7 +160,7 @@ describe('Catalog & jobs', () => {
 
   it('shows catalog stats, the vote tiers and the size guard note', async () => {
     routes();
-    await renderWithClient(<AdminCatalogScreen />);
+    await renderWithClient(<AdminCatalogScreen />, adminClient());
     expect(await screen.findByTestId('metric-movies')).toBeOnTheScreen();
     expect(screen.getByLabelText('Rejected ids, 2,500, failed the quality bar')).toBeOnTheScreen();
     expect(screen.getByLabelText(/^TMDB votes: 1,000\+ 10,000/)).toBeOnTheScreen();
@@ -168,7 +169,7 @@ describe('Catalog & jobs', () => {
 
   it('lists the jobs with controls only where they apply', async () => {
     routes();
-    await renderWithClient(<AdminCatalogScreen />);
+    await renderWithClient(<AdminCatalogScreen />, adminClient());
     const topUp = await screen.findByTestId('job-catalog-top-up');
     expect(within(topUp).getByRole('button', { name: 'Run Nightly catalog top-up now' })).toBeOnTheScreen();
     expect(within(screen.getByTestId('job-closeness')).queryByRole('button')).toBeNull();
@@ -176,7 +177,7 @@ describe('Catalog & jobs', () => {
 
   it('lists every setting, with the size-guard note under the guard', async () => {
     routes();
-    await renderWithClient(<AdminCatalogScreen />);
+    await renderWithClient(<AdminCatalogScreen />, adminClient());
     expect(await screen.findByTestId('setting-catalog.max-database-mb')).toBeOnTheScreen();
     expect(screen.getByTestId('setting-catalog.quality.min-votes')).toBeOnTheScreen();
     expect(screen.getByRole('switch', { name: 'Require a poster' })).toBeOnTheScreen();
@@ -191,7 +192,7 @@ describe('Catalog & jobs', () => {
       { path: '/admin/jobs', status: 500, body: {} },
       { path: '/admin/settings', status: 500, body: {} },
     ]);
-    await renderWithClient(<AdminCatalogScreen />);
+    await renderWithClient(<AdminCatalogScreen />, adminClient());
     expect(await screen.findByText("Couldn't load catalog stats")).toBeOnTheScreen();
     expect(await screen.findByText("Couldn't load jobs")).toBeOnTheScreen();
     expect(await screen.findByText("Couldn't load settings")).toBeOnTheScreen();
@@ -205,7 +206,7 @@ describe('Reports', () => {
       { path: '/admin/reports?status=OPEN&cursor=c1', body: page([makeReport({ id: 'r2', reason: 'SPAM' })]) },
       { path: '/admin/reports?status=RESOLVED', body: page([]) },
     ]);
-    await renderWithClient(<AdminReportsScreen />);
+    await renderWithClient(<AdminReportsScreen />, adminClient());
     expect(await screen.findByTestId('report-r1')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Load more' }));
     expect(await screen.findByTestId('report-r2')).toBeOnTheScreen();
@@ -218,7 +219,7 @@ describe('Reports', () => {
 
   it('an empty queue says so; a failure offers a retry', async () => {
     serveRoutes(fetchMock, [{ path: '/admin/reports?status=OPEN', body: page([]) }]);
-    await renderWithClient(<AdminReportsScreen />);
+    await renderWithClient(<AdminReportsScreen />, adminClient());
     expect(await screen.findByText('All clear')).toBeOnTheScreen();
   });
 
@@ -229,7 +230,7 @@ describe('Reports', () => {
       { method: 'POST', path: '/admin/reports/r1/resolve', body: makeReport({ status: 'RESOLVED' }) },
       { path: /.*/, body: {} },
     ]);
-    await renderWithClient(<AdminReportsScreen />);
+    await renderWithClient(<AdminReportsScreen />, adminClient());
     await fireEvent.press(await screen.findByRole('button', { name: /^Resolve report/ }));
     expect(await screen.findByText('All clear')).toBeOnTheScreen();
     expect(api.callsTo('GET', '/admin/reports?status=OPEN')).toHaveLength(2);
@@ -240,7 +241,7 @@ describe('Reports', () => {
       { path: '/admin/reports?status=OPEN', status: 500, body: {}, times: 1 },
       { path: '/admin/reports?status=OPEN', body: page([makeReport()]) },
     ]);
-    await renderWithClient(<AdminReportsScreen />);
+    await renderWithClient(<AdminReportsScreen />, adminClient());
     await fireEvent.press(await screen.findByRole('button', { name: 'Try again' }));
     expect(await screen.findByTestId('report-r1')).toBeOnTheScreen();
   });
@@ -253,7 +254,7 @@ describe('Audit log', () => {
       { path: '/admin/audit-log?cursor=n1', body: page([makeAuditEntry({ id: 'a2', action: 'JOB_RUN', target: 'catalog-top-up' })]) },
       { path: '/admin/audit-log?action=REPORT_RESOLVE', body: page([]) },
     ]);
-    await renderWithClient(<AdminAuditScreen />);
+    await renderWithClient(<AdminAuditScreen />, adminClient());
     expect(await screen.findByTestId('audit-a1')).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: 'All' })).toBeSelected();
     await fireEvent.press(screen.getByRole('button', { name: 'Load more' }));
@@ -267,7 +268,7 @@ describe('Audit log', () => {
 
   it('a failed load offers a retry', async () => {
     serveRoutes(fetchMock, [{ path: '/admin/audit-log', status: 500, body: {} }]);
-    await renderWithClient(<AdminAuditScreen />);
+    await renderWithClient(<AdminAuditScreen />, adminClient());
     expect(await screen.findByText("Couldn't load the audit log")).toBeOnTheScreen();
   });
 });

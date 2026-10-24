@@ -20,7 +20,18 @@ import {
   useUsageMetrics,
 } from '../api/admin';
 import { queryKeys } from '../lib/queryKeys';
-import { makeCatalog, makeHealth, makeIntSetting, makeJob, makeReport, makeUsage, page } from '../test-utils/adminFixtures';
+import {
+  adminClient,
+  makeCatalog,
+  makeHealth,
+  makeIntSetting,
+  makeJob,
+  makeReport,
+  makeUsage,
+  page,
+} from '../test-utils/adminFixtures';
+import { makeProfile } from '../test-utils/fixtures';
+import { createTestQueryClient } from '../test-utils/render';
 import { API_BASE, serveRoutes } from '../test-utils/fetchRoutes';
 import { renderHookWithClient } from '../test-utils/render';
 
@@ -34,6 +45,28 @@ beforeEach(() => {
 
 describe('admin query hooks', () => {
   it.each([
+    ['no cached /me', null],
+    ['a non-admin /me', makeProfile({ isAdmin: false })],
+  ])('send nothing with %s', async (_name, me) => {
+    const client = createTestQueryClient();
+    if (me) client.setQueryData(queryKeys.me, me);
+    const hooks = [
+      useCatalogMetrics,
+      useUsageMetrics,
+      useHealthMetrics,
+      useAdminSettings,
+      useAdminJobs,
+      () => useAdminReports('OPEN'),
+      () => useAdminAudit(null),
+    ];
+    const { result } = await renderHookWithClient(() => hooks.map((hook) => hook().fetchStatus), client);
+    expect(result.current.every((status) => status === 'idle')).toBe(true);
+    // Not even /me: the gate reads the cache only.
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+
+  it.each([
     ['catalog', useCatalogMetrics, '/admin/metrics/catalog', makeCatalog()],
     ['usage', useUsageMetrics, '/admin/metrics/usage', makeUsage()],
     ['health', useHealthMetrics, '/admin/metrics/health', makeHealth()],
@@ -41,7 +74,10 @@ describe('admin query hooks', () => {
     ['jobs', useAdminJobs, '/admin/jobs', [makeJob()]],
   ])('%s GETs its endpoint with the bearer token', async (_name, hook, path, body) => {
     serveRoutes(fetchMock, [{ path, body }]);
-    const { result } = await renderHookWithClient(() => (hook as () => { data?: unknown; isSuccess: boolean })());
+    const { result } = await renderHookWithClient(
+      () => (hook as () => { data?: unknown; isSuccess: boolean })(),
+      adminClient(),
+    );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(body);
     const [url, init] = fetchMock.mock.calls[0]!;
@@ -54,7 +90,7 @@ describe('admin query hooks', () => {
       { path: '/admin/reports?status=DISMISSED', body: page([makeReport()], 'c 1') },
       { path: '/admin/reports?status=DISMISSED&cursor=c%201', body: page([]) },
     ]);
-    const { result } = await renderHookWithClient(() => useAdminReports('DISMISSED'));
+    const { result } = await renderHookWithClient(() => useAdminReports('DISMISSED'), adminClient());
     await waitFor(() => expect(result.current.hasNextPage).toBe(true));
     await act(() => result.current.fetchNextPage());
     await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
@@ -66,9 +102,9 @@ describe('admin query hooks', () => {
       { path: '/admin/audit-log?action=JOB_PAUSE', body: page([]) },
       { path: '/admin/audit-log', body: page([]) },
     ]);
-    const filtered = await renderHookWithClient(() => useAdminAudit('JOB_PAUSE'));
+    const filtered = await renderHookWithClient(() => useAdminAudit('JOB_PAUSE'), adminClient());
     await waitFor(() => expect(filtered.result.current.isSuccess).toBe(true));
-    const all = await renderHookWithClient(() => useAdminAudit(null));
+    const all = await renderHookWithClient(() => useAdminAudit(null), adminClient());
     await waitFor(() => expect(all.result.current.isSuccess).toBe(true));
     expect(api.calls().map((c) => c.path)).toEqual(['/admin/audit-log?action=JOB_PAUSE', '/admin/audit-log']);
   });
@@ -80,7 +116,7 @@ describe('admin query hooks', () => {
         { path: '/admin/jobs', body: [makeJob({ running: true })], times: 1 },
         { path: '/admin/jobs', body: [makeJob({ running: false })] },
       ]);
-      const { result } = await renderHookWithClient(() => useAdminJobs());
+      const { result } = await renderHookWithClient(() => useAdminJobs(), adminClient());
       await waitFor(() => expect(result.current.data?.[0]?.running).toBe(true));
       await act(async () => {
         jest.advanceTimersByTime(JOBS_POLL_MS + 10);

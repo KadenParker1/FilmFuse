@@ -10,6 +10,9 @@ import type {
   PageDTO,
   UsageMetricsDTO,
 } from '../types/api';
+import { queryKeys } from '../lib/queryKeys';
+import { makeProfile } from './fixtures';
+import { createTestQueryClient } from './render';
 
 export const page = <T>(items: T[], nextCursor: string | null = null): PageDTO<T> => ({ items, nextCursor });
 
@@ -154,3 +157,10 @@ export const makeCatalog = (overrides: Partial<CatalogMetricsDTO> = {}): Catalog
   generatedAt: '2026-10-23T10:00:00Z',
   ...overrides,
 });
+
+/** A test client whose cached `/me` is an admin, as under the admin layout (admin queries need it). */
+export function adminClient() {
+  const client = createTestQueryClient();
+  client.setQueryData(queryKeys.me, makeProfile({ isAdmin: true }));
+  return client;
+}
