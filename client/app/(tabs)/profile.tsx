@@ -71,6 +71,7 @@ export default function ProfileScreen() {
   const { colors } = useTheme();
   const { signOut } = useAuth();
   const [deleting, setDeleting] = useState(false);
+  const me = useMe();
 
   return (
     <Screen edges={['top']} scroll>
@@ -109,6 +110,14 @@ export default function ProfileScreen() {
             icon={<Ionicons name="ban-outline" size={18} color={colors.text} />}
             onPress={() => router.push('/settings/blocked')}
           />
+          {me.data?.isAdmin ? (
+            <Button
+              title="Admin"
+              variant="secondary"
+              icon={<Ionicons name="speedometer-outline" size={18} color={colors.text} />}
+              onPress={() => router.push('/admin')}
+            />
+          ) : null}
           <Button title="Sign out" variant="secondary" onPress={() => void signOut()} />
           <Button title="Delete account" variant="danger" onPress={() => setDeleting(true)} />
         </Card>
