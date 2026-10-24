@@ -16,5 +16,7 @@ public record ProfileResponseDTO(
         boolean onboardingCompleted,
         Instant onboardingCompletedAt,
         Instant createdAt,
-        Instant updatedAt) {
+        Instant updatedAt,
+        /** Whether the caller may open the admin portal ({@code profiles.role = 'admin'}); UI gating only - the server enforces it. */
+        boolean isAdmin) {
 }

@@ -41,6 +41,26 @@ class MigrationIntegrationTest extends AbstractIntegrationTest {
         }
     }
 
+    /** V21: the admin role, runtime settings and the audit log are no recommendation signal. */
+    @Test
+    void mlReaderCannotReadAdminData() {
+        assertThat(jdbc.queryForObject(
+                "select has_column_privilege('ml_reader', 'app.profiles', 'role', 'SELECT')", Boolean.class)).isFalse();
+        for (String table : new String[] {"app.admin_settings", "app.admin_audit_log"}) {
+            assertThat(jdbc.queryForObject("select has_table_privilege('ml_reader', ?, 'SELECT')", Boolean.class, table))
+                    .as("SELECT on %s", table).isFalse();
+        }
+    }
+
+    /** V21: everyone starts as a plain user. */
+    @Test
+    void profilesDefaultToTheUserRole() {
+        assertThat(jdbc.queryForObject("""
+                select column_default from information_schema.columns
+                where table_schema = 'app' and table_name = 'profiles' and column_name = 'role'
+                """, String.class)).startsWith("'user'");
+    }
+
     /** V17: the never-enforced PENDING_VERIFICATION status is gone; ACTIVE and SUSPENDED remain. */
     @Test
     void statusIsOnlyActiveOrSuspended() {

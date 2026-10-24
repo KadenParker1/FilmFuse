@@ -58,7 +58,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if (wait.isEmpty() && userId != null) {
             wait = limiter.tryAcquire(RateLimitRule.USER, userId);
             if (wait.isEmpty()) {
-                Optional<RateLimitRule> category = RateLimitRule.categoryOf(request.getMethod(), pathOf(request));
+                Optional<RateLimitRule> category = RateLimitRule.categoryOf(request.getMethod(), pathOf(request))
+                        .filter(rule -> !rule.adminOnly()
+                                || isAdmin(SecurityContextHolder.getContext().getAuthentication()));
                 if (category.isPresent()) {
                     wait = limiter.tryAcquire(category.get(), userId);
                 }
@@ -84,6 +86,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static String userIdOf(Authentication authentication) {
         return authentication instanceof JwtAuthenticationToken token && token.isAuthenticated()
                 ? token.getToken().getSubject() : null;
+    }
+
+    private static boolean isAdmin(Authentication authentication) {
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 
     private static String pathOf(HttpServletRequest request) {

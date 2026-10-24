@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.PathContainer;
 import org.springframework.web.util.pattern.PathPattern;
@@ -17,7 +18,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *   <li>{@link #IP} - every request from one client address (authenticated or not).</li>
  *   <li>{@link #USER} - every request by one signed-in user (JWT {@code sub}).</li>
  *   <li>The rest are per user and apply to writes that send email or are abuse-prone, on top of
- *       {@link #USER}.</li>
+ *       {@link #USER} (POST only, except {@link #ADMIN_WRITES}).</li>
  * </ul>
  */
 public enum RateLimitRule {
@@ -41,18 +42,39 @@ public enum RateLimitRule {
             "/api/v1/sessions"),
     /** Each upload URL is a signed write into storage. */
     PHOTO_UPLOAD("photo-upload", 20, Duration.ofHours(1),
-            "/api/v1/me/profile-photo/upload-url");
+            "/api/v1/me/profile-photo/upload-url"),
+    /**
+     * Every admin write (settings, job run / pause / resume, report resolutions): POST, PUT, PATCH and
+     * DELETE under {@code /api/v1/admin}. Applied to admins only - a non-admin's request is answered 404
+     * by authorisation, and must never see a 429 that would reveal the surface.
+     */
+    ADMIN_WRITES("admin-writes", 60, Duration.ofMinutes(10), true,
+            Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE), "/api/v1/admin/**");
 
     private final String key;
     private final int defaultCapacity;
     private final Duration defaultPeriod;
-    private final List<PathPattern> postPaths;
+    private final boolean adminOnly;
+    private final Set<HttpMethod> methods;
+    private final List<PathPattern> paths;
 
     RateLimitRule(String key, int defaultCapacity, Duration defaultPeriod, String... postPaths) {
+        this(key, defaultCapacity, defaultPeriod, false, Set.of(HttpMethod.POST), postPaths);
+    }
+
+    RateLimitRule(String key, int defaultCapacity, Duration defaultPeriod, boolean adminOnly, Set<HttpMethod> methods,
+                  String... paths) {
         this.key = key;
         this.defaultCapacity = defaultCapacity;
         this.defaultPeriod = defaultPeriod;
-        this.postPaths = Arrays.stream(postPaths).map(PathPatternParser.defaultInstance::parse).toList();
+        this.adminOnly = adminOnly;
+        this.methods = methods;
+        this.paths = Arrays.stream(paths).map(PathPatternParser.defaultInstance::parse).toList();
+    }
+
+    /** Whether the category applies only to callers holding {@code ROLE_ADMIN}. */
+    public boolean adminOnly() {
+        return adminOnly;
     }
 
     /** The property name ({@code filmfuse.rate-limit.limits.<key>}) and the bucket-key prefix. */
@@ -70,12 +92,16 @@ public enum RateLimitRule {
 
     /** The per-category rule (never IP / USER) for a request, if any. */
     public static Optional<RateLimitRule> categoryOf(String method, String path) {
-        if (!HttpMethod.POST.matches(method)) {
+        if (method == null) {
             return Optional.empty();
         }
+        HttpMethod httpMethod = HttpMethod.valueOf(method);
         PathContainer container = PathContainer.parsePath(path);
         for (RateLimitRule rule : values()) {
-            for (PathPattern pattern : rule.postPaths) {
+            if (!rule.methods.contains(httpMethod)) {
+                continue;
+            }
+            for (PathPattern pattern : rule.paths) {
                 if (pattern.matches(container)) {
                     return Optional.of(rule);
                 }

@@ -32,6 +32,9 @@ import org.springframework.data.domain.Persistable;
 @EqualsAndHashCode(of = "id", callSuper = false)
 public class Profile extends AuditableEntity implements Persistable<UUID> {
 
+    /** The value of {@code profiles.role} that grants the admin portal. */
+    public static final String ADMIN_ROLE = "admin";
+
     @Id
     private UUID id;
 
@@ -63,6 +66,19 @@ public class Profile extends AuditableEntity implements Persistable<UUID> {
 
     @Column(name = "onboarding_completed_at")
     private Instant onboardingCompletedAt;
+
+    /**
+     * {@code user} or {@code admin} (V21). Read-only here on purpose: the role is granted only by hand
+     * in SQL (CLAUDE.md, "Admin portal"), so no save through this entity can ever write it - a new
+     * row gets the column default {@code user}.
+     */
+    @Setter(AccessLevel.NONE)
+    @Column(name = "role", insertable = false, updatable = false)
+    private String role;
+
+    public boolean isAdmin() {
+        return ADMIN_ROLE.equals(role);
+    }
 
     public Profile(UUID id) {
         this.id = id;

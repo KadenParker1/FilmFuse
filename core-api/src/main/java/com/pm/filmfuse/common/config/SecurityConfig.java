@@ -1,5 +1,6 @@
 package com.pm.filmfuse.common.config;
 
+import com.pm.filmfuse.admin.security.AdminAccess;
 import com.pm.filmfuse.common.http.HttpLimitsProperties;
 import com.pm.filmfuse.common.http.RequestBodyLimitFilter;
 import com.pm.filmfuse.common.ratelimit.RateLimitFilter;
@@ -71,10 +72,15 @@ public class SecurityConfig {
                     if (!prod) {
                         auth.requestMatchers(API_DOC_PATHS).permitAll();
                     }
+                    // Admin portal: ROLE_ADMIN only; signed-in non-admins get a 404 (AdminAccess).
+                    auth.requestMatchers(AdminAccess.PATH_PATTERN).hasRole("ADMIN");
                     auth.requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().authenticated();
                 })
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
+                .exceptionHandling(exceptions -> exceptions.accessDeniedHandler(AdminAccess.accessDeniedHandler()))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
+                        .accessDeniedHandler(AdminAccess.accessDeniedHandler()))
                 .addFilterBefore(new RequestBodyLimitFilter(httpLimits.maxBodySize().toBytes()),
                         BearerTokenAuthenticationFilter.class)
                 .addFilterAfter(new RateLimitFilter(rateLimiter), BearerTokenAuthenticationFilter.class);
