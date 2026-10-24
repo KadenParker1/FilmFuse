@@ -1,80 +1,58 @@
 package com.pm.filmfuse.movie.seed;
 
+import com.pm.filmfuse.common.job.JobRunRecorder;
+import com.pm.filmfuse.common.job.JobRunRepository;
+import com.pm.filmfuse.movie.catalog.CatalogJobLock;
+import com.pm.filmfuse.support.FakeCatalogJobLock;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-/** filmfuse.catalog.seed.*: nightly top-up at 04:00 UTC unless disabled; the startup runner only on request. */
+/** filmfuse.catalog.seed.*: binding and defaults; the startup runner only on request (scheduling: CatalogJobsConfigTest). */
 class CatalogSeedConfigTest {
 
     private final CatalogSeedService seeder = mock(CatalogSeedService.class);
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withUserConfiguration(CatalogSeedConfig.class)
-            .withBean(CatalogSeedService.class, () -> seeder);
+            .withBean(CatalogSeedService.class, () -> seeder)
+            .withBean(CatalogJobLock.class, FakeCatalogJobLock::new)
+            .withBean(JobRunRecorder.class, () -> new JobRunRecorder(mock(JobRunRepository.class),
+                    java.time.Clock.systemUTC(), 200));
 
     @Test
-    void theTopUpIsScheduledNightlyByDefaultAndNoStartupSeedRuns() {
+    void noStartupSeedByDefaultAndTheTopUpDefaultsToFiftyPages() {
         runner.run(context -> {
-            var tasks = context.getBean(ScheduledTaskHolder.class).getScheduledTasks();
-            assertThat(tasks).hasSize(1);
-            CronTask task = (CronTask) tasks.iterator().next().getTask();
-            assertThat(task.getExpression()).isEqualTo("0 0 4 * * *");
-            task.getRunnable().run();
-            verify(seeder).topUp();
             assertThat(context).doesNotHaveBean(CatalogSeedRunner.class);
             CatalogSeedProperties properties = context.getBean(CatalogSeedProperties.class);
-            assertThat(properties.topUp().pages()).isEqualTo(25);
+            assertThat(properties.topUp().pages()).isEqualTo(50);
+            assertThat(properties.topUp().cron()).isEqualTo("0 0 4 * * *");
             assertThat(properties.popularPages()).isEqualTo(500);
+            // Scheduling lives in CatalogJobsConfig now.
+            assertThat(context).doesNotHaveBean(ScheduledTaskHolder.class);
         });
     }
 
     @Test
-    void cronAndPagesAreConfigurableAndAFailureIsSwallowed() {
-        when(seeder.topUp()).thenThrow(new IllegalStateException("boom"));
+    void topUpSettingsBind() {
         runner.withPropertyValues("filmfuse.catalog.seed.top-up.cron=0 15 2 * * *",
                         "filmfuse.catalog.seed.top-up.pages=7", "filmfuse.catalog.seed.requests-per-second=5")
                 .run(context -> {
-                    CronTask task = (CronTask) context.getBean(ScheduledTaskHolder.class)
-                            .getScheduledTasks().iterator().next().getTask();
-                    assertThat(task.getExpression()).isEqualTo("0 15 2 * * *");
-                    task.getRunnable().run();
-                    verify(seeder).topUp();
                     CatalogSeedProperties properties = context.getBean(CatalogSeedProperties.class);
+                    assertThat(properties.topUp().cron()).isEqualTo("0 15 2 * * *");
                     assertThat(properties.topUp().pages()).isEqualTo(7);
                     assertThat(properties.requestsPerSecond()).isEqualTo(5d);
                 });
     }
 
     @Test
-    void disabledMeansNoScheduledTask() {
-        runner.withPropertyValues("filmfuse.catalog.seed.top-up.enabled=false")
-                .run(context -> assertThat(context).doesNotHaveBean(ScheduledTaskHolder.class));
-    }
-
-    @Test
     void runOnStartupRegistersTheRunner() {
         runner.withPropertyValues("filmfuse.catalog.seed.run-on-startup=true", "filmfuse.catalog.seed.top-up.enabled=false")
                 .run(context -> assertThat(context).hasSingleBean(CatalogSeedRunner.class));
-    }
-
-    @Test
-    void theTopUpDoesNotHaveTheSchedulerToItself() {
-        // application.properties: a long top-up must not block the other jobs (vector refresh every 15 s).
-        runner.withInitializer(new ConfigDataApplicationContextInitializer())
-                .withConfiguration(AutoConfigurations.of(TaskSchedulingAutoConfiguration.class))
-                .run(context -> assertThat(context.getBean(ThreadPoolTaskScheduler.class)
-                        .getScheduledThreadPoolExecutor().getCorePoolSize()).isGreaterThanOrEqualTo(2));
     }
 
     @Test
@@ -120,6 +98,7 @@ class CatalogSeedConfigTest {
                     assertThat(p.quality().minVotes()).isEqualTo(5);
                     assertThat(p.quality().appliesTo(CatalogSeedProperties.Source.EXPORT)).isTrue();
                     assertThat(p.quality().appliesTo(CatalogSeedProperties.Source.POPULAR)).isFalse();
+                    assertThat(p.topUp().pages()).isEqualTo(50);
                 });
     }
 }

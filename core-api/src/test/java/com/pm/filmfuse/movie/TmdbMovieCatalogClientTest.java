@@ -4,6 +4,7 @@ import com.pm.filmfuse.common.exception.NotFoundException;
 import com.pm.filmfuse.common.exception.UpstreamUnavailableException;
 import com.pm.filmfuse.movie.catalog.CatalogMovie;
 import com.pm.filmfuse.movie.catalog.CatalogPage;
+import com.pm.filmfuse.movie.catalog.ChangedIdsPage;
 import com.pm.filmfuse.movie.catalog.TmdbMovieCatalogClient;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -342,5 +343,85 @@ class TmdbMovieCatalogClientTest {
                         """, MediaType.APPLICATION_JSON));
 
         assertThat(client.details(680).voteCount()).isEqualTo(29001);
+    }
+
+    @Test
+    void changedMovieIdsSendsTheWindowAndPageAndDropsAdultAndMalformedEntries() {
+        server.expect(requestTo(startsWith(BASE + "/movie/changes?")))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header("Authorization", "Bearer test-token"))
+                .andExpect(queryParam("start_date", "2026-10-11"))
+                .andExpect(queryParam("end_date", "2026-10-18"))
+                .andExpect(queryParam("page", "3"))
+                .andExpect(queryParamCount(3))
+                .andRespond(withSuccess("""
+                        {"page": 3, "total_pages": 41, "total_results": 4012, "results": [
+                          {"id": 680, "adult": false},
+                          {"id": 99, "adult": true},
+                          {"id": 603},
+                          {"adult": false},
+                          {"id": -4, "adult": false},
+                          null
+                        ]}
+                        """, MediaType.APPLICATION_JSON));
+
+        ChangedIdsPage page = client.changedMovieIds(java.time.LocalDate.of(2026, 10, 11),
+                java.time.LocalDate.of(2026, 10, 18), 3);
+
+        server.verify();
+        assertThat(page.ids()).containsExactly(680, 603);
+        assertThat(page.page()).isEqualTo(3);
+        assertThat(page.totalPages()).isEqualTo(41);
+        assertThat(page.hasNext()).isTrue();
+    }
+
+    @Test
+    void anEmptyChangeListIsOnePageWithNothingNext() {
+        server.expect(requestTo(startsWith(BASE + "/movie/changes?")))
+                .andRespond(withSuccess("""
+                        {"page": 1, "total_pages": 0, "results": []}
+                        """, MediaType.APPLICATION_JSON));
+
+        ChangedIdsPage page = client.changedMovieIds(java.time.LocalDate.of(2026, 10, 11),
+                java.time.LocalDate.of(2026, 10, 18), 1);
+
+        assertThat(page.ids()).isEmpty();
+        assertThat(page.hasNext()).isFalse();
+    }
+
+    @Test
+    void changeListErrorsMapLikeEveryOtherRequest() {
+        server.expect(requestTo(startsWith(BASE + "/movie/changes?"))).andRespond(withStatus(HttpStatus.UNAUTHORIZED));
+        server.expect(requestTo(startsWith(BASE + "/movie/changes?"))).andRespond(withServerError());
+        java.time.LocalDate day = java.time.LocalDate.of(2026, 10, 18);
+
+        assertThatThrownBy(() -> client.changedMovieIds(day, day, 1))
+                .isInstanceOf(com.pm.filmfuse.movie.catalog.CatalogAuthenticationException.class);
+        assertThatThrownBy(() -> client.changedMovieIds(day, day, 1))
+                .isInstanceOf(UpstreamUnavailableException.class)
+                .isNotInstanceOf(com.pm.filmfuse.movie.catalog.CatalogAuthenticationException.class);
+    }
+
+    @Test
+    void aClientWithoutChangeSupportSaysSo() {
+        com.pm.filmfuse.movie.catalog.MovieCatalogClient minimal = new com.pm.filmfuse.movie.catalog.MovieCatalogClient() {
+            @Override
+            public CatalogPage search(String query, int page) {
+                return null;
+            }
+
+            @Override
+            public CatalogPage popular(Integer genreId, int page) {
+                return null;
+            }
+
+            @Override
+            public CatalogMovie details(int id) {
+                return null;
+            }
+        };
+        java.time.LocalDate day = java.time.LocalDate.of(2026, 10, 18);
+
+        assertThatThrownBy(() -> minimal.changedMovieIds(day, day, 1)).isInstanceOf(UnsupportedOperationException.class);
     }
 }

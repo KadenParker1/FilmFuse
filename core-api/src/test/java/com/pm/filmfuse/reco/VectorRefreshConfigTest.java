@@ -1,5 +1,6 @@
 package com.pm.filmfuse.reco;
 
+import com.pm.filmfuse.common.job.JobRunRecorder;
 import com.pm.filmfuse.reco.repository.UserVectorRepository;
 import com.pm.filmfuse.reco.service.VectorBuildService;
 import com.pm.filmfuse.reco.service.VectorRefreshConfig;
@@ -29,6 +30,7 @@ class VectorRefreshConfigTest {
             .withBean(UserVectorRepository.class, () -> mock(UserVectorRepository.class))
             .withBean(VectorBuildService.class, () -> mock(VectorBuildService.class))
             .withBean(Clock.class, Clock::systemUTC)
+            .withBean(JobRunRecorder.class, () -> mock(JobRunRecorder.class))
             .withBean(VectorRefreshScheduler.class);
 
     private static Set<ScheduledTask> tasks(org.springframework.context.ApplicationContext context) {

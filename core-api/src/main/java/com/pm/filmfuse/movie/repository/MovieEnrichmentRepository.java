@@ -52,6 +52,25 @@ public class MovieEnrichmentRepository {
                 """, new MapSqlParameterSource("ids", ids).addValue("since", Timestamp.from(since)), Integer.class));
     }
 
+    /** The {@code limit} most popular stored movies (the weekly refresh's main tier), most popular first. */
+    public List<Integer> topByPopularity(int limit) {
+        if (limit <= 0) {
+            return List.of();
+        }
+        return jdbc.queryForList("""
+                select id from app.movies order by popularity desc nulls last, id limit :limit
+                """, new MapSqlParameterSource("limit", limit), Integer.class);
+    }
+
+    /** Which of {@code ids} have a row in {@code app.movies}. */
+    public Set<Integer> storedAmong(Collection<Integer> ids) {
+        if (ids.isEmpty()) {
+            return Set.of();
+        }
+        return new HashSet<>(jdbc.queryForList("select id from app.movies where id in (:ids)",
+                new MapSqlParameterSource("ids", ids), Integer.class));
+    }
+
     public long count() {
         Long count = jdbc.queryForObject("select count(*) from app.movies", new MapSqlParameterSource(), Long.class);
         return count == null ? 0 : count;

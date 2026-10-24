@@ -2,7 +2,6 @@ package com.pm.filmfuse.movie.seed;
 
 import com.pm.filmfuse.common.exception.NotFoundException;
 import com.pm.filmfuse.common.exception.UpstreamUnavailableException;
-import com.pm.filmfuse.movie.catalog.CatalogAuthenticationException;
 import com.pm.filmfuse.movie.catalog.CatalogMovie;
 import com.pm.filmfuse.movie.catalog.CatalogPage;
 import com.pm.filmfuse.movie.catalog.MovieCatalogClient;
@@ -71,7 +70,9 @@ import org.springframework.stereotype.Service;
  * approximate - the nightly top-up and the next full pass catch what moved.
  *
  * <p>Every catalog request (retries included) goes through a {@link RequestPacer}
- * ({@code requests-per-second}). One run at a time per process.
+ * ({@code requests-per-second}; retries, backoff and the 401 limit live in {@link CatalogCalls}, shared
+ * with the weekly refresh). One run at a time per process; across processes the callers
+ * ({@link CatalogSeedRunner}, {@link CatalogTopUpJob}) hold the {@code CatalogJobLock}.
  */
 @Service
 public class CatalogSeedService {
@@ -79,10 +80,8 @@ public class CatalogSeedService {
     static final String POPULAR_CURSOR = "popular";
     static final String EXPORT_CURSOR = "export";
     static final String DISCOVER_CURSOR = "discover";
-    private static final Duration MAX_BACKOFF = Duration.ofMinutes(1);
     /** Ids per skip-rule query (and per cursor save / size check) for the id file and the export. */
     static final int ID_CHUNK = 200;
-    private static final long MB = 1024L * 1024;
 
     private static final Logger log = LoggerFactory.getLogger(CatalogSeedService.class);
 
@@ -162,7 +161,12 @@ public class CatalogSeedService {
 
     /** The nightly top-up: popular pages 1..{@code top-up.pages}, from page 1 every time. */
     public SeedReport topUp() {
-        return seed(new SeedPlan(properties.topUp().pages(), List.of(), false));
+        return topUp(properties.topUp().pages());
+    }
+
+    /** A top-up of popular pages 1..{@code pages} (the effective setting; see {@code CatalogRefreshSettings}). */
+    public SeedReport topUp(int pages) {
+        return seed(new SeedPlan(pages, List.of(), false));
     }
 
     public SeedReport seed(SeedPlan plan) {
@@ -193,7 +197,7 @@ public class CatalogSeedService {
             if (plan.discover()) {
                 seedDiscover(plan, run);
             }
-        } catch (AbortRun ex) {
+        } catch (AbortRun | CatalogCalls.Abort ex) {
             log.error("Catalog seed aborted: {}", ex.getMessage());
             outcome = SeedReport.Outcome.ABORTED;
         } catch (InterruptedException ex) {
@@ -426,7 +430,7 @@ public class CatalogSeedService {
         } catch (NotFoundException ex) {
             store.markChecked(id);
             run.notFound++;
-        } catch (AbortRun ex) {
+        } catch (AbortRun | CatalogCalls.Abort ex) {
             throw ex;
         } catch (UpstreamUnavailableException ex) {
             log.debug("Catalog seed: movie {} still failing after retries", id);
@@ -451,59 +455,16 @@ public class CatalogSeedService {
 
     /** The {@code max-database-mb} guard, before every page / batch. */
     private void checkDatabaseSize() {
-        int limitMb = properties.maxDatabaseMb();
-        if (limitMb == 0) {
-            return;
-        }
-        long bytes;
-        try {
-            bytes = databaseSize.currentBytes();
-        } catch (RuntimeException ex) {
-            throw new AbortRun("could not read the database size for the max-database-mb guard (" + ex.getMessage()
-                    + "); set filmfuse.catalog.seed.max-database-mb=0 to run without it");
-        }
-        if (bytes > limitMb * MB) {
-            throw new AbortRun("database size " + bytes / MB + " MB exceeds max-database-mb=" + limitMb
-                    + " - stopping before it fills up. Cursors are kept: raise filmfuse.catalog.seed.max-database-mb "
-                    + "(e.g. after a plan upgrade) and run again to resume");
-        }
+        CatalogCalls.checkDatabaseSize(databaseSize, properties.maxDatabaseMb());
     }
 
-    /**
-     * One paced catalog request with retries. Not-found is passed straight through; outages back off
-     * {@code initial-backoff * 2^attempt} (at most a minute) and give up after {@code max-retries}.
-     */
+    /** One paced catalog request with retries ({@link CatalogCalls}). */
     private <T> T call(Run run, Supplier<T> request) throws InterruptedException {
-        for (int attempt = 0; ; attempt++) {
-            pacer.acquire();
-            try {
-                T result = request.get();
-                run.consecutiveAuthFailures = 0;
-                return result;
-            } catch (CatalogAuthenticationException ex) {
-                if (++run.consecutiveAuthFailures >= properties.authFailureLimit()) {
-                    throw new AbortRun("the catalog rejected the access token " + run.consecutiveAuthFailures
-                            + " times in a row (401) - check TMDB_ACCESS_TOKEN");
-                }
-                if (attempt >= properties.maxRetries()) {
-                    throw ex;
-                }
-            } catch (NotFoundException ex) {
-                run.consecutiveAuthFailures = 0;
-                throw ex;
-            } catch (UpstreamUnavailableException ex) {
-                run.consecutiveAuthFailures = 0;
-                if (attempt >= properties.maxRetries()) {
-                    throw ex;
-                }
-            }
-            sleeper.sleep(backoff(attempt));
-        }
+        return run.calls.call(request);
     }
 
     Duration backoff(int attempt) {
-        Duration delay = properties.initialBackoff().multipliedBy(1L << Math.min(attempt, 20));
-        return delay.compareTo(MAX_BACKOFF) > 0 ? MAX_BACKOFF : delay;
+        return CatalogCalls.backoff(properties.initialBackoff(), attempt);
     }
 
     /** Stops the whole run; never caught per movie. */
@@ -524,7 +485,7 @@ public class CatalogSeedService {
         int failed;
         int rejectedQuality;
         int skippedRejected;
-        int consecutiveAuthFailures;
+        final CatalogCalls calls = new CatalogCalls(pacer, sleeper, properties);
 
         Run(Instant started) {
             this.started = started;
