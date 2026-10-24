@@ -159,6 +159,75 @@ class CatalogFreshnessJobsTest {
         verify(runs).finish(anyLong(), any(), eq(JobOutcome.FAILED), any());
     }
 
+    // --- scheduled runs waiting for the lock -----------------------------------------------------------------
+
+    /** Held for the first {@code busyAttempts} attempts (e.g. an enrichment tick), then free. */
+    private static final class BusyThenFreeLock extends FakeCatalogJobLock {
+        int attempts;
+        final int busyAttempts;
+
+        BusyThenFreeLock(int busyAttempts) {
+            this.busyAttempts = busyAttempts;
+        }
+
+        @Override
+        public <T> java.util.Optional<T> tryRun(java.util.function.Supplier<T> work) {
+            held = ++attempts <= busyAttempts;
+            return super.tryRun(work);
+        }
+    }
+
+    @Test
+    void aScheduledRefreshThatLosesTheLockToAShortJobWaitsAndRunsInsteadOfSkippingTheWeek() {
+        BusyThenFreeLock busy = new BusyThenFreeLock(2);
+        java.util.List<Duration> sleeps = new java.util.ArrayList<>();
+        CatalogRefreshJob job = new CatalogRefreshJob(refresher, settings::get, busy, recorder, sleeps::add);
+        when(refresher.refresh(any())).thenReturn(refreshReport(Outcome.COMPLETED));
+
+        job.scheduledRun();
+
+        assertThat(busy.attempts).isEqualTo(3);
+        assertThat(sleeps).containsExactly(CatalogRefreshJob.LOCK_RETRY_DELAY, CatalogRefreshJob.LOCK_RETRY_DELAY);
+        verify(refresher).refresh(any());
+        verify(runs, never()).insert(any(), any(), any(), eq(JobOutcome.SKIPPED), any(), any());
+    }
+
+    @Test
+    void aScheduledTopUpGivesUpAfterItsAttemptsAndRecordsOneSkip() {
+        BusyThenFreeLock busy = new BusyThenFreeLock(Integer.MAX_VALUE);
+        java.util.List<Duration> sleeps = new java.util.ArrayList<>();
+        CatalogTopUpJob job = new CatalogTopUpJob(seeder, settings::get, busy, recorder, sleeps::add);
+
+        job.scheduledRun();
+
+        assertThat(busy.attempts).isEqualTo(CatalogTopUpJob.LOCK_ATTEMPTS);
+        assertThat(sleeps).hasSize(CatalogTopUpJob.LOCK_ATTEMPTS - 1);
+        verify(seeder, never()).topUp(anyInt());
+        verify(runs).insert(eq(JobNames.CATALOG_TOP_UP), any(), any(), eq(JobOutcome.SKIPPED), any(), isNull());
+    }
+
+    @Test
+    void aManualRunNeverWaitsForTheLock() {
+        BusyThenFreeLock busy = new BusyThenFreeLock(1);
+        CatalogRefreshJob job = new CatalogRefreshJob(refresher, settings::get, busy, recorder, d -> {
+            throw new AssertionError("runNow must not wait");
+        });
+
+        assertThat(job.runNow("admin:1").outcome()).isEqualTo(Outcome.ALREADY_RUNNING);
+        assertThat(busy.attempts).isEqualTo(1);
+    }
+
+    @Test
+    void aScheduledRunWhoseSettingsSourceFailsNeverThrows() {
+        CatalogRefreshJob job = new CatalogRefreshJob(refresher, () -> {
+            throw new IllegalStateException("settings table unreachable");
+        }, lock, recorder);
+
+        job.scheduledRun();
+
+        verify(refresher, never()).refresh(any());
+    }
+
     // --- facade ------------------------------------------------------------------------------------------------
 
     @Test

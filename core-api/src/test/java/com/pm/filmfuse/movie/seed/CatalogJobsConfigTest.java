@@ -154,6 +154,29 @@ class CatalogJobsConfigTest {
     }
 
     @Test
+    void aFailingSettingsSourceOrACronThatNeverFiresFallsBackInsteadOfUnschedulingTheJob() {
+        AtomicReference<String> cron = new AtomicReference<>("0 0 0 30 2 *");
+        AtomicReference<RuntimeException> failure = new AtomicReference<>();
+        org.springframework.scheduling.Trigger trigger = CatalogJobsConfig.dynamicCron("the test job", () -> {
+            if (failure.get() != null) {
+                throw failure.get();
+            }
+            return cron.get();
+        }, CatalogRefreshProperties.DEFAULT_CRON);
+        SimpleTriggerContext context = new SimpleTriggerContext(Clock.fixed(SATURDAY_MIDNIGHT, ZoneOffset.UTC));
+
+        // February 30th never comes: Spring would get null and drop the task.
+        assertThat(trigger.nextExecution(context)).isEqualTo(Instant.parse("2026-10-18T05:00:00Z"));
+
+        failure.set(new IllegalStateException("settings table unreachable"));
+        assertThat(trigger.nextExecution(context)).isEqualTo(Instant.parse("2026-10-18T05:00:00Z"));
+
+        failure.set(null);
+        cron.set("0 0 6 * * *");
+        assertThat(trigger.nextExecution(context)).isEqualTo(Instant.parse("2026-10-17T06:00:00Z"));
+    }
+
+    @Test
     void theShippedPropertiesScheduleBothAndGiveTheSchedulerMoreThanOneThread() {
         runner.withInitializer(new ConfigDataApplicationContextInitializer())
                 .withConfiguration(AutoConfigurations.of(TaskSchedulingAutoConfiguration.class))

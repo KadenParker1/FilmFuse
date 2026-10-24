@@ -44,7 +44,8 @@ public final class SessionAdvisoryLock {
     /**
      * Runs {@code work} while holding the lock.
      *
-     * @return the work's result, or empty when someone else holds the lock (the work did not run)
+     * @return the work's result, or empty when someone else holds the lock (the work did not run). Work
+     *         that returns null also yields empty, so callers that must tell the two apart return a value.
      */
     public <T> Optional<T> tryRun(Supplier<T> work) {
         Connection connection;
@@ -76,11 +77,15 @@ public final class SessionAdvisoryLock {
         }
     }
 
-    /** Whether anyone (any session) holds the lock right now. */
+    /**
+     * Whether anyone (any session of this database) holds the lock right now. pg_locks lists every
+     * database of the cluster, and advisory keys are per database.
+     */
     public boolean isHeld() {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      select exists (select 1 from pg_locks where locktype = 'advisory' and granted
+                                    and database = (select oid from pg_database where datname = current_database())
                                     and objsubid = 1 and ((classid::bigint << 32) | objid::bigint) = ?)
                      """)) {
             statement.setLong(1, key);
