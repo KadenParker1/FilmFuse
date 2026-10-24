@@ -812,6 +812,8 @@ export interface AdminJobDTO {
   schedule: string | null;
   nextRunAt: string | null;
   running: boolean;
+  /** The last run never finished and nothing runs it any more (the process died): outcome unknown. */
+  lastRunStale: boolean;
   lastRun: JobRunDTO | null;
   recentRuns: JobRunDTO[];
 }

@@ -47,6 +47,8 @@ public class AdminJobService {
     private static final Logger log = LoggerFactory.getLogger(AdminJobService.class);
 
     static final int RECENT_RUNS = 5;
+    /** A non-catalog job's unfinished run older than this is treated as stale (its process died). */
+    static final Duration STALE_AFTER = Duration.ofHours(6);
     static final String ALREADY_RUNNING = "ALREADY_RUNNING: a catalog job is already running. Try again when it has finished.";
     static final String UNKNOWN_JOB = "Job not found.";
     static final String NOT_CONTROLLABLE = "This job can't be run or paused from here.";
@@ -217,10 +219,15 @@ public class AdminJobService {
             next = nextRun(schedule, now);
         }
         JobRunDTO last = recent.isEmpty() ? null : recent.getFirst();
-        boolean running = last != null && last.outcome() == JobOutcome.RUNNING && last.finishedAt() == null
-                && (!job.name().startsWith("catalog-") || catalogLockHeld);
+        boolean unfinished = last != null && last.outcome() == JobOutcome.RUNNING && last.finishedAt() == null;
+        // A RUNNING row with no finish is only a live run if something is still working on it: for catalog
+        // jobs the cross-process lock must be held; others get a generous age limit. Otherwise the process
+        // died mid-run and the row is stale - its real outcome is unknown.
+        boolean running = unfinished && (job.name().startsWith("catalog-") ? catalogLockHeld
+                : last.startedAt().isAfter(now.minus(STALE_AFTER)));
+        boolean stale = unfinished && !running;
         return new AdminJobDTO(job.name(), job.label(), scheduled, paused, job.controllable(), schedule, next, running,
-                last, List.copyOf(recent));
+                stale, last, List.copyOf(recent));
     }
 
     private String scheduleOf(Definition job, CatalogRefreshSettings.Settings current) {

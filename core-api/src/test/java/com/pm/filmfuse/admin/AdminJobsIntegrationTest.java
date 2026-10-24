@@ -107,6 +107,33 @@ class AdminJobsIntegrationTest extends AbstractAdminIntegrationTest {
     }
 
     @Test
+    void anUnfinishedRunNobodyIsRunningIsStaleNotRunning() throws Exception {
+        Instant started = Instant.now().minus(Duration.ofHours(2));
+        run("catalog-top-up", started, null, "RUNNING", null);     // catalog: the lock is not held
+        run("closeness", Instant.now().minus(Duration.ofHours(7)), null, "RUNNING", null);
+        run("weekly-digest", Instant.now().minus(Duration.ofMinutes(5)), null, "RUNNING", null);
+
+        mockMvc.perform(get("/api/v1/admin/jobs").with(as(admin)))
+                .andExpect(jsonPath("$[0].running").value(false))
+                .andExpect(jsonPath("$[0].lastRunStale").value(true))
+                .andExpect(jsonPath("$[4].running").value(false))
+                .andExpect(jsonPath("$[4].lastRunStale").value(true))
+                .andExpect(jsonPath("$[5].running").value(true))
+                .andExpect(jsonPath("$[5].lastRunStale").value(false));
+
+        try (Connection holder = dataSource.getConnection(); Statement statement = holder.createStatement()) {
+            statement.execute("select pg_advisory_lock(" + CatalogJobLock.KEY + ")");
+            try {
+                mockMvc.perform(get("/api/v1/admin/jobs").with(as(admin)))
+                        .andExpect(jsonPath("$[0].running").value(true))
+                        .andExpect(jsonPath("$[0].lastRunStale").value(false));
+            } finally {
+                statement.execute("select pg_advisory_unlock(" + CatalogJobLock.KEY + ")");
+            }
+        }
+    }
+
+    @Test
     void nextRunComesFromTheCron() {
         Instant now = Instant.parse("2026-10-23T10:00:00Z"); // a Friday
         assertThat(com.pm.filmfuse.admin.service.AdminJobService.nextRun("0 0 4 * * *", now))

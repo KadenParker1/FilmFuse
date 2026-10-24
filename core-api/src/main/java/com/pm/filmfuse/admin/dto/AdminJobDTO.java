@@ -14,12 +14,15 @@ import java.util.List;
  * @param nextRunAt   the next scheduled start from the cron (null when not scheduled, paused, or interval-based)
  * @param running     whether a run is in progress (catalog jobs: the cross-process lock is held and the last
  *                    run has not finished)
+ * @param lastRunStale the newest run is still RUNNING with no finish, but nothing is running it any more
+ *                    (the process died mid-run): its real outcome is unknown
  * @param lastRun     the newest recorded run, if any
  * @param recentRuns  up to five newest runs, newest first
  *
  * Mirrored by hand in client/types/api.ts.
  */
 public record AdminJobDTO(String name, String label, boolean scheduled, boolean paused, boolean controllable,
-                          String schedule, Instant nextRunAt, boolean running, JobRunDTO lastRun,
+                          String schedule, Instant nextRunAt, boolean running, boolean lastRunStale,
+                          JobRunDTO lastRun,
                           List<JobRunDTO> recentRuns) {
 }

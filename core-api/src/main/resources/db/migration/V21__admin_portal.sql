@@ -38,8 +38,7 @@ alter table app.reports
     add column resolved_at     timestamptz,
     add column resolved_by     uuid references app.profiles (id) on delete set null,
     add column resolution_note text check (resolution_note is null or char_length(resolution_note) <= 500);
-alter table app.reports add constraint reports_resolution_check
-    check ((status = 'OPEN') = (resolved_at is null));
+-- No check tying status to resolved_at: reports closed by hand in SQL before this portal (V13) have none.
 
 -- The queue: open reports, oldest first.
 create index reports_open_created_idx on app.reports (created_at, id) where status = 'OPEN';
