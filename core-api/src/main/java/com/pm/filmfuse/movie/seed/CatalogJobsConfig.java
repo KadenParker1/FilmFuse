@@ -1,5 +1,6 @@
 package com.pm.filmfuse.movie.seed;
 
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
@@ -39,20 +40,35 @@ public class CatalogJobsConfig {
     }
 
     /**
-     * A UTC cron trigger whose expression is read on every call; an invalid expression (e.g. a bad
-     * runtime override) falls back to {@code fallback} instead of unscheduling the job.
+     * A UTC cron trigger whose expression is read on every call. It never throws and never returns
+     * null: Spring's {@code ReschedulingRunnable} drops a trigger task for good when either happens, so a
+     * settings source that fails (e.g. a runtime settings table the database could not read), an invalid
+     * expression, or one that never fires again (e.g. {@code 0 0 0 30 2 *}) all fall back to
+     * {@code fallback} for that execution instead of unscheduling the job until a restart.
      */
     static Trigger dynamicCron(String jobName, Supplier<String> cron, String fallback) {
+        CronTrigger fallbackTrigger = new CronTrigger(fallback, ZoneOffset.UTC);
         return context -> {
-            String expression = cron.get();
-            CronTrigger trigger;
+            String expression;
             try {
-                trigger = new CronTrigger(expression, ZoneOffset.UTC);
+                expression = cron.get();
+            } catch (RuntimeException ex) {
+                log.error("Could not read the cron of {} ({}); using the default '{}'", jobName, ex.toString(),
+                        fallback);
+                return fallbackTrigger.nextExecution(context);
+            }
+            Instant next;
+            try {
+                next = new CronTrigger(expression, ZoneOffset.UTC).nextExecution(context);
             } catch (IllegalArgumentException ex) {
                 log.error("Invalid cron '{}' for {}; using the default '{}'", expression, jobName, fallback);
-                trigger = new CronTrigger(fallback, ZoneOffset.UTC);
+                return fallbackTrigger.nextExecution(context);
             }
-            return trigger.nextExecution(context);
+            if (next == null) {
+                log.error("Cron '{}' for {} never fires again; using the default '{}'", expression, jobName, fallback);
+                return fallbackTrigger.nextExecution(context);
+            }
+            return next;
         };
     }
 
