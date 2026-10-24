@@ -191,6 +191,18 @@ class AdminUnitTest {
             assertThat(AdminAccess.isAdminPath("/api/v1/administrator")).isFalse();
             assertThat(AdminAccess.isAdminPath("/api/v1/me")).isFalse();
         }
+
+        @Test
+        void percentEncodedAdminPathsAreAdminPathsToo() throws Exception {
+            // MVC and the security rule decode segments; the 404 must not fall back to a revealing 403.
+            assertThat(AdminAccess.isAdminPath("/api/v1/%61dmin/settings")).isTrue();
+            assertThat(AdminAccess.isAdminPath("/api/v1/admi%6E")).isTrue();
+            assertThat(AdminAccess.isAdminPath("/api/v1/%61dministrator")).isFalse();
+            MockHttpServletRequest encoded = new MockHttpServletRequest("GET", "/api/v1/%61dmin/settings");
+            MockHttpServletResponse response = new MockHttpServletResponse();
+            AdminAccess.accessDeniedHandler().handle(encoded, response, new AccessDeniedException("no"));
+            assertThat(response.getStatus()).isEqualTo(404);
+        }
     }
 
     @Nested

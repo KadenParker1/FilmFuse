@@ -105,6 +105,22 @@ class AdminAccessIntegrationTest extends AbstractAdminIntegrationTest {
     }
 
     @Test
+    void percentEncodedAdminPathsAre404ForNonAdminsToo() throws Exception {
+        // MVC decodes "%61dmin" to "admin" and routes it to the admin controller; the security rule refuses
+        // it, and the refusal must be the same 404, not a 403 that reveals the surface.
+        UUID user = newUser();
+        mockMvc.perform(get(java.net.URI.create("/api/v1/%61dmin/settings")).with(as(user)))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(put(java.net.URI.create("/api/v1/admi%6E/settings/catalog.quality.min-votes")).with(as(user))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"value\": 7}"))
+                .andExpect(status().isNotFound());
+        assertThat(jdbc.queryForObject("select count(*) from app.admin_settings where updated_by = ?", Long.class, user))
+                .isZero();
+        mockMvc.perform(get(java.net.URI.create("/api/v1/%61dmin/settings")).with(as(newAdmin())))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void aBrandNewUnprovisionedCallerIsNotAnAdmin() throws Exception {
         mockMvc.perform(get("/api/v1/admin/settings").with(as(UUID.randomUUID()))).andExpect(status().isNotFound());
     }

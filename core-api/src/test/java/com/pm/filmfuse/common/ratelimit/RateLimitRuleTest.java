@@ -23,6 +23,9 @@ class RateLimitRuleTest {
             "DELETE, /api/v1/admin/settings/catalog.requests-per-second, ADMIN_WRITES",
             "POST, /api/v1/admin/jobs/catalog-top-up/run, ADMIN_WRITES",
             "PATCH, /api/v1/admin/anything, ADMIN_WRITES",
+            // Percent-encoded segments route to the same handler, so they count the same.
+            "PUT, /api/v1/%61dmin/settings/catalog.requests-per-second, ADMIN_WRITES",
+            "POST, /api/v1/%72eports, REPORTS",
     })
     void abuseProneWritesHaveACategory(String method, String path, RateLimitRule expected) {
         assertThat(RateLimitRule.categoryOf(method, path)).contains(expected);
