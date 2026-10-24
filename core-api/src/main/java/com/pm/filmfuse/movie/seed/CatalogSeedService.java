@@ -173,6 +173,11 @@ public class CatalogSeedService {
             log.warn("Catalog setting overrides unavailable, using the configured values: {}", ex.getMessage());
             effective = configured;
         }
+        List<String> changed = CatalogSeedOverrides.changes(configured, effective);
+        if (!changed.isEmpty()) {
+            log.warn("Admin settings (app.admin_settings) override the configured catalog values for this run: {}",
+                    String.join(", ", changed));
+        }
         this.properties = effective;
         this.quality = new QualityFilter(effective.quality());
         this.pacer = effective.requestsPerSecond().equals(configured.requestsPerSecond()) ? configuredPacer
