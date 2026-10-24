@@ -30,7 +30,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 BACKEND = ROOT / "core-api" / "src" / "main" / "java" / "com" / "pm" / "filmfuse"
 EXTRA_DTO_FILES = [BACKEND / "common" / "exception" / "ErrorResponseDTO.java"]
 # Enums outside dto/ packages that DTOs expose (serialised by name, so the client sees the constants).
-EXTRA_ENUM_FILES = [BACKEND / "user" / "model" / "AccountStatus.java"]
+EXTRA_ENUM_FILES = [BACKEND / "user" / "model" / "AccountStatus.java", BACKEND / "common" / "job" / "JobOutcome.java"]
 MIRROR = ROOT / "client" / "types" / "api.ts"
 
 # Java DTOs that legitimately never reach the client, so need no mirror in api.ts.

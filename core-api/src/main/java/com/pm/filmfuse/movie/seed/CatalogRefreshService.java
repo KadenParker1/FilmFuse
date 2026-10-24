@@ -68,10 +68,14 @@ public class CatalogRefreshService {
     private final MovieEnrichmentRepository movies;
     private final CatalogSeedRejectRepository rejects;
     private final DatabaseSizeProbe databaseSize;
-    private final CatalogSeedProperties seedProperties;
-    private final QualityFilter quality;
+    private final CatalogSeedProperties configured;
     private final Clock clock;
-    private final RequestPacer pacer;
+    private final RequestPacer configuredPacer;
+    private CatalogSeedOverrides overrides = CatalogSeedOverrides.NONE;
+    // The effective values of the current (or last) run; see applyOverrides().
+    private volatile CatalogSeedProperties seedProperties;
+    private volatile QualityFilter quality;
+    private volatile RequestPacer pacer;
     private final Sleeper sleeper;
     private final AtomicBoolean running = new AtomicBoolean();
 
@@ -91,11 +95,38 @@ public class CatalogRefreshService {
         this.movies = movies;
         this.rejects = rejects;
         this.databaseSize = databaseSize;
+        this.configured = seedProperties;
         this.seedProperties = seedProperties;
         this.quality = new QualityFilter(seedProperties.quality());
         this.clock = clock;
+        this.configuredPacer = pacer;
         this.pacer = pacer;
         this.sleeper = sleeper;
+    }
+
+    /** Runtime overrides (the admin portal's settings); applied at the start of every run. */
+    @Autowired(required = false)
+    void setOverrides(CatalogSeedOverrides overrides) {
+        this.overrides = overrides == null ? CatalogSeedOverrides.NONE : overrides;
+    }
+
+    /**
+     * Re-reads the overridable values for the run about to start (called under the running flag, so
+     * one run sees one consistent set). A changed request rate gets its own pacer; otherwise the
+     * configured (or a test's injected) pacer is kept.
+     */
+    private void applyOverrides() {
+        CatalogSeedProperties effective;
+        try {
+            effective = overrides.apply(configured);
+        } catch (RuntimeException ex) {
+            log.warn("Catalog setting overrides unavailable, using the configured values: {}", ex.getMessage());
+            effective = configured;
+        }
+        this.seedProperties = effective;
+        this.quality = new QualityFilter(effective.quality());
+        this.pacer = effective.requestsPerSecond().equals(configured.requestsPerSecond()) ? configuredPacer
+                : RequestPacer.system(effective.requestsPerSecond());
     }
 
     public RefreshReport refresh(Settings settings) {
@@ -103,6 +134,7 @@ public class CatalogRefreshService {
             log.warn("Catalog refresh not started: another run is in progress");
             return RefreshReport.notStarted(Outcome.ALREADY_RUNNING);
         }
+        applyOverrides();
         Run run = new Run(settings, clock.instant());
         Outcome outcome = Outcome.COMPLETED;
         String abortReason = null;

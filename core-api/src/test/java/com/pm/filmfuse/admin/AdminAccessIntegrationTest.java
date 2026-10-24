@@ -43,7 +43,11 @@ class AdminAccessIntegrationTest extends AbstractAdminIntegrationTest {
                 endpoint("GET /admin/reports", () -> get("/api/v1/admin/reports")),
                 endpoint("POST /admin/reports/{id}/resolve", () -> post("/api/v1/admin/reports/" + SOME_ID + "/resolve")
                         .contentType(MediaType.APPLICATION_JSON).content("{\"resolution\": \"DISMISSED\"}")),
-                endpoint("GET /admin/audit-log", () -> get("/api/v1/admin/audit-log")));
+                endpoint("GET /admin/audit-log", () -> get("/api/v1/admin/audit-log")),
+                endpoint("GET /admin/jobs", () -> get("/api/v1/admin/jobs")),
+                endpoint("POST /admin/jobs/{name}/run", () -> post("/api/v1/admin/jobs/closeness/run")),
+                endpoint("POST /admin/jobs/{name}/pause", () -> post("/api/v1/admin/jobs/catalog-top-up/pause")),
+                endpoint("POST /admin/jobs/{name}/resume", () -> post("/api/v1/admin/jobs/catalog-top-up/resume")));
     }
 
     private static Arguments endpoint(String name, Supplier<MockHttpServletRequestBuilder> request) {
@@ -83,6 +87,10 @@ class AdminAccessIntegrationTest extends AbstractAdminIntegrationTest {
         if (name.startsWith("POST /admin/reports")) {
             // It names a report that does not exist: the service's 404 with a message, past the guard.
             result.andExpect(status().isNotFound()).andExpect(jsonPath("$.message").value("Report not found."));
+        } else if (name.startsWith("POST /admin/jobs/{name}/run")) {
+            // closeness has no Run now: the service's 400, past the guard (real runs: AdminJobsIntegrationTest).
+            result.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value("This job can't be run or paused from here."));
         } else {
             result.andExpect(status().isOk());
         }

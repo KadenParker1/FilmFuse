@@ -788,3 +788,37 @@ export interface HealthMetricsDTO {
   openReports: number;
   generatedAt: string;
 }
+
+/** Java enum `JobOutcome` (common.job) — how a recorded job run ended. */
+export type JobOutcome = 'RUNNING' | 'COMPLETED' | 'ABORTED' | 'INTERRUPTED' | 'FAILED' | 'SKIPPED';
+
+/** com.pm.filmfuse.admin.dto.JobRunDTO — one app.job_runs row; finishedAt null while running. */
+export interface JobRunDTO {
+  id: number;
+  startedAt: string;
+  finishedAt: string | null;
+  outcome: JobOutcome;
+  summary: Record<string, unknown>;
+  triggeredBy: string | null;
+}
+
+/** com.pm.filmfuse.admin.dto.AdminJobDTO — GET /admin/jobs. `controllable` = Run now / Pause / Resume apply. */
+export interface AdminJobDTO {
+  name: string;
+  label: string;
+  scheduled: boolean;
+  paused: boolean;
+  controllable: boolean;
+  schedule: string | null;
+  nextRunAt: string | null;
+  running: boolean;
+  lastRun: JobRunDTO | null;
+  recentRuns: JobRunDTO[];
+}
+
+/** com.pm.filmfuse.admin.dto.JobRunStartedDTO — 202 from POST /admin/jobs/{name}/run. */
+export interface JobRunStartedDTO {
+  jobName: string;
+  runId: number | null;
+  triggeredBy: string;
+}

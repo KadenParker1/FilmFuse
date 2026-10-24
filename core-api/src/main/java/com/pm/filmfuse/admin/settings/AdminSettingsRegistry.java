@@ -35,7 +35,8 @@ public class AdminSettingsRegistry {
         Map<String, AdminSettingDefinition> byKey = new LinkedHashMap<>();
         for (AdminSettingDefinition definition : List.of(
                 AdminSettingDefinition.integer(TOP_UP_SIZE, "Catalog", "Nightly top-up size",
-                        "How many movies the nightly top-up refreshes from TMDB's popular list.", "movies",
+                        "How many movies the nightly top-up refreshes from TMDB's popular list (rounded up to "
+                                + "pages of 20).", "movies",
                         100, 5_000, defaults::topUpSize),
                 AdminSettingDefinition.integer(MAIN_TIER_SIZE, "Catalog", "Weekly main tier size",
                         "How many of the most popular movies the weekly refresh keeps current.", "movies",

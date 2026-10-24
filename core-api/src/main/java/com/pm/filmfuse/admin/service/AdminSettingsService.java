@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -52,6 +53,17 @@ public class AdminSettingsService {
         repository.upsert(key, value, adminId, clock.instant());
         audit.record(adminId, AdminAction.SETTING_UPDATE, key, old.orElse(null), value);
         return toDTO(definition, repository.find(key).orElse(null));
+    }
+
+    /**
+     * Stores a value without an audit row of its own, for callers that audit the action themselves
+     * (pause / resume a job). Must run in the caller's transaction.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void store(UUID adminId, String key, Object rawValue) {
+        Object value = definition(key).validate(rawValue);
+        repository.lockValue(key);
+        repository.upsert(key, value, adminId, clock.instant());
     }
 
     /** Removes the override, so the configured default applies again; idempotent, audited only when one existed. */
