@@ -24,7 +24,7 @@ class CatalogSeedPropertiesTest {
         assertThat(p.progressEvery()).isEqualTo(250);
         assertThat(p.topUp().enabled()).isTrue();
         assertThat(p.topUp().cron()).isEqualTo("0 0 4 * * *");
-        assertThat(p.topUp().pages()).isEqualTo(25);
+        assertThat(p.topUp().pages()).isEqualTo(50);
     }
 
     @Test
@@ -43,7 +43,7 @@ class CatalogSeedPropertiesTest {
         assertThat(p.progressEvery()).isEqualTo(250);
         assertThat(p.topUp().enabled()).isFalse();
         assertThat(p.topUp().cron()).isEqualTo("0 0 4 * * *");
-        assertThat(p.topUp().pages()).isEqualTo(25);
+        assertThat(p.topUp().pages()).isEqualTo(50);
 
         assertThat(new CatalogSeedProperties(null, -3, " ids.txt ", 2.5, 0, Duration.ZERO, Duration.ZERO, 1, 1,
                 new CatalogSeedProperties.TopUp(null, null, 9_999)))

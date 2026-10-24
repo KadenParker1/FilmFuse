@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pm.filmfuse.common.exception.NotFoundException;
 import com.pm.filmfuse.common.exception.UpstreamUnavailableException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,6 +116,28 @@ public class TmdbMovieCatalogClient implements MovieCatalogClient {
         return toPage(body, page);
     }
 
+    /** {@code /movie/changes}: ids only, so no language; TMDB rejects windows longer than 14 days. */
+    @Override
+    public ChangedIdsPage changedMovieIds(LocalDate from, LocalDate to, int page) {
+        TmdbChanges body = call(() -> restClient.get()
+                .uri(uri -> uri.path("/movie/changes")
+                        .queryParam("start_date", from.toString())
+                        .queryParam("end_date", to.toString())
+                        .queryParam("page", page)
+                        .build())
+                .retrieve()
+                .body(TmdbChanges.class));
+        if (body == null) {
+            throw new UpstreamUnavailableException(UNAVAILABLE, new IllegalStateException("TMDB returned no body"));
+        }
+        List<Integer> ids = body.results() == null ? List.of() : body.results().stream()
+                .filter(Objects::nonNull)
+                .filter(change -> change.id() != null && change.id() > 0 && !Boolean.TRUE.equals(change.adult()))
+                .map(TmdbChange::id)
+                .toList();
+        return new ChangedIdsPage(ids, body.page() > 0 ? body.page() : page, body.totalPages());
+    }
+
     @Override
     public CatalogMovie details(int id) {
         TmdbMovie body = call(() -> restClient.get()
@@ -164,6 +188,14 @@ public class TmdbMovieCatalogClient implements MovieCatalogClient {
             int page,
             List<TmdbMovie> results,
             @JsonProperty("total_pages") int totalPages) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    record TmdbChange(Integer id, Boolean adult) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    record TmdbChanges(int page, List<TmdbChange> results, @JsonProperty("total_pages") int totalPages) {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

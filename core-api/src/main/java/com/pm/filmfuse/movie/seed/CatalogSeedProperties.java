@@ -99,14 +99,16 @@ public record CatalogSeedProperties(
      *
      * @param enabled whether the job is scheduled (default true; false under the test and seed profiles)
      * @param cron    when, UTC (default 04:00 daily)
-     * @param pages   popular pages (default 25, about 500 movies)
+     * @param pages   popular pages (default {@value #DEFAULT_PAGES}, about 1,000 movies)
      */
     public record TopUp(Boolean enabled, String cron, Integer pages) {
+
+        public static final int DEFAULT_PAGES = 50;
 
         public TopUp {
             enabled = enabled == null || enabled;
             cron = cron == null || cron.isBlank() ? DEFAULT_CRON : cron;
-            pages = pages == null || pages < 1 ? 25 : Math.min(pages, MovieCatalogClient.MAX_PAGE);
+            pages = pages == null || pages < 1 ? DEFAULT_PAGES : Math.min(pages, MovieCatalogClient.MAX_PAGE);
         }
     }
 

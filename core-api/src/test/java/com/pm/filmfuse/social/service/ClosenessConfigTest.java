@@ -1,6 +1,12 @@
 package com.pm.filmfuse.social.service;
 
 import java.util.Set;
+import com.pm.filmfuse.common.job.JobNames;
+import com.pm.filmfuse.common.job.JobOutcome;
+import com.pm.filmfuse.common.job.JobRunRecorder;
+import com.pm.filmfuse.common.job.JobRunRepository;
+import java.time.Clock;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.ApplicationContext;
@@ -9,7 +15,12 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -17,10 +28,12 @@ import static org.mockito.Mockito.verify;
 class ClosenessConfigTest {
 
     private final ClosenessJob job = mock(ClosenessJob.class);
+    private final JobRunRepository runs = mock(JobRunRepository.class);
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withUserConfiguration(ClosenessConfig.class)
-            .withBean(ClosenessJob.class, () -> job);
+            .withBean(ClosenessJob.class, () -> job)
+            .withBean(JobRunRecorder.class, () -> new JobRunRecorder(runs, Clock.systemUTC(), 200));
 
     private static Set<ScheduledTask> tasks(ApplicationContext context) {
         return context.getBean(ScheduledTaskHolder.class).getScheduledTasks();
@@ -61,5 +74,29 @@ class ClosenessConfigTest {
     void disabledMeansNoScheduledTask() {
         runner.withPropertyValues("filmfuse.closeness.enabled=false")
                 .run(context -> assertThat(context).doesNotHaveBean(ScheduledTaskHolder.class));
+    }
+
+    @Test
+    void everyScheduledRunIsRecordedInTheJobHistory() {
+        when(job.recomputeAll()).thenReturn(4);
+        when(runs.insert(any(), any(), any(), any(), any(), any())).thenReturn(3L);
+        runner.run(context -> {
+            context.getBean(ScheduledTaskHolder.class).getScheduledTasks().iterator().next().getTask().getRunnable()
+                    .run();
+            verify(runs).insert(eq(JobNames.CLOSENESS), any(), isNull(), eq(JobOutcome.RUNNING), eq(Map.of()), isNull());
+            verify(runs).finish(eq(3L), any(), eq(JobOutcome.COMPLETED), eq(Map.of("rowsUpdated", 4)));
+        });
+    }
+
+    @Test
+    void aFailingRunIsRecordedAsFailed() {
+        when(job.recomputeAll()).thenThrow(new IllegalStateException("db down"));
+        runner.run(context -> {
+            Runnable tick = context.getBean(ScheduledTaskHolder.class).getScheduledTasks().iterator().next().getTask()
+                    .getRunnable();
+            org.assertj.core.api.Assertions.assertThatThrownBy(tick::run).hasMessage("db down");
+            verify(runs).finish(anyLong(), any(), eq(JobOutcome.FAILED),
+                    eq(Map.of("error", "IllegalStateException: db down")));
+        });
     }
 }
