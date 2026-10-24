@@ -1,0 +1,84 @@
+### FilmFuse core-api - admin portal. Token: see me.http; the account must have profiles.role = 'admin'
+# (granted in SQL only - see CLAUDE.md "Admin portal"). A non-admin gets 404 on every path here, no token 401.
+# Writes are rate limited (admin-writes, 60 per 10 minutes) and recorded in the audit log.
+
+@baseUrl = http://localhost:8080
+@token = paste-access-token-here
+@reportId = 00000000-0000-0000-0000-000000000000
+
+### Am I an admin? (isAdmin)
+GET {{baseUrl}}/api/v1/me
+Authorization: Bearer {{token}}
+
+### Metrics: catalog (movies, certification, vote tiers, rejects, database size vs guard / plan)
+GET {{baseUrl}}/api/v1/admin/metrics/catalog
+Authorization: Bearer {{token}}
+
+### Metrics: usage (users, ratings per day for 30 UTC days, sessions, active groups)
+GET {{baseUrl}}/api/v1/admin/metrics/usage
+Authorization: Bearer {{token}}
+
+### Metrics: health (ML /health, dirty taste vectors, open reports)
+GET {{baseUrl}}/api/v1/admin/metrics/health
+Authorization: Bearer {{token}}
+
+### Jobs: schedule, next run, paused, last / recent runs
+GET {{baseUrl}}/api/v1/admin/jobs
+Authorization: Bearer {{token}}
+
+### Run the nightly top-up now (202 + runId; 409 ALREADY_RUNNING while a catalog job holds the lock)
+POST {{baseUrl}}/api/v1/admin/jobs/catalog-top-up/run
+Authorization: Bearer {{token}}
+
+### Run the weekly refresh now
+POST {{baseUrl}}/api/v1/admin/jobs/catalog-refresh/run
+Authorization: Bearer {{token}}
+
+### Pause / resume scheduled runs (Run now still works while paused)
+POST {{baseUrl}}/api/v1/admin/jobs/catalog-refresh/pause
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/api/v1/admin/jobs/catalog-refresh/resume
+Authorization: Bearer {{token}}
+
+### Runtime settings (effective value, default, bounds)
+GET {{baseUrl}}/api/v1/admin/settings
+Authorization: Bearer {{token}}
+
+### Change one (400 + fieldErrors.value when out of bounds or the wrong type; unknown key 400)
+PUT {{baseUrl}}/api/v1/admin/settings/catalog.top-up.size
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"value": 1500}
+
+### Booleans take true / false
+PUT {{baseUrl}}/api/v1/admin/settings/catalog.quality.require-poster
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"value": false}
+
+### Back to the configured default
+DELETE {{baseUrl}}/api/v1/admin/settings/catalog.top-up.size
+Authorization: Bearer {{token}}
+
+### Reports queue (status OPEN default, oldest first | RESOLVED | DISMISSED; limit 1-100, cursor)
+GET {{baseUrl}}/api/v1/admin/reports?status=OPEN&limit=25
+Authorization: Bearer {{token}}
+
+### Resolve or dismiss an OPEN report (404 unknown, 409 already handled; note <= 500 chars)
+POST {{baseUrl}}/api/v1/admin/reports/{{reportId}}/resolve
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"resolution": "RESOLVED", "note": "Removed the rating and warned the author"}
+
+### Audit log, newest first (optional action filter; limit 1-100, cursor)
+GET {{baseUrl}}/api/v1/admin/audit-log?limit=50
+Authorization: Bearer {{token}}
+
+###
+GET {{baseUrl}}/api/v1/admin/audit-log?action=SETTING_UPDATE
+Authorization: Bearer {{token}}
