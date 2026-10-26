@@ -186,7 +186,7 @@ export default function MovieScreen() {
       <ScrollView contentContainerClassName="flex-grow" contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
         {content}
       </ScrollView>
-      <View className="absolute left-4" style={{ top: insets.top + 8 }}>
+      <View className="absolute" style={{ top: insets.top + 8, left: insets.left + 16 }}>
         <BackButton />
       </View>
     </View>

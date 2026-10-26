@@ -22,6 +22,13 @@ re-exported by hand) and the PNGs Expo reads to client/assets/ (referenced from 
     favicon.png                  48x48      web favicon
     brand/preview.png            1600x560   all of the above side by side (for review only)
 
+and the web app ("Add to Home Screen") icons to client/public/ (served at the site root):
+
+    apple-touch-icon.png         180x180    iOS home-screen icon, opaque (iOS rounds it)
+    icons/icon-192.png           192x192    manifest icon, opaque
+    icons/icon-512.png           512x512    manifest icon, opaque
+    icons/icon-maskable-512.png  512x512    manifest "maskable" icon, mark inside the 80% safe circle
+
 Re-run after changing the geometry or colours below; the outputs are committed.
 """
 from __future__ import annotations
@@ -36,6 +43,7 @@ from pathlib import Path
 
 BRAND_DIR = Path(__file__).resolve().parent
 ASSETS_DIR = BRAND_DIR.parent
+PUBLIC_DIR = ASSETS_DIR.parent / "public"
 
 # Keep in step with client/theme/tokens.ts (palettes.dark) - __tests__/appConfig.test.ts checks
 # that app.config.ts uses the same background.
@@ -135,6 +143,9 @@ SOURCES: dict[str, str] = {
     "splash-icon.svg": svg(scaled(mark(uid="splash"), 0.8)),
     # Tiny sizes: a rounded dark tile with the mark filling most of it.
     "favicon.svg": svg(background(rounded=220) + scaled(mark(uid="fav"), 1.22)),
+    # Web manifest "maskable" icon: Android crops to any shape inside the central 80% circle, so
+    # the mark (~0.62 of the box at scale 1) is shrunk to stay well inside it; full-bleed background.
+    "maskable-icon.svg": svg(background() + scaled(mark(uid="mask"), 0.78)),
 }
 
 OUTPUTS: list[tuple[str, str, int]] = [
@@ -144,6 +155,16 @@ OUTPUTS: list[tuple[str, str, int]] = [
     ("android-icon-monochrome.svg", "android-icon-monochrome.png", 1024),
     ("splash-icon.svg", "splash-icon.png", 1024),
     ("favicon.svg", "favicon.png", 48),
+]
+
+# Web app ("Add to Home Screen") icons, written to client/public/ (copied as-is into the web export
+# and referenced from public/manifest.webmanifest and app/+html.tsx). All opaque: iOS fills an
+# apple-touch-icon's transparency with black, and the manifest's "any" icons are full-bleed tiles.
+WEB_OUTPUTS: list[tuple[str, str, int]] = [
+    ("icon.svg", "apple-touch-icon.png", 180),
+    ("icon.svg", "icons/icon-192.png", 192),
+    ("icon.svg", "icons/icon-512.png", 512),
+    ("maskable-icon.svg", "icons/icon-maskable-512.png", 512),
 ]
 
 
@@ -242,6 +263,10 @@ def main() -> int:
         # The iOS icon must be opaque: flatten onto the background colour.
         render(rsvg, BRAND_DIR / source, ASSETS_DIR / out, size, BG if out == "icon.png" else None)
         print(f"wrote assets/{out} ({size}x{size})")
+    for source, out, size in WEB_OUTPUTS:
+        (PUBLIC_DIR / out).parent.mkdir(parents=True, exist_ok=True)
+        render(rsvg, BRAND_DIR / source, PUBLIC_DIR / out, size, BG)
+        print(f"wrote public/{out} ({size}x{size})")
     preview(rsvg)
     print("wrote assets/brand/preview.png")
     return 0

@@ -21,7 +21,7 @@ export default function SocialScreen() {
   const incomingCount = incoming.data?.length ?? 0;
 
   return (
-    <Screen edges={['top']} className="gap-4 pb-0">
+    <Screen edges={['top', 'left', 'right']} className="gap-4 pb-0">
       <Heading>Social</Heading>
       <SearchBar
         label="Search people"

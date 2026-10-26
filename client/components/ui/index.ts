@@ -18,6 +18,7 @@ export { Skeleton } from './Skeleton';
 export { Slider1to10 } from './Slider1to10';
 export { scoreLabel, clampScore, SCORE_MIN, SCORE_MAX } from './scoreLabel';
 export { TextField } from './TextField';
+export { MIN_WEB_INPUT_FONT_SIZE, TextInput } from './TextInput';
 export { Toast, type ToastAction, type ToastTone } from './Toast';
 export { UNDO_TOAST_MS, UndoToastProvider, useUndoToast, type CommitReason, type UndoOptions } from './UndoToast';
 export { Body, Heading, Label } from './Text';

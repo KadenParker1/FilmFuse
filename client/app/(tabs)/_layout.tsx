@@ -83,7 +83,7 @@ function TabsShell() {
           );
         })}
       </Tabs>
-      {wide ? null : <RateFab bottomOffset={TAB_BAR_HEIGHT + insets.bottom + 14} rightOffset={16} />}
+      {wide ? null : <RateFab bottomOffset={TAB_BAR_HEIGHT + insets.bottom + 14} rightOffset={insets.right + 16} />}
     </View>
   );
 }

@@ -74,7 +74,7 @@ export default function ProfileScreen() {
   const me = useMe();
 
   return (
-    <Screen edges={['top']} scroll>
+    <Screen edges={['top', 'left', 'right']} scroll>
       <Heading>Profile</Heading>
       <ProfileHeader />
 

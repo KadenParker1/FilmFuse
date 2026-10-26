@@ -1,4 +1,5 @@
-import { Text, TextInput, View, type TextInputProps } from 'react-native';
+import { Text, View } from 'react-native';
+import { TextInput, type TextInputProps } from './TextInput';
 import { useTheme } from '../../theme/useTheme';
 
 type Props = TextInputProps & {

@@ -5,7 +5,10 @@ import { useSafeAreaInsets, type Edge } from 'react-native-safe-area-context';
 type Props = {
   children: ReactNode;
   scroll?: boolean;
-  /** Safe-area edges to pad. Tab screens skip the bottom (the tab bar handles it). */
+  /**
+   * Safe-area edges to pad (all four by default). Tab screens skip the bottom (the tab bar handles
+   * it). Left/right matter on a landscape iPhone (the web app rotates; native is portrait-only).
+   */
   edges?: Edge[];
   className?: string;
   /** Grid screens (Discover) use a wider max width on big web screens. */
@@ -13,7 +16,7 @@ type Props = {
 };
 
 /** Safe-area page wrapper with the app background and a readable max width on wide web. */
-export function Screen({ children, scroll = false, edges = ['top', 'bottom'], className = '', wide = false }: Props) {
+export function Screen({ children, scroll = false, edges = ['top', 'bottom', 'left', 'right'], className = '', wide = false }: Props) {
   const insets = useSafeAreaInsets();
   const padding = {
     paddingTop: edges.includes('top') ? insets.top : 0,
