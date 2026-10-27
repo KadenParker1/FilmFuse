@@ -8,6 +8,7 @@ import path from 'path';
 import { act, render, renderHook, screen } from '@testing-library/react-native';
 import { Platform, Text } from 'react-native';
 import * as SafeArea from 'react-native-safe-area-context';
+import { ServerDocument } from 'expo-router/build/server/ServerDocument';
 import Root, { WEB_HEAD } from '../app/+html';
 import { APP_NAME } from '../app.config';
 import { WebSafeAreaProvider } from '../components/WebSafeAreaProvider';
@@ -101,6 +102,28 @@ describe('document head (app/+html.tsx)', () => {
 
   it('renders the page content', () => {
     expect(html).toContain('<div id="root"></div>');
+  });
+
+  it("renders Expo's head / body nodes and attributes (bundle scripts, CSS) - without them pages never hydrate", () => {
+    const withAssets = renderToStaticMarkup(
+      <ServerDocument
+        data={{
+          htmlAttributes: { dir: 'ltr' },
+          bodyAttributes: { className: 'expo-body' },
+          headNodes: <link rel="stylesheet" href="/_expo/static/css/web.css" />,
+          bodyNodes: <script defer src="/_expo/static/js/web/entry.js" />,
+        }}
+      >
+        <Root>
+          <div id="root" />
+        </Root>
+      </ServerDocument>,
+    );
+    expect(withAssets).toMatch(/<html lang="en" dir="ltr">/);
+    expect(withAssets).toContain('<body class="expo-body">');
+    expect(withAssets).toMatch(/<head>.*<link rel="stylesheet" href="\/_expo\/static\/css\/web.css"\/>.*<\/head>/s);
+    // The bundle comes after the app markup, inside body.
+    expect(withAssets).toMatch(/<div id="root"><\/div><script defer="" src="\/_expo\/static\/js\/web\/entry.js"><\/script><\/body>/);
   });
 });
 
@@ -211,6 +234,12 @@ describe('theme behind the app', () => {
     const doc = runScript(saved, systemLight);
     expect(doc.documentElement.style.backgroundColor).toBe(palettes[expected].bg);
     expect(doc.metas[0]!.content).toBe(palettes[expected].bg);
+  });
+
+  it('pre-paint script: built from constants only, and nothing in it can close the <script> tag', () => {
+    const script = documentThemeScript();
+    expect(script).not.toMatch(/<\/|<!--/i);
+    expect(script).toContain(JSON.stringify(APPEARANCE_KEY));
   });
 
   it('pre-paint script: blocked storage leaves the static dark default', () => {
