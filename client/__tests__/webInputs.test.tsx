@@ -49,10 +49,14 @@ describe('web input font size (no iOS focus zoom)', () => {
     for (const dir of ['app', 'components', 'auth']) {
       for (const file of sourceFiles(path.join(ROOT, dir))) {
         const source = fs.readFileSync(file, 'utf8');
-        for (const match of source.matchAll(/<(TextInput|TextField|SearchBar)\b[^>]*?className="([^"]*)"/gs)) {
-          const size = classFontSize(match[2]);
+        // [^<] rather than [^>]: an arrow-function prop (`onChangeText={(t) => ...}`) before className
+        // must not end the match early. Plain strings and template literals both count.
+        const pattern = /<(TextInput|TextField|SearchBar)\b[^<]*?className=(?:"([^"]*)"|\{`([^`]*)`\})/gs;
+        for (const match of source.matchAll(pattern)) {
+          const classes = match[2] ?? match[3] ?? '';
+          const size = classFontSize(classes);
           if (size !== undefined && size < MIN_WEB_INPUT_FONT_SIZE) {
-            offenders.push(`${path.relative(ROOT, file)}: <${match[1]} className="${match[2]}">`);
+            offenders.push(`${path.relative(ROOT, file)}: <${match[1]} className="${classes}">`);
           }
         }
       }
@@ -65,6 +69,9 @@ describe('web input font size (no iOS focus zoom)', () => {
     expect(classFontSize('text-sm')).toBe(14);
     expect(classFontSize('text-xs')).toBe(12);
     expect(classFontSize('text-2xl')).toBe(24);
+    // The whole scale: an unrecognised large size would otherwise be clamped down to 16 on web.
+    expect(classFontSize('text-5xl')).toBe(48);
+    expect(classFontSize('text-9xl')).toBe(128);
     expect(classFontSize('text-[15px]')).toBe(15);
     expect(classFontSize('text-text text-muted')).toBeUndefined();
     expect(classFontSize(undefined)).toBeUndefined();
@@ -75,6 +82,7 @@ describe('web input font size (no iOS focus zoom)', () => {
     expect(webInputFontStyle({ fontSize: 12 }, undefined, 'web')).toEqual({ fontSize: 16 });
     expect(webInputFontStyle(undefined, 'text-sm', 'web')).toEqual({ fontSize: 16 });
     expect(webInputFontStyle(undefined, 'text-lg', 'web')).toEqual({ fontSize: 18 });
+    expect(webInputFontStyle(undefined, 'text-6xl', 'web')).toEqual({ fontSize: 60 });
     expect(webInputFontStyle([{ fontSize: 20 }], 'text-sm', 'web')).toEqual({ fontSize: 20 });
   });
 
