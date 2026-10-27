@@ -104,7 +104,7 @@ export default function DiscoverScreen() {
   );
 
   return (
-    <Screen edges={['top']} wide className="gap-4 pb-0">
+    <Screen edges={['top', 'left', 'right']} wide className="gap-4 pb-0">
       <Heading>Discover</Heading>
       <SearchBar
         label="Search movies"

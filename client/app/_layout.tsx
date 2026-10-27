@@ -18,6 +18,8 @@ import { queryClient } from '../lib/queryClient';
 import { AuthProvider } from '../auth/AuthProvider';
 import { useAuth } from '../auth/useAuth';
 import { ThemeRoot } from '../components/ThemeRoot';
+import { WebDocumentTheme } from '../components/WebDocumentTheme';
+import { WebSafeAreaProvider } from '../components/WebSafeAreaProvider';
 import { FullScreenLoader } from '../components/FullScreenLoader';
 import { GuardedLinkSaver } from '../components/GuardedLinkSaver';
 import { QuickRateProvider } from '../components/rating/QuickRateProvider';
@@ -48,17 +50,19 @@ export default function RootLayout() {
   if (!ready) return null;
 
   return (
-    <AppearanceProvider>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <ThemeRoot>
-            <QuickRateProvider>
-              <RootNavigator />
-            </QuickRateProvider>
-          </ThemeRoot>
-        </AuthProvider>
-      </QueryClientProvider>
-    </AppearanceProvider>
+    <WebSafeAreaProvider>
+      <AppearanceProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <ThemeRoot>
+              <QuickRateProvider>
+                <RootNavigator />
+              </QuickRateProvider>
+            </ThemeRoot>
+          </AuthProvider>
+        </QueryClientProvider>
+      </AppearanceProvider>
+    </WebSafeAreaProvider>
   );
 }
 
@@ -80,6 +84,7 @@ function RootNavigator() {
     <>
       <GuardedLinkSaver signedIn={signedIn} />
       <StatusBar style={statusBarStyle(scheme)} />
+      <WebDocumentTheme scheme={scheme} />
       <Stack screenOptions={stackScreenOptions(colors.bg)}>
         <Stack.Protected guard={signedIn} redirectTo="/sign-in">
           <Stack.Screen name="(tabs)" />

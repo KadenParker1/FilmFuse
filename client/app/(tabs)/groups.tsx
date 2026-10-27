@@ -129,7 +129,7 @@ export default function GroupsScreen() {
   }
 
   return (
-    <Screen edges={['top']} scroll>
+    <Screen edges={['top', 'left', 'right']} scroll>
       <View className="gap-6 pb-28">
         <Heading>Groups</Heading>
         <TonightCta onPress={() => router.push('/sessions/new')} />

@@ -1,4 +1,5 @@
-import { Pressable, TextInput, View, type TextInputProps } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { TextInput, type TextInputProps } from './TextInput';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '../../theme/useTheme';
 

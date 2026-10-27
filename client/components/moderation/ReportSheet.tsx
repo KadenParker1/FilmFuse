@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { TextInput } from '../ui/TextInput';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { REPORT_DETAILS_MAX, useCreateReport } from '../../api/reports';
 import { ApiError } from '../../lib/apiClient';
