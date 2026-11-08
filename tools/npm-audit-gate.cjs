@@ -4,7 +4,6 @@
 // Usage (from client/): npm audit --omit=dev --json | node ../tools/npm-audit-gate.cjs
 const ACCEPTED = new Map([
   ['GHSA-vfj7-8cjw-p6xm', 'braces via @expo/cli/Metro - build-time only, no fixed release'],
-  ['GHSA-86w9-cpqp-85rv', 'node-forge via @expo/code-signing-certificates - code signing not used'],
   ['GHSA-mrhx-c7xc-m3w5', 'zod 3 via @expo/cli - dev CLI only, fix is zod 4 which @expo/cli 58 does not allow'],
 ]);
 

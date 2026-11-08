@@ -2,6 +2,14 @@
 
 **Date:** 2026-10-17 · **Branch:** `phase-6-hardening` · **Toolchain:** Node 24.3.0, npm 11.4.2, Expo SDK 58, React Native 0.88.0
 
+## Update 2026-11-08
+
+CI's audit gate failed on five new high advisories in `node-forge@1.4.0` (GHSA-7wch-p9px-956x, GHSA-jc66-7q78-782g,
+GHSA-8hrf-8g6f-7xwp, GHSA-hqq3-7jhf-c5jx, GHSA-5x38-2vff-x55p). `node-forge@1.4.3` fixes them and also fixes the previously
+accepted GHSA-86w9-cpqp-85rv. It is inside `@expo/cli`'s `^1.4.0` range, so a lockfile update (`npm update node-forge`) was
+enough; no override. GHSA-86w9 was removed from the accepted list in `tools/npm-audit-gate.cjs` and from the table below. The
+tables below are otherwise the 2026-10-17 snapshot.
+
 ## Summary
 
 | | Total | High | Moderate | Critical |
@@ -36,7 +44,6 @@ version that the requesting package's semver range does not allow (see below).
 | Advisory | Package (installed) | Severity | Dependency path(s) | Runtime or dev-only | Why not fixed | Risk |
 |---|---|---|---|---|---|---|
 | [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm): stack-exhaustion DoS from deeply nested brace patterns | `braces@3.0.3` (via `micromatch@4.0.8`) | high | `tailwindcss@3.4` → chokidar / micromatch / fast-glob; `expo` → `@expo/metro` → `metro-file-map`, `metro` (also via `react-native` → `@react-native/community-cli-plugin`); `jest-expo` → `@react-native/jest-preset` → `babel-jest@29` → `@jest/transform@29`; `jest@30` → `@jest/transform` | Dev/build only (Metro bundler, Tailwind compiler, Jest). Not in the bundle. | Affects `<=3.0.3`, and 3.0.3 is the latest release. No fix is available, and `micromatch@4.0.8` is also the latest. | **Low.** Only glob patterns from our own config (`tailwind.config.js` content globs, Metro/Jest config) reach `braces`. No untrusted input does. Worst case is a crashed local build. |
-| [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv): RSA PKCS#1 v1.5 signature-verification forgery | `node-forge@1.4.0` | high | `expo` → `@expo/cli` (and → `@expo/code-signing-certificates`) | Dev CLI only. Not in the bundle. | Affects `<=1.4.0`, and 1.4.0 is the latest release. No fix is available. | **Low.** `@expo/cli` uses node-forge to read local Keychain certificates for `expo run:ios` and, through `@expo/code-signing-certificates`, to sign expo-updates manifests. We don't install `expo-updates` or set a `codeSigningCertificate`, so no signature verification of untrusted data happens. |
 | [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5): memory exhaustion while validating oversized constrained collections (published after this audit; first failed CI on 2026-10-23) | `zod@3.25.76` | high | `expo` → `@expo/cli`; `eslint-config-expo` → `eslint-plugin-react-hooks@7` (→ `zod-validation-error`) | Dev CLI and lint only. Not in the bundle: a source-mapped `npx expo export -p web` (35 maps) has no `node_modules/zod/` file. The app never imports zod. | Fixed only in `4.6.6`. `@expo/cli@58` and `eslint-plugin-react-hooks@7` require zod 3, so the fix needs a major-version override outside their ranges, which could break the Expo CLI. | **Low.** zod there validates our own config files and CLI arguments, not untrusted input. Worst case is a crashed local command. Re-check when Expo moves `@expo/cli` to zod 4. |
 | [GHSA-hp3w-g68c-fv3c](https://github.com/advisories/GHSA-hp3w-g68c-fv3c): DoS through unbounded precision specifiers | `sprintf-js@1.0.3` | moderate | `jest-expo` / `jest` → `babel-jest@30` → `babel-plugin-istanbul@8` → `@istanbuljs/load-nyc-config` → `js-yaml@3` → `argparse@1` → `sprintf-js` | Test/coverage tooling only | Affects `<=1.1.3`, and 1.1.3 is the latest release. No fix is available. (A newer `js-yaml` would drop it, but `load-nyc-config` pins `js-yaml@^3`.) | **Negligible.** argparse formats its own help strings. Our format strings never reach it. |
 | [GHSA-w5hq-g745-h8pq](https://github.com/advisories/GHSA-w5hq-g745-h8pq): missing buffer bounds check in v3/v5/v6 when `buf` is passed | `uuid@7.0.3` | moderate | `expo` / `expo-splash-screen` / `@expo/prebuild-config` → `@expo/config-plugins` → `xcode@3.0.1` → `uuid` | Prebuild/config-plugin time only. Not in the bundle. | Fixed in `11.1.1`, but `xcode@3.0.1` (latest) requires `uuid@^7.0.3`, so the fix is a major-version override outside the requester's range. | **Negligible / not reachable.** `xcode` only calls `uuid.v4()` with no `buf` argument (`pbxProject.js`). The vulnerable v3/v5/v6 + `buf` code path is never used. |
