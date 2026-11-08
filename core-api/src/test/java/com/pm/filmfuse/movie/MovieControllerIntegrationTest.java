@@ -1,6 +1,8 @@
 package com.pm.filmfuse.movie;
 
+import com.pm.filmfuse.common.exception.NotFoundException;
 import com.pm.filmfuse.common.exception.UpstreamUnavailableException;
+import com.pm.filmfuse.movie.catalog.CatalogAuthenticationException;
 import com.pm.filmfuse.movie.catalog.MovieCatalogClient;
 import com.pm.filmfuse.support.AbstractIntegrationTest;
 import java.sql.Timestamp;
@@ -349,6 +351,45 @@ class MovieControllerIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/v1/movies/{id}", FIGHT_CLUB).with(someUser()))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.message").value("Movie data is temporarily unavailable."));
+    }
+
+    @Test
+    void staleCachedRowIsServedWhenTheRefreshHitsAnOutage() throws Exception {
+        upsertCached(9003, "Stale But Known", 101, null, null, Instant.now().minus(Duration.ofDays(30)));
+        doThrow(new UpstreamUnavailableException("Movie data is temporarily unavailable."))
+                .when(catalogClient).details(9003);
+
+        mockMvc.perform(get("/api/v1/movies/{id}", 9003).with(someUser()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Stale But Known"))
+                .andExpect(jsonPath("$.runtime").value(101));
+        verify(catalogClient, times(1)).details(9003);
+        // The stale row is not re-stamped, so the next request tries the catalog again.
+        Timestamp cachedAt = jdbc.queryForObject("select cached_at from app.movies where id = ?", Timestamp.class, 9003);
+        assertThat(cachedAt.toInstant()).isBefore(Instant.now().minus(Duration.ofDays(29)));
+    }
+
+    @Test
+    void staleCachedRowIsServedWhenTheCatalogNoLongerKnowsIt() throws Exception {
+        upsertCached(9004, "Gone From The Catalog", 88, null, null, Instant.now().minus(Duration.ofDays(30)));
+        doThrow(new NotFoundException("Movie not found."))
+                .when(catalogClient).details(9004);
+
+        mockMvc.perform(get("/api/v1/movies/{id}", 9004).with(someUser()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Gone From The Catalog"));
+    }
+
+    @Test
+    void catalogAuthFailureOnAStaleRowStillServesTheRow() throws Exception {
+        upsertCached(9005, "Token Expired Meanwhile", 90, null, null, Instant.now().minus(Duration.ofDays(30)));
+        doThrow(new CatalogAuthenticationException("Movie data is temporarily unavailable.",
+                new IllegalStateException("TMDB returned 401")))
+                .when(catalogClient).details(9005);
+
+        mockMvc.perform(get("/api/v1/movies/{id}", 9005).with(someUser()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Token Expired Meanwhile"));
     }
 
     // --- auth ---

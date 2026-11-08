@@ -2,6 +2,8 @@ package com.pm.filmfuse.movie.service;
 
 import com.pm.filmfuse.common.dto.PageDTO;
 import com.pm.filmfuse.common.exception.BadRequestException;
+import com.pm.filmfuse.common.exception.NotFoundException;
+import com.pm.filmfuse.common.exception.UpstreamUnavailableException;
 import com.pm.filmfuse.movie.catalog.CatalogMovie;
 import com.pm.filmfuse.movie.catalog.CatalogPage;
 import com.pm.filmfuse.movie.catalog.MovieCatalogClient;
@@ -20,6 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -84,15 +87,28 @@ public class MovieService {
      */
     public MovieDetailDTO details(int id) {
         Instant now = clock.instant();
-        CatalogMovie movie = movieRepository.findById(id)
-                .filter(cached -> isFresh(cached, now))
+        Optional<Movie> cached = movieRepository.findById(id);
+        CatalogMovie movie = cached
+                .filter(row -> isFresh(row, now))
                 .map(MovieMapper::toCatalogMovie)
-                .orElseGet(() -> {
-                    CatalogMovie fetched = catalogClient.details(id);
-                    cacheDetails(fetched, now);
-                    return fetched;
-                });
+                .orElseGet(() -> refetch(id, cached, now));
         return MovieMapper.toDetailDTO(movie, genreService.namesById(), imageBaseUrl);
+    }
+
+    /**
+     * Fetches details from the catalog and caches them. If the fetch fails (outage, or the catalog
+     * no longer knows the id) and a row is already cached, the stale row is served instead: a movie
+     * that ratings and favourites already reference must not start answering 404/502 because a
+     * refresh failed. Without a cached row the error propagates as before.
+     */
+    private CatalogMovie refetch(int id, Optional<Movie> cached, Instant now) {
+        try {
+            CatalogMovie fetched = catalogClient.details(id);
+            cacheDetails(fetched, now);
+            return fetched;
+        } catch (NotFoundException | UpstreamUnavailableException ex) {
+            return cached.map(MovieMapper::toCatalogMovie).orElseThrow(() -> ex);
+        }
     }
 
     /**
