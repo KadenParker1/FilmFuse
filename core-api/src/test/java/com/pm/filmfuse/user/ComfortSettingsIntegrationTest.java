@@ -121,4 +121,34 @@ class ComfortSettingsIntegrationTest extends AbstractIntegrationTest {
         assertThat(jdbc.queryForObject("select count(*) from app.user_settings where user_id = ?", Integer.class, id))
                 .isZero();
     }
+
+    @Test
+    void noneForViolenceOrFrighteningIsRaisedToMildButOtherDimensionsKeepNone() throws Exception {
+        UUID id = UUID.randomUUID();
+        RequestPostProcessor me = com.pm.filmfuse.support.JwtTestSupport.supabaseUser(id);
+        String body = """
+                {"contentLimits": {"VIOLENCE": "NONE", "FRIGHTENING": "NONE", "LANGUAGE": "NONE"}}
+                """;
+        mockMvc.perform(put("/api/v1/me/settings/comfort").with(me).contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contentLimits.VIOLENCE").value("MILD"))
+                .andExpect(jsonPath("$.contentLimits.FRIGHTENING").value("MILD"))
+                .andExpect(jsonPath("$.contentLimits.LANGUAGE").value("NONE"));
+        assertThat(jdbc.queryForObject("select content_limits::text from app.user_settings where user_id = ?", String.class, id))
+                .contains("\"violence\": \"mild\"").contains("\"frightening\": \"mild\"").contains("\"language\": \"none\"");
+    }
+
+    @Test
+    void aStoredNoneFrighteningLimitIsReadBackAsMild() throws Exception {
+        UUID id = UUID.randomUUID();
+        RequestPostProcessor me = com.pm.filmfuse.support.JwtTestSupport.supabaseUser(id);
+        mockMvc.perform(get("/api/v1/me/settings/comfort").with(me)).andExpect(status().isOk()); // provisions the profile
+        jdbc.update("""
+                insert into app.user_settings (user_id, content_limits) values (?, '{"frightening": "none"}'::jsonb)
+                on conflict (user_id) do update set content_limits = excluded.content_limits""", id);
+
+        mockMvc.perform(get("/api/v1/me/settings/comfort").with(me))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contentLimits.FRIGHTENING").value("MILD"));
+    }
 }

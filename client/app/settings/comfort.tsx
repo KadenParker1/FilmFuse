@@ -3,24 +3,33 @@ import { View } from 'react-native';
 import { useComfortSettings, useUpdateComfortSettings } from '../../api/comfort';
 import { BackButton } from '../../components/BackButton';
 import { ComfortFields } from '../../components/comfort/ComfortFields';
-import { GROUP_PRIVACY_NOTE, limitsForCertification, sameLimits, validateComfort } from '../../components/comfort/comfortCopy';
+import {
+  GROUP_PRIVACY_NOTE,
+  limitsForCertification,
+  normalizeLimits,
+  sameLimits,
+  validateComfort,
+} from '../../components/comfort/comfortCopy';
 import { Body, Button, ErrorState, Heading, Screen, Skeleton, errorMessage } from '../../components/ui';
 import { ApiError } from '../../lib/apiClient';
 import type { ComfortSettingsDTO } from '../../types/api';
 
-/** Never send a hidden row's value (e.g. "Sex & nudity" below R). */
+/** Never send a hidden row's value (e.g. "Sex & nudity" below R), nor a level the pickers no longer offer. */
 const saveable = (d: ComfortSettingsDTO): ComfortSettingsDTO => ({
   ...d,
-  contentLimits: limitsForCertification(d.maxCertification, d.contentLimits),
+  contentLimits: normalizeLimits(limitsForCertification(d.maxCertification, d.contentLimits)),
 });
+
+/** Form state from a server response: an older NONE for violence / frightening reads as MILD. */
+const normalized = (d: ComfortSettingsDTO): ComfortSettingsDTO => ({ ...d, contentLimits: normalizeLimits(d.contentLimits) });
 
 const sameSettings = (a: ComfortSettingsDTO, b: ComfortSettingsDTO) =>
   a.maxCertification === b.maxCertification && a.allowUnrated === b.allowUnrated && sameLimits(a.contentLimits, b.contentLimits);
 
 function ComfortForm({ initial }: { initial: ComfortSettingsDTO }) {
   const update = useUpdateComfortSettings();
-  const [draft, setDraft] = useState<ComfortSettingsDTO>(initial);
-  const [saved, setSaved] = useState<ComfortSettingsDTO>(initial);
+  const [draft, setDraft] = useState<ComfortSettingsDTO>(() => normalized(initial));
+  const [saved, setSaved] = useState<ComfortSettingsDTO>(() => normalized(initial));
   const [localError, setLocalError] = useState<string | null>(null);
   const dirty = !sameSettings(draft, saved);
 
@@ -38,8 +47,8 @@ function ComfortForm({ initial }: { initial: ComfortSettingsDTO }) {
     }
     update.mutate(saveable(draft), {
       onSuccess: (settings) => {
-        setSaved(settings);
-        setDraft(settings);
+        setSaved(normalized(settings));
+        setDraft(normalized(settings));
       },
     });
   };

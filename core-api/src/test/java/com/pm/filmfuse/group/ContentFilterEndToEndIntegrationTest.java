@@ -1,5 +1,9 @@
 package com.pm.filmfuse.group;
 
+import com.pm.filmfuse.reco.dto.ContentLevel;
+
+import com.pm.filmfuse.reco.dto.ContentDimension;
+
 import com.jayway.jsonpath.JsonPath;
 import com.pm.filmfuse.reco.ml.MlGroupRecommendation;
 import com.pm.filmfuse.reco.ml.MlGroupRecommendationRequest;
@@ -189,19 +193,39 @@ class ContentFilterEndToEndIntegrationTest extends AbstractGroupIntegrationTest 
 
     @Test
     void everyDimensionLimitIsEnforced() throws Exception {
-        for (String dimension : List.of("violence", "sexual", "language", "drugs", "frightening")) {
+        // Each dimension at its strictest selectable limit: NONE, except violence / frightening, which start at MILD.
+        for (ContentDimension d : ContentDimension.values()) {
+            String dimension = d.code();
+            ContentLevel floor = d.lowestLimit();
+            ContentLevel above = ContentLevel.values()[floor.ordinal() + 1];
             TestUser a = user();
             TestUser b = user();
             befriend(a, b);
-            setComfort(a, "{\"contentLimits\": {\"" + dimension.toUpperCase() + "\": \"NONE\"}, \"allowUnrated\": true}");
+            setComfort(a, "{\"contentLimits\": {\"" + d.name() + "\": \"" + floor.name() + "\"}, \"allowUnrated\": true}");
             int genre = uniqueGenre();
-            int over = movie(genre, "PG", 20, Map.of(dimension, "mild"));
-            int ok = movie(genre, "PG", 10, Map.of(dimension, "none"));
+            int over = movie(genre, "PG", 20, Map.of(dimension, above.code()));
+            int ok = movie(genre, "PG", 10, Map.of(dimension, floor.code()));
             mlReturns(over, ok);
 
             String body = json(createAdHocSession(b, genre, a).andExpect(status().isCreated()));
             assertThat(resultIds(body)).as(dimension).containsExactly(ok);
         }
+    }
+
+    @Test
+    void aNoneFrighteningLimitActsAsMildSoTypicalGFilmsStillPass() throws Exception {
+        TestUser a = user();
+        TestUser b = user();
+        befriend(a, b);
+        setComfort(a, "{\"maxCertification\": \"G\", \"contentLimits\": {\"FRIGHTENING\": \"NONE\", \"VIOLENCE\": \"NONE\"}, \"allowUnrated\": false}");
+        int genre = uniqueGenre();
+        int scary = movie(genre, "G", 20, Map.of("frightening", "moderate", "violence", "mild"));
+        int gentle = movie(genre, "G", 10, Map.of("frightening", "mild", "violence", "mild"));
+        mlReturns(scary, gentle);
+
+        String body = json(createAdHocSession(b, genre, a).andExpect(status().isCreated()));
+        assertThat(resultIds(body)).containsExactly(gentle);
+        assertThat(body).doesNotContain("no frightening").doesNotContain("no violence");
     }
 
     @Test

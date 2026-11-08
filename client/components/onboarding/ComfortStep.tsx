@@ -2,23 +2,27 @@ import { useState } from 'react';
 import { useUpdateComfortSettings } from '../../api/comfort';
 import type { ComfortSettingsDTO, OnboardingStateDTO } from '../../types/api';
 import { ComfortFields } from '../comfort/ComfortFields';
-import { GROUP_PRIVACY_NOTE, limitsForCertification, validateComfort } from '../comfort/comfortCopy';
+import { GROUP_PRIVACY_NOTE, limitsForCertification, normalizeLimits, validateComfort } from '../comfort/comfortCopy';
 import { Body } from '../ui';
 import { OnboardingFrame } from './OnboardingFrame';
 import { describeError } from './steps';
 import { useAdvance } from './useAdvance';
 
-/** Never send a hidden row's value (e.g. "Sex & nudity" below R). */
+/** Never send a hidden row's value (e.g. "Sex & nudity" below R), nor a level the pickers no longer offer. */
 const saveable = (d: ComfortSettingsDTO): ComfortSettingsDTO => ({
   ...d,
-  contentLimits: limitsForCertification(d.maxCertification, d.contentLimits),
+  contentLimits: normalizeLimits(limitsForCertification(d.maxCertification, d.contentLimits)),
 });
 
 /** Step 6: content comfort (the same pickers as Settings → Comfort), saved via PUT /me/settings/comfort. */
 export function ComfortStep({ state }: { state: OnboardingStateDTO }) {
   const update = useUpdateComfortSettings();
   const nav = useAdvance(6);
-  const [draft, setDraft] = useState<ComfortSettingsDTO>(state.comfort);
+  const [draft, setDraft] = useState<ComfortSettingsDTO>(() => ({
+    ...state.comfort,
+    // An older NONE for violence / frightening reads (and is sent) as MILD.
+    contentLimits: normalizeLimits(state.comfort.contentLimits),
+  }));
   const [localError, setLocalError] = useState<string | null>(null);
 
   const edit = (patch: Partial<ComfortSettingsDTO>) => {

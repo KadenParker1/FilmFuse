@@ -10,7 +10,12 @@ import {
   CERTIFICATIONS,
   CONTENT_DIMENSIONS,
   LEVEL_EXAMPLES,
+  MIN_LEVEL,
   certificationDescription,
+  clampLevel,
+  levelExample,
+  levelsFor,
+  normalizeLimits,
   certificationLabel,
   levelFor,
   sameLimits,
@@ -33,10 +38,55 @@ describe('comfortCopy', () => {
     for (const c of CERTIFICATIONS) expect(certificationDescription(c).length).toBeGreaterThan(10);
   });
 
-  it('has an example for every dimension × level', () => {
+  it('has an example for exactly the selectable levels of every dimension', () => {
     for (const d of CONTENT_DIMENSIONS) {
-      expect(Object.keys(LEVEL_EXAMPLES[d])).toEqual(['NONE', 'MILD', 'MODERATE', 'STRONG']);
+      expect(Object.keys(LEVEL_EXAMPLES[d])).toEqual(levelsFor(d));
+      for (const l of levelsFor(d)) expect(levelExample(d, l).length).toBeGreaterThan(10);
     }
+  });
+
+  it('starts violence and frightening at Mild; the others keep None', () => {
+    expect(levelsFor('VIOLENCE')).toEqual(['MILD', 'MODERATE', 'STRONG']);
+    expect(levelsFor('FRIGHTENING')).toEqual(['MILD', 'MODERATE', 'STRONG']);
+    for (const d of ['SEXUAL', 'LANGUAGE', 'DRUGS'] as const) {
+      expect(levelsFor(d)).toEqual(['NONE', 'MILD', 'MODERATE', 'STRONG']);
+    }
+    for (const d of CONTENT_DIMENSIONS) expect(levelsFor(d)[0]).toBe(MIN_LEVEL[d]);
+  });
+
+  it('describes Mild as the gentlest setting where it is the minimum', () => {
+    expect(levelExample('VIOLENCE', 'MILD')).toBe('Mild — the gentlest setting: cartoon or slapstick scuffles, no blood.');
+    expect(levelExample('FRIGHTENING', 'MILD')).toBe(
+      'Mild — the gentlest setting: brief tense moments or cartoon peril, quickly resolved.',
+    );
+    // A stray NONE reads as the Mild example rather than nothing.
+    expect(levelExample('VIOLENCE', 'NONE')).toBe(levelExample('VIOLENCE', 'MILD'));
+    expect(levelExample('LANGUAGE', 'NONE')).toBe('No swearing at all.');
+  });
+
+  it('clampLevel raises only levels below the minimum', () => {
+    expect(clampLevel('VIOLENCE', 'NONE')).toBe('MILD');
+    expect(clampLevel('FRIGHTENING', 'NONE')).toBe('MILD');
+    expect(clampLevel('VIOLENCE', 'MODERATE')).toBe('MODERATE');
+    expect(clampLevel('SEXUAL', 'NONE')).toBe('NONE');
+  });
+
+  it('normalizeLimits turns NONE into MILD for violence and frightening only', () => {
+    const before = { VIOLENCE: 'NONE', FRIGHTENING: 'NONE', SEXUAL: 'NONE', LANGUAGE: 'NONE', DRUGS: 'NONE' } as const;
+    expect(normalizeLimits(before)).toEqual({
+      VIOLENCE: 'MILD',
+      FRIGHTENING: 'MILD',
+      SEXUAL: 'NONE',
+      LANGUAGE: 'NONE',
+      DRUGS: 'NONE',
+    });
+    expect(before.VIOLENCE).toBe('NONE'); // not mutated
+    expect(normalizeLimits({})).toEqual({});
+    expect(normalizeLimits({ VIOLENCE: 'MODERATE', FRIGHTENING: 'MILD' })).toEqual({ VIOLENCE: 'MODERATE', FRIGHTENING: 'MILD' });
+    // Unknown values pass through for validateComfort to report.
+    const bad = { VIOLENCE: 'EXTREME' as ContentLevel };
+    expect(normalizeLimits(bad)).toEqual(bad);
+    expect(validateComfort(makeComfort({ contentLimits: normalizeLimits(bad) }))).toMatch(/content limits/);
   });
 
   it('treats a missing dimension as STRONG and stores STRONG by omission', () => {
@@ -135,8 +185,42 @@ describe('ContentLevelPicker / ContentLimitsEditor', () => {
     expect(screen.getByText('Violence & gore')).toBeOnTheScreen();
     expect(screen.getByRole('radio', { name: 'Violence & gore: Mild' })).toBeChecked();
     expect(screen.getByTestId('level-example-VIOLENCE')).toHaveTextContent(LEVEL_EXAMPLES.VIOLENCE.MILD);
-    await fireEvent.press(screen.getByRole('radio', { name: 'Violence & gore: None' }));
+    await fireEvent.press(screen.getByRole('radio', { name: 'Violence & gore: Moderate' }));
+    expect(onChange).toHaveBeenCalledWith('MODERATE');
+  });
+
+  it.each([
+    ['VIOLENCE', 'Violence & gore'],
+    ['FRIGHTENING', 'Frightening & intense'],
+  ] as const)('offers no None for %s: three radios, Mild first', async (dim, name) => {
+    await render(<ContentLevelPicker dimension={dim} value="STRONG" onChange={jest.fn()} />);
+    expect(screen.queryByRole('radio', { name: `${name}: None` })).toBeNull();
+    expect(screen.getAllByRole('radio').map((r) => r.props.accessibilityLabel)).toEqual([
+      `${name}: Mild`,
+      `${name}: Moderate`,
+      `${name}: Strong`,
+    ]);
+    // The group keeps its name; the platform announces position over the three options.
+    expect(screen.getByLabelText(name)).toHaveProp('accessibilityRole', 'radiogroup');
+  });
+
+  it.each([
+    ['SEXUAL', 'Sex & nudity'],
+    ['LANGUAGE', 'Language'],
+    ['DRUGS', 'Drug use'],
+  ] as const)('still offers None for %s', async (dim, name) => {
+    const onChange = jest.fn();
+    await render(<ContentLevelPicker dimension={dim} value="MILD" onChange={onChange} />);
+    expect(screen.getAllByRole('radio')).toHaveLength(4);
+    await fireEvent.press(screen.getByRole('radio', { name: `${name}: None` }));
     expect(onChange).toHaveBeenCalledWith('NONE');
+    expect(screen.getByTestId(`level-example-${dim}`)).toHaveTextContent(LEVEL_EXAMPLES[dim].MILD);
+  });
+
+  it('shows an old NONE for violence as Mild, with the Mild example', async () => {
+    await render(<ContentLevelPicker dimension="VIOLENCE" value="NONE" onChange={jest.fn()} />);
+    expect(screen.getByRole('radio', { name: 'Violence & gore: Mild' })).toBeChecked();
+    expect(screen.getByTestId('level-example-VIOLENCE')).toHaveTextContent(/the gentlest setting/);
   });
 
   it('edits all five dimensions in one map', async () => {

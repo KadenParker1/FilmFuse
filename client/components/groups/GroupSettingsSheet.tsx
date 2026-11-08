@@ -4,7 +4,7 @@ import { useUpdateGroup } from '../../api/groups';
 import { ApiError } from '../../lib/apiClient';
 import type { ComfortCapDTO, GroupDetailDTO } from '../../types/api';
 import { CertificationPicker } from '../comfort/CertificationPicker';
-import { limitsForCertification } from '../comfort/comfortCopy';
+import { limitsForCertification, normalizeLimits } from '../comfort/comfortCopy';
 import { ContentLimitsEditor } from '../comfort/ContentLevelPicker';
 import { Body, Button, Label, Sheet, TextField, errorMessage } from '../ui';
 import { ColorSwatches, EmojiPicker } from './GroupStylePickers';
@@ -37,7 +37,11 @@ function SettingsForm({ group, onDone, onDelete }: { group: GroupDetailDTO; onDo
   const [name, setName] = useState(group.name);
   const [emoji, setEmoji] = useState(groupEmoji(group.emoji));
   const [color, setColor] = useState(groupColor(group.color));
-  const [cap, setCap] = useState<ComfortCapDTO>(group.comfortCap);
+  const [cap, setCap] = useState<ComfortCapDTO>(() => ({
+    ...group.comfortCap,
+    // An older NONE for violence / frightening reads (and is sent) as MILD.
+    contentLimits: normalizeLimits(group.comfortCap.contentLimits),
+  }));
   const [nameError, setNameError] = useState<string | null>(null);
 
   const save = () => {
@@ -45,7 +49,7 @@ function SettingsForm({ group, onDone, onDelete }: { group: GroupDetailDTO; onDo
     setNameError(errors.name ?? null);
     if (errors.name) return;
     update.mutate(
-      { groupId: group.id, body: { name: name.trim(), emoji, color, comfortCap: { ...cap, contentLimits: limitsForCertification(cap.maxCertification, cap.contentLimits) } } },
+      { groupId: group.id, body: { name: name.trim(), emoji, color, comfortCap: { ...cap, contentLimits: normalizeLimits(limitsForCertification(cap.maxCertification, cap.contentLimits)) } } },
       { onSuccess: onDone },
     );
   };

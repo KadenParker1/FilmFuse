@@ -1,7 +1,7 @@
 jest.mock('expo-router', () => require('../test-utils/router').expoRouterMock);
 jest.mock('../api/comfort', () => ({ useComfortSettings: jest.fn(), useUpdateComfortSettings: jest.fn() }));
 
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import ComfortSettingsScreen from '../app/settings/comfort';
 import { useComfortSettings, useUpdateComfortSettings } from '../api/comfort';
 import { ApiError, NetworkError } from '../lib/apiClient';
@@ -64,6 +64,43 @@ describe('ComfortSettingsScreen', () => {
     await fireEvent.press(screen.getByRole('radio', { name: 'G' }));
     await fireEvent.press(screen.getByRole('radio', { name: label }));
     expect(screen.getByRole('radio', { name: 'Sex & nudity: Strong' })).toBeChecked();
+  });
+
+  it('shows a NONE from the server for violence / frightening as Mild, unchanged, and saves MILD', async () => {
+    mockComfort.mockReturnValue(
+      queryResult({
+        data: makeComfort({ maxCertification: 'R', contentLimits: { VIOLENCE: 'NONE', FRIGHTENING: 'NONE', SEXUAL: 'NONE' } }),
+      }),
+    );
+    await render(<ComfortSettingsScreen />);
+    expect(screen.getByRole('radio', { name: 'Violence & gore: Mild' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Frightening & intense: Mild' })).toBeChecked();
+    expect(screen.queryByRole('radio', { name: 'Violence & gore: None' })).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Frightening & intense: None' })).toBeNull();
+    expect(screen.getByRole('radio', { name: 'Sex & nudity: None' })).toBeChecked();
+    expect(screen.getByTestId('level-example-VIOLENCE')).toHaveTextContent(/the gentlest setting/);
+    // Reading NONE as MILD is not an unsaved change.
+    expect(save()).toBeDisabled();
+    await fireEvent.press(screen.getByRole('radio', { name: 'Language: Mild' }));
+    await fireEvent.press(save());
+    expect(update.mutate).toHaveBeenCalledWith(
+      {
+        maxCertification: 'R',
+        contentLimits: { VIOLENCE: 'MILD', FRIGHTENING: 'MILD', SEXUAL: 'NONE', LANGUAGE: 'MILD' },
+        allowUnrated: false,
+      },
+      expect.anything(),
+    );
+  });
+
+  it('normalises a saved response that still says NONE', async () => {
+    await render(<ComfortSettingsScreen />);
+    await fireEvent.press(screen.getByRole('radio', { name: 'Language: Mild' }));
+    await fireEvent.press(save());
+    const [, opts] = update.mutate.mock.calls[0];
+    await act(async () => opts.onSuccess(makeComfort({ maxCertification: 'R', contentLimits: { VIOLENCE: 'NONE', LANGUAGE: 'MILD' } })));
+    expect(screen.getByRole('radio', { name: 'Violence & gore: Mild' })).toBeChecked();
+    expect(save()).toBeDisabled();
   });
 
   it('drops SEXUAL from the payload when lowering below R', async () => {

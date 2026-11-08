@@ -13,6 +13,19 @@ public enum ContentDimension {
     DRUGS,
     FRIGHTENING;
 
+    /**
+     * The strictest limit a user or group can set for this dimension. Violence and frightening
+     * start at {@code MILD}: the content tagger never rates a film "none" for them (G and PG films
+     * have cartoon peril), so a NONE limit would match almost nothing. Lower limits are raised to
+     * this by {@code ContentFilter}.
+     */
+    public ContentLevel lowestLimit() {
+        return switch (this) {
+            case VIOLENCE, FRIGHTENING -> ContentLevel.MILD;
+            case SEXUAL, LANGUAGE, DRUGS -> ContentLevel.NONE;
+        };
+    }
+
     /** "violence": the database and ML-contract form. */
     public String code() {
         return name().toLowerCase(Locale.ROOT);

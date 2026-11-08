@@ -50,6 +50,46 @@ class ContentFilterTest {
     @Nested
     class Normalisation {
 
+        @ParameterizedTest
+        @EnumSource(value = ContentDimension.class, names = {"VIOLENCE", "FRIGHTENING"})
+        void violenceAndFrighteningStartAtMild(ContentDimension dimension) {
+            assertThat(dimension.lowestLimit()).isEqualTo(MILD);
+            ContentFilter f = filter(null, Map.of(dimension, NONE), false);
+            assertThat(f.contentLimits()).containsExactly(Map.entry(dimension, MILD));
+            assertThat(f).isEqualTo(filter(null, Map.of(dimension, MILD), false));
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = ContentDimension.class, names = {"SEXUAL", "LANGUAGE", "DRUGS"})
+        void otherDimensionsKeepNone(ContentDimension dimension) {
+            assertThat(dimension.lowestLimit()).isEqualTo(NONE);
+            assertThat(filter(null, Map.of(dimension, NONE), false).contentLimits())
+                    .containsExactly(Map.entry(dimension, NONE));
+        }
+
+        @Test
+        void storedNoneFrighteningIsReadBackAsMild() {
+            ContentFilter f = ContentFilter.fromJson(
+                    "{\"maxCertification\":\"G\",\"contentLimits\":{\"frightening\":\"none\",\"violence\":\"none\","
+                            + "\"sexual\":\"none\"},\"allowUnrated\":false}");
+            assertThat(f.contentLimits()).containsExactlyInAnyOrderEntriesOf(
+                    Map.of(FRIGHTENING, MILD, VIOLENCE, MILD, SEXUAL, NONE));
+            assertThat(f.label()).doesNotContain("no frightening").doesNotContain("no violence");
+        }
+
+        @Test
+        void aG_CappedMildPeril_movieIsEligibleUnderTheStrictestPossibleFilter() {
+            // The Sleepover Standoff case: G cap + every dimension at its floor must still admit a typical G film.
+            Map<ContentDimension, ContentLevel> strictest = new EnumMap<>(ContentDimension.class);
+            for (ContentDimension d : ContentDimension.values()) {
+                strictest.put(d, NONE);
+            }
+            ContentFilter f = filter(G, strictest, false);
+            MovieContent typicalG = movie(G, Map.of(VIOLENCE, MILD, FRIGHTENING, MILD, SEXUAL, NONE, LANGUAGE, NONE,
+                    DRUGS, NONE));
+            assertThat(f.isEligible(typicalG)).isTrue();
+        }
+
         @Test
         void strongAndNullLimitsMeanNoLimitAndAreDropped() {
             Map<ContentDimension, ContentLevel> limits = new HashMap<>();
@@ -109,7 +149,9 @@ class ContentFilterTest {
             for (ContentDimension dimension : ContentDimension.values()) {
                 for (ContentLevel a : ContentLevel.values()) {
                     for (ContentLevel b : ContentLevel.values()) {
-                        pairs.add(Arguments.of(dimension, a, b, a.ordinal() <= b.ordinal() ? a : b));
+                        // Limits below the dimension's floor are raised to it (violence / frightening: NONE -> MILD).
+                        pairs.add(Arguments.of(dimension, a, b,
+                                ContentLevel.max(ContentLevel.min(a, b), dimension.lowestLimit())));
                     }
                 }
             }
@@ -256,7 +298,8 @@ class ContentFilterTest {
             for (ContentDimension dimension : ContentDimension.values()) {
                 for (ContentLevel limit : ContentLevel.values()) {
                     for (ContentLevel level : ContentLevel.values()) {
-                        cases.add(Arguments.of(dimension, limit, level, level.ordinal() <= limit.ordinal()));
+                        ContentLevel effective = ContentLevel.max(limit, dimension.lowestLimit());
+                        cases.add(Arguments.of(dimension, limit, level, level.isAtMost(effective)));
                     }
                 }
             }
@@ -384,8 +427,8 @@ class ContentFilterTest {
             assertThat(ContentDimension.fromCode("Sexual")).isEqualTo(SEXUAL);
             assertThat(ContentLevel.MODERATE.code()).isEqualTo("moderate");
             assertThat(ContentLevel.fromCode("nope")).isNull();
-            assertThat(filter(null, Map.of(FRIGHTENING, NONE), true).contentLimitCodes())
-                    .containsExactly(Map.entry("frightening", "none"));
+            assertThat(filter(null, Map.of(SEXUAL, NONE), true).contentLimitCodes())
+                    .containsExactly(Map.entry("sexual", "none"));
         }
     }
 }

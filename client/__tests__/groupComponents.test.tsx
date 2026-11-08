@@ -323,6 +323,29 @@ describe('GroupSettingsSheet', () => {
     expect(screen.getByText('Sex & nudity')).toBeOnTheScreen();
   });
 
+  it('shows a stored NONE for violence / frightening as Mild, offers no None there, and saves MILD', async () => {
+    await render(
+      <GroupSettingsSheet
+        group={makeGroup({
+          comfortCap: { maxCertification: 'G', contentLimits: { VIOLENCE: 'NONE', FRIGHTENING: 'NONE', LANGUAGE: 'NONE' } },
+        })}
+        visible
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+      />,
+    );
+    expect(screen.getByRole('radio', { name: 'Violence & gore: Mild' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Frightening & intense: Mild' })).toBeChecked();
+    expect(screen.queryByRole('radio', { name: 'Violence & gore: None' })).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Frightening & intense: None' })).toBeNull();
+    expect(screen.getByRole('radio', { name: 'Language: None' })).toBeChecked();
+    await fireEvent.press(screen.getByRole('button', { name: 'Save changes' }));
+    expect(update.mutate.mock.calls[0][0].body.comfortCap).toEqual({
+      maxCertification: 'G',
+      contentLimits: { VIOLENCE: 'MILD', FRIGHTENING: 'MILD', LANGUAGE: 'NONE' },
+    });
+  });
+
   it('never sends a hidden SEXUAL value already stored under a sub-R cap', async () => {
     await render(
       <GroupSettingsSheet

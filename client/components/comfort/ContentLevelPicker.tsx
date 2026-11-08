@@ -2,11 +2,12 @@ import { Text, View } from 'react-native';
 import type { Certification, ContentDimension, ContentLevel } from '../../types/api';
 import { Body, ChoiceGroup } from '../ui';
 import {
-  CONTENT_LEVELS,
   DIMENSION_LABELS,
-  LEVEL_EXAMPLES,
   LEVEL_LABELS,
+  clampLevel,
+  levelExample,
   levelFor,
+  levelsFor,
   visibleDimensions,
   withLevel,
 } from './comfortCopy';
@@ -18,9 +19,13 @@ type Props = {
   disabled?: boolean;
 };
 
-/** One dimension's ceiling (None / Mild / Moderate / Strong) with an example of what it allows. */
+/**
+ * One dimension's ceiling with an example of what it allows: None / Mild / Moderate / Strong, or from
+ * Mild for violence and frightening (see MIN_LEVEL). A value below the minimum shows as the minimum.
+ */
 export function ContentLevelPicker({ dimension, value, onChange, disabled }: Props) {
   const name = DIMENSION_LABELS[dimension];
+  const shown = clampLevel(dimension, value);
   return (
     <View testID={`level-picker-${dimension}`} className="gap-2">
       <Text className="font-body-semibold text-base text-text">{name}</Text>
@@ -28,16 +33,16 @@ export function ContentLevelPicker({ dimension, value, onChange, disabled }: Pro
         label={name}
         layout="fill"
         disabled={disabled}
-        choices={CONTENT_LEVELS.map((l) => ({
+        choices={levelsFor(dimension).map((l) => ({
           value: l,
           label: LEVEL_LABELS[l],
           accessibilityLabel: `${name}: ${LEVEL_LABELS[l]}`,
         }))}
-        value={value}
+        value={shown}
         onChange={onChange}
       />
       <Body muted testID={`level-example-${dimension}`} className="text-sm">
-        {LEVEL_EXAMPLES[dimension][value]}
+        {levelExample(dimension, shown)}
       </Body>
     </View>
   );

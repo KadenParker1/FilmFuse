@@ -45,11 +45,59 @@ export const DIMENSION_LABELS: Record<ContentDimension, string> = {
   FRIGHTENING: 'Frightening & intense',
 };
 
-/** What each ceiling lets through, per dimension. */
-export const LEVEL_EXAMPLES: Record<ContentDimension, Record<ContentLevel, string>> = {
+/**
+ * The gentlest selectable limit per dimension. The content tagger never labels a film "none" for
+ * violence or frightening (even G films carry cartoon peril), so "None" there matched almost nothing
+ * and emptied group sessions: those two start at Mild. The server treats a NONE for them as MILD.
+ */
+export const MIN_LEVEL: Record<ContentDimension, ContentLevel> = {
+  VIOLENCE: 'MILD',
+  SEXUAL: 'NONE',
+  LANGUAGE: 'NONE',
+  DRUGS: 'NONE',
+  FRIGHTENING: 'MILD',
+};
+
+/** The levels a picker offers for this dimension, gentlest first. Single source of truth for level lists. */
+export function levelsFor(dim: ContentDimension): ContentLevel[] {
+  return CONTENT_LEVELS.slice(CONTENT_LEVELS.indexOf(MIN_LEVEL[dim]));
+}
+
+/** Raises a level below the dimension's minimum to that minimum (e.g. an old NONE for violence → MILD). */
+export function clampLevel(dim: ContentDimension, level: ContentLevel): ContentLevel {
+  return CONTENT_LEVELS.indexOf(level) < CONTENT_LEVELS.indexOf(MIN_LEVEL[dim]) ? MIN_LEVEL[dim] : level;
+}
+
+/**
+ * A limits map with every level selectable: older values the pickers no longer offer (NONE for
+ * violence / frightening, from a cached response or an old draft) become the minimum. Unknown keys and
+ * values pass through untouched for validateComfort to report.
+ */
+export function normalizeLimits(
+  limits: Partial<Record<ContentDimension, ContentLevel>>,
+): Partial<Record<ContentDimension, ContentLevel>> {
+  const next = { ...limits };
+  for (const dim of CONTENT_DIMENSIONS) {
+    const level = next[dim];
+    if (level !== undefined && CONTENT_LEVELS.includes(level)) next[dim] = clampLevel(dim, level);
+  }
+  return next;
+}
+
+type Examples = Record<ContentLevel, string>;
+/** Dimensions that start at Mild have no "None" example. */
+type FromMild = Omit<Examples, 'NONE'>;
+
+/** What each ceiling lets through, per dimension. Read through `levelExample`. */
+export const LEVEL_EXAMPLES: {
+  VIOLENCE: FromMild;
+  SEXUAL: Examples;
+  LANGUAGE: Examples;
+  DRUGS: Examples;
+  FRIGHTENING: FromMild;
+} = {
   VIOLENCE: {
-    NONE: 'No fighting or injury on screen.',
-    MILD: 'Cartoon or slapstick scuffles, no blood.',
+    MILD: 'Mild — the gentlest setting: cartoon or slapstick scuffles, no blood.',
     MODERATE: 'Action fights and some blood, not lingered on.',
     STRONG: 'Anything, including graphic gore.',
   },
@@ -72,12 +120,17 @@ export const LEVEL_EXAMPLES: Record<ContentDimension, Record<ContentLevel, strin
     STRONG: 'Anything, including heavy drug use.',
   },
   FRIGHTENING: {
-    NONE: 'Gentle — nothing scary.',
-    MILD: 'Brief tense moments, quickly resolved.',
+    MILD: 'Mild — the gentlest setting: brief tense moments or cartoon peril, quickly resolved.',
     MODERATE: 'Sustained suspense and some jump scares.',
     STRONG: 'Anything, including full-on horror.',
   },
 };
+
+/** The example for a level, clamped to what the dimension offers. */
+export function levelExample(dim: ContentDimension, level: ContentLevel): string {
+  const examples: Partial<Examples> = LEVEL_EXAMPLES[dim];
+  return examples[clampLevel(dim, level)] ?? '';
+}
 
 /** A missing dimension means no limit. */
 export const levelFor = (limits: Partial<Record<ContentDimension, ContentLevel>>, dim: ContentDimension): ContentLevel =>
@@ -145,6 +198,6 @@ export function validateComfort(settings: ComfortSettingsDTO): string | null {
     ([dim, level]) =>
       !CONTENT_DIMENSIONS.includes(dim as ContentDimension) || !CONTENT_LEVELS.includes(level as ContentLevel),
   );
-  if (unknown) return 'One of the content limits isn’t valid. Pick None, Mild, Moderate or Strong.';
+  if (unknown) return 'One of the content limits isn’t valid. Pick one of the listed levels.';
   return null;
 }

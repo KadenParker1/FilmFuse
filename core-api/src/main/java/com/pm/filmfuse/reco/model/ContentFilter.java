@@ -18,7 +18,9 @@ import java.util.Map;
  * session. These are <strong>hard</strong> filters - never preferences.
  *
  * <p>Normalised on construction: {@code contentLimits} holds only real limits (a {@code STRONG} or
- * null entry means "no limit" and is dropped), so equal filters compare equal.
+ * null entry means "no limit" and is dropped), so equal filters compare equal. A limit below the
+ * dimension's {@link ContentDimension#lowestLimit()} is raised to it (violence / frightening:
+ * NONE becomes MILD), so older stored values and older clients keep working.
  *
  * <p>Eligibility ({@link #isEligible}), as in the Phase 3 contract:
  * <ul>
@@ -52,7 +54,7 @@ public record ContentFilter(
         if (contentLimits != null) {
             contentLimits.forEach((dimension, level) -> {
                 if (dimension != null && level != null && level != ContentLevel.STRONG) {
-                    limits.put(dimension, level);
+                    limits.put(dimension, ContentLevel.max(level, dimension.lowestLimit()));
                 }
             });
         }

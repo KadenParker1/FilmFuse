@@ -556,6 +556,25 @@ describe('step 6: Comfort', () => {
     expect(client.getQueryData(queryKeys.comfortSettings)).toEqual(sent);
   });
 
+  it('shows an old NONE for violence / frightening as Mild and sends MILD', async () => {
+    const comfort = makeComfort({ maxCertification: 'PG', contentLimits: { VIOLENCE: 'NONE', FRIGHTENING: 'NONE', LANGUAGE: 'NONE' } });
+    const { api } = await open(6, makeOnboardingState({ step: 6, comfort }), [
+      { method: 'PUT', path: '/me/settings/comfort', body: (b: unknown) => b },
+    ]);
+    expect(screen.getByRole('radio', { name: 'Violence & gore: Mild' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Frightening & intense: Mild' })).toBeChecked();
+    expect(screen.queryByRole('radio', { name: 'Violence & gore: None' })).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Frightening & intense: None' })).toBeNull();
+    expect(screen.getByRole('radio', { name: 'Language: None' })).toBeChecked();
+    await fireEvent.press(continueButton());
+    await expectAdvancedTo(api, 7);
+    expect(api.callsTo('PUT', '/me/settings/comfort')[0]?.body).toEqual({
+      maxCertification: 'PG',
+      contentLimits: { VIOLENCE: 'MILD', FRIGHTENING: 'MILD', LANGUAGE: 'NONE' },
+      allowUnrated: false,
+    });
+  });
+
   it.each([['G'], ['PG'], ['PG-13']])('hides "Sex & nudity" at %s and shows it again at R', async (label) => {
     await open(6, makeOnboardingState({ step: 6, comfort: makeComfort({ maxCertification: null, contentLimits: {} }) }), []);
     expect(screen.getByText('Sex & nudity')).toBeOnTheScreen();
