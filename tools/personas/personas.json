@@ -1,0 +1,5301 @@
+{
+  "version": 1,
+  "password": "ff-persona-local-1",
+  "emailDomain": "filmfuse.test",
+  "personas": [
+    {
+      "key": "disney-mom",
+      "username": "magic_kingdom_meg",
+      "displayName": "Meg Alvarez",
+      "archetype": "Disney mom",
+      "bio": "Two kids under 8, annual passholder, knows every word of Moana.",
+      "tags": [
+        "family",
+        "animation",
+        "disney",
+        "parent"
+      ],
+      "genres": {
+        "16": 10,
+        "10751": 10,
+        "10402": 9,
+        "12": 7,
+        "35": 7,
+        "14": 8,
+        "10749": 6,
+        "18": 4,
+        "27": 1,
+        "80": 2,
+        "10752": 1,
+        "53": 2
+      },
+      "moods": {
+        "feel-good": 10,
+        "cozy": 9,
+        "tearjerker": 7,
+        "laugh-out-loud": 7,
+        "visually-stunning": 8,
+        "dark-gritty": 1,
+        "edge-of-seat": 3
+      },
+      "favorites": [
+        {
+          "title": "Moana",
+          "year": 2016
+        },
+        {
+          "title": "Tangled",
+          "year": 2010
+        },
+        {
+          "title": "Frozen",
+          "year": 2013
+        },
+        {
+          "title": "The Lion King",
+          "year": 1994
+        },
+        {
+          "title": "Beauty and the Beast",
+          "year": 1991
+        },
+        {
+          "title": "Encanto",
+          "year": 2021
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Zootopia",
+          "year": 2016,
+          "score": 9
+        },
+        {
+          "title": "Coco",
+          "year": 2017,
+          "score": 10
+        },
+        {
+          "title": "The Little Mermaid",
+          "year": 1989,
+          "score": 9
+        },
+        {
+          "title": "Aladdin",
+          "year": 1992,
+          "score": 9
+        },
+        {
+          "title": "Mary Poppins",
+          "year": 1964,
+          "score": 8
+        },
+        {
+          "title": "The Greatest Showman",
+          "year": 2017,
+          "score": 9
+        },
+        {
+          "title": "Mamma Mia!",
+          "year": 2008,
+          "score": 8
+        },
+        {
+          "title": "Cars 2",
+          "year": 2011,
+          "score": 6
+        },
+        {
+          "title": "Frozen II",
+          "year": 2019,
+          "score": 8
+        },
+        {
+          "title": "Hereditary",
+          "year": 2018,
+          "score": 1
+        },
+        {
+          "title": "Saw",
+          "year": 2004,
+          "score": 1
+        },
+        {
+          "title": "Pulp Fiction",
+          "year": 1994,
+          "score": 3
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.5,
+        "spread": 0.9
+      },
+      "era": {
+        "from": 1985,
+        "to": 2026
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "film-bro",
+      "username": "kubrick_stare",
+      "displayName": "Tyler Brandt",
+      "archetype": "Film bro",
+      "bio": "Fight Club is misunderstood. Has a Letterboxd top four and will tell you about it.",
+      "tags": [
+        "film-bro",
+        "auteur",
+        "power-user"
+      ],
+      "genres": {
+        "80": 10,
+        "53": 10,
+        "18": 9,
+        "878": 8,
+        "9648": 8,
+        "28": 6,
+        "10752": 7,
+        "35": 4,
+        "10749": 2,
+        "10751": 1,
+        "16": 3,
+        "10402": 3
+      },
+      "moods": {
+        "mind-bending": 10,
+        "dark-gritty": 10,
+        "edge-of-seat": 8,
+        "visually-stunning": 8,
+        "feel-good": 2,
+        "cozy": 1
+      },
+      "favorites": [
+        {
+          "title": "Fight Club",
+          "year": 1999
+        },
+        {
+          "title": "The Dark Knight",
+          "year": 2008
+        },
+        {
+          "title": "Pulp Fiction",
+          "year": 1994
+        },
+        {
+          "title": "2001: A Space Odyssey",
+          "year": 1968
+        },
+        {
+          "title": "Taxi Driver",
+          "year": 1976
+        },
+        {
+          "title": "Se7en",
+          "year": 1995
+        },
+        {
+          "title": "There Will Be Blood",
+          "year": 2007
+        },
+        {
+          "title": "Goodfellas",
+          "year": 1990
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Inception",
+          "year": 2010,
+          "score": 10
+        },
+        {
+          "title": "Reservoir Dogs",
+          "year": 1992,
+          "score": 9
+        },
+        {
+          "title": "The Shining",
+          "year": 1980,
+          "score": 10
+        },
+        {
+          "title": "Zodiac",
+          "year": 2007,
+          "score": 9
+        },
+        {
+          "title": "The Social Network",
+          "year": 2010,
+          "score": 9
+        },
+        {
+          "title": "Drive",
+          "year": 2011,
+          "score": 9
+        },
+        {
+          "title": "Whiplash",
+          "year": 2014,
+          "score": 10
+        },
+        {
+          "title": "American Psycho",
+          "year": 2000,
+          "score": 9
+        },
+        {
+          "title": "No Country for Old Men",
+          "year": 2007,
+          "score": 9
+        },
+        {
+          "title": "Oppenheimer",
+          "year": 2023,
+          "score": 10
+        },
+        {
+          "title": "Joker",
+          "year": 2019,
+          "score": 9
+        },
+        {
+          "title": "The Wolf of Wall Street",
+          "year": 2013,
+          "score": 9
+        },
+        {
+          "title": "The Notebook",
+          "year": 2004,
+          "score": 2
+        },
+        {
+          "title": "Twilight",
+          "year": 2008,
+          "score": 1
+        },
+        {
+          "title": "Frozen",
+          "year": 2013,
+          "score": 3
+        },
+        {
+          "title": "Mamma Mia!",
+          "year": 2008,
+          "score": 1
+        }
+      ],
+      "volume": "power",
+      "rater": {
+        "bias": 0.0,
+        "spread": 1.2
+      },
+      "era": {
+        "from": 1965,
+        "to": 2026
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "a24-hipster",
+      "username": "slow_cinema_wren",
+      "displayName": "Wren Okafor",
+      "archetype": "A24 / arthouse hipster",
+      "bio": "Owns the A24 tote. Thinks the best films are the ones where nothing happens.",
+      "tags": [
+        "arthouse",
+        "indie",
+        "a24"
+      ],
+      "genres": {
+        "18": 10,
+        "10749": 7,
+        "27": 8,
+        "14": 6,
+        "35": 6,
+        "9648": 8,
+        "878": 7,
+        "28": 2,
+        "10751": 2,
+        "10752": 3,
+        "10770": 1
+      },
+      "moods": {
+        "mind-bending": 9,
+        "tearjerker": 8,
+        "visually-stunning": 10,
+        "dark-gritty": 7,
+        "feel-good": 4,
+        "laugh-out-loud": 3,
+        "edge-of-seat": 4
+      },
+      "favorites": [
+        {
+          "title": "Moonlight",
+          "year": 2016
+        },
+        {
+          "title": "Lady Bird",
+          "year": 2017
+        },
+        {
+          "title": "The Lighthouse",
+          "year": 2019
+        },
+        {
+          "title": "Everything Everywhere All at Once",
+          "year": 2022
+        },
+        {
+          "title": "Past Lives",
+          "year": 2023
+        },
+        {
+          "title": "Ex Machina",
+          "year": 2014
+        },
+        {
+          "title": "Under the Skin",
+          "year": 2013
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Aftersun",
+          "year": 2022,
+          "score": 10
+        },
+        {
+          "title": "Midsommar",
+          "year": 2019,
+          "score": 9
+        },
+        {
+          "title": "Frances Ha",
+          "year": 2012,
+          "score": 9
+        },
+        {
+          "title": "Swiss Army Man",
+          "year": 2016,
+          "score": 9
+        },
+        {
+          "title": "Paterson",
+          "year": 2016,
+          "score": 8
+        },
+        {
+          "title": "The Lobster",
+          "year": 2015,
+          "score": 8
+        },
+        {
+          "title": "Hereditary",
+          "year": 2018,
+          "score": 8
+        },
+        {
+          "title": "Avengers: Endgame",
+          "year": 2019,
+          "score": 3
+        },
+        {
+          "title": "Transformers",
+          "year": 2007,
+          "score": 1
+        },
+        {
+          "title": "Fast Five",
+          "year": 2011,
+          "score": 2
+        },
+        {
+          "title": "The Greatest Showman",
+          "year": 2017,
+          "score": 2
+        }
+      ],
+      "volume": "heavy",
+      "rater": {
+        "bias": -0.3,
+        "spread": 1.1
+      },
+      "era": {
+        "from": 1995,
+        "to": 2026
+      },
+      "popularity": "niche",
+      "onboarded": true
+    },
+    {
+      "key": "horror-fanatic",
+      "username": "final_girl_dana",
+      "displayName": "Dana Kowalski",
+      "archetype": "Horror fanatic",
+      "bio": "Slashers on Friday, elevated horror on Sunday. 31 films every October, no exceptions.",
+      "tags": [
+        "horror",
+        "slasher"
+      ],
+      "genres": {
+        "27": 10,
+        "53": 9,
+        "9648": 8,
+        "878": 7,
+        "35": 5,
+        "80": 6,
+        "28": 5,
+        "10749": 1,
+        "10751": 1,
+        "10402": 2,
+        "10752": 3,
+        "16": 3
+      },
+      "moods": {
+        "edge-of-seat": 10,
+        "dark-gritty": 10,
+        "mind-bending": 7,
+        "laugh-out-loud": 5,
+        "cozy": 2,
+        "feel-good": 1,
+        "tearjerker": 2
+      },
+      "favorites": [
+        {
+          "title": "Halloween",
+          "year": 1978
+        },
+        {
+          "title": "Scream",
+          "year": 1996
+        },
+        {
+          "title": "The Texas Chainsaw Massacre",
+          "year": 1974
+        },
+        {
+          "title": "The Thing",
+          "year": 1982
+        },
+        {
+          "title": "Hereditary",
+          "year": 2018
+        },
+        {
+          "title": "The Exorcist",
+          "year": 1973
+        },
+        {
+          "title": "Get Out",
+          "year": 2017
+        },
+        {
+          "title": "A Nightmare on Elm Street",
+          "year": 1984
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "The Babadook",
+          "year": 2014,
+          "score": 9
+        },
+        {
+          "title": "It Follows",
+          "year": 2014,
+          "score": 9
+        },
+        {
+          "title": "Friday the 13th",
+          "year": 1980,
+          "score": 8
+        },
+        {
+          "title": "Alien",
+          "year": 1979,
+          "score": 10
+        },
+        {
+          "title": "The Conjuring",
+          "year": 2013,
+          "score": 8
+        },
+        {
+          "title": "Talk to Me",
+          "year": 2023,
+          "score": 9
+        },
+        {
+          "title": "Barbarian",
+          "year": 2022,
+          "score": 8
+        },
+        {
+          "title": "X",
+          "year": 2022,
+          "score": 9
+        },
+        {
+          "title": "Annabelle",
+          "year": 2014,
+          "score": 4
+        },
+        {
+          "title": "The Notebook",
+          "year": 2004,
+          "score": 3
+        },
+        {
+          "title": "27 Dresses",
+          "year": 2008,
+          "score": 2
+        },
+        {
+          "title": "The Princess Diaries",
+          "year": 2001,
+          "score": 2
+        }
+      ],
+      "volume": "heavy",
+      "rater": {
+        "bias": 0.0,
+        "spread": 1.0
+      },
+      "era": {
+        "from": 1970,
+        "to": 2026
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "romcom-lover",
+      "username": "meet_cute_maya",
+      "displayName": "Maya Lindqvist",
+      "archetype": "Rom-com lover",
+      "bio": "Will watch anything where two people who hate each other end up at an airport.",
+      "tags": [
+        "romance",
+        "comedy"
+      ],
+      "genres": {
+        "10749": 10,
+        "35": 10,
+        "18": 8,
+        "10402": 6,
+        "10751": 5,
+        "16": 5,
+        "27": 1,
+        "10752": 1,
+        "37": 1,
+        "53": 2,
+        "80": 2,
+        "878": 3
+      },
+      "moods": {
+        "feel-good": 10,
+        "cozy": 9,
+        "laugh-out-loud": 8,
+        "tearjerker": 7,
+        "dark-gritty": 1,
+        "edge-of-seat": 2,
+        "mind-bending": 2
+      },
+      "favorites": [
+        {
+          "title": "When Harry Met Sally...",
+          "year": 1989
+        },
+        {
+          "title": "Notting Hill",
+          "year": 1999
+        },
+        {
+          "title": "10 Things I Hate About You",
+          "year": 1999
+        },
+        {
+          "title": "Crazy Rich Asians",
+          "year": 2018
+        },
+        {
+          "title": "The Proposal",
+          "year": 2009
+        },
+        {
+          "title": "Pretty Woman",
+          "year": 1990
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Sleepless in Seattle",
+          "year": 1993,
+          "score": 9
+        },
+        {
+          "title": "You've Got Mail",
+          "year": 1998,
+          "score": 9
+        },
+        {
+          "title": "Love Actually",
+          "year": 2003,
+          "score": 9
+        },
+        {
+          "title": "Bridget Jones's Diary",
+          "year": 2001,
+          "score": 8
+        },
+        {
+          "title": "How to Lose a Guy in 10 Days",
+          "year": 2003,
+          "score": 8
+        },
+        {
+          "title": "27 Dresses",
+          "year": 2008,
+          "score": 8
+        },
+        {
+          "title": "Crazy, Stupid, Love.",
+          "year": 2011,
+          "score": 9
+        },
+        {
+          "title": "Anyone But You",
+          "year": 2023,
+          "score": 8
+        },
+        {
+          "title": "Saw",
+          "year": 2004,
+          "score": 1
+        },
+        {
+          "title": "The Texas Chainsaw Massacre",
+          "year": 1974,
+          "score": 1
+        },
+        {
+          "title": "No Country for Old Men",
+          "year": 2007,
+          "score": 3
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.5,
+        "spread": 0.9
+      },
+      "era": {
+        "from": 1985,
+        "to": 2026
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "action-dad",
+      "username": "yippee_ki_yay_rick",
+      "displayName": "Rick Donnelly",
+      "archetype": "Action dad",
+      "bio": "Die Hard is a Christmas movie. Owns every Stallone on Blu-ray.",
+      "tags": [
+        "action",
+        "80s",
+        "90s"
+      ],
+      "genres": {
+        "28": 10,
+        "53": 8,
+        "10752": 8,
+        "80": 7,
+        "12": 8,
+        "878": 6,
+        "35": 6,
+        "10749": 2,
+        "10402": 1,
+        "99": 2,
+        "16": 2,
+        "18": 4
+      },
+      "moods": {
+        "edge-of-seat": 10,
+        "laugh-out-loud": 6,
+        "dark-gritty": 6,
+        "feel-good": 6,
+        "tearjerker": 1,
+        "mind-bending": 2,
+        "cozy": 3
+      },
+      "favorites": [
+        {
+          "title": "Die Hard",
+          "year": 1988
+        },
+        {
+          "title": "Rambo: First Blood Part II",
+          "year": 1985
+        },
+        {
+          "title": "Terminator 2: Judgment Day",
+          "year": 1991
+        },
+        {
+          "title": "Predator",
+          "year": 1987
+        },
+        {
+          "title": "Lethal Weapon",
+          "year": 1987
+        },
+        {
+          "title": "Rocky",
+          "year": 1976
+        },
+        {
+          "title": "Top Gun: Maverick",
+          "year": 2022
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Commando",
+          "year": 1985,
+          "score": 9
+        },
+        {
+          "title": "Speed",
+          "year": 1994,
+          "score": 9
+        },
+        {
+          "title": "Con Air",
+          "year": 1997,
+          "score": 8
+        },
+        {
+          "title": "The Rock",
+          "year": 1996,
+          "score": 9
+        },
+        {
+          "title": "Face/Off",
+          "year": 1997,
+          "score": 8
+        },
+        {
+          "title": "Cliffhanger",
+          "year": 1993,
+          "score": 8
+        },
+        {
+          "title": "John Wick",
+          "year": 2014,
+          "score": 9
+        },
+        {
+          "title": "Mad Max: Fury Road",
+          "year": 2015,
+          "score": 8
+        },
+        {
+          "title": "The Expendables",
+          "year": 2010,
+          "score": 7
+        },
+        {
+          "title": "Lady Bird",
+          "year": 2017,
+          "score": 2
+        },
+        {
+          "title": "The Notebook",
+          "year": 2004,
+          "score": 2
+        },
+        {
+          "title": "Pride & Prejudice",
+          "year": 2005,
+          "score": 1
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.3,
+        "spread": 1.0
+      },
+      "era": {
+        "from": 1975,
+        "to": 2026
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "anime-ghibli",
+      "username": "totoro_umbrella",
+      "displayName": "Kenji Morales",
+      "archetype": "Anime / Ghibli fan",
+      "bio": "Rewatches Spirited Away every winter. Has opinions on subs vs dubs (subs).",
+      "tags": [
+        "anime",
+        "animation"
+      ],
+      "genres": {
+        "16": 10,
+        "14": 10,
+        "12": 9,
+        "18": 7,
+        "878": 8,
+        "10751": 6,
+        "10749": 6,
+        "28": 6,
+        "10752": 3,
+        "37": 1,
+        "27": 3,
+        "99": 2
+      },
+      "moods": {
+        "visually-stunning": 10,
+        "cozy": 8,
+        "tearjerker": 8,
+        "mind-bending": 7,
+        "feel-good": 7,
+        "dark-gritty": 4
+      },
+      "favorites": [
+        {
+          "title": "Spirited Away",
+          "year": 2001
+        },
+        {
+          "title": "My Neighbor Totoro",
+          "year": 1988
+        },
+        {
+          "title": "Princess Mononoke",
+          "year": 1997
+        },
+        {
+          "title": "Your Name.",
+          "year": 2016
+        },
+        {
+          "title": "Akira",
+          "year": 1988
+        },
+        {
+          "title": "Howl's Moving Castle",
+          "year": 2004
+        },
+        {
+          "title": "The Boy and the Heron",
+          "year": 2023
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Ghost in the Shell",
+          "year": 1995,
+          "score": 9
+        },
+        {
+          "title": "Perfect Blue",
+          "year": 1997,
+          "score": 9
+        },
+        {
+          "title": "Grave of the Fireflies",
+          "year": 1988,
+          "score": 10
+        },
+        {
+          "title": "Kiki's Delivery Service",
+          "year": 1989,
+          "score": 9
+        },
+        {
+          "title": "Nausicaä of the Valley of the Wind",
+          "year": 1984,
+          "score": 9
+        },
+        {
+          "title": "Suzume",
+          "year": 2022,
+          "score": 8
+        },
+        {
+          "title": "A Silent Voice",
+          "year": 2016,
+          "score": 9
+        },
+        {
+          "title": "Paprika",
+          "year": 2006,
+          "score": 9
+        },
+        {
+          "title": "Ghost in the Shell",
+          "year": 2017,
+          "score": 2
+        },
+        {
+          "title": "The Last Airbender",
+          "year": 2010,
+          "score": 1
+        },
+        {
+          "title": "Grown Ups",
+          "year": 2010,
+          "score": 2
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.2,
+        "spread": 1.0
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "doc-nerd",
+      "username": "verite_vik",
+      "displayName": "Vikram Shah",
+      "archetype": "Documentary nerd",
+      "bio": "Thinks reality is stranger than fiction. Has a Criterion Channel and a Kanopy login.",
+      "tags": [
+        "documentary",
+        "nonfiction"
+      ],
+      "genres": {
+        "99": 10,
+        "36": 9,
+        "10402": 8,
+        "18": 6,
+        "80": 7,
+        "10752": 6,
+        "35": 4,
+        "27": 1,
+        "14": 2,
+        "16": 3,
+        "10749": 3,
+        "28": 2
+      },
+      "moods": {
+        "mind-bending": 8,
+        "tearjerker": 7,
+        "dark-gritty": 6,
+        "feel-good": 6,
+        "edge-of-seat": 5
+      },
+      "favorites": [
+        {
+          "title": "Man on Wire",
+          "year": 2008
+        },
+        {
+          "title": "Searching for Sugar Man",
+          "year": 2012
+        },
+        {
+          "title": "Jiro Dreams of Sushi",
+          "year": 2011
+        },
+        {
+          "title": "Senna",
+          "year": 2010
+        },
+        {
+          "title": "Won't You Be My Neighbor?",
+          "year": 2018
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Amy",
+          "year": 2015,
+          "score": 9
+        },
+        {
+          "title": "Free Solo",
+          "year": 2018,
+          "score": 10
+        },
+        {
+          "title": "Bowling for Columbine",
+          "year": 2002,
+          "score": 7
+        },
+        {
+          "title": "Hoop Dreams",
+          "year": 1994,
+          "score": 10
+        },
+        {
+          "title": "Exit Through the Gift Shop",
+          "year": 2010,
+          "score": 9
+        },
+        {
+          "title": "The Act of Killing",
+          "year": 2012,
+          "score": 9
+        },
+        {
+          "title": "Grizzly Man",
+          "year": 2005,
+          "score": 8
+        },
+        {
+          "title": "Blackfish",
+          "year": 2013,
+          "score": 8
+        },
+        {
+          "title": "Transformers: Age of Extinction",
+          "year": 2014,
+          "score": 1
+        },
+        {
+          "title": "Twilight",
+          "year": 2008,
+          "score": 2
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.0,
+        "spread": 0.9
+      },
+      "popularity": "niche",
+      "onboarded": true
+    },
+    {
+      "key": "classic-hollywood",
+      "username": "nitrate_nora",
+      "displayName": "Nora Whitfield",
+      "archetype": "Classic Hollywood buff",
+      "bio": "If it isn't in black and white, she'll probably pass. Hitchcock, Wilder, Hepburn.",
+      "tags": [
+        "classic",
+        "pre-1965"
+      ],
+      "genres": {
+        "18": 9,
+        "10749": 9,
+        "9648": 9,
+        "35": 8,
+        "53": 8,
+        "10402": 7,
+        "37": 6,
+        "10752": 6,
+        "80": 7,
+        "878": 3,
+        "27": 4,
+        "16": 2,
+        "28": 2
+      },
+      "moods": {
+        "cozy": 8,
+        "feel-good": 7,
+        "edge-of-seat": 7,
+        "tearjerker": 7,
+        "laugh-out-loud": 7,
+        "visually-stunning": 6,
+        "dark-gritty": 4
+      },
+      "favorites": [
+        {
+          "title": "Casablanca",
+          "year": 1942
+        },
+        {
+          "title": "Rear Window",
+          "year": 1954
+        },
+        {
+          "title": "Some Like It Hot",
+          "year": 1959
+        },
+        {
+          "title": "Sunset Blvd.",
+          "year": 1950
+        },
+        {
+          "title": "Vertigo",
+          "year": 1958
+        },
+        {
+          "title": "Roman Holiday",
+          "year": 1953
+        },
+        {
+          "title": "The Apartment",
+          "year": 1960
+        },
+        {
+          "title": "Singin' in the Rain",
+          "year": 1952
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Double Indemnity",
+          "year": 1944,
+          "score": 10
+        },
+        {
+          "title": "Psycho",
+          "year": 1960,
+          "score": 9
+        },
+        {
+          "title": "North by Northwest",
+          "year": 1959,
+          "score": 9
+        },
+        {
+          "title": "It's a Wonderful Life",
+          "year": 1946,
+          "score": 9
+        },
+        {
+          "title": "Citizen Kane",
+          "year": 1941,
+          "score": 8
+        },
+        {
+          "title": "The Philadelphia Story",
+          "year": 1940,
+          "score": 9
+        },
+        {
+          "title": "Breakfast at Tiffany's",
+          "year": 1961,
+          "score": 8
+        },
+        {
+          "title": "All About Eve",
+          "year": 1950,
+          "score": 10
+        },
+        {
+          "title": "Notorious",
+          "year": 1946,
+          "score": 9
+        },
+        {
+          "title": "Gone with the Wind",
+          "year": 1939,
+          "score": 7
+        },
+        {
+          "title": "Transformers",
+          "year": 2007,
+          "score": 1
+        },
+        {
+          "title": "Fast & Furious 6",
+          "year": 2013,
+          "score": 1
+        },
+        {
+          "title": "Avatar",
+          "year": 2009,
+          "score": 3
+        }
+      ],
+      "volume": "heavy",
+      "rater": {
+        "bias": 0.2,
+        "spread": 0.9
+      },
+      "era": {
+        "from": 1930,
+        "to": 1965
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "mcu-teen",
+      "username": "webhead_jayden",
+      "displayName": "Jayden Park",
+      "archetype": "MCU / superhero teen",
+      "bio": "15, has seen Endgame nine times, ranks every Spider-Man suit. Parents set a PG-13 cap.",
+      "tags": [
+        "superhero",
+        "teen",
+        "comfort-cap"
+      ],
+      "genres": {
+        "28": 10,
+        "12": 10,
+        "878": 9,
+        "35": 8,
+        "14": 8,
+        "16": 7,
+        "18": 3,
+        "10749": 2,
+        "99": 1,
+        "10752": 3,
+        "37": 1,
+        "36": 1
+      },
+      "moods": {
+        "edge-of-seat": 10,
+        "laugh-out-loud": 9,
+        "visually-stunning": 8,
+        "feel-good": 7,
+        "tearjerker": 4,
+        "cozy": 3
+      },
+      "favorites": [
+        {
+          "title": "Avengers: Endgame",
+          "year": 2019
+        },
+        {
+          "title": "Spider-Man: No Way Home",
+          "year": 2021
+        },
+        {
+          "title": "Spider-Man: Into the Spider-Verse",
+          "year": 2018
+        },
+        {
+          "title": "Avengers: Infinity War - Part I",
+          "year": 2018
+        },
+        {
+          "title": "Guardians of the Galaxy",
+          "year": 2014
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Iron Man",
+          "year": 2008,
+          "score": 9
+        },
+        {
+          "title": "Black Panther",
+          "year": 2017,
+          "score": 9
+        },
+        {
+          "title": "Thor: Ragnarok",
+          "year": 2017,
+          "score": 9
+        },
+        {
+          "title": "Spider-Man: Across the Spider-Verse",
+          "year": 2023,
+          "score": 10
+        },
+        {
+          "title": "Captain America: Civil War",
+          "year": 2016,
+          "score": 9
+        },
+        {
+          "title": "The Avengers",
+          "year": 2012,
+          "score": 9
+        },
+        {
+          "title": "Spider-Man: Homecoming",
+          "year": 2017,
+          "score": 8
+        },
+        {
+          "title": "The Batman",
+          "year": 2022,
+          "score": 7
+        },
+        {
+          "title": "Pride & Prejudice",
+          "year": 2005,
+          "score": 2
+        },
+        {
+          "title": "Lady Bird",
+          "year": 2017,
+          "score": 3
+        },
+        {
+          "title": "Casablanca",
+          "year": 1942,
+          "score": 3
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.5,
+        "spread": 1.0
+      },
+      "era": {
+        "from": 2005,
+        "to": 2026
+      },
+      "popularity": "mainstream",
+      "comfort": {
+        "maxCertification": "PG_13",
+        "contentLimits": {
+          "SEXUAL": "MILD"
+        },
+        "allowUnrated": false
+      },
+      "onboarded": true
+    },
+    {
+      "key": "hard-scifi-engineer",
+      "username": "delta_v_priya",
+      "displayName": "Priya Raman",
+      "archetype": "Hard sci-fi engineer",
+      "bio": "Mechanical engineer. Will pause the film to check the orbital mechanics.",
+      "tags": [
+        "scifi",
+        "engineer"
+      ],
+      "genres": {
+        "878": 10,
+        "9648": 8,
+        "53": 8,
+        "18": 7,
+        "99": 8,
+        "12": 7,
+        "28": 5,
+        "10749": 2,
+        "10402": 2,
+        "37": 2,
+        "27": 4,
+        "10751": 3
+      },
+      "moods": {
+        "mind-bending": 10,
+        "visually-stunning": 9,
+        "edge-of-seat": 8,
+        "tearjerker": 4,
+        "cozy": 3,
+        "laugh-out-loud": 3
+      },
+      "favorites": [
+        {
+          "title": "2001: A Space Odyssey",
+          "year": 1968
+        },
+        {
+          "title": "The Martian",
+          "year": 2015
+        },
+        {
+          "title": "Interstellar",
+          "year": 2014
+        },
+        {
+          "title": "Arrival",
+          "year": 2016
+        },
+        {
+          "title": "Contact",
+          "year": 1997
+        },
+        {
+          "title": "Gattaca",
+          "year": 1997
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Primer",
+          "year": 2004,
+          "score": 10
+        },
+        {
+          "title": "Moon",
+          "year": 2009,
+          "score": 9
+        },
+        {
+          "title": "Apollo 13",
+          "year": 1995,
+          "score": 9
+        },
+        {
+          "title": "Ex Machina",
+          "year": 2014,
+          "score": 9
+        },
+        {
+          "title": "Blade Runner",
+          "year": 1982,
+          "score": 8
+        },
+        {
+          "title": "Dune",
+          "year": 2021,
+          "score": 8
+        },
+        {
+          "title": "Gravity",
+          "year": 2013,
+          "score": 6
+        },
+        {
+          "title": "Sunshine",
+          "year": 2007,
+          "score": 7
+        },
+        {
+          "title": "Armageddon",
+          "year": 1998,
+          "score": 2
+        },
+        {
+          "title": "The Core",
+          "year": 2003,
+          "score": 1
+        },
+        {
+          "title": "Independence Day",
+          "year": 1996,
+          "score": 4
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": -0.5,
+        "spread": 1.0
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "true-crime-thriller",
+      "username": "cold_case_carla",
+      "displayName": "Carla Jennings",
+      "archetype": "True-crime / thriller fan",
+      "bio": "Listens to three murder podcasts a week. Locks the door twice.",
+      "tags": [
+        "crime",
+        "thriller",
+        "true-crime"
+      ],
+      "genres": {
+        "80": 10,
+        "53": 10,
+        "9648": 9,
+        "18": 7,
+        "99": 8,
+        "27": 6,
+        "28": 5,
+        "35": 3,
+        "10749": 3,
+        "10751": 1,
+        "16": 1,
+        "10402": 2
+      },
+      "moods": {
+        "edge-of-seat": 10,
+        "dark-gritty": 9,
+        "mind-bending": 8,
+        "feel-good": 3,
+        "cozy": 2
+      },
+      "favorites": [
+        {
+          "title": "Zodiac",
+          "year": 2007
+        },
+        {
+          "title": "The Silence of the Lambs",
+          "year": 1991
+        },
+        {
+          "title": "Gone Girl",
+          "year": 2014
+        },
+        {
+          "title": "Prisoners",
+          "year": 2013
+        },
+        {
+          "title": "Memories of Murder",
+          "year": 2003
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Se7en",
+          "year": 1995,
+          "score": 9
+        },
+        {
+          "title": "Monster",
+          "year": 2003,
+          "score": 8
+        },
+        {
+          "title": "Catch Me If You Can",
+          "year": 2002,
+          "score": 8
+        },
+        {
+          "title": "The Girl with the Dragon Tattoo",
+          "year": 2011,
+          "score": 9
+        },
+        {
+          "title": "Nightcrawler",
+          "year": 2014,
+          "score": 9
+        },
+        {
+          "title": "Wind River",
+          "year": 2017,
+          "score": 8
+        },
+        {
+          "title": "Killers of the Flower Moon",
+          "year": 2023,
+          "score": 8
+        },
+        {
+          "title": "The Irishman",
+          "year": 2019,
+          "score": 7
+        },
+        {
+          "title": "Paddington",
+          "year": 2014,
+          "score": 3
+        },
+        {
+          "title": "Mamma Mia!",
+          "year": 2008,
+          "score": 2
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.0,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "western-grandpa",
+      "username": "dusty_trail_earl",
+      "displayName": "Earl Hutchins",
+      "archetype": "Western grandpa",
+      "bio": "Retired rancher. They don't make 'em like Eastwood anymore.",
+      "tags": [
+        "western",
+        "classic",
+        "older"
+      ],
+      "genres": {
+        "37": 10,
+        "10752": 9,
+        "28": 8,
+        "18": 7,
+        "36": 8,
+        "12": 7,
+        "80": 6,
+        "35": 5,
+        "27": 1,
+        "16": 1,
+        "878": 2,
+        "10402": 3,
+        "10749": 3
+      },
+      "moods": {
+        "dark-gritty": 7,
+        "edge-of-seat": 7,
+        "feel-good": 6,
+        "cozy": 6,
+        "mind-bending": 1
+      },
+      "favorites": [
+        {
+          "title": "The Good, the Bad and the Ugly",
+          "year": 1966
+        },
+        {
+          "title": "Unforgiven",
+          "year": 1992
+        },
+        {
+          "title": "Rio Bravo",
+          "year": 1959
+        },
+        {
+          "title": "The Searchers",
+          "year": 1956
+        },
+        {
+          "title": "True Grit",
+          "year": 1969
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "High Noon",
+          "year": 1952,
+          "score": 9
+        },
+        {
+          "title": "Tombstone",
+          "year": 1993,
+          "score": 9
+        },
+        {
+          "title": "The Outlaw Josey Wales",
+          "year": 1976,
+          "score": 9
+        },
+        {
+          "title": "Once Upon a Time in the West",
+          "year": 1968,
+          "score": 10
+        },
+        {
+          "title": "Butch Cassidy and the Sundance Kid",
+          "year": 1969,
+          "score": 9
+        },
+        {
+          "title": "Open Range",
+          "year": 2003,
+          "score": 8
+        },
+        {
+          "title": "3:10 to Yuma",
+          "year": 2007,
+          "score": 7
+        },
+        {
+          "title": "Patton",
+          "year": 1970,
+          "score": 8
+        },
+        {
+          "title": "Moulin Rouge",
+          "year": 2001,
+          "score": 1
+        },
+        {
+          "title": "Shrek",
+          "year": 2001,
+          "score": 3
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.0,
+        "spread": 0.8
+      },
+      "era": {
+        "from": 1945,
+        "to": 2010
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "musical-theatre-kid",
+      "username": "jazz_hands_jess",
+      "displayName": "Jess Delgado",
+      "archetype": "Musical theatre kid",
+      "bio": "High-school drama club president. Has the Hamilton cast recording memorised.",
+      "tags": [
+        "musical",
+        "teen",
+        "theatre"
+      ],
+      "genres": {
+        "10402": 10,
+        "10749": 8,
+        "35": 8,
+        "18": 8,
+        "10751": 7,
+        "14": 6,
+        "16": 7,
+        "27": 2,
+        "10752": 1,
+        "37": 1,
+        "80": 2,
+        "28": 3
+      },
+      "moods": {
+        "feel-good": 10,
+        "tearjerker": 9,
+        "visually-stunning": 8,
+        "laugh-out-loud": 7,
+        "cozy": 7,
+        "dark-gritty": 2
+      },
+      "favorites": [
+        {
+          "title": "Hamilton",
+          "year": 2020
+        },
+        {
+          "title": "La La Land",
+          "year": 2016
+        },
+        {
+          "title": "Les Misérables",
+          "year": 2012
+        },
+        {
+          "title": "The Greatest Showman",
+          "year": 2017
+        },
+        {
+          "title": "Wicked",
+          "year": 2024
+        },
+        {
+          "title": "Into the Woods",
+          "year": 2014
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Mamma Mia!",
+          "year": 2008,
+          "score": 9
+        },
+        {
+          "title": "Chicago",
+          "year": 2002,
+          "score": 9
+        },
+        {
+          "title": "Moulin Rouge",
+          "year": 2001,
+          "score": 9
+        },
+        {
+          "title": "Grease",
+          "year": 1978,
+          "score": 8
+        },
+        {
+          "title": "West Side Story",
+          "year": 1961,
+          "score": 9
+        },
+        {
+          "title": "tick, tick... BOOM!",
+          "year": 2021,
+          "score": 10
+        },
+        {
+          "title": "The Sound of Music",
+          "year": 1965,
+          "score": 8
+        },
+        {
+          "title": "Cats",
+          "year": 2019,
+          "score": 2
+        },
+        {
+          "title": "Saw",
+          "year": 2004,
+          "score": 1
+        },
+        {
+          "title": "Transformers",
+          "year": 2007,
+          "score": 2
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 1.0,
+        "spread": 1.0
+      },
+      "era": {
+        "from": 1955,
+        "to": 2026
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "war-history-buff",
+      "username": "flanking_frank",
+      "displayName": "Frank Odell",
+      "archetype": "War / history buff",
+      "bio": "Reads Stephen Ambrose for fun. Watches every war film with a notepad for inaccuracies.",
+      "tags": [
+        "war",
+        "history"
+      ],
+      "genres": {
+        "10752": 10,
+        "36": 10,
+        "18": 8,
+        "28": 7,
+        "99": 8,
+        "53": 6,
+        "37": 6,
+        "12": 5,
+        "10749": 2,
+        "16": 1,
+        "14": 2,
+        "27": 1,
+        "10402": 2
+      },
+      "moods": {
+        "dark-gritty": 9,
+        "edge-of-seat": 8,
+        "tearjerker": 7,
+        "feel-good": 2,
+        "laugh-out-loud": 2
+      },
+      "favorites": [
+        {
+          "title": "Saving Private Ryan",
+          "year": 1998
+        },
+        {
+          "title": "Das Boot",
+          "year": 1981
+        },
+        {
+          "title": "Apocalypse Now",
+          "year": 1979
+        },
+        {
+          "title": "1917",
+          "year": 2019
+        },
+        {
+          "title": "Paths of Glory",
+          "year": 1957
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Full Metal Jacket",
+          "year": 1987,
+          "score": 9
+        },
+        {
+          "title": "Platoon",
+          "year": 1986,
+          "score": 9
+        },
+        {
+          "title": "Dunkirk",
+          "year": 2017,
+          "score": 8
+        },
+        {
+          "title": "Letters from Iwo Jima",
+          "year": 2006,
+          "score": 9
+        },
+        {
+          "title": "The Bridge on the River Kwai",
+          "year": 1957,
+          "score": 9
+        },
+        {
+          "title": "Schindler's List",
+          "year": 1993,
+          "score": 10
+        },
+        {
+          "title": "Black Hawk Down",
+          "year": 2001,
+          "score": 8
+        },
+        {
+          "title": "Downfall",
+          "year": 2004,
+          "score": 9
+        },
+        {
+          "title": "Pearl Harbor",
+          "year": 2001,
+          "score": 2
+        },
+        {
+          "title": "Inglourious Basterds",
+          "year": 2009,
+          "score": 6
+        },
+        {
+          "title": "The Hurt Locker",
+          "year": 2008,
+          "score": 8
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": -0.3,
+        "spread": 1.0
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "hallmark-cozy",
+      "username": "cocoa_and_cardigans",
+      "displayName": "Linda Marsh",
+      "archetype": "Cozy Hallmark / TV-movie fan",
+      "bio": "Starts Christmas movies on November 1st. Small towns, big-city lawyers, snow.",
+      "tags": [
+        "cozy",
+        "tv-movie",
+        "holiday"
+      ],
+      "genres": {
+        "10770": 10,
+        "10749": 10,
+        "10751": 9,
+        "35": 8,
+        "18": 6,
+        "10402": 5,
+        "16": 5,
+        "27": 1,
+        "53": 1,
+        "10752": 1,
+        "80": 1,
+        "878": 2
+      },
+      "moods": {
+        "cozy": 10,
+        "feel-good": 10,
+        "tearjerker": 6,
+        "laugh-out-loud": 6,
+        "dark-gritty": 1,
+        "edge-of-seat": 1,
+        "mind-bending": 1
+      },
+      "favorites": [
+        {
+          "title": "A Christmas Prince",
+          "year": 2017
+        },
+        {
+          "title": "The Princess Switch",
+          "year": 2018
+        },
+        {
+          "title": "The Holiday",
+          "year": 2006
+        },
+        {
+          "title": "Halloweentown",
+          "year": 1998
+        },
+        {
+          "title": "Love Actually",
+          "year": 2003
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "White Christmas",
+          "year": 1954,
+          "score": 9
+        },
+        {
+          "title": "Elf",
+          "year": 2003,
+          "score": 8
+        },
+        {
+          "title": "It's a Wonderful Life",
+          "year": 1946,
+          "score": 9
+        },
+        {
+          "title": "While You Were Sleeping",
+          "year": 1995,
+          "score": 9
+        },
+        {
+          "title": "Christmas with the Kranks",
+          "year": 2004,
+          "score": 7
+        },
+        {
+          "title": "The Family Stone",
+          "year": 2005,
+          "score": 8
+        },
+        {
+          "title": "Four Christmases",
+          "year": 2008,
+          "score": 7
+        },
+        {
+          "title": "Die Hard",
+          "year": 1988,
+          "score": 3
+        },
+        {
+          "title": "Black Christmas",
+          "year": 1974,
+          "score": 1
+        },
+        {
+          "title": "Fight Club",
+          "year": 1999,
+          "score": 1
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 1.0,
+        "spread": 0.8
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "lotr-fantasy",
+      "username": "second_breakfast_sam",
+      "displayName": "Sam Brennan",
+      "archetype": "Fantasy / LOTR nerd",
+      "bio": "Watches the extended editions every December. Learning Sindarin on Duolingo (sort of).",
+      "tags": [
+        "fantasy",
+        "adventure"
+      ],
+      "genres": {
+        "14": 10,
+        "12": 10,
+        "28": 8,
+        "16": 7,
+        "10751": 6,
+        "878": 7,
+        "18": 6,
+        "36": 6,
+        "10749": 4,
+        "37": 2,
+        "80": 2,
+        "99": 2
+      },
+      "moods": {
+        "visually-stunning": 10,
+        "edge-of-seat": 8,
+        "tearjerker": 7,
+        "feel-good": 7,
+        "cozy": 7,
+        "mind-bending": 5,
+        "dark-gritty": 4
+      },
+      "favorites": [
+        {
+          "title": "The Lord of the Rings: The Fellowship of the Ring",
+          "year": 2001
+        },
+        {
+          "title": "The Lord of the Rings: The Two Towers",
+          "year": 2002
+        },
+        {
+          "title": "The Lord of the Rings: The Return of the King",
+          "year": 2003
+        },
+        {
+          "title": "The Princess Bride",
+          "year": 1987
+        },
+        {
+          "title": "Pan's Labyrinth",
+          "year": 2006
+        },
+        {
+          "title": "Harry Potter and the Prisoner of Azkaban",
+          "year": 2004
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Willow",
+          "year": 1988,
+          "score": 8
+        },
+        {
+          "title": "Stardust",
+          "year": 2007,
+          "score": 8
+        },
+        {
+          "title": "The NeverEnding Story",
+          "year": 1984,
+          "score": 8
+        },
+        {
+          "title": "Labyrinth",
+          "year": 1986,
+          "score": 8
+        },
+        {
+          "title": "The Green Knight",
+          "year": 2021,
+          "score": 7
+        },
+        {
+          "title": "Dune: Part Two",
+          "year": 2024,
+          "score": 9
+        },
+        {
+          "title": "The Hobbit: The Battle of the Five Armies",
+          "year": 2014,
+          "score": 4
+        },
+        {
+          "title": "Eragon",
+          "year": 2006,
+          "score": 2
+        },
+        {
+          "title": "Conan the Barbarian",
+          "year": 1982,
+          "score": 7
+        },
+        {
+          "title": "Legend",
+          "year": 1985,
+          "score": 6
+        },
+        {
+          "title": "Harry Potter and the Sorcerer's Stone",
+          "year": 2001,
+          "score": 8
+        },
+        {
+          "title": "Dungeons & Dragons",
+          "year": 2000,
+          "score": 1
+        },
+        {
+          "title": "The Notebook",
+          "year": 2004,
+          "score": 3
+        }
+      ],
+      "volume": "heavy",
+      "rater": {
+        "bias": 0.3,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "whodunit-lover",
+      "username": "little_grey_cells",
+      "displayName": "Agatha Pryce",
+      "archetype": "Whodunit / mystery lover",
+      "bio": "Solves it by the second act. Agatha Christie paperbacks in every room.",
+      "tags": [
+        "mystery",
+        "whodunit"
+      ],
+      "genres": {
+        "9648": 10,
+        "80": 9,
+        "35": 8,
+        "53": 7,
+        "18": 7,
+        "10749": 4,
+        "27": 3,
+        "28": 3,
+        "878": 2,
+        "10752": 2,
+        "16": 2
+      },
+      "moods": {
+        "mind-bending": 9,
+        "cozy": 8,
+        "laugh-out-loud": 6,
+        "edge-of-seat": 7,
+        "dark-gritty": 3
+      },
+      "favorites": [
+        {
+          "title": "Knives Out",
+          "year": 2019
+        },
+        {
+          "title": "Glass Onion: A Knives Out Mystery",
+          "year": 2022
+        },
+        {
+          "title": "Murder on the Orient Express",
+          "year": 1974
+        },
+        {
+          "title": "Clue",
+          "year": 1985
+        },
+        {
+          "title": "Gosford Park",
+          "year": 2001
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Death on the Nile",
+          "year": 1978,
+          "score": 8
+        },
+        {
+          "title": "Witness for the Prosecution",
+          "year": 1957,
+          "score": 9
+        },
+        {
+          "title": "The Thin Man",
+          "year": 1934,
+          "score": 9
+        },
+        {
+          "title": "Sleuth",
+          "year": 1972,
+          "score": 9
+        },
+        {
+          "title": "Rebecca",
+          "year": 1940,
+          "score": 8
+        },
+        {
+          "title": "Murder on the Orient Express",
+          "year": 2017,
+          "score": 5
+        },
+        {
+          "title": "Sherlock Holmes",
+          "year": 2009,
+          "score": 7
+        },
+        {
+          "title": "Fast Five",
+          "year": 2011,
+          "score": 2
+        },
+        {
+          "title": "Transformers",
+          "year": 2007,
+          "score": 1
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.0,
+        "spread": 0.9
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "eighties-kid",
+      "username": "rad_tubular_tina",
+      "displayName": "Tina Russo",
+      "archetype": "80s nostalgia kid",
+      "bio": "Grew up on VHS rentals. Still quotes Ferris Bueller weekly.",
+      "tags": [
+        "80s",
+        "nostalgia"
+      ],
+      "genres": {
+        "12": 9,
+        "35": 9,
+        "878": 9,
+        "14": 8,
+        "28": 7,
+        "10751": 7,
+        "27": 6,
+        "10749": 6,
+        "18": 4,
+        "99": 2,
+        "10752": 2,
+        "36": 2
+      },
+      "moods": {
+        "feel-good": 9,
+        "laugh-out-loud": 8,
+        "cozy": 8,
+        "edge-of-seat": 7,
+        "visually-stunning": 5,
+        "dark-gritty": 3
+      },
+      "favorites": [
+        {
+          "title": "Back to the Future",
+          "year": 1985
+        },
+        {
+          "title": "The Goonies",
+          "year": 1985
+        },
+        {
+          "title": "E.T. the Extra-Terrestrial",
+          "year": 1982
+        },
+        {
+          "title": "Ferris Bueller's Day Off",
+          "year": 1986
+        },
+        {
+          "title": "Ghostbusters",
+          "year": 1984
+        },
+        {
+          "title": "The Breakfast Club",
+          "year": 1985
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Gremlins",
+          "year": 1984,
+          "score": 8
+        },
+        {
+          "title": "Raiders of the Lost Ark",
+          "year": 1981,
+          "score": 10
+        },
+        {
+          "title": "Sixteen Candles",
+          "year": 1984,
+          "score": 7
+        },
+        {
+          "title": "Big",
+          "year": 1988,
+          "score": 8
+        },
+        {
+          "title": "Beetlejuice",
+          "year": 1988,
+          "score": 9
+        },
+        {
+          "title": "Indiana Jones and the Temple of Doom",
+          "year": 1984,
+          "score": 7
+        },
+        {
+          "title": "Stand by Me",
+          "year": 1986,
+          "score": 9
+        },
+        {
+          "title": "Ghostbusters",
+          "year": 2016,
+          "score": 3
+        },
+        {
+          "title": "Moonlight",
+          "year": 2016,
+          "score": 4
+        },
+        {
+          "title": "The Irishman",
+          "year": 2019,
+          "score": 3
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.5,
+        "spread": 1.0
+      },
+      "era": {
+        "from": 1978,
+        "to": 1992
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "world-cinephile",
+      "username": "subtitle_sofia",
+      "displayName": "Sofia Bergström",
+      "archetype": "Foreign-language cinephile",
+      "bio": "One-inch subtitle barrier? Never heard of it. Kurosawa, Bergman, Bong, Jeunet.",
+      "tags": [
+        "world-cinema",
+        "arthouse",
+        "subtitles"
+      ],
+      "genres": {
+        "18": 10,
+        "36": 8,
+        "10749": 8,
+        "80": 8,
+        "9648": 8,
+        "35": 7,
+        "10752": 7,
+        "14": 6,
+        "28": 5,
+        "16": 6,
+        "27": 4,
+        "10751": 2,
+        "10770": 1
+      },
+      "moods": {
+        "mind-bending": 9,
+        "visually-stunning": 9,
+        "tearjerker": 8,
+        "dark-gritty": 7,
+        "cozy": 5,
+        "feel-good": 5
+      },
+      "favorites": [
+        {
+          "title": "Seven Samurai",
+          "year": 1954
+        },
+        {
+          "title": "The Seventh Seal",
+          "year": 1957
+        },
+        {
+          "title": "Parasite",
+          "year": 2019
+        },
+        {
+          "title": "Amélie",
+          "year": 2001
+        },
+        {
+          "title": "In the Mood for Love",
+          "year": 2000
+        },
+        {
+          "title": "City of God",
+          "year": 2002
+        },
+        {
+          "title": "Cinema Paradiso",
+          "year": 1989
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Rashomon",
+          "year": 1950,
+          "score": 10
+        },
+        {
+          "title": "Persona",
+          "year": 1966,
+          "score": 9
+        },
+        {
+          "title": "Chungking Express",
+          "year": 1994,
+          "score": 9
+        },
+        {
+          "title": "Pan's Labyrinth",
+          "year": 2006,
+          "score": 9
+        },
+        {
+          "title": "The Lives of Others",
+          "year": 2006,
+          "score": 10
+        },
+        {
+          "title": "Bicycle Thieves",
+          "year": 1948,
+          "score": 9
+        },
+        {
+          "title": "La Haine",
+          "year": 1995,
+          "score": 9
+        },
+        {
+          "title": "Anatomy of a Fall",
+          "year": 2023,
+          "score": 8
+        },
+        {
+          "title": "8½",
+          "year": 1963,
+          "score": 8
+        },
+        {
+          "title": "Yi Yi",
+          "year": 2000,
+          "score": 9
+        },
+        {
+          "title": "Ran",
+          "year": 1985,
+          "score": 9
+        },
+        {
+          "title": "Pacific Rim",
+          "year": 2013,
+          "score": 2
+        },
+        {
+          "title": "Grown Ups",
+          "year": 2010,
+          "score": 1
+        }
+      ],
+      "volume": "heavy",
+      "rater": {
+        "bias": 0.0,
+        "spread": 1.0
+      },
+      "popularity": "niche",
+      "onboarded": true
+    },
+    {
+      "key": "pixar-crier",
+      "username": "ugly_cry_ollie",
+      "displayName": "Ollie Nguyen",
+      "archetype": "Pixar crier",
+      "bio": "The first ten minutes of Up wrecked him and he keeps going back for more.",
+      "tags": [
+        "animation",
+        "pixar",
+        "tearjerker"
+      ],
+      "genres": {
+        "16": 10,
+        "10751": 9,
+        "18": 8,
+        "35": 7,
+        "14": 8,
+        "12": 7,
+        "10749": 6,
+        "27": 2,
+        "10752": 2,
+        "80": 2,
+        "37": 2
+      },
+      "moods": {
+        "tearjerker": 10,
+        "feel-good": 9,
+        "cozy": 8,
+        "visually-stunning": 8,
+        "laugh-out-loud": 6,
+        "dark-gritty": 2
+      },
+      "favorites": [
+        {
+          "title": "Up",
+          "year": 2009
+        },
+        {
+          "title": "Toy Story 3",
+          "year": 2010
+        },
+        {
+          "title": "Inside Out",
+          "year": 2015
+        },
+        {
+          "title": "Coco",
+          "year": 2017
+        },
+        {
+          "title": "WALL·E",
+          "year": 2008
+        },
+        {
+          "title": "Soul",
+          "year": 2020
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Finding Nemo",
+          "year": 2003,
+          "score": 9
+        },
+        {
+          "title": "Ratatouille",
+          "year": 2007,
+          "score": 9
+        },
+        {
+          "title": "Monsters, Inc.",
+          "year": 2001,
+          "score": 8
+        },
+        {
+          "title": "Toy Story",
+          "year": 1995,
+          "score": 9
+        },
+        {
+          "title": "Inside Out 2",
+          "year": 2024,
+          "score": 8
+        },
+        {
+          "title": "Turning Red",
+          "year": 2022,
+          "score": 7
+        },
+        {
+          "title": "Cars 2",
+          "year": 2011,
+          "score": 3
+        },
+        {
+          "title": "The Good Dinosaur",
+          "year": 2015,
+          "score": 5
+        },
+        {
+          "title": "Saw",
+          "year": 2004,
+          "score": 1
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.5,
+        "spread": 1.0
+      },
+      "era": {
+        "from": 1995,
+        "to": 2026
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "cult-trash",
+      "username": "so_bad_its_good",
+      "displayName": "Rex Malloy",
+      "archetype": "Cult / B-movie trash connoisseur",
+      "bio": "Owns a signed copy of The Room. Hosts bad-movie nights with a drinking-game scorecard.",
+      "tags": [
+        "cult",
+        "b-movie"
+      ],
+      "genres": {
+        "27": 9,
+        "35": 9,
+        "878": 9,
+        "28": 7,
+        "14": 7,
+        "80": 6,
+        "53": 5,
+        "18": 3,
+        "10749": 3,
+        "36": 1,
+        "10752": 2,
+        "10751": 2
+      },
+      "moods": {
+        "laugh-out-loud": 10,
+        "mind-bending": 7,
+        "dark-gritty": 6,
+        "edge-of-seat": 5,
+        "feel-good": 6,
+        "tearjerker": 1
+      },
+      "favorites": [
+        {
+          "title": "The Room",
+          "year": 2003
+        },
+        {
+          "title": "Evil Dead II",
+          "year": 1987
+        },
+        {
+          "title": "Troll 2",
+          "year": 1990
+        },
+        {
+          "title": "Plan 9 from Outer Space",
+          "year": 1959
+        },
+        {
+          "title": "Big Trouble in Little China",
+          "year": 1986
+        },
+        {
+          "title": "Repo Man",
+          "year": 1984
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Sharknado",
+          "year": 2013,
+          "score": 8
+        },
+        {
+          "title": "Flash Gordon",
+          "year": 1980,
+          "score": 9
+        },
+        {
+          "title": "Re-Animator",
+          "year": 1985,
+          "score": 9
+        },
+        {
+          "title": "Showgirls",
+          "year": 1995,
+          "score": 8
+        },
+        {
+          "title": "Batman & Robin",
+          "year": 1997,
+          "score": 7
+        },
+        {
+          "title": "Army of Darkness",
+          "year": 1992,
+          "score": 9
+        },
+        {
+          "title": "Bad Taste",
+          "year": 1987,
+          "score": 8
+        },
+        {
+          "title": "The Toxic Avenger",
+          "year": 1984,
+          "score": 8
+        },
+        {
+          "title": "The King's Speech",
+          "year": 2010,
+          "score": 3
+        },
+        {
+          "title": "The English Patient",
+          "year": 1996,
+          "score": 2
+        },
+        {
+          "title": "Green Book",
+          "year": 2018,
+          "score": 2
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.0,
+        "spread": 1.3
+      },
+      "era": {
+        "from": 1955,
+        "to": 2015
+      },
+      "popularity": "niche",
+      "onboarded": true
+    },
+    {
+      "key": "oscar-completionist",
+      "username": "best_picture_bea",
+      "displayName": "Beatrice Hale",
+      "archetype": "Oscar-bait completionist",
+      "bio": "Watches every Best Picture nominee before the ceremony. Has a spreadsheet.",
+      "tags": [
+        "awards",
+        "drama",
+        "power-user"
+      ],
+      "genres": {
+        "18": 10,
+        "36": 9,
+        "10749": 8,
+        "10752": 7,
+        "10402": 6,
+        "80": 7,
+        "35": 5,
+        "53": 6,
+        "878": 4,
+        "27": 2,
+        "16": 3,
+        "10751": 2,
+        "28": 3
+      },
+      "moods": {
+        "tearjerker": 9,
+        "visually-stunning": 8,
+        "mind-bending": 6,
+        "dark-gritty": 6,
+        "feel-good": 6
+      },
+      "favorites": [
+        {
+          "title": "The King's Speech",
+          "year": 2010
+        },
+        {
+          "title": "Schindler's List",
+          "year": 1993
+        },
+        {
+          "title": "12 Years a Slave",
+          "year": 2013
+        },
+        {
+          "title": "Spotlight",
+          "year": 2015
+        },
+        {
+          "title": "The Shape of Water",
+          "year": 2017
+        },
+        {
+          "title": "Nomadland",
+          "year": 2021
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "The English Patient",
+          "year": 1996,
+          "score": 8
+        },
+        {
+          "title": "Green Book",
+          "year": 2018,
+          "score": 7
+        },
+        {
+          "title": "Oppenheimer",
+          "year": 2023,
+          "score": 9
+        },
+        {
+          "title": "Parasite",
+          "year": 2019,
+          "score": 9
+        },
+        {
+          "title": "Moonlight",
+          "year": 2016,
+          "score": 9
+        },
+        {
+          "title": "Birdman: Or (The Unexpected Virtue of Ignorance)",
+          "year": 2014,
+          "score": 8
+        },
+        {
+          "title": "Argo",
+          "year": 2012,
+          "score": 8
+        },
+        {
+          "title": "Slumdog Millionaire",
+          "year": 2008,
+          "score": 8
+        },
+        {
+          "title": "Million Dollar Baby",
+          "year": 2004,
+          "score": 8
+        },
+        {
+          "title": "The Power of the Dog",
+          "year": 2021,
+          "score": 8
+        },
+        {
+          "title": "Crash",
+          "year": 2004,
+          "score": 4
+        },
+        {
+          "title": "Grown Ups",
+          "year": 2010,
+          "score": 1
+        },
+        {
+          "title": "Transformers",
+          "year": 2007,
+          "score": 1
+        }
+      ],
+      "volume": "power",
+      "rater": {
+        "bias": 0.0,
+        "spread": 0.9
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "stoner-comedy",
+      "username": "couch_lock_chaz",
+      "displayName": "Chaz Petrakis",
+      "archetype": "Stoner comedy guy",
+      "bio": "If it has Seth Rogen in it, he's already seen it twice. Snacks are mandatory.",
+      "tags": [
+        "comedy",
+        "stoner"
+      ],
+      "genres": {
+        "35": 10,
+        "28": 8,
+        "16": 8,
+        "12": 6,
+        "878": 6,
+        "27": 5,
+        "80": 5,
+        "18": 2,
+        "36": 1,
+        "10752": 1,
+        "99": 3,
+        "10749": 4
+      },
+      "moods": {
+        "laugh-out-loud": 10,
+        "feel-good": 8,
+        "cozy": 7,
+        "mind-bending": 6,
+        "tearjerker": 1,
+        "dark-gritty": 2
+      },
+      "favorites": [
+        {
+          "title": "Pineapple Express",
+          "year": 2008
+        },
+        {
+          "title": "The Big Lebowski",
+          "year": 1998
+        },
+        {
+          "title": "Superbad",
+          "year": 2007
+        },
+        {
+          "title": "Harold & Kumar Go to White Castle",
+          "year": 2004
+        },
+        {
+          "title": "Dazed and Confused",
+          "year": 1993
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Friday",
+          "year": 1995,
+          "score": 9
+        },
+        {
+          "title": "This Is the End",
+          "year": 2013,
+          "score": 8
+        },
+        {
+          "title": "Half Baked",
+          "year": 1998,
+          "score": 8
+        },
+        {
+          "title": "Step Brothers",
+          "year": 2008,
+          "score": 9
+        },
+        {
+          "title": "Anchorman: The Legend of Ron Burgundy",
+          "year": 2004,
+          "score": 9
+        },
+        {
+          "title": "Dude, Where's My Car?",
+          "year": 2000,
+          "score": 7
+        },
+        {
+          "title": "Schindler's List",
+          "year": 1993,
+          "score": 5
+        },
+        {
+          "title": "The English Patient",
+          "year": 1996,
+          "score": 2
+        },
+        {
+          "title": "Amélie",
+          "year": 2001,
+          "score": 4
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.5,
+        "spread": 1.0
+      },
+      "era": {
+        "from": 1990,
+        "to": 2026
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "sports-dad",
+      "username": "fourth_and_long_ed",
+      "displayName": "Ed Kowalczyk",
+      "archetype": "Sports-movie dad",
+      "bio": "Coaches little league. Gets misty at every underdog speech.",
+      "tags": [
+        "sports",
+        "parent"
+      ],
+      "genres": {
+        "18": 8,
+        "35": 8,
+        "10751": 8,
+        "28": 6,
+        "36": 7,
+        "99": 7,
+        "10749": 3,
+        "27": 1,
+        "14": 2,
+        "878": 3,
+        "16": 4,
+        "10402": 3
+      },
+      "moods": {
+        "feel-good": 10,
+        "tearjerker": 8,
+        "edge-of-seat": 8,
+        "laugh-out-loud": 6,
+        "dark-gritty": 2,
+        "mind-bending": 1
+      },
+      "favorites": [
+        {
+          "title": "Remember the Titans",
+          "year": 2000
+        },
+        {
+          "title": "Miracle",
+          "year": 2004
+        },
+        {
+          "title": "Hoosiers",
+          "year": 1986
+        },
+        {
+          "title": "The Sandlot",
+          "year": 1993
+        },
+        {
+          "title": "Field of Dreams",
+          "year": 1989
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Rudy",
+          "year": 1993,
+          "score": 9
+        },
+        {
+          "title": "Moneyball",
+          "year": 2011,
+          "score": 9
+        },
+        {
+          "title": "The Blind Side",
+          "year": 2009,
+          "score": 8
+        },
+        {
+          "title": "Rocky",
+          "year": 1976,
+          "score": 9
+        },
+        {
+          "title": "A League of Their Own",
+          "year": 1992,
+          "score": 8
+        },
+        {
+          "title": "Ford v Ferrari",
+          "year": 2019,
+          "score": 9
+        },
+        {
+          "title": "Creed",
+          "year": 2015,
+          "score": 8
+        },
+        {
+          "title": "Major League",
+          "year": 1989,
+          "score": 7
+        },
+        {
+          "title": "Caddyshack",
+          "year": 1980,
+          "score": 8
+        },
+        {
+          "title": "Raging Bull",
+          "year": 1980,
+          "score": 6
+        },
+        {
+          "title": "Midsommar",
+          "year": 2019,
+          "score": 1
+        },
+        {
+          "title": "The Lighthouse",
+          "year": 2019,
+          "score": 2
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.3,
+        "spread": 0.8
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "austen-period-drama",
+      "username": "pemberley_or_bust",
+      "displayName": "Eleanor Fairfax",
+      "archetype": "Jane Austen period-drama fan",
+      "bio": "Has strong feelings about the 1995 vs 2005 hand flex debate. Tea, always.",
+      "tags": [
+        "period-drama",
+        "romance"
+      ],
+      "genres": {
+        "10749": 10,
+        "18": 9,
+        "36": 9,
+        "35": 6,
+        "10402": 5,
+        "10751": 5,
+        "9648": 6,
+        "28": 1,
+        "27": 1,
+        "878": 1,
+        "10752": 4,
+        "37": 2
+      },
+      "moods": {
+        "cozy": 9,
+        "tearjerker": 8,
+        "visually-stunning": 9,
+        "feel-good": 8,
+        "dark-gritty": 2,
+        "edge-of-seat": 2
+      },
+      "favorites": [
+        {
+          "title": "Pride & Prejudice",
+          "year": 2005
+        },
+        {
+          "title": "Sense and Sensibility",
+          "year": 1995
+        },
+        {
+          "title": "Emma.",
+          "year": 2020
+        },
+        {
+          "title": "Little Women",
+          "year": 2019
+        },
+        {
+          "title": "Persuasion",
+          "year": 1995
+        },
+        {
+          "title": "Atonement",
+          "year": 2007
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Emma",
+          "year": 1996,
+          "score": 8
+        },
+        {
+          "title": "Jane Eyre",
+          "year": 2011,
+          "score": 8
+        },
+        {
+          "title": "Becoming Jane",
+          "year": 2007,
+          "score": 7
+        },
+        {
+          "title": "Mansfield Park",
+          "year": 1999,
+          "score": 7
+        },
+        {
+          "title": "The Age of Innocence",
+          "year": 1993,
+          "score": 8
+        },
+        {
+          "title": "A Room with a View",
+          "year": 1985,
+          "score": 9
+        },
+        {
+          "title": "Bright Star",
+          "year": 2009,
+          "score": 8
+        },
+        {
+          "title": "Little Women",
+          "year": 1994,
+          "score": 8
+        },
+        {
+          "title": "Mad Max: Fury Road",
+          "year": 2015,
+          "score": 2
+        },
+        {
+          "title": "Saw",
+          "year": 2004,
+          "score": 1
+        },
+        {
+          "title": "Pacific Rim",
+          "year": 2013,
+          "score": 1
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.3,
+        "spread": 0.9
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "nolan-stan",
+      "username": "tenet_backwards",
+      "displayName": "Marcus Ellery",
+      "archetype": "Christopher Nolan stan",
+      "bio": "Saw Oppenheimer in 70mm IMAX three times. Has explained Tenet at two weddings.",
+      "tags": [
+        "nolan",
+        "auteur"
+      ],
+      "genres": {
+        "878": 10,
+        "53": 10,
+        "9648": 9,
+        "28": 8,
+        "18": 8,
+        "10752": 7,
+        "80": 7,
+        "36": 6,
+        "35": 3,
+        "10749": 2,
+        "10751": 1,
+        "16": 2,
+        "10402": 2
+      },
+      "moods": {
+        "mind-bending": 10,
+        "visually-stunning": 10,
+        "edge-of-seat": 9,
+        "dark-gritty": 7,
+        "cozy": 1,
+        "laugh-out-loud": 2
+      },
+      "favorites": [
+        {
+          "title": "Inception",
+          "year": 2010
+        },
+        {
+          "title": "Interstellar",
+          "year": 2014
+        },
+        {
+          "title": "The Prestige",
+          "year": 2006
+        },
+        {
+          "title": "Memento",
+          "year": 2000
+        },
+        {
+          "title": "The Dark Knight",
+          "year": 2008
+        },
+        {
+          "title": "Tenet",
+          "year": 2020
+        },
+        {
+          "title": "Oppenheimer",
+          "year": 2023
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Dunkirk",
+          "year": 2017,
+          "score": 9
+        },
+        {
+          "title": "Batman Begins",
+          "year": 2005,
+          "score": 8
+        },
+        {
+          "title": "The Dark Knight Rises",
+          "year": 2012,
+          "score": 8
+        },
+        {
+          "title": "Insomnia",
+          "year": 2002,
+          "score": 7
+        },
+        {
+          "title": "Following",
+          "year": 1998,
+          "score": 8
+        },
+        {
+          "title": "Arrival",
+          "year": 2016,
+          "score": 9
+        },
+        {
+          "title": "The Matrix",
+          "year": 1999,
+          "score": 9
+        },
+        {
+          "title": "Shutter Island",
+          "year": 2010,
+          "score": 8
+        },
+        {
+          "title": "Barbie",
+          "year": 2023,
+          "score": 4
+        },
+        {
+          "title": "Grown Ups",
+          "year": 2010,
+          "score": 1
+        },
+        {
+          "title": "The Notebook",
+          "year": 2004,
+          "score": 2
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.3,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "halloween-disney-mom",
+      "username": "spooky_mouse_mom",
+      "displayName": "Becca Thornton",
+      "archetype": "Disney + horror mom",
+      "bio": "Halloween-obsessed theme-park mom. Haunted Mansion by day, Hereditary after bedtime.",
+      "tags": [
+        "multi-genre",
+        "family",
+        "horror",
+        "parent",
+        "disney"
+      ],
+      "genres": {
+        "16": 9,
+        "10751": 9,
+        "27": 10,
+        "14": 8,
+        "53": 8,
+        "35": 7,
+        "10402": 7,
+        "9648": 6,
+        "10749": 3,
+        "10752": 1,
+        "37": 1,
+        "99": 2
+      },
+      "moods": {
+        "cozy": 8,
+        "feel-good": 8,
+        "edge-of-seat": 9,
+        "dark-gritty": 7,
+        "visually-stunning": 7,
+        "laugh-out-loud": 6
+      },
+      "favorites": [
+        {
+          "title": "Hocus Pocus",
+          "year": 1993
+        },
+        {
+          "title": "The Nightmare Before Christmas",
+          "year": 1993
+        },
+        {
+          "title": "Coco",
+          "year": 2017
+        },
+        {
+          "title": "Halloween",
+          "year": 1978
+        },
+        {
+          "title": "The Conjuring",
+          "year": 2013
+        },
+        {
+          "title": "Hereditary",
+          "year": 2018
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Halloweentown",
+          "year": 1998,
+          "score": 9
+        },
+        {
+          "title": "Coraline",
+          "year": 2009,
+          "score": 10
+        },
+        {
+          "title": "Beetlejuice",
+          "year": 1988,
+          "score": 9
+        },
+        {
+          "title": "Moana",
+          "year": 2016,
+          "score": 9
+        },
+        {
+          "title": "Get Out",
+          "year": 2017,
+          "score": 9
+        },
+        {
+          "title": "Tangled",
+          "year": 2010,
+          "score": 8
+        },
+        {
+          "title": "Scream",
+          "year": 1996,
+          "score": 9
+        },
+        {
+          "title": "The Haunted Mansion",
+          "year": 2003,
+          "score": 5
+        },
+        {
+          "title": "Encanto",
+          "year": 2021,
+          "score": 8
+        },
+        {
+          "title": "It",
+          "year": 2017,
+          "score": 8
+        },
+        {
+          "title": "Pride & Prejudice",
+          "year": 2005,
+          "score": 3
+        },
+        {
+          "title": "The Irishman",
+          "year": 2019,
+          "score": 3
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.3,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "slasher-romcom-teen",
+      "username": "ghostface_xoxo",
+      "displayName": "Ava Sinclair",
+      "archetype": "Slasher + rom-com teen",
+      "bio": "17. Ghostface phone case, To All the Boys on loop. Wants both in one movie.",
+      "tags": [
+        "multi-genre",
+        "teen",
+        "horror",
+        "romance"
+      ],
+      "genres": {
+        "27": 10,
+        "10749": 10,
+        "35": 9,
+        "53": 8,
+        "9648": 6,
+        "18": 5,
+        "28": 4,
+        "10752": 1,
+        "37": 1,
+        "36": 1,
+        "99": 1,
+        "878": 4
+      },
+      "moods": {
+        "edge-of-seat": 9,
+        "feel-good": 8,
+        "laugh-out-loud": 8,
+        "dark-gritty": 6,
+        "cozy": 6,
+        "mind-bending": 3
+      },
+      "favorites": [
+        {
+          "title": "Scream",
+          "year": 1996
+        },
+        {
+          "title": "10 Things I Hate About You",
+          "year": 1999
+        },
+        {
+          "title": "Scream",
+          "year": 2022
+        },
+        {
+          "title": "To All the Boys I've Loved Before",
+          "year": 2018
+        },
+        {
+          "title": "The Cabin in the Woods",
+          "year": 2012
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Jennifer's Body",
+          "year": 2009,
+          "score": 9
+        },
+        {
+          "title": "Pearl",
+          "year": 2022,
+          "score": 8
+        },
+        {
+          "title": "Heathers",
+          "year": 1989,
+          "score": 9
+        },
+        {
+          "title": "Mean Girls",
+          "year": 2004,
+          "score": 9
+        },
+        {
+          "title": "Crazy Rich Asians",
+          "year": 2018,
+          "score": 8
+        },
+        {
+          "title": "Anyone But You",
+          "year": 2023,
+          "score": 8
+        },
+        {
+          "title": "Friday the 13th",
+          "year": 1980,
+          "score": 7
+        },
+        {
+          "title": "Saving Private Ryan",
+          "year": 1998,
+          "score": 3
+        },
+        {
+          "title": "2001: A Space Odyssey",
+          "year": 1968,
+          "score": 2
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.5,
+        "spread": 1.2
+      },
+      "era": {
+        "from": 1995,
+        "to": 2026
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "anime-western",
+      "username": "spike_and_the_drifter",
+      "displayName": "Cole Tanaka",
+      "archetype": "Anime + western fan",
+      "bio": "Cowboy Bebop got him into both. Sergio Leone and Shinichirō Watanabe on the same shelf.",
+      "tags": [
+        "multi-genre",
+        "anime",
+        "western"
+      ],
+      "genres": {
+        "37": 10,
+        "16": 10,
+        "28": 9,
+        "878": 8,
+        "12": 8,
+        "18": 6,
+        "80": 7,
+        "10749": 2,
+        "10751": 2,
+        "10402": 5,
+        "27": 3,
+        "99": 1
+      },
+      "moods": {
+        "dark-gritty": 8,
+        "visually-stunning": 9,
+        "edge-of-seat": 8,
+        "mind-bending": 6,
+        "cozy": 4
+      },
+      "favorites": [
+        {
+          "title": "Cowboy Bebop: The Movie",
+          "year": 2001
+        },
+        {
+          "title": "The Good, the Bad and the Ugly",
+          "year": 1966
+        },
+        {
+          "title": "Akira",
+          "year": 1988
+        },
+        {
+          "title": "Once Upon a Time in the West",
+          "year": 1968
+        },
+        {
+          "title": "Princess Mononoke",
+          "year": 1997
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Unforgiven",
+          "year": 1992,
+          "score": 9
+        },
+        {
+          "title": "Seven Samurai",
+          "year": 1954,
+          "score": 10
+        },
+        {
+          "title": "Django Unchained",
+          "year": 2012,
+          "score": 8
+        },
+        {
+          "title": "Ghost in the Shell",
+          "year": 1995,
+          "score": 8
+        },
+        {
+          "title": "Yojimbo",
+          "year": 1961,
+          "score": 9
+        },
+        {
+          "title": "Redline",
+          "year": 2009,
+          "score": 8
+        },
+        {
+          "title": "No Country for Old Men",
+          "year": 2007,
+          "score": 8
+        },
+        {
+          "title": "Sukiyaki Western Django",
+          "year": 2008,
+          "score": 7
+        },
+        {
+          "title": "The Lone Ranger",
+          "year": 2013,
+          "score": 3
+        },
+        {
+          "title": "The Notebook",
+          "year": 2004,
+          "score": 2
+        },
+        {
+          "title": "Mamma Mia!",
+          "year": 2008,
+          "score": 1
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.0,
+        "spread": 1.0
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "docs-superhero",
+      "username": "cape_and_footnotes",
+      "displayName": "Dev Kapoor",
+      "archetype": "Documentary + superhero fan",
+      "bio": "History teacher by day, MCU completionist by night. Ranks docs and capes on one list.",
+      "tags": [
+        "multi-genre",
+        "documentary",
+        "superhero"
+      ],
+      "genres": {
+        "99": 10,
+        "28": 9,
+        "12": 9,
+        "878": 8,
+        "36": 8,
+        "35": 6,
+        "18": 6,
+        "27": 2,
+        "10749": 2,
+        "37": 3,
+        "10402": 5,
+        "10752": 5
+      },
+      "moods": {
+        "edge-of-seat": 8,
+        "mind-bending": 7,
+        "feel-good": 7,
+        "visually-stunning": 8,
+        "tearjerker": 5
+      },
+      "favorites": [
+        {
+          "title": "The Avengers",
+          "year": 2012
+        },
+        {
+          "title": "Free Solo",
+          "year": 2018
+        },
+        {
+          "title": "Man on Wire",
+          "year": 2008
+        },
+        {
+          "title": "The Dark Knight",
+          "year": 2008
+        },
+        {
+          "title": "Won't You Be My Neighbor?",
+          "year": 2018
+        },
+        {
+          "title": "Spider-Man: Into the Spider-Verse",
+          "year": 2018
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Iron Man",
+          "year": 2008,
+          "score": 9
+        },
+        {
+          "title": "Blackfish",
+          "year": 2013,
+          "score": 8
+        },
+        {
+          "title": "Black Panther",
+          "year": 2017,
+          "score": 9
+        },
+        {
+          "title": "Jiro Dreams of Sushi",
+          "year": 2011,
+          "score": 8
+        },
+        {
+          "title": "Avengers: Endgame",
+          "year": 2019,
+          "score": 9
+        },
+        {
+          "title": "Logan",
+          "year": 2017,
+          "score": 9
+        },
+        {
+          "title": "Hoop Dreams",
+          "year": 1994,
+          "score": 9
+        },
+        {
+          "title": "Green Lantern",
+          "year": 2011,
+          "score": 2
+        },
+        {
+          "title": "Catwoman",
+          "year": 2004,
+          "score": 1
+        },
+        {
+          "title": "The Notebook",
+          "year": 2004,
+          "score": 3
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.3,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "musical-horror",
+      "username": "time_warp_toni",
+      "displayName": "Toni Vance",
+      "archetype": "Musical + horror fan",
+      "bio": "Rocky Horror midnight regular since college. Sweeney Todd is a comfort watch.",
+      "tags": [
+        "multi-genre",
+        "musical",
+        "horror",
+        "cult"
+      ],
+      "genres": {
+        "10402": 10,
+        "27": 10,
+        "35": 8,
+        "14": 7,
+        "53": 6,
+        "10749": 5,
+        "18": 5,
+        "10752": 1,
+        "37": 1,
+        "99": 2,
+        "36": 2,
+        "28": 3
+      },
+      "moods": {
+        "laugh-out-loud": 8,
+        "dark-gritty": 8,
+        "visually-stunning": 8,
+        "feel-good": 6,
+        "edge-of-seat": 6
+      },
+      "favorites": [
+        {
+          "title": "The Rocky Horror Picture Show",
+          "year": 1975
+        },
+        {
+          "title": "Sweeney Todd: The Demon Barber of Fleet Street",
+          "year": 2007
+        },
+        {
+          "title": "Little Shop of Horrors",
+          "year": 1986
+        },
+        {
+          "title": "Phantom of the Paradise",
+          "year": 1974
+        },
+        {
+          "title": "The Nightmare Before Christmas",
+          "year": 1993
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Corpse Bride",
+          "year": 2005,
+          "score": 8
+        },
+        {
+          "title": "Shaun of the Dead",
+          "year": 2004,
+          "score": 8
+        },
+        {
+          "title": "Hedwig and the Angry Inch",
+          "year": 2000,
+          "score": 9
+        },
+        {
+          "title": "Suspiria",
+          "year": 1977,
+          "score": 8
+        },
+        {
+          "title": "Chicago",
+          "year": 2002,
+          "score": 8
+        },
+        {
+          "title": "Beetlejuice",
+          "year": 1988,
+          "score": 8
+        },
+        {
+          "title": "The Phantom of the Opera",
+          "year": 2004,
+          "score": 6
+        },
+        {
+          "title": "Saving Private Ryan",
+          "year": 1998,
+          "score": 3
+        },
+        {
+          "title": "Moneyball",
+          "year": 2011,
+          "score": 2
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.3,
+        "spread": 1.1
+      },
+      "popularity": "niche",
+      "onboarded": true
+    },
+    {
+      "key": "family-war-dad",
+      "username": "bedtime_and_bunkers",
+      "displayName": "Greg Holloway",
+      "archetype": "Family-movie dad who loves war films",
+      "bio": "Pixar with the kids at 6, Band of Brothers after they're asleep. Both make him cry.",
+      "tags": [
+        "multi-genre",
+        "family",
+        "war",
+        "parent"
+      ],
+      "genres": {
+        "10751": 9,
+        "16": 9,
+        "10752": 10,
+        "36": 9,
+        "35": 7,
+        "12": 7,
+        "18": 7,
+        "27": 1,
+        "10749": 3,
+        "10402": 3,
+        "878": 4,
+        "80": 3
+      },
+      "moods": {
+        "feel-good": 8,
+        "tearjerker": 8,
+        "edge-of-seat": 7,
+        "dark-gritty": 6,
+        "cozy": 7,
+        "laugh-out-loud": 6
+      },
+      "favorites": [
+        {
+          "title": "Saving Private Ryan",
+          "year": 1998
+        },
+        {
+          "title": "Toy Story",
+          "year": 1995
+        },
+        {
+          "title": "Finding Nemo",
+          "year": 2003
+        },
+        {
+          "title": "Dunkirk",
+          "year": 2017
+        },
+        {
+          "title": "Paddington 2",
+          "year": 2017
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Paddington",
+          "year": 2014,
+          "score": 9
+        },
+        {
+          "title": "Hacksaw Ridge",
+          "year": 2016,
+          "score": 9
+        },
+        {
+          "title": "Up",
+          "year": 2009,
+          "score": 9
+        },
+        {
+          "title": "1917",
+          "year": 2019,
+          "score": 10
+        },
+        {
+          "title": "Fury",
+          "year": 2014,
+          "score": 8
+        },
+        {
+          "title": "How to Train Your Dragon",
+          "year": 2010,
+          "score": 9
+        },
+        {
+          "title": "The Incredibles",
+          "year": 2004,
+          "score": 9
+        },
+        {
+          "title": "Hereditary",
+          "year": 2018,
+          "score": 1
+        },
+        {
+          "title": "The Emoji Movie",
+          "year": 2017,
+          "score": 2
+        },
+        {
+          "title": "The Room",
+          "year": 2003,
+          "score": 1
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.2,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "scifi-romance",
+      "username": "starcrossed_lena",
+      "displayName": "Lena Moreau",
+      "archetype": "Sci-fi + romance fan",
+      "bio": "Wants love stories that bend time. Cried at Arrival, swooned at Her.",
+      "tags": [
+        "multi-genre",
+        "scifi",
+        "romance"
+      ],
+      "genres": {
+        "878": 10,
+        "10749": 10,
+        "18": 8,
+        "14": 7,
+        "9648": 7,
+        "35": 5,
+        "28": 4,
+        "27": 2,
+        "10752": 1,
+        "37": 1,
+        "80": 2,
+        "99": 2
+      },
+      "moods": {
+        "mind-bending": 9,
+        "tearjerker": 9,
+        "visually-stunning": 8,
+        "cozy": 6,
+        "feel-good": 6,
+        "dark-gritty": 2
+      },
+      "favorites": [
+        {
+          "title": "Eternal Sunshine of the Spotless Mind",
+          "year": 2004
+        },
+        {
+          "title": "Her",
+          "year": 2013
+        },
+        {
+          "title": "Arrival",
+          "year": 2016
+        },
+        {
+          "title": "About Time",
+          "year": 2013
+        },
+        {
+          "title": "WALL·E",
+          "year": 2008
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "The Time Traveler's Wife",
+          "year": 2009,
+          "score": 7
+        },
+        {
+          "title": "Passengers",
+          "year": 2016,
+          "score": 6
+        },
+        {
+          "title": "Interstellar",
+          "year": 2014,
+          "score": 9
+        },
+        {
+          "title": "Annihilation",
+          "year": 2018,
+          "score": 7
+        },
+        {
+          "title": "Ex Machina",
+          "year": 2014,
+          "score": 8
+        },
+        {
+          "title": "Before Sunrise",
+          "year": 1995,
+          "score": 8
+        },
+        {
+          "title": "Everything Everywhere All at Once",
+          "year": 2022,
+          "score": 10
+        },
+        {
+          "title": "Predator",
+          "year": 1987,
+          "score": 2
+        },
+        {
+          "title": "Saw",
+          "year": 2004,
+          "score": 1
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.3,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "comedy-truecrime-podcaster",
+      "username": "murder_and_giggles",
+      "displayName": "Jamie Ruiz",
+      "archetype": "Comedy + true-crime podcaster",
+      "bio": "Co-hosts a podcast where they laugh about murders. It's a coping mechanism, okay?",
+      "tags": [
+        "multi-genre",
+        "comedy",
+        "true-crime"
+      ],
+      "genres": {
+        "35": 10,
+        "80": 10,
+        "99": 9,
+        "9648": 8,
+        "53": 7,
+        "18": 5,
+        "27": 5,
+        "10749": 3,
+        "10751": 2,
+        "10752": 1,
+        "37": 2,
+        "10402": 3
+      },
+      "moods": {
+        "laugh-out-loud": 10,
+        "dark-gritty": 8,
+        "edge-of-seat": 7,
+        "mind-bending": 6,
+        "cozy": 5
+      },
+      "favorites": [
+        {
+          "title": "Fargo",
+          "year": 1996
+        },
+        {
+          "title": "Knives Out",
+          "year": 2019
+        },
+        {
+          "title": "Bernie",
+          "year": 2011
+        },
+        {
+          "title": "In Bruges",
+          "year": 2008
+        },
+        {
+          "title": "Clue",
+          "year": 1985
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Zodiac",
+          "year": 2007,
+          "score": 9
+        },
+        {
+          "title": "Catch Me If You Can",
+          "year": 2002,
+          "score": 9
+        },
+        {
+          "title": "The Nice Guys",
+          "year": 2016,
+          "score": 9
+        },
+        {
+          "title": "Pain & Gain",
+          "year": 2013,
+          "score": 7
+        },
+        {
+          "title": "Game Night",
+          "year": 2018,
+          "score": 8
+        },
+        {
+          "title": "Tucker and Dale vs Evil",
+          "year": 2010,
+          "score": 8
+        },
+        {
+          "title": "The Act of Killing",
+          "year": 2012,
+          "score": 8
+        },
+        {
+          "title": "I, Tonya",
+          "year": 2017,
+          "score": 9
+        },
+        {
+          "title": "The Notebook",
+          "year": 2004,
+          "score": 3
+        },
+        {
+          "title": "The Lord of the Rings: The Return of the King",
+          "year": 2003,
+          "score": 4
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 0.0,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "brand-new",
+      "username": "just_joined_jo",
+      "displayName": "Jo Peterson",
+      "archetype": "Brand-new user",
+      "bio": "Signed up five minutes ago. Likes a good thriller, hasn't rated anything yet.",
+      "tags": [
+        "edge-case",
+        "new-user",
+        "cold-start"
+      ],
+      "genres": {
+        "53": 9,
+        "28": 8,
+        "9648": 8,
+        "35": 6,
+        "18": 5,
+        "27": 4,
+        "10749": 3
+      },
+      "moods": {
+        "edge-of-seat": 8,
+        "mind-bending": 6
+      },
+      "favorites": [
+        {
+          "title": "Gone Girl",
+          "year": 2014
+        },
+        {
+          "title": "The Bourne Identity",
+          "year": 2002
+        },
+        {
+          "title": "Knives Out",
+          "year": 2019
+        }
+      ],
+      "anchorRatings": [],
+      "volume": "none",
+      "rater": {
+        "bias": 0.0,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "never-onboarded",
+      "username": "halfway_hal",
+      "displayName": "Hal Benson",
+      "archetype": "Never finished onboarding",
+      "bio": "Started signing up, got distracted by a notification, never came back.",
+      "tags": [
+        "edge-case",
+        "not-onboarded"
+      ],
+      "genres": {
+        "35": 9,
+        "28": 8,
+        "12": 8,
+        "10751": 6,
+        "16": 5,
+        "27": 2
+      },
+      "moods": {
+        "feel-good": 7
+      },
+      "favorites": [
+        {
+          "title": "Shrek",
+          "year": 2001
+        },
+        {
+          "title": "The Incredibles",
+          "year": 2004
+        },
+        {
+          "title": "Jumanji: Welcome to the Jungle",
+          "year": 2017
+        }
+      ],
+      "anchorRatings": [],
+      "volume": "none",
+      "rater": {
+        "bias": 0.0,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "onboarded": false
+    },
+    {
+      "key": "generous-rater",
+      "username": "everything_is_awesome",
+      "displayName": "Sunny Patel",
+      "archetype": "Generous rater",
+      "bio": "Never met a movie she didn't like. Seven is her idea of a harsh score.",
+      "tags": [
+        "edge-case",
+        "generous-rater"
+      ],
+      "genres": {
+        "35": 9,
+        "10751": 9,
+        "12": 9,
+        "10749": 8,
+        "16": 8,
+        "18": 7,
+        "28": 7,
+        "14": 7,
+        "10402": 7,
+        "27": 5
+      },
+      "moods": {
+        "feel-good": 10,
+        "cozy": 9,
+        "laugh-out-loud": 9,
+        "tearjerker": 8,
+        "visually-stunning": 8
+      },
+      "favorites": [
+        {
+          "title": "Paddington 2",
+          "year": 2017
+        },
+        {
+          "title": "The Princess Bride",
+          "year": 1987
+        },
+        {
+          "title": "Mamma Mia!",
+          "year": 2008
+        },
+        {
+          "title": "Up",
+          "year": 2009
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Frozen",
+          "year": 2013,
+          "score": 10
+        },
+        {
+          "title": "Cars 2",
+          "year": 2011,
+          "score": 8
+        },
+        {
+          "title": "Twilight",
+          "year": 2008,
+          "score": 8
+        },
+        {
+          "title": "Grown Ups",
+          "year": 2010,
+          "score": 8
+        },
+        {
+          "title": "Transformers",
+          "year": 2007,
+          "score": 9
+        },
+        {
+          "title": "The Notebook",
+          "year": 2004,
+          "score": 10
+        },
+        {
+          "title": "Avatar",
+          "year": 2009,
+          "score": 10
+        },
+        {
+          "title": "Catwoman",
+          "year": 2004,
+          "score": 7
+        },
+        {
+          "title": "Elf",
+          "year": 2003,
+          "score": 10
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": 2.0,
+        "spread": 0.5
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "harsh-critic",
+      "username": "two_stars_max",
+      "displayName": "Victor Crane",
+      "archetype": "Harsh critic",
+      "bio": "Freelance film critic. A 7 from him is a rave. Thinks most films are 'fine, I suppose'.",
+      "tags": [
+        "edge-case",
+        "harsh-rater",
+        "critic"
+      ],
+      "genres": {
+        "18": 9,
+        "80": 8,
+        "9648": 8,
+        "36": 7,
+        "35": 5,
+        "53": 6,
+        "10752": 6,
+        "10749": 4,
+        "28": 2,
+        "10751": 1,
+        "16": 3,
+        "14": 2,
+        "878": 4
+      },
+      "moods": {
+        "mind-bending": 8,
+        "dark-gritty": 7,
+        "visually-stunning": 7,
+        "feel-good": 2,
+        "cozy": 2
+      },
+      "favorites": [
+        {
+          "title": "The Godfather",
+          "year": 1972
+        },
+        {
+          "title": "Citizen Kane",
+          "year": 1941
+        },
+        {
+          "title": "Tokyo Story",
+          "year": 1953
+        },
+        {
+          "title": "The Third Man",
+          "year": 1949
+        },
+        {
+          "title": "Chinatown",
+          "year": 1974
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "The Godfather: Part II",
+          "year": 1974,
+          "score": 9
+        },
+        {
+          "title": "Casablanca",
+          "year": 1942,
+          "score": 8
+        },
+        {
+          "title": "Pulp Fiction",
+          "year": 1994,
+          "score": 6
+        },
+        {
+          "title": "The Shawshank Redemption",
+          "year": 1994,
+          "score": 5
+        },
+        {
+          "title": "Forrest Gump",
+          "year": 1994,
+          "score": 3
+        },
+        {
+          "title": "Avatar",
+          "year": 2009,
+          "score": 2
+        },
+        {
+          "title": "La La Land",
+          "year": 2016,
+          "score": 4
+        },
+        {
+          "title": "The Dark Knight",
+          "year": 2008,
+          "score": 5
+        },
+        {
+          "title": "Inception",
+          "year": 2010,
+          "score": 4
+        },
+        {
+          "title": "Moonlight",
+          "year": 2016,
+          "score": 7
+        },
+        {
+          "title": "Avengers: Endgame",
+          "year": 2019,
+          "score": 1
+        },
+        {
+          "title": "The Greatest Showman",
+          "year": 2017,
+          "score": 1
+        },
+        {
+          "title": "Parasite",
+          "year": 2019,
+          "score": 8
+        }
+      ],
+      "volume": "heavy",
+      "rater": {
+        "bias": -2.0,
+        "spread": 1.0
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "flat-six",
+      "username": "solid_six_steve",
+      "displayName": "Steve Mulligan",
+      "archetype": "Flat everything-is-a-6 rater",
+      "bio": "Watches whatever's on. Everything is 'yeah, it was alright'.",
+      "tags": [
+        "edge-case",
+        "flat-rater"
+      ],
+      "genres": {
+        "28": 8,
+        "35": 8,
+        "53": 8,
+        "18": 6,
+        "878": 6,
+        "80": 6,
+        "10749": 5,
+        "27": 5
+      },
+      "moods": {
+        "edge-of-seat": 6,
+        "laugh-out-loud": 6,
+        "feel-good": 6
+      },
+      "favorites": [
+        {
+          "title": "Jurassic Park",
+          "year": 1993
+        },
+        {
+          "title": "The Fugitive",
+          "year": 1993
+        },
+        {
+          "title": "Men in Black",
+          "year": 1997
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Titanic",
+          "year": 1997,
+          "score": 6
+        },
+        {
+          "title": "The Matrix",
+          "year": 1999,
+          "score": 6
+        },
+        {
+          "title": "Shrek",
+          "year": 2001,
+          "score": 6
+        },
+        {
+          "title": "Avatar",
+          "year": 2009,
+          "score": 6
+        },
+        {
+          "title": "Mamma Mia!",
+          "year": 2008,
+          "score": 6
+        },
+        {
+          "title": "The Godfather",
+          "year": 1972,
+          "score": 6
+        },
+        {
+          "title": "Saw",
+          "year": 2004,
+          "score": 6
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.0,
+        "spread": 0.3
+      },
+      "popularity": "mainstream",
+      "onboarded": true
+    },
+    {
+      "key": "contrarian",
+      "username": "actually_overrated",
+      "displayName": "Quinn Abernathy",
+      "archetype": "Contrarian",
+      "bio": "If it made a billion dollars, it's bad. Has a hot take for every blockbuster.",
+      "tags": [
+        "edge-case",
+        "contrarian",
+        "niche"
+      ],
+      "genres": {
+        "18": 8,
+        "27": 8,
+        "35": 8,
+        "878": 7,
+        "9648": 7,
+        "80": 6,
+        "99": 7,
+        "28": 2,
+        "10751": 1,
+        "12": 3,
+        "14": 3,
+        "16": 4,
+        "10749": 3
+      },
+      "moods": {
+        "mind-bending": 9,
+        "dark-gritty": 8,
+        "laugh-out-loud": 6,
+        "feel-good": 2,
+        "visually-stunning": 4
+      },
+      "favorites": [
+        {
+          "title": "Primer",
+          "year": 2004
+        },
+        {
+          "title": "Synecdoche, New York",
+          "year": 2008
+        },
+        {
+          "title": "Eraserhead",
+          "year": 1977
+        },
+        {
+          "title": "Repo Man",
+          "year": 1984
+        },
+        {
+          "title": "Under the Skin",
+          "year": 2013
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Titanic",
+          "year": 1997,
+          "score": 2
+        },
+        {
+          "title": "Avatar",
+          "year": 2009,
+          "score": 1
+        },
+        {
+          "title": "Avengers: Endgame",
+          "year": 2019,
+          "score": 1
+        },
+        {
+          "title": "The Lion King",
+          "year": 1994,
+          "score": 3
+        },
+        {
+          "title": "Star Wars: Episode IV - A New Hope",
+          "year": 1977,
+          "score": 3
+        },
+        {
+          "title": "Forrest Gump",
+          "year": 1994,
+          "score": 1
+        },
+        {
+          "title": "Jurassic World",
+          "year": 2015,
+          "score": 1
+        },
+        {
+          "title": "Barbie",
+          "year": 2023,
+          "score": 2
+        },
+        {
+          "title": "Top Gun: Maverick",
+          "year": 2022,
+          "score": 2
+        },
+        {
+          "title": "Frozen",
+          "year": 2013,
+          "score": 2
+        },
+        {
+          "title": "The Shawshank Redemption",
+          "year": 1994,
+          "score": 4
+        },
+        {
+          "title": "Showgirls",
+          "year": 1995,
+          "score": 8
+        },
+        {
+          "title": "Southland Tales",
+          "year": 2006,
+          "score": 9
+        }
+      ],
+      "volume": "medium",
+      "rater": {
+        "bias": -0.5,
+        "spread": 1.4
+      },
+      "popularity": "niche",
+      "onboarded": true
+    },
+    {
+      "key": "omnivore",
+      "username": "watches_it_all",
+      "displayName": "Riley Chen",
+      "archetype": "Omnivore",
+      "bio": "Logs 400 films a year across every genre. Truly does not have a type.",
+      "tags": [
+        "edge-case",
+        "omnivore",
+        "power-user"
+      ],
+      "genres": {
+        "28": 8,
+        "12": 8,
+        "16": 8,
+        "35": 8,
+        "80": 8,
+        "99": 8,
+        "18": 8,
+        "10751": 7,
+        "14": 8,
+        "36": 8,
+        "27": 8,
+        "10402": 8,
+        "9648": 8,
+        "10749": 8,
+        "878": 9,
+        "10770": 6,
+        "53": 8,
+        "10752": 8,
+        "37": 8
+      },
+      "moods": {
+        "mind-bending": 8,
+        "cozy": 8,
+        "laugh-out-loud": 8,
+        "edge-of-seat": 8,
+        "tearjerker": 8,
+        "visually-stunning": 8,
+        "dark-gritty": 8,
+        "feel-good": 8
+      },
+      "favorites": [
+        {
+          "title": "Parasite",
+          "year": 2019
+        },
+        {
+          "title": "Spirited Away",
+          "year": 2001
+        },
+        {
+          "title": "Mad Max: Fury Road",
+          "year": 2015
+        },
+        {
+          "title": "Casablanca",
+          "year": 1942
+        },
+        {
+          "title": "Paddington 2",
+          "year": 2017
+        },
+        {
+          "title": "Alien",
+          "year": 1979
+        },
+        {
+          "title": "Unforgiven",
+          "year": 1992
+        },
+        {
+          "title": "Amélie",
+          "year": 2001
+        },
+        {
+          "title": "Hoop Dreams",
+          "year": 1994
+        },
+        {
+          "title": "When Harry Met Sally...",
+          "year": 1989
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "The Thing",
+          "year": 1982,
+          "score": 9
+        },
+        {
+          "title": "Singin' in the Rain",
+          "year": 1952,
+          "score": 9
+        },
+        {
+          "title": "Seven Samurai",
+          "year": 1954,
+          "score": 9
+        },
+        {
+          "title": "Toy Story",
+          "year": 1995,
+          "score": 9
+        },
+        {
+          "title": "Heat",
+          "year": 1995,
+          "score": 9
+        },
+        {
+          "title": "Clue",
+          "year": 1985,
+          "score": 8
+        },
+        {
+          "title": "Saving Private Ryan",
+          "year": 1998,
+          "score": 8
+        },
+        {
+          "title": "Halloween",
+          "year": 1978,
+          "score": 8
+        },
+        {
+          "title": "Dune: Part Two",
+          "year": 2024,
+          "score": 9
+        },
+        {
+          "title": "Barbie",
+          "year": 2023,
+          "score": 8
+        },
+        {
+          "title": "Everything Everywhere All at Once",
+          "year": 2022,
+          "score": 9
+        },
+        {
+          "title": "Free Solo",
+          "year": 2018,
+          "score": 8
+        },
+        {
+          "title": "The Notebook",
+          "year": 2004,
+          "score": 6
+        },
+        {
+          "title": "Cats",
+          "year": 2019,
+          "score": 3
+        },
+        {
+          "title": "Transformers: Age of Extinction",
+          "year": 2014,
+          "score": 3
+        }
+      ],
+      "volume": "power",
+      "rater": {
+        "bias": 0.3,
+        "spread": 1.0
+      },
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "strict-parent",
+      "username": "screen_time_sarah",
+      "displayName": "Sarah Lindgren",
+      "archetype": "Parent with strict comfort cap",
+      "bio": "Watches only what her 5- and 7-year-old can watch. G-rated, nothing scary.",
+      "tags": [
+        "edge-case",
+        "comfort-cap",
+        "family",
+        "parent"
+      ],
+      "genres": {
+        "10751": 10,
+        "16": 10,
+        "35": 8,
+        "10402": 7,
+        "14": 6,
+        "12": 6,
+        "27": 1,
+        "53": 1,
+        "80": 1,
+        "10752": 1
+      },
+      "moods": {
+        "feel-good": 10,
+        "cozy": 10,
+        "laugh-out-loud": 8,
+        "dark-gritty": 1,
+        "edge-of-seat": 1
+      },
+      "favorites": [
+        {
+          "title": "Toy Story",
+          "year": 1995
+        },
+        {
+          "title": "Finding Nemo",
+          "year": 2003
+        },
+        {
+          "title": "Cars",
+          "year": 2006
+        },
+        {
+          "title": "My Neighbor Totoro",
+          "year": 1988
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Winnie the Pooh",
+          "year": 2011,
+          "score": 9
+        },
+        {
+          "title": "Monsters, Inc.",
+          "year": 2001,
+          "score": 9
+        },
+        {
+          "title": "Ratatouille",
+          "year": 2007,
+          "score": 8
+        },
+        {
+          "title": "WALL·E",
+          "year": 2008,
+          "score": 9
+        },
+        {
+          "title": "Inside Out",
+          "year": 2015,
+          "score": 9
+        },
+        {
+          "title": "Up",
+          "year": 2009,
+          "score": 8
+        },
+        {
+          "title": "Paddington",
+          "year": 2014,
+          "score": 9
+        },
+        {
+          "title": "Coraline",
+          "year": 2009,
+          "score": 2
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.5,
+        "spread": 0.8
+      },
+      "popularity": "mainstream",
+      "comfort": {
+        "maxCertification": "G",
+        "contentLimits": {
+          "VIOLENCE": "MILD",
+          "FRIGHTENING": "MILD",
+          "SEXUAL": "NONE",
+          "LANGUAGE": "NONE",
+          "DRUGS": "NONE"
+        },
+        "allowUnrated": false
+      },
+      "onboarded": true
+    },
+    {
+      "key": "sensitive-viewer",
+      "username": "no_jumpscares_please",
+      "displayName": "Noor Haddad",
+      "archetype": "Sensitive viewer (no scares)",
+      "bio": "Adult, loves heavy dramas and romances, but anything frightening gives her nightmares.",
+      "tags": [
+        "edge-case",
+        "comfort-cap",
+        "sensitive"
+      ],
+      "genres": {
+        "18": 10,
+        "10749": 9,
+        "35": 8,
+        "36": 8,
+        "10402": 7,
+        "10751": 6,
+        "27": 1,
+        "53": 2,
+        "9648": 4,
+        "10752": 4
+      },
+      "moods": {
+        "tearjerker": 9,
+        "cozy": 9,
+        "feel-good": 8,
+        "visually-stunning": 7,
+        "edge-of-seat": 1,
+        "dark-gritty": 2
+      },
+      "favorites": [
+        {
+          "title": "The Shawshank Redemption",
+          "year": 1994
+        },
+        {
+          "title": "Brooklyn",
+          "year": 2015
+        },
+        {
+          "title": "Pride & Prejudice",
+          "year": 2005
+        },
+        {
+          "title": "Call Me by Your Name",
+          "year": 2017
+        },
+        {
+          "title": "Little Women",
+          "year": 2019
+        }
+      ],
+      "anchorRatings": [
+        {
+          "title": "Atonement",
+          "year": 2007,
+          "score": 9
+        },
+        {
+          "title": "Carol",
+          "year": 2015,
+          "score": 8
+        },
+        {
+          "title": "The Holdovers",
+          "year": 2023,
+          "score": 9
+        },
+        {
+          "title": "Past Lives",
+          "year": 2023,
+          "score": 9
+        },
+        {
+          "title": "Manchester by the Sea",
+          "year": 2016,
+          "score": 8
+        },
+        {
+          "title": "A Quiet Place",
+          "year": 2018,
+          "score": 1
+        },
+        {
+          "title": "The Conjuring",
+          "year": 2013,
+          "score": 1
+        },
+        {
+          "title": "Green Book",
+          "year": 2018,
+          "score": 8
+        }
+      ],
+      "volume": "light",
+      "rater": {
+        "bias": 0.0,
+        "spread": 1.0
+      },
+      "popularity": "mainstream",
+      "comfort": {
+        "maxCertification": null,
+        "contentLimits": {
+          "FRIGHTENING": "MILD"
+        },
+        "allowUnrated": true
+      },
+      "onboarded": true
+    }
+  ]
+}

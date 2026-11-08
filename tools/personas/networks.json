@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "about": "Fake social networks for the local test personas. Clusters become complete friend graphs (earlier member sends the request). See networks.py for the format and rules.",
+  "clusters": [
+    {
+      "name": "Alvarez family",
+      "kind": "family",
+      "members": ["disney-mom", "family-war-dad", "mcu-teen", "western-grandpa"],
+      "close": [["disney-mom", "family-war-dad"], ["mcu-teen", "western-grandpa"]]
+    },
+    {
+      "name": "Film school friends",
+      "kind": "film-school",
+      "members": ["film-bro", "a24-hipster", "world-cinephile", "nolan-stan", "oscar-completionist"],
+      "close": [["film-bro", "nolan-stan"]]
+    },
+    {
+      "name": "Office crew",
+      "kind": "office",
+      "members": ["romcom-lover", "true-crime-thriller", "hard-scifi-engineer", "doc-nerd", "sports-dad", "whodunit-lover", "comedy-truecrime-podcaster", "flat-six"],
+      "close": [["true-crime-thriller", "comedy-truecrime-podcaster"]]
+    },
+    {
+      "name": "College roommates",
+      "kind": "roommates",
+      "members": ["stoner-comedy", "anime-ghibli", "lotr-fantasy", "eighties-kid", "cult-trash"],
+      "close": [["stoner-comedy", "lotr-fantasy"]]
+    },
+    {
+      "name": "Horror club",
+      "kind": "club",
+      "members": ["horror-fanatic", "cult-trash", "halloween-disney-mom", "slasher-romcom-teen", "musical-horror", "harsh-critic"]
+    },
+    {
+      "name": "Book-club moms",
+      "kind": "book-club",
+      "members": ["hallmark-cozy", "austen-period-drama", "halloween-disney-mom", "disney-mom", "pixar-crier", "strict-parent", "sensitive-viewer"],
+      "close": [["hallmark-cozy", "austen-period-drama"]]
+    },
+    {
+      "name": "Classic film society",
+      "kind": "society",
+      "members": ["classic-hollywood", "war-history-buff", "western-grandpa", "anime-western"]
+    },
+    {
+      "name": "Dads' fantasy league",
+      "kind": "sports",
+      "members": ["action-dad", "sports-dad", "family-war-dad", "eighties-kid"]
+    }
+  ],
+  "edges": [
+    {"a": "disney-mom", "b": "horror-fanatic", "type": "friend", "note": "next-door neighbours"},
+    {"a": "disney-mom", "b": "film-bro", "type": "friend", "note": "cousins"},
+    {"a": "omnivore", "b": "film-bro", "type": "friend", "note": "the connector"},
+    {"a": "omnivore", "b": "romcom-lover", "type": "friend"},
+    {"a": "omnivore", "b": "horror-fanatic", "type": "friend"},
+    {"a": "omnivore", "b": "anime-ghibli", "type": "friend", "close": "b", "note": "one-way close flag"},
+    {"a": "docs-superhero", "b": "mcu-teen", "type": "friend", "note": "cool uncle"},
+    {"a": "docs-superhero", "b": "doc-nerd", "type": "friend"},
+    {"a": "scifi-romance", "b": "hard-scifi-engineer", "type": "friend", "close": true, "note": "couple"},
+    {"a": "scifi-romance", "b": "romcom-lover", "type": "friend"},
+    {"a": "contrarian", "b": "a24-hipster", "type": "friend"},
+    {"a": "generous-rater", "b": "disney-mom", "type": "friend", "close": "a", "note": "one-way close flag"},
+    {"a": "generous-rater", "b": "musical-theatre-kid", "type": "friend"},
+    {"a": "musical-theatre-kid", "b": "slasher-romcom-teen", "type": "friend", "note": "same school"},
+    {"a": "musical-theatre-kid", "b": "mcu-teen", "type": "friend"},
+    {"a": "strict-parent", "b": "slasher-romcom-teen", "type": "friend", "note": "babysitter"},
+    {"a": "contrarian", "b": "film-bro", "type": "pending", "note": "film-bro never answered"},
+    {"a": "hallmark-cozy", "b": "horror-fanatic", "type": "pending"},
+    {"a": "mcu-teen", "b": "film-bro", "type": "pending"},
+    {"a": "doc-nerd", "b": "classic-hollywood", "type": "pending"},
+    {"a": "harsh-critic", "b": "generous-rater", "type": "block", "note": "can't stand the 10/10s"},
+    {"a": "a24-hipster", "b": "mcu-teen", "type": "block"}
+  ],
+  "isolates": ["brand-new", "never-onboarded"],
+  "groups": [
+    {"name": "Thesis Screening", "emoji": "🎬", "creator": "film-bro", "members": ["a24-hipster", "world-cinephile", "nolan-stan"], "intent": "easy", "note": "film-school friends, overlapping auteur/drama taste"},
+    {"name": "Fright Club", "emoji": "🔪", "creator": "horror-fanatic", "members": ["cult-trash", "musical-horror", "slasher-romcom-teen"], "intent": "easy", "note": "everyone rates horror 9-10"},
+    {"name": "Cozy Book Club", "emoji": "📚", "creator": "hallmark-cozy", "members": ["austen-period-drama", "pixar-crier"], "intent": "easy", "note": "romance / feel-good overlap"},
+    {"name": "Chaos Movie Night", "emoji": "🌀", "creator": "disney-mom", "members": ["horror-fanatic", "film-bro"], "intent": "hard", "note": "Disney mom + horror fan + film bro: almost no shared genre"},
+    {"name": "Sleepover Standoff", "emoji": "🧸", "creator": "strict-parent", "members": ["halloween-disney-mom", "slasher-romcom-teen", "sensitive-viewer"], "intent": "hard", "note": "G-cap parent + no-scares viewer vs slasher/horror fans"},
+    {"name": "Family Movie Night", "emoji": "🍿", "creator": "disney-mom", "members": ["family-war-dad", "mcu-teen", "western-grandpa"], "intent": "hard", "note": "three generations, a PG-13 teen"},
+    {"name": "Office Happy Hour", "emoji": "🍻", "creator": "romcom-lover", "members": ["true-crime-thriller", "hard-scifi-engineer", "doc-nerd", "sports-dad", "whodunit-lover", "comedy-truecrime-podcaster", "flat-six"], "intent": "big", "note": "8 mixed tastes"},
+    {"name": "Date Night", "emoji": "💑", "creator": "disney-mom", "members": ["family-war-dad"], "intent": "pair"},
+    {"name": "Couch Co-op", "emoji": "🎮", "creator": "stoner-comedy", "members": ["anime-ghibli"], "intent": "pair"}
+  ]
+}

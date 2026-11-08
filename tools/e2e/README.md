@@ -32,6 +32,12 @@ Bugs these have caught so far (2026-10-17):
 - **ML calls failed with 422.** The JDK HTTP client's HTTP/2 upgrade made uvicorn drop request bodies. Fixed by pinning HTTP/1.1 in `RestClients`.
 - **Capped groups got empty sessions.** List endpoints never cached certifications, so groups with a certification cap got zero results. Fixed by catalog certification enrichment.
 
+## Test personas
+
+For 44 realistic seeded accounts with taste profiles, rating histories, friend networks and groups
+(Disney mom, film bro, a G-capped parent, cross-genre combos, …), see `tools/personas/README.md`
+(`seed.py`, logins in `tools/personas/accounts.csv`, who's who in `tools/personas/ROSTER.md`).
+
 ## Local browser test accounts
 Throwaway accounts that exist only in the local Supabase stack (`supabase start`), used for manual and
 Claude-in-Chrome browser runs against `http://localhost:8081`. Reset with `supabase db reset`.

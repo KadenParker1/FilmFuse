@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "password": "ff-persona-local-1",
+  "emailDomain": "filmfuse.test",
+  "personas": [
+    {
+      "key": "disney-mom",
+      "username": "magic_kingdom_meg",
+      "displayName": "Meg Alvarez",
+      "archetype": "Disney mom",
+      "bio": "Two kids under 8, annual passholder, cries at every Pixar short.",
+      "tags": ["family", "animation", "comfort-capped"],
+      "genres": {"16": 10, "10751": 10, "10402": 8, "12": 7, "35": 7, "27": 1, "53": 2},
+      "moods": {"feel-good": 10, "cozy": 9, "tearjerker": 8, "dark-gritty": 1},
+      "favorites": [
+        {"title": "Moana", "year": 2016, "tmdbId": 277834},
+        {"title": "Toy Story", "year": 1995, "tmdbId": 862},
+        {"title": "Coco", "year": 2017, "tmdbId": 354912},
+        {"title": "The Lion King", "year": 1994, "tmdbId": 8587}
+      ],
+      "anchorRatings": [
+        {"title": "Frozen", "year": 2013, "score": 9, "tmdbId": 109445},
+        {"title": "Up", "year": 2009, "score": 10, "tmdbId": 14160},
+        {"title": "Hereditary", "year": 2018, "score": 2, "tmdbId": 493922}
+      ],
+      "volume": "medium",
+      "rater": {"bias": 1.5, "spread": 0.8},
+      "era": {"from": 1990, "to": 2026},
+      "popularity": "mainstream",
+      "comfort": {"maxCertification": "PG", "contentLimits": {"VIOLENCE": "MILD", "FRIGHTENING": "MILD"}, "allowUnrated": false},
+      "onboarded": true
+    },
+    {
+      "key": "horror-fanatic",
+      "username": "final_girl_frankie",
+      "displayName": "Frankie Doyle",
+      "archetype": "Horror fanatic",
+      "bio": "Has seen every Friday the 13th. Twice. Rates harshly, \"jump scares are a crutch\".",
+      "tags": ["horror", "harsh-rater", "niche"],
+      "genres": {"27": 10, "53": 9, "9648": 8, "80": 7, "10749": 2, "10751": 1, "16": 3},
+      "moods": {"edge-of-seat": 10, "dark-gritty": 9, "feel-good": 2},
+      "favorites": [
+        {"title": "The Shining", "year": 1980, "tmdbId": 694},
+        {"title": "Hereditary", "year": 2018, "tmdbId": 493922},
+        {"title": "The Thing", "year": 1982, "tmdbId": 1091}
+      ],
+      "anchorRatings": [
+        {"title": "Get Out", "year": 2017, "score": 9, "tmdbId": 419430},
+        {"title": "The Notebook", "year": 2004, "score": 2, "tmdbId": 11036}
+      ],
+      "volume": "heavy",
+      "rater": {"bias": -1.5, "spread": 1.2},
+      "era": {"from": 1970, "to": 2026},
+      "popularity": "niche",
+      "onboarded": true
+    },
+    {
+      "key": "film-bro",
+      "username": "tyler_durden_fan",
+      "displayName": "Chad Becker",
+      "archetype": "Film bro",
+      "bio": "Letterboxd four-favourites are all Fincher. Will explain the ending to you.",
+      "tags": ["crime", "drama", "mainstream-prestige"],
+      "genres": {"18": 9, "80": 9, "53": 8, "28": 7, "878": 7, "10749": 3, "10751": 2},
+      "moods": {"mind-bending": 9, "dark-gritty": 9},
+      "favorites": [
+        {"title": "Fight Club", "year": 1999, "tmdbId": 550},
+        {"title": "Pulp Fiction", "year": 1994, "tmdbId": 680},
+        {"title": "The Dark Knight", "year": 2008, "tmdbId": 155},
+        {"title": "Crouching Tiger, Hidden Dragon", "year": 2000, "tmdbId": 146}
+      ],
+      "anchorRatings": [],
+      "volume": "light",
+      "rater": {"bias": 0.0, "spread": 1.0},
+      "popularity": "mixed",
+      "onboarded": true
+    },
+    {
+      "key": "mcu-teen",
+      "username": "webhead_jayden",
+      "displayName": "Jayden Alvarez",
+      "archetype": "MCU teen",
+      "bio": "14. Has opinions about the multiverse.",
+      "tags": ["teen", "superhero", "not-onboarded", "comfort-capped"],
+      "genres": {"28": 10, "12": 9, "878": 9, "35": 7, "18": 3},
+      "moods": {},
+      "favorites": [
+        {"title": "Avengers: Endgame", "year": 2019, "tmdbId": 299534},
+        {"title": "Spider-Man: Into the Spider-Verse", "year": 2018, "tmdbId": 324857},
+        {"title": "Black Panther", "year": 2018, "tmdbId": 284054}
+      ],
+      "anchorRatings": [],
+      "volume": "none",
+      "rater": {"bias": 0.5, "spread": 1.0},
+      "popularity": "mainstream",
+      "comfort": {"maxCertification": "PG_13", "contentLimits": {}, "allowUnrated": true},
+      "onboarded": false
+    },
+    {
+      "key": "hallmark-fan",
+      "username": "cozy_christmas_carol",
+      "displayName": "Carol Whitfield",
+      "archetype": "Hallmark fan",
+      "bio": "Small town, big city girl, one snowy weekend. Every time.",
+      "tags": ["romance", "flat-rater", "g-cap"],
+      "genres": {"10749": 10, "10751": 9, "35": 8, "10770": 9, "27": 1, "80": 2},
+      "moods": {"cozy": 10, "feel-good": 10},
+      "favorites": [
+        {"title": "The Holiday", "year": 2006, "tmdbId": 1581},
+        {"title": "Love Actually", "year": 2003, "tmdbId": 508},
+        {"title": "You've Got Mail", "year": 1998, "tmdbId": 9489}
+      ],
+      "anchorRatings": [
+        {"title": "Notting Hill", "year": 1999, "score": 8, "tmdbId": 509}
+      ],
+      "volume": "light",
+      "rater": {"bias": 1.0, "spread": 0.4},
+      "era": {"from": 1985, "to": 2026},
+      "popularity": "mainstream",
+      "comfort": {"maxCertification": "G", "contentLimits": {"SEXUAL": "NONE", "LANGUAGE": "MILD"}, "allowUnrated": false},
+      "onboarded": true
+    }
+  ]
+}

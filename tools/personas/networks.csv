@@ -1,0 +1,125 @@
+﻿a,b,type,a_username,b_username,detail,source
+contrarian,a24-hipster,friend,actually_overrated,slow_cinema_wren,,edge
+film-bro,a24-hipster,friend,kubrick_stare,slow_cinema_wren,,Film school friends
+a24-hipster,nolan-stan,friend,slow_cinema_wren,tenet_backwards,,Film school friends
+a24-hipster,oscar-completionist,friend,slow_cinema_wren,best_picture_bea,,Film school friends
+a24-hipster,world-cinephile,friend,slow_cinema_wren,subtitle_sofia,,Film school friends
+action-dad,eighties-kid,friend,yippee_ki_yay_rick,rad_tubular_tina,,Dads' fantasy league
+action-dad,family-war-dad,friend,yippee_ki_yay_rick,bedtime_and_bunkers,,Dads' fantasy league
+action-dad,sports-dad,friend,yippee_ki_yay_rick,fourth_and_long_ed,,Dads' fantasy league
+anime-ghibli,cult-trash,friend,totoro_umbrella,so_bad_its_good,,College roommates
+anime-ghibli,eighties-kid,friend,totoro_umbrella,rad_tubular_tina,,College roommates
+anime-ghibli,lotr-fantasy,friend,totoro_umbrella,second_breakfast_sam,,College roommates
+omnivore,anime-ghibli,close,watches_it_all,totoro_umbrella,close friends (anime-ghibli only); one-way close flag,edge
+stoner-comedy,anime-ghibli,friend,couch_lock_chaz,totoro_umbrella,,College roommates
+classic-hollywood,anime-western,friend,nitrate_nora,spike_and_the_drifter,,Classic film society
+war-history-buff,anime-western,friend,flanking_frank,spike_and_the_drifter,,Classic film society
+western-grandpa,anime-western,friend,dusty_trail_earl,spike_and_the_drifter,,Classic film society
+austen-period-drama,disney-mom,friend,pemberley_or_bust,magic_kingdom_meg,,Book-club moms
+hallmark-cozy,austen-period-drama,close,cocoa_and_cardigans,pemberley_or_bust,close friends (both),Book-club moms
+austen-period-drama,halloween-disney-mom,friend,pemberley_or_bust,spooky_mouse_mom,,Book-club moms
+austen-period-drama,pixar-crier,friend,pemberley_or_bust,ugly_cry_ollie,,Book-club moms
+austen-period-drama,sensitive-viewer,friend,pemberley_or_bust,no_jumpscares_please,,Book-club moms
+austen-period-drama,strict-parent,friend,pemberley_or_bust,screen_time_sarah,,Book-club moms
+classic-hollywood,war-history-buff,friend,nitrate_nora,flanking_frank,,Classic film society
+classic-hollywood,western-grandpa,friend,nitrate_nora,dusty_trail_earl,,Classic film society
+doc-nerd,comedy-truecrime-podcaster,friend,verite_vik,murder_and_giggles,,Office crew
+comedy-truecrime-podcaster,flat-six,friend,murder_and_giggles,solid_six_steve,,Office crew
+hard-scifi-engineer,comedy-truecrime-podcaster,friend,delta_v_priya,murder_and_giggles,,Office crew
+romcom-lover,comedy-truecrime-podcaster,friend,meet_cute_maya,murder_and_giggles,,Office crew
+sports-dad,comedy-truecrime-podcaster,friend,fourth_and_long_ed,murder_and_giggles,,Office crew
+true-crime-thriller,comedy-truecrime-podcaster,close,cold_case_carla,murder_and_giggles,close friends (both),Office crew
+whodunit-lover,comedy-truecrime-podcaster,friend,little_grey_cells,murder_and_giggles,,Office crew
+eighties-kid,cult-trash,friend,rad_tubular_tina,so_bad_its_good,,College roommates
+cult-trash,halloween-disney-mom,friend,so_bad_its_good,spooky_mouse_mom,,Horror club
+cult-trash,harsh-critic,friend,so_bad_its_good,two_stars_max,,Horror club
+horror-fanatic,cult-trash,friend,final_girl_dana,so_bad_its_good,,Horror club
+lotr-fantasy,cult-trash,friend,second_breakfast_sam,so_bad_its_good,,College roommates
+cult-trash,musical-horror,friend,so_bad_its_good,time_warp_toni,,Horror club
+cult-trash,slasher-romcom-teen,friend,so_bad_its_good,ghostface_xoxo,,Horror club
+stoner-comedy,cult-trash,friend,couch_lock_chaz,so_bad_its_good,,College roommates
+disney-mom,family-war-dad,close,magic_kingdom_meg,bedtime_and_bunkers,close friends (both),Alvarez family
+disney-mom,film-bro,friend,magic_kingdom_meg,kubrick_stare,cousins,edge
+generous-rater,disney-mom,close,everything_is_awesome,magic_kingdom_meg,close friends (generous-rater only); one-way close flag,edge
+hallmark-cozy,disney-mom,friend,cocoa_and_cardigans,magic_kingdom_meg,,Book-club moms
+halloween-disney-mom,disney-mom,friend,spooky_mouse_mom,magic_kingdom_meg,,Book-club moms
+disney-mom,horror-fanatic,friend,magic_kingdom_meg,final_girl_dana,next-door neighbours,edge
+disney-mom,mcu-teen,friend,magic_kingdom_meg,webhead_jayden,,Alvarez family
+disney-mom,pixar-crier,friend,magic_kingdom_meg,ugly_cry_ollie,,Book-club moms
+disney-mom,sensitive-viewer,friend,magic_kingdom_meg,no_jumpscares_please,,Book-club moms
+disney-mom,strict-parent,friend,magic_kingdom_meg,screen_time_sarah,,Book-club moms
+disney-mom,western-grandpa,friend,magic_kingdom_meg,dusty_trail_earl,,Alvarez family
+docs-superhero,doc-nerd,friend,cape_and_footnotes,verite_vik,,edge
+doc-nerd,flat-six,friend,verite_vik,solid_six_steve,,Office crew
+hard-scifi-engineer,doc-nerd,friend,delta_v_priya,verite_vik,,Office crew
+romcom-lover,doc-nerd,friend,meet_cute_maya,verite_vik,,Office crew
+doc-nerd,sports-dad,friend,verite_vik,fourth_and_long_ed,,Office crew
+true-crime-thriller,doc-nerd,friend,cold_case_carla,verite_vik,,Office crew
+doc-nerd,whodunit-lover,friend,verite_vik,little_grey_cells,,Office crew
+docs-superhero,mcu-teen,friend,cape_and_footnotes,webhead_jayden,cool uncle,edge
+family-war-dad,eighties-kid,friend,bedtime_and_bunkers,rad_tubular_tina,,Dads' fantasy league
+lotr-fantasy,eighties-kid,friend,second_breakfast_sam,rad_tubular_tina,,College roommates
+sports-dad,eighties-kid,friend,fourth_and_long_ed,rad_tubular_tina,,Dads' fantasy league
+stoner-comedy,eighties-kid,friend,couch_lock_chaz,rad_tubular_tina,,College roommates
+family-war-dad,mcu-teen,friend,bedtime_and_bunkers,webhead_jayden,,Alvarez family
+sports-dad,family-war-dad,friend,fourth_and_long_ed,bedtime_and_bunkers,,Dads' fantasy league
+family-war-dad,western-grandpa,friend,bedtime_and_bunkers,dusty_trail_earl,,Alvarez family
+film-bro,nolan-stan,close,kubrick_stare,tenet_backwards,close friends (both),Film school friends
+omnivore,film-bro,friend,watches_it_all,kubrick_stare,the connector,edge
+film-bro,oscar-completionist,friend,kubrick_stare,best_picture_bea,,Film school friends
+film-bro,world-cinephile,friend,kubrick_stare,subtitle_sofia,,Film school friends
+hard-scifi-engineer,flat-six,friend,delta_v_priya,solid_six_steve,,Office crew
+romcom-lover,flat-six,friend,meet_cute_maya,solid_six_steve,,Office crew
+sports-dad,flat-six,friend,fourth_and_long_ed,solid_six_steve,,Office crew
+true-crime-thriller,flat-six,friend,cold_case_carla,solid_six_steve,,Office crew
+whodunit-lover,flat-six,friend,little_grey_cells,solid_six_steve,,Office crew
+generous-rater,musical-theatre-kid,friend,everything_is_awesome,jazz_hands_jess,,edge
+hallmark-cozy,halloween-disney-mom,friend,cocoa_and_cardigans,spooky_mouse_mom,,Book-club moms
+hallmark-cozy,pixar-crier,friend,cocoa_and_cardigans,ugly_cry_ollie,,Book-club moms
+hallmark-cozy,sensitive-viewer,friend,cocoa_and_cardigans,no_jumpscares_please,,Book-club moms
+hallmark-cozy,strict-parent,friend,cocoa_and_cardigans,screen_time_sarah,,Book-club moms
+halloween-disney-mom,harsh-critic,friend,spooky_mouse_mom,two_stars_max,,Horror club
+horror-fanatic,halloween-disney-mom,friend,final_girl_dana,spooky_mouse_mom,,Horror club
+halloween-disney-mom,musical-horror,friend,spooky_mouse_mom,time_warp_toni,,Horror club
+halloween-disney-mom,pixar-crier,friend,spooky_mouse_mom,ugly_cry_ollie,,Book-club moms
+halloween-disney-mom,sensitive-viewer,friend,spooky_mouse_mom,no_jumpscares_please,,Book-club moms
+halloween-disney-mom,slasher-romcom-teen,friend,spooky_mouse_mom,ghostface_xoxo,,Horror club
+halloween-disney-mom,strict-parent,friend,spooky_mouse_mom,screen_time_sarah,,Book-club moms
+romcom-lover,hard-scifi-engineer,friend,meet_cute_maya,delta_v_priya,,Office crew
+scifi-romance,hard-scifi-engineer,close,starcrossed_lena,delta_v_priya,close friends (both); couple,edge
+hard-scifi-engineer,sports-dad,friend,delta_v_priya,fourth_and_long_ed,,Office crew
+true-crime-thriller,hard-scifi-engineer,friend,cold_case_carla,delta_v_priya,,Office crew
+hard-scifi-engineer,whodunit-lover,friend,delta_v_priya,little_grey_cells,,Office crew
+horror-fanatic,harsh-critic,friend,final_girl_dana,two_stars_max,,Horror club
+musical-horror,harsh-critic,friend,time_warp_toni,two_stars_max,,Horror club
+slasher-romcom-teen,harsh-critic,friend,ghostface_xoxo,two_stars_max,,Horror club
+horror-fanatic,musical-horror,friend,final_girl_dana,time_warp_toni,,Horror club
+omnivore,horror-fanatic,friend,watches_it_all,final_girl_dana,,edge
+horror-fanatic,slasher-romcom-teen,friend,final_girl_dana,ghostface_xoxo,,Horror club
+stoner-comedy,lotr-fantasy,close,couch_lock_chaz,second_breakfast_sam,close friends (both),College roommates
+musical-theatre-kid,mcu-teen,friend,jazz_hands_jess,webhead_jayden,,edge
+mcu-teen,western-grandpa,close,webhead_jayden,dusty_trail_earl,close friends (both),Alvarez family
+slasher-romcom-teen,musical-horror,friend,ghostface_xoxo,time_warp_toni,,Horror club
+musical-theatre-kid,slasher-romcom-teen,friend,jazz_hands_jess,ghostface_xoxo,same school,edge
+nolan-stan,oscar-completionist,friend,tenet_backwards,best_picture_bea,,Film school friends
+world-cinephile,nolan-stan,friend,subtitle_sofia,tenet_backwards,,Film school friends
+omnivore,romcom-lover,friend,watches_it_all,meet_cute_maya,,edge
+world-cinephile,oscar-completionist,friend,subtitle_sofia,best_picture_bea,,Film school friends
+pixar-crier,sensitive-viewer,friend,ugly_cry_ollie,no_jumpscares_please,,Book-club moms
+pixar-crier,strict-parent,friend,ugly_cry_ollie,screen_time_sarah,,Book-club moms
+scifi-romance,romcom-lover,friend,starcrossed_lena,meet_cute_maya,,edge
+romcom-lover,sports-dad,friend,meet_cute_maya,fourth_and_long_ed,,Office crew
+romcom-lover,true-crime-thriller,friend,meet_cute_maya,cold_case_carla,,Office crew
+romcom-lover,whodunit-lover,friend,meet_cute_maya,little_grey_cells,,Office crew
+strict-parent,sensitive-viewer,friend,screen_time_sarah,no_jumpscares_please,,Book-club moms
+strict-parent,slasher-romcom-teen,friend,screen_time_sarah,ghostface_xoxo,babysitter,edge
+true-crime-thriller,sports-dad,friend,cold_case_carla,fourth_and_long_ed,,Office crew
+sports-dad,whodunit-lover,friend,fourth_and_long_ed,little_grey_cells,,Office crew
+true-crime-thriller,whodunit-lover,friend,cold_case_carla,little_grey_cells,,Office crew
+war-history-buff,western-grandpa,friend,flanking_frank,dusty_trail_earl,,Classic film society
+doc-nerd,classic-hollywood,pending,verite_vik,nitrate_nora,"doc-nerd sent, classic-hollywood never answered",edge
+contrarian,film-bro,pending,actually_overrated,kubrick_stare,"contrarian sent, film-bro never answered; film-bro never answered",edge
+mcu-teen,film-bro,pending,webhead_jayden,kubrick_stare,"mcu-teen sent, film-bro never answered",edge
+hallmark-cozy,horror-fanatic,pending,cocoa_and_cardigans,final_girl_dana,"hallmark-cozy sent, horror-fanatic never answered",edge
+a24-hipster,mcu-teen,block,slow_cinema_wren,webhead_jayden,a24-hipster blocked mcu-teen,edge
+harsh-critic,generous-rater,block,two_stars_max,everything_is_awesome,harsh-critic blocked generous-rater; can't stand the 10/10s,edge

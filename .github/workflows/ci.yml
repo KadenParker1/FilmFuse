@@ -55,6 +55,13 @@ jobs:
       - name: Test
         run: pytest -q
 
+      # Local test-persona tooling (stdlib-only scripts; MovieLens-dependent tests use fixtures).
+      - name: Lint test-persona tooling
+        run: ruff check ../tools/personas && ruff format --check ../tools/personas
+
+      - name: Test test-persona tooling
+        run: pytest -q ../tools/personas
+
   # client/types/api.ts mirrors the core-api DTOs by hand and nothing else compares one against
   # the other, so this is the only thing standing between a forgotten field and a runtime
   # `undefined`. Its own job: it needs neither Java nor Node, so it reports in seconds and says
