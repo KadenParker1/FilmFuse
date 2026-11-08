@@ -2,7 +2,7 @@
 
 Social group movie recommender. Users onboard by scoring their taste, rate movies 1–10 after watching, add friends, form groups (saved or ad-hoc "Tonight" sessions), and get recommendations that fuse every member's interest vector into a group matrix. Also gives personal "For you" recommendations. Ships as a native app (iOS/Android) **and** a web app from one codebase.
 
-Full roadmap, API design and data model: `~/.claude/plans/humble-waddling-cray.md` (copy into `docs/` if it needs to live in the repo).
+Full roadmap, API design and data model: `~/.claude/plans/humble-waddling-cray.md` (copy into `docs/` if it needs to live in the repo). Unscheduled ideas/features: `docs/backlog.md`.
 
 ## Ownership — read first
 - **The recommendation algorithm belongs to the project owner.** Interest-vector construction, the group matrix, aggregation strategies (mean / least-misery / closeness-weighted / …), ranking, explanations and adaptive calibration live in `python-ml-service/` and are written by the owner. Claude builds plumbing, contracts, tests and evaluation harnesses around it, and may write clearly-marked **placeholder** implementations — but does not design or write the real algorithm unless explicitly asked.
@@ -85,6 +85,7 @@ python3 tools/check_api_type_drift.py
 # Local Supabase uses ports 553xx (API 55321, DB 55322, Studio 55323, Mailpit 55324) so it can run beside
 # other projects' stacks; run core-api on :8090 when 8080 is taken.
 ANON_KEY=... python3 -I tools/e2e/smoke.py
+ANON_KEY=... python3 -I tools/personas/seed.py   # 44 test personas + fake social networks via the real APIs (runbook: tools/personas/README.md)
 cd client && npx expo export -p web   # what Vercel builds
 ```
 
