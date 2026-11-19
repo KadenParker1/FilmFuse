@@ -1,15 +1,12 @@
-"""Recommender interface + PLACEHOLDER implementation.
+"""Recommender interface, the shared vector layout, and the model the service runs.
 
-OWNER: this is where your algorithm plugs in.
-  1. Write a class that implements every method of `Recommender` (e.g. in
-     `app/services/my_recommender.py`). Interest vectors, the group matrix,
-     aggregation strategies, ranking, explanations and calibration are yours.
-  2. Change the single line in `get_recommender()` below to return it.
-Routes, auth and the request/response contract (`app/models/contract.py`)
-do not need to change.
+The live model is `hybrid-v1` (`app/services/content_recommender.py` blended with
+`app/services/collaborative.py`; see docs/recommender-directions.md). To try another
+model, implement every method of `Recommender` and return it from `get_recommender()`.
+Routes, auth and the request/response contract (`app/models/contract.py`) do not need to change.
 
-`PlaceholderRecommender` is deliberately dumb: no DB access, no maths worth
-keeping. It exists only so core-api can be built and tested end-to-end.
+`PlaceholderRecommender` is the old deliberately dumb stand-in, kept as a reference
+point for tests; nothing serves it.
 """
 
 from functools import lru_cache
@@ -67,7 +64,7 @@ class Recommender(Protocol):
 _PLACEHOLDER_CANDIDATES: list[int] = [278, 238, 155, 680, 550, 13, 603, 27205, 129, 120]
 
 
-# PLACEHOLDER — replace with your implementation
+# Reference stand-in only (not served).
 class PlaceholderRecommender:
     """Stated prefs copied into a vector; recommendations echo a hard-coded list."""
 
@@ -133,5 +130,17 @@ def _take(candidates: list[int], exclude: list[int], k: int) -> list[int]:
 
 @lru_cache
 def get_recommender() -> Recommender:
-    # OWNER: swap this one line for your implementation.
-    return PlaceholderRecommender()
+    """hybrid-v1 (content + item-kNN), reading movies, taste and all ratings through
+    ML_DATABASE_URL when it is set. Without it the catalog is empty and the model keeps
+    core-api's pool order (still never errors)."""
+    from app.core.config import database_url
+    from app.services.catalog import InMemoryCatalog, PostgresCatalog, PostgresTasteStore
+    from app.services.collaborative import PostgresRatingsSource
+    from app.services.content_recommender import ContentRecommender
+
+    url = database_url()
+    if url:
+        return ContentRecommender(
+            PostgresCatalog(url), PostgresTasteStore(url), PostgresRatingsSource(url)
+        )
+    return ContentRecommender(InMemoryCatalog([]))

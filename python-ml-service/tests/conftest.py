@@ -17,8 +17,14 @@ def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
     monkeypatch.delenv("ML_DATABASE_URL", raising=False)
     get_settings.cache_clear()
     from app.main import create_app
+    from app.services.recommender import get_recommender
+    from tests.fixtures import fixture_recommender
 
-    yield TestClient(create_app())
+    app = create_app()
+    # No database in tests: content-v1 runs over a small fixture catalog.
+    recommender = fixture_recommender()
+    app.dependency_overrides[get_recommender] = lambda: recommender
+    yield TestClient(app)
     get_settings.cache_clear()
 
 

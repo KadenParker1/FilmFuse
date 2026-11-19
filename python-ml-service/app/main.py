@@ -1,10 +1,27 @@
 """FilmFuse ML service entrypoint."""
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from app.api.routes import router
 from app.core.config import get_settings
 from app.core.limits import BodySizeLimitMiddleware
+
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # Load the movie catalog and build the CF model in the background, so the first request
+    # doesn't pay for them.
+    from app.services.recommender import get_recommender
+
+    recommender = get_recommender()
+    for part in ("catalog", "ratings"):  # movie catalog, then the collaborative model
+        warm = getattr(getattr(recommender, part, None), "warm", None)
+        if callable(warm):
+            warm()
+    yield
 
 
 def create_app() -> FastAPI:
@@ -18,6 +35,7 @@ def create_app() -> FastAPI:
         docs_url="/docs" if docs else None,
         redoc_url="/redoc" if docs else None,
         openapi_url="/openapi.json" if docs else None,
+        lifespan=_lifespan,
     )
     app.add_middleware(BodySizeLimitMiddleware, max_bytes=settings.max_body_bytes)
 
@@ -26,6 +44,7 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     app.include_router(router)
+
     return app
 
 

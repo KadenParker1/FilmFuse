@@ -20,7 +20,8 @@ class Settings(BaseSettings):
 
     env: Literal["local", "test", "production"] = Field(default="production", alias="ENV")
     ml_internal_key: str | None = Field(default=None, alias="ML_INTERNAL_KEY")
-    # Read-only role (ml_reader). Not used yet; optional until the algorithm needs the DB.
+    # Read-only role (ml_reader): content-v1 reads app.movies and taste tables through it.
+    # Optional: without it the model ranks with no movie metadata (keeps the pool order).
     ml_database_url: str | None = Field(default=None, alias="ML_DATABASE_URL")
     max_body_bytes: int = Field(default=DEFAULT_MAX_BODY_BYTES, alias="ML_MAX_BODY_BYTES", ge=1024)
 
@@ -48,3 +49,15 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+class _DatabaseSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    ml_database_url: str | None = Field(default=None, alias="ML_DATABASE_URL")
+
+
+def database_url() -> str | None:
+    """ML_DATABASE_URL alone. The recommender also runs outside the web app (the offline eval
+    CLI), where the service-only settings such as ML_INTERNAL_KEY don't apply."""
+    return _DatabaseSettings().ml_database_url or None

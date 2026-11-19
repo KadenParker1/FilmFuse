@@ -12,7 +12,7 @@ from eval.harness import EvalConfig, EvalTrainingData, build_context, evaluate, 
 from eval.run import main
 
 
-def test_end_to_end_with_placeholder(tiny_data_dir: Path, tmp_path: Path) -> None:
+def test_end_to_end_with_default_recommender(tiny_data_dir: Path, tmp_path: Path) -> None:
     out = tmp_path / "reports" / "r.md"
     argv = [
         "--recommender",
@@ -69,8 +69,10 @@ def test_end_to_end_with_placeholder(tiny_data_dir: Path, tmp_path: Path) -> Non
 
 
 def test_load_recommender_accepts_factory_class_or_instance() -> None:
+    from app.services.content_recommender import ContentRecommender
+
     assert isinstance(
-        load_recommender("app.services.recommender:get_recommender"), PlaceholderRecommender
+        load_recommender("app.services.recommender:get_recommender"), ContentRecommender
     )
     assert isinstance(
         load_recommender("app.services.recommender:PlaceholderRecommender"),

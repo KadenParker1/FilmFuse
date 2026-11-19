@@ -13,8 +13,8 @@ ENV=local .venv/bin/uvicorn app.main:app --reload --port 8001   # dev key: local
 ```
 
 Env vars (see `.env.example`): `ENV` (`local` | `test` | `production`; unset = `production`),
-`ML_INTERNAL_KEY` (required unless `ENV=local`, and then at least 32 characters), `ML_DATABASE_URL` (read-only `ml_reader` role,
-optional for now), `ML_MAX_BODY_BYTES` (request body cap, default 5 MiB; larger is a 413), `PORT`.
+`ML_INTERNAL_KEY` (required unless `ENV=local`, and then at least 32 characters), `ML_DATABASE_URL` (read-only `ml_reader` role;
+the model reads movies and taste through it), `ML_MAX_BODY_BYTES` (request body cap, default 5 MiB; larger is a 413), `PORT`.
 
 `/docs`, `/redoc` and `/openapi.json` exist only when `ENV` is not `production`. `/health` is
 always public; everything under `/internal` needs the key.
@@ -25,14 +25,38 @@ always public; everything under `/internal` needs the key.
 .venv/bin/pytest -q && .venv/bin/ruff check . && .venv/bin/ruff format --check .
 ```
 
-## Where the algorithm goes
+## The model: hybrid-v1 (content + item-kNN)
 
-`app/services/recommender.py` defines the `Recommender` protocol. It has four methods:
-`build_user_vector`, `recommend_for_group`, `recommend_for_user` and `calibration_candidates`.
-`PlaceholderRecommender` is an intentionally dumb stand-in, and every part of it is marked
-`# PLACEHOLDER — replace with your implementation`. To plug in your own code, implement the
-protocol and change the one line in `get_recommender()`. You don't need to touch the routes
-or the contract.
+`app/services/content_recommender.py` is the live model. It starts from content-v1 (Phase 0
+of `docs/recommender-directions.md`: genre and mood matching) and blends in item-kNN
+collaborative filtering (`collaborative.py`) wherever co-ratings give evidence. Without that
+evidence (new users, movies few people rated) it is exactly content-v1.
+
+| Piece | File | What it does |
+|---|---|---|
+| Movie features | `features.py` | Genre one-hot plus 8 mood strengths derived from genres and TMDB keywords (`MOOD_RULES`, plain data, easy to tune). |
+| Catalog and taste | `catalog.py` | `app.movies` held in memory (warmed at startup, refreshed every 6h in the background, unknown ids fetched on demand); each user's loved, disliked and dismissed movies. Read through `ML_DATABASE_URL` (read-only `ml_reader`). |
+| User vector | `content_recommender.py` | Each of the 27 dims starts at the stated preference (5 if unset) and is pulled towards the user's scores for movies with that feature. Favourites count as a 10 and least favourites as a 1 (weight 3 each), dismissals as a mild 3, and older ratings count less. |
+| Predicted score | `content_recommender.py` | Taste affinity (0.7 × weighted mean of the user's dims + 0.3 × their lowest genre dim, so one hated genre sinks a movie), plus similarity to loved and disliked movies, plus a quality/popularity prior that weighs more for new users. |
+| Collaborative part | `collaborative.py` | Item-kNN: movies are neighbours when people rate them alike (mean-centred ratings, adjusted cosine shrunk by co-rater count, top 50 per movie). Built from all of `app.ratings` in the background, rebuilt hourly; a user's own ratings are read fresh on every request. Blended as `taste = (1-β)·content + β·kNN`, with `β = 0.9·support/(support+2)`. EASE is in the same file for offline comparison (it lost: NDCG@10 0.08 vs 0.09). |
+| Lists | `content_recommender.py` | "For you" uses a light genre-diversity re-rank. Groups go through `group_strategies.py`: mean, least misery, most pleasure, closeness-weighted (the group's average closeness blends mean and least misery) and a GFAR-style fairness list. |
+| Explanations | `content_recommender.py` | Built from the score's largest actual contribution, for example "Because you love Horror", "Like Coco, which you loved", "Because you rated Alien 9/10" or "Highly rated and popular". Group lines never single out a member. |
+| Calibration | `content_recommender.py` | Well-known movies, round-robin across genres, starting with the genres the user has rated least. |
+
+Without `ML_DATABASE_URL` the model has no movie metadata. It then keeps core-api's pool order
+and never errors. Every weight is a named constant at the top of its file: judge a change with
+`python -m eval.run` (below) and `tools/personas/sessions.py` (live).
+
+Locally, `ml_reader` has no login until you give it one (never commit the password):
+
+```bash
+docker exec <supabase_db container> psql -U postgres -c "alter role ml_reader with login password '<local-only>'"
+ENV=local ML_DATABASE_URL=postgresql://ml_reader:<local-only>@127.0.0.1:55322/postgres \
+  .venv/bin/uvicorn app.main:app --port 8001
+```
+
+To try a different model, implement the `Recommender` protocol in `app/services/recommender.py`
+and return it from `get_recommender()`. You don't need to touch the routes or the contract.
 
 ## Contract (frozen; see `app/models/contract.py`)
 
@@ -41,7 +65,7 @@ UUIDs and movie ids are TMDB ints.
 
 | Endpoint | Request | Response |
 |---|---|---|
-| `POST /internal/user-vectors` | `userId, previousVector?, genrePrefs[{genreId,score}], moodPrefs[{moodTag,score}], favorites[{movieId,rank}], ratings[{movieId,score,source,createdAt}], unseen[], dismissals[]` | `{vector:{interpretable[], latent?}, dim, modelVersion}` |
+| `POST /internal/user-vectors` | `userId, previousVector?, genrePrefs[{genreId,score}], moodPrefs[{moodTag,score}], favorites[{movieId,rank}], leastFavorites?[{movieId,rank}], ratings[{movieId,score,source,createdAt}], unseen[], dismissals[]` | `{vector:{interpretable[], latent?}, dim, modelVersion}` |
 | `POST /internal/group-recommendations` | `members[{userId,vector?,weight}], closeness[n][n], filters, excludeMovieIds, candidateMovieIds?, strategy, k` | `{results:[{movieId, groupScore, memberScores{userId:score}, explanation}]}` |
 | `POST /internal/user-recommendations` | `userId, vector, filters, excludeMovieIds, candidateMovieIds?, k` | `{results:[{movieId, score, explanation}]}` |
 | `POST /internal/calibration-candidates` | `userId, seenMovieIds, k` | `{movieIds:[]}` |
@@ -56,6 +80,9 @@ UUIDs and movie ids are TMDB ints.
 - `candidateMovieIds` is an optional, pre-filtered eligible pool from core-api. When it is
   present, rank only within it. The placeholder keeps the given order, minus
   `excludeMovieIds`, cut to `k`.
+- `leastFavorites` (added 2026-11-08, additive and optional, defaults to `[]`): the user's 0 to 5
+  least favourite movies, ranked (rank 1 = most disliked). A movie is never in both `favorites`
+  and `leastFavorites`. The placeholder accepts the field and ignores it.
 - A group member's `vector` may be `null` (no vector yet). That member is still listed in
   `memberScores`.
 - The interpretable vector has one dimension per genre in `GENRE_IDS`, followed by one per mood

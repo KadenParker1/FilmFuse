@@ -29,8 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ContentFilterService {
 
-    /** How many eligible candidates are handed to the ranker. */
-    public static final int POOL_SIZE = 200;
+    /**
+     * How many eligible candidates are handed to the ranker (most popular first). 1000, not 200,
+     * so niche tastes (horror, documentary, Nollywood...) have something to rank: content-v1
+     * scores 1000 movies in well under the ML latency budget.
+     */
+    public static final int POOL_SIZE = 1000;
 
     /** A pool smaller than this (twice the 20 results a session or page shows) triggers enrichment. */
     public static final int ENRICH_BELOW = 40;
