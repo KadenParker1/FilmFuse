@@ -106,6 +106,26 @@ def test_what_it_tests():
     assert "loves Horror + Romance" in text and "power user" in text and "long-tail" in text
 
 
+def test_roster_least_favourites_column():
+    data = sample()
+    md = export_csv.roster_markdown(data, None, None)
+    assert "| Top genres | Least favourites | Ratings |" in md
+    rows = {
+        re.match(r"\| `[^`]+`<br>([a-z0-9-]+) \|", line).group(1): line
+        for line in md.splitlines()
+        if line.startswith("| `")
+    }
+    assert all(line.count(" | ") == 8 for line in rows.values())  # 9 cells
+    assert "| Hereditary (2018) |" in rows["disney-mom"]
+    assert "| The Notebook (2004); Frozen (2013) |" in rows["horror-fanatic"]
+    assert "| - |" in rows["film-bro"]
+
+
+def test_narrow_tag_note():
+    p = {"key": "n", "tags": ["multi-genre", "narrow"], "genres": {"27": 10, "10751": 10}}
+    assert "narrow: loves only these few genres" in export_csv.what_it_tests(p)
+
+
 def test_pipes_escaped():
     data = sample()
     data["personas"][0]["bio"] = "a | b"

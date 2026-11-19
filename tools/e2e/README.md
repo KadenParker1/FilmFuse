@@ -34,7 +34,7 @@ Bugs these have caught so far (2026-10-17):
 
 ## Test personas
 
-For 44 realistic seeded accounts with taste profiles, rating histories, friend networks and groups
+For 300 realistic seeded accounts with taste profiles, rating histories, friend networks and groups
 (Disney mom, film bro, a G-capped parent, cross-genre combos, …), see `tools/personas/README.md`
 (`seed.py`, logins in `tools/personas/accounts.csv`, who's who in `tools/personas/ROSTER.md`).
 

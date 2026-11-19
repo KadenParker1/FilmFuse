@@ -220,7 +220,11 @@ def test_real_networks_file_matches_real_personas():
     assert intents == {"easy", "hard", "big", "pair"}
     assert {e.type for e in net.edges} == {"friend", "pending", "block"}
     assert any(e.close_by for e in net.edges)
-    assert all(not net.friends_of(k) for k in net.isolates) and len(net.isolates) >= 2
+    assert all(not net.friends_of(k) for k in net.isolates) and len(net.isolates) >= 13
+    assert len(net.groups) >= 40 and len(net.clusters) >= 48
+    # Everyone but the declared isolates and a few never-onboarded accounts has friends.
+    friendless = {p["key"] for p in data["personas"] if not net.friends_of(p["key"])}
+    assert len(friendless - set(net.isolates)) <= 2
 
 
 def test_cli_validate(tmp_path, capsys):

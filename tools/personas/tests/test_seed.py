@@ -94,6 +94,8 @@ def test_full_call_sequence_for_one_persona(stack, data):
             for f in persona(data, "disney-mom")["favorites"]
         ],
         ("PUT", "/api/v1/me/preferences/favorites"),
+        ("GET", "/api/v1/movies/493922"),  # least favourite exists?
+        ("PUT", "/api/v1/me/preferences/least-favorites"),
         ("PUT", "/api/v1/me/settings/comfort"),
         ("POST", "/api/v1/me/onboarding/complete"),
         ("GET", "/api/v1/me/ratings"),
@@ -106,6 +108,7 @@ def test_full_call_sequence_for_one_persona(stack, data):
     assert stack.prefs[uid]["/me/preferences/genres"][0] == {"genreId": 12, "score": 7}
     assert {"moodTag": "cozy", "score": 9} in stack.prefs[uid]["/me/preferences/moods"]
     assert [f["rank"] for f in stack.prefs[uid]["/me/preferences/favorites"]] == [1, 2, 3, 4]
+    assert stack.prefs[uid]["/me/preferences/least-favorites"] == [{"movieId": 493922, "rank": 1}]
     r = stack.ratings[uid][9001]
     assert r["source"] == "QUICK_RATE" and r["score"] == 7
     assert r["visibility"] in ("PUBLIC", "FRIENDS", "PRIVATE")
@@ -156,13 +159,15 @@ def test_wrong_password_is_reported(stack, data):
 
 def test_404_movie_skipped_and_counted(stack, data):
     del stack.catalog[9002]
-    del stack.catalog[493922]  # an anchor (Hereditary)
+    del stack.catalog[493922]  # an anchor and the least favourite (Hereditary)
     rep = make(stack, data).seed_persona(persona(data, "disney-mom"))
     assert rep.errors == []
-    assert len(rep.skipped_movies) == 2
+    assert len(rep.skipped_movies) == 3
     assert any("Gen B" in m for m in rep.skipped_movies)
-    assert any("Hereditary" in m for m in rep.skipped_movies)
+    assert "anchor Hereditary (2018) [493922]" in rep.skipped_movies
+    assert "least favourite Hereditary (2018) [493922]" in rep.skipped_movies
     assert rep.ratings_written == 3
+    assert stack.prefs[rep.user_id]["/me/preferences/least-favorites"] == []
 
 
 def test_favourite_fallback(data):
@@ -174,7 +179,7 @@ def test_favourite_fallback(data):
     favs = stack.prefs[rep.user_id]["/me/preferences/favorites"]
     assert [f["movieId"] for f in favs] == [862, 5000, 6000]
     assert rep.fallback_favorites == ["Moana [5000] (search)", "Popular 6000 [6000] (popular)"]
-    assert sum("favourite" in m for m in rep.skipped_movies) == 3
+    assert sum(m.startswith("favourite") for m in rep.skipped_movies) == 3
 
 
 def test_no_fallback_when_enough_favourites(stack, data):
@@ -351,6 +356,9 @@ def test_dry_run_makes_no_calls(tmp_path, data, capsys, monkeypatch):
     assert stack.calls == []
     out = capsys.readouterr().out
     assert "DRY RUN" in out and "SKIP onboarding" in out and "group [hard] Chaos" in out
+    assert "4 favourites, 1 least favourites" in out  # disney-mom
+    assert "3 favourites, 2 least favourites" in out  # horror-fanatic
+    assert "3 favourites, 0 least favourites" in out  # film-bro
     assert not (tmp_path / "state.json").exists()
 
 
@@ -378,3 +386,79 @@ def test_preflight_detects_fixture_catalog(tmp_path, data):
     full = FakeStack()
     full.add_movies(*all_ids(data, GENERATED))
     assert make(full, data).preflight(data["personas"]) == 0
+
+
+# --------------------------------------------------------------------------- least favourites
+
+
+def least_puts(stack, email):
+    return [p for m, p in stack.calls_for(email) if m == "PUT" and p.endswith("/least-favorites")]
+
+
+def test_least_favorites_ranked_payload(stack, data):
+    rep = make(stack, data).seed_persona(persona(data, "horror-fanatic"))
+    assert rep.errors == []
+    assert stack.prefs[rep.user_id]["/me/preferences/least-favorites"] == [
+        {"movieId": 11036, "rank": 1},
+        {"movieId": 109445, "rank": 2},
+    ]
+
+
+def test_least_favorites_empty_list_clears(stack, data):
+    """A persona without least favourites still PUTs [] (the endpoint replaces the list)."""
+    rep = make(stack, data).seed_persona(persona(data, "film-bro"))
+    assert rep.errors == []
+    assert stack.prefs[rep.user_id]["/me/preferences/least-favorites"] == []
+    assert len(least_puts(stack, "film-bro@filmfuse.test")) == 1
+
+
+def test_least_favorites_rerun_replaces_again(stack, data):
+    state = {}
+    make(stack, data, state=state).seed_persona(persona(data, "horror-fanatic"))
+    rep = make(stack, data, state=state).seed_persona(persona(data, "horror-fanatic"))
+    assert rep.errors == []
+    assert len(least_puts(stack, "horror-fanatic@filmfuse.test")) == 2  # idempotent replace
+    assert len(stack.prefs[rep.user_id]["/me/preferences/least-favorites"]) == 2
+
+
+def test_least_favorite_404_skipped_rest_kept(stack, data):
+    del stack.catalog[11036]  # The Notebook: an anchor and the first least favourite
+    rep = make(stack, data).seed_persona(persona(data, "horror-fanatic"))
+    assert rep.errors == []
+    assert "least favourite The Notebook (2004) [11036]" in rep.skipped_movies
+    assert stack.prefs[rep.user_id]["/me/preferences/least-favorites"] == [
+        {"movieId": 109445, "rank": 1}
+    ]
+
+
+def test_least_favorite_that_is_a_favourite_is_dropped(stack, data):
+    p = json.loads(json.dumps(persona(data, "horror-fanatic")))
+    p["leastFavorites"].append({"title": "The Shining", "year": 1980, "tmdbId": 694})
+    rep = make(stack, data).seed_persona(p)
+    assert rep.errors == []  # never sent, so core-api's 400 for "in both lists" can't happen
+    ids = [f["movieId"] for f in stack.prefs[rep.user_id]["/me/preferences/least-favorites"]]
+    assert ids == [11036, 109445]
+
+
+def test_least_favorites_capped_at_five(stack, data):
+    p = json.loads(json.dumps(persona(data, "film-bro")))
+    p["leastFavorites"] = [{"title": f"M{i}", "year": 2000, "tmdbId": 7000 + i} for i in range(7)]
+    stack.add_movies(*range(7000, 7007))
+    rep = make(stack, data).seed_persona(p)
+    assert rep.errors == []
+    sent = stack.prefs[rep.user_id]["/me/preferences/least-favorites"]
+    assert [f["rank"] for f in sent] == [1, 2, 3, 4, 5]
+
+
+def test_least_favorites_http_error_reported(stack, data):
+    stack.inject.append(("PUT", "/api/v1/me/preferences/least-favorites", 500, {}))
+    rep = make(stack, data).seed_persona(persona(data, "disney-mom"))
+    assert any("least-favorites: HTTP 500" in e for e in rep.errors)
+
+
+def test_least_favorites_payload_helper():
+    assert seed.least_favorites_payload([5, 6]) == [
+        {"movieId": 5, "rank": 1},
+        {"movieId": 6, "rank": 2},
+    ]
+    assert seed.least_favorites({"key": "k"}) == []

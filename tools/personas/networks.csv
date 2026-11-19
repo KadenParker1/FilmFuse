@@ -1,43 +1,616 @@
 ﻿a,b,type,a_username,b_username,detail,source
+a-aiko-fantasy-romance,a-ben-mystery-family,friend,aiko_reads_in_the_rain,ben_case_closed,,Year 9 lunch table
+a-zoe-13-pixar,a-aiko-fantasy-romance,close,zoe_draws_dragons,aiko_reads_in_the_rain,close friends (both),Year 9 lunch table
+a-aiko-fantasy-romance,kid-gamer-10yo,friend,aiko_reads_in_the_rain,respawn_max,,Year 9 lunch table
+a-arjun-masala-mix,a-elena-period-romance,friend,arjun_paisa_vasool,elena_writes_letters,,Uni film society
+a-arjun-masala-mix,a-ines-western-musical,friend,arjun_paisa_vasool,ines_saddle_and_song,,Uni film society
+a-arjun-masala-mix,a-kwame-scifi-thriller,friend,arjun_paisa_vasool,kwame_debugs_at_night,,Uni film society
+a-arjun-masala-mix,a-lucia-doc-music,friend,arjun_paisa_vasool,lucia_on_bandoneon,,Uni film society
+a-maya-anime-gym,a-arjun-masala-mix,friend,maya_lifts_and_anime,arjun_paisa_vasool,,Uni film society
+a-noah-a24-drama,a-arjun-masala-mix,friend,noah_shoots_35mm,arjun_paisa_vasool,,Uni film society
+a-omar-omnivore,a-arjun-masala-mix,friend,omar_watches_everything,arjun_paisa_vasool,,Uni film society
+a-priya-romcom-music,a-arjun-masala-mix,friend,meetcute_priya,arjun_paisa_vasool,,Uni film society
+a-sofia-crime-mystery,a-arjun-masala-mix,friend,sofia_objection,arjun_paisa_vasool,,Uni film society
+a-tomas-war-history,a-arjun-masala-mix,friend,eastern_front_tomas,arjun_paisa_vasool,,Uni film society
+a-arjun-masala-mix,c-bengaluru-musicals-romance,friend,arjun_paisa_vasool,sunita_hums_along,,Bollywood-and-beyond Discord
+a-arjun-masala-mix,e-desi-diaspora,friend,arjun_paisa_vasool,chai_and_blockbusters,cousins,edge
+g-ayesha-lahore-medstudent,a-arjun-masala-mix,friend,ayesha_filmi_dil,arjun_paisa_vasool,,Bollywood-and-beyond Discord
+g-tharindu-kandy-fantasy,a-arjun-masala-mix,friend,tharindu_middle_earth,arjun_paisa_vasool,,Bollywood-and-beyond Discord
+a-ben-mystery-family,a-jonas-horror-family,close,ben_case_closed,spooky_big_bro_jonas,close friends (both); brothers,edge
+a-zoe-13-pixar,a-ben-mystery-family,friend,zoe_draws_dragons,ben_case_closed,,Year 9 lunch table
+h-akinyi-kisumu-mysteries,a-ben-mystery-family,friend,akinyi_solves_it_first,ben_case_closed,school pen-pal programme,edge
+a-ben-mystery-family,kid-gamer-10yo,friend,ben_case_closed,respawn_max,,Year 9 lunch table
+a-ethan-western-gamer,a-chloe-musical-theatre,friend,cowpoke_ethan,chloe_belts_defying,,Sixth-form common room
+a-chloe-musical-theatre,a-freya-scifi-horror,friend,chloe_belts_defying,freya_in_the_vents,,Sixth-form common room
+a-jonas-horror-family,a-chloe-musical-theatre,friend,spooky_big_bro_jonas,chloe_belts_defying,,Sixth-form common room
+a-liam-comedy-kid,a-chloe-musical-theatre,friend,liam_quotes_everything,chloe_belts_defying,,Sixth-form common room
+a-chloe-musical-theatre,e-dancer-dance-films,friend,chloe_belts_defying,five_six_seven_eight,dance teacher,edge
+a-chloe-musical-theatre,musical-theatre-kid,close,chloe_belts_defying,jazz_hands_jess,close friends (both); same drama club,edge
+a-chloe-musical-theatre,slasher-romcom-teen,friend,chloe_belts_defying,ghostface_xoxo,,Sixth-form common room
+a-diego-futbol,b-alberta-trucker,friend,diego_camisa_10,long_haul_dale,,Sports bar crew
+b-boston-firefighter,a-diego-futbol,friend,dorchester_ladder_sean,diego_camisa_10,,Sports bar crew
+c-boston-firefighter,a-diego-futbol,friend,ladder_and_league_sully,diego_camisa_10,,Sports bar crew
+c-electrician-hockey-dad,a-diego-futbol,friend,sparky_kowalski,diego_camisa_10,,Sports bar crew
+d-sports-docs-manc,a-diego-futbol,friend,terrace_doc_dan,diego_camisa_10,,Sports bar crew
+f-rio-favela-teen-action,a-diego-futbol,friend,lucas_da_rocinha,diego_camisa_10,futsal tournament,edge
+a-diego-futbol,sports-dad,friend,diego_camisa_10,fourth_and_long_ed,,Sports bar crew
+a-elena-period-romance,a-ines-western-musical,friend,elena_writes_letters,ines_saddle_and_song,,Uni film society
+a-elena-period-romance,a-kwame-scifi-thriller,friend,elena_writes_letters,kwame_debugs_at_night,,Uni film society
+a-elena-period-romance,a-lucia-doc-music,friend,elena_writes_letters,lucia_on_bandoneon,,Uni film society
+a-maya-anime-gym,a-elena-period-romance,friend,maya_lifts_and_anime,elena_writes_letters,,Uni film society
+a-noah-a24-drama,a-elena-period-romance,friend,noah_shoots_35mm,elena_writes_letters,,Uni film society
+a-omar-omnivore,a-elena-period-romance,friend,omar_watches_everything,elena_writes_letters,,Uni film society
+a-priya-romcom-music,a-elena-period-romance,close,meetcute_priya,elena_writes_letters,close friends (both),Uni film society
+a-sofia-crime-mystery,a-elena-period-romance,friend,sofia_objection,elena_writes_letters,,Uni film society
+a-tomas-war-history,a-elena-period-romance,friend,eastern_front_tomas,elena_writes_letters,,Uni film society
+a-elena-period-romance,austen-period-drama,friend,elena_writes_letters,pemberley_or_bust,,edge
+a-emma-truecrime-nurse,a-marcus-easygoing,friend,emma_nightshift_docs,marcus_double_feature,,Night-shift nurses
+b-night-shift-nurse,a-emma-truecrime-nurse,friend,icu_after_hours,emma_nightshift_docs,,Night-shift nurses
+c-cork-icu-nurse-crime,a-emma-truecrime-nurse,friend,night_shift_siobhan,emma_nightshift_docs,,Night-shift nurses
+a-emma-truecrime-nurse,comedy-truecrime-podcaster,friend,emma_nightshift_docs,murder_and_giggles,podcast superfan,edge
+e-er-nurse-comedies,a-emma-truecrime-nurse,friend,night_shift_noor,emma_nightshift_docs,,"Night-shift nurses, Night-shift carers"
+f-kingston-nurse-mom,a-emma-truecrime-nurse,friend,nurse_shanice_ja,emma_nightshift_docs,,Night-shift carers
+i-navajo-aide-nights,a-emma-truecrime-nurse,friend,shiprock_night_owl,emma_nightshift_docs,,Night-shift carers
+i-rotherham-care-home-nights,a-emma-truecrime-nurse,friend,leanne_on_nights,emma_nightshift_docs,,Night-shift carers
+a-ethan-western-gamer,a-freya-scifi-horror,friend,cowpoke_ethan,freya_in_the_vents,,Sixth-form common room
+a-jonas-horror-family,a-ethan-western-gamer,friend,spooky_big_bro_jonas,cowpoke_ethan,,Sixth-form common room
+a-ethan-western-gamer,a-liam-comedy-kid,friend,cowpoke_ethan,liam_quotes_everything,,Sixth-form common room
+a-ethan-western-gamer,anime-western,friend,cowpoke_ethan,spike_and_the_drifter,,edge
+h-aibek-steppe-westerns-anime,a-ethan-western-gamer,friend,aibek_rides_and_draws,cowpoke_ethan,Red Dead Discord,edge
+a-ethan-western-gamer,slasher-romcom-teen,friend,cowpoke_ethan,ghostface_xoxo,,Sixth-form common room
+a-jonas-horror-family,a-freya-scifi-horror,close,spooky_big_bro_jonas,freya_in_the_vents,close friends (both),Sixth-form common room
+a-liam-comedy-kid,a-freya-scifi-horror,friend,liam_quotes_everything,freya_in_the_vents,,Sixth-form common room
+a-freya-scifi-horror,d-lyon-cinephile,close,freya_in_the_vents,cine_club_odile,close friends (d-lyon-cinephile only); granddaughter,edge
+a-freya-scifi-horror,horror-fanatic,friend,freya_in_the_vents,final_girl_dana,,edge
+a-freya-scifi-horror,slasher-romcom-teen,friend,freya_in_the_vents,ghostface_xoxo,,Sixth-form common room
+a-ines-western-musical,a-kwame-scifi-thriller,friend,ines_saddle_and_song,kwame_debugs_at_night,,Uni film society
+a-ines-western-musical,a-lucia-doc-music,friend,ines_saddle_and_song,lucia_on_bandoneon,,Uni film society
+a-maya-anime-gym,a-ines-western-musical,friend,maya_lifts_and_anime,ines_saddle_and_song,,Uni film society
+a-noah-a24-drama,a-ines-western-musical,friend,noah_shoots_35mm,ines_saddle_and_song,,Uni film society
+a-omar-omnivore,a-ines-western-musical,friend,omar_watches_everything,ines_saddle_and_song,,Uni film society
+a-priya-romcom-music,a-ines-western-musical,friend,meetcute_priya,ines_saddle_and_song,,Uni film society
+a-sofia-crime-mystery,a-ines-western-musical,friend,sofia_objection,ines_saddle_and_song,,Uni film society
+a-tomas-war-history,a-ines-western-musical,friend,eastern_front_tomas,ines_saddle_and_song,,Uni film society
+a-ines-western-musical,western-musical,close,ines_saddle_and_song,yeehaw_showtunes,close friends (both); grandfather and granddaughter,edge
+b-amsterdam-arthouse-barista,a-jade-harsh-cinephile,friend,noor_slow_cinema,jade_two_stars,,International film forum
+c-sao-paulo-architect-cinephile,a-jade-harsh-cinephile,friend,bia_em_pinheiros,jade_two_stars,,International film forum
+d-lyon-cinephile,a-jade-harsh-cinephile,friend,cine_club_odile,jade_two_stars,,International film forum
+d-osaka-jidaigeki,a-jade-harsh-cinephile,friend,naniwa_samurai_kenji,jade_two_stars,,International film forum
+a-jade-harsh-cinephile,d-silent-film-pianist,friend,jade_two_stars,nitrate_and_ivories,,International film forum
+e-hong-kong-action,a-jade-harsh-cinephile,friend,bullet_ballet_bo,jade_two_stars,,International film forum
+e-italian-neorealism,a-jade-harsh-cinephile,friend,bicycle_thief_bruno,jade_two_stars,,International film forum
+e-new-hollywood-70s,a-jade-harsh-cinephile,friend,director_s_decade,jade_two_stars,,International film forum
+e-nouvelle-vague,a-jade-harsh-cinephile,friend,cahiers_claudine,jade_two_stars,,International film forum
+e-spaghetti-westerns,a-jade-harsh-cinephile,friend,morricone_whistle,jade_two_stars,,International film forum
+a-jade-harsh-cinephile,film-bro,friend,jade_two_stars,kubrick_stare,,edge
+a-jade-harsh-cinephile,world-cinephile,friend,jade_two_stars,subtitle_sofia,,International film forum
+a-jonas-horror-family,a-liam-comedy-kid,friend,spooky_big_bro_jonas,liam_quotes_everything,,Sixth-form common room
+b-spooky-family-mum,a-jonas-horror-family,friend,cosy_creepy_siobhan,spooky_big_bro_jonas,,Spooky Parents Club
+c-brisbane-horror-family-mum,a-jonas-horror-family,friend,kerry_anne_creeps,spooky_big_bro_jonas,,Spooky Parents Club
+d-horror-family-grandpa,a-jonas-horror-family,friend,hammer_and_grandkids,spooky_big_bro_jonas,,Spooky Parents Club
+a-jonas-horror-family,halloween-disney-mom,friend,spooky_big_bro_jonas,spooky_mouse_mom,,Spooky Parents Club
+a-jonas-horror-family,slasher-romcom-teen,friend,spooky_big_bro_jonas,ghostface_xoxo,,Sixth-form common room
+a-jonas-horror-family,spooky-family-dad,friend,spooky_big_bro_jonas,creature_feature_dad,,Spooky Parents Club
+a-lucia-doc-music,a-kwame-scifi-thriller,friend,lucia_on_bandoneon,kwame_debugs_at_night,,Uni film society
+a-maya-anime-gym,a-kwame-scifi-thriller,friend,maya_lifts_and_anime,kwame_debugs_at_night,,Uni film society
+a-noah-a24-drama,a-kwame-scifi-thriller,friend,noah_shoots_35mm,kwame_debugs_at_night,,Uni film society
+a-omar-omnivore,a-kwame-scifi-thriller,friend,omar_watches_everything,kwame_debugs_at_night,,Uni film society
+a-priya-romcom-music,a-kwame-scifi-thriller,friend,meetcute_priya,kwame_debugs_at_night,,Uni film society
+a-sofia-crime-mystery,a-kwame-scifi-thriller,friend,sofia_objection,kwame_debugs_at_night,,Uni film society
+a-tomas-war-history,a-kwame-scifi-thriller,friend,eastern_front_tomas,kwame_debugs_at_night,,Uni film society
+a-kwame-scifi-thriller,b-berlin-ux-scifi,friend,kwame_debugs_at_night,lena_in_orbit,met on the sci-fi Discord,edge
+a-kwame-scifi-thriller,b-lagos-london-producer,friend,kwame_debugs_at_night,four_bar_aisha,London flatmates,edge
+a-liam-comedy-kid,d-widow-musicals-history,friend,liam_quotes_everything,harrogate_hymns_maggie,grandson,edge
+a-liam-comedy-kid,slasher-romcom-teen,friend,liam_quotes_everything,ghostface_xoxo,,Sixth-form common room
+a-maya-anime-gym,a-lucia-doc-music,friend,maya_lifts_and_anime,lucia_on_bandoneon,,Uni film society
+a-noah-a24-drama,a-lucia-doc-music,friend,noah_shoots_35mm,lucia_on_bandoneon,,Uni film society
+a-omar-omnivore,a-lucia-doc-music,friend,omar_watches_everything,lucia_on_bandoneon,,Uni film society
+a-priya-romcom-music,a-lucia-doc-music,friend,meetcute_priya,lucia_on_bandoneon,,Uni film society
+a-sofia-crime-mystery,a-lucia-doc-music,friend,sofia_objection,lucia_on_bandoneon,,Uni film society
+a-tomas-war-history,a-lucia-doc-music,friend,eastern_front_tomas,lucia_on_bandoneon,,Uni film society
+b-buenos-aires-horror,a-lucia-doc-music,friend,diego_after_midnight,lucia_on_bandoneon,,Cineclub del Río de la Plata
+a-lucia-doc-music,c-nola-bassist-music-crime,friend,lucia_on_bandoneon,curtis_on_frenchmen,masterclass,edge
+f-buenos-aires-psychoanalyst,a-lucia-doc-music,friend,lic_freud_palermo,lucia_on_bandoneon,,Cineclub del Río de la Plata
+f-cordoba-horror-dad,a-lucia-doc-music,friend,papa_del_terror_cba,lucia_on_bandoneon,,Cineclub del Río de la Plata
+f-havana-abuela-musica,a-lucia-doc-music,friend,yeya_del_vedado,lucia_on_bandoneon,music-teacher exchange,edge
+f-montevideo-newlyweds-romance,a-lucia-doc-music,friend,rambla_al_atardecer,lucia_on_bandoneon,,Cineclub del Río de la Plata
+f-santiago-retired-projectionist,a-lucia-doc-music,friend,proyector_de_santiago,lucia_on_bandoneon,,Cineclub del Río de la Plata
+f-uruguay-gaucho-westerns-docs,a-lucia-doc-music,friend,tropero_de_tacuarembo,lucia_on_bandoneon,,Cineclub del Río de la Plata
+b-night-shift-nurse,a-marcus-easygoing,friend,icu_after_hours,marcus_double_feature,,Night-shift nurses
+c-cork-icu-nurse-crime,a-marcus-easygoing,friend,night_shift_siobhan,marcus_double_feature,,Night-shift nurses
+e-er-nurse-comedies,a-marcus-easygoing,friend,night_shift_noor,marcus_double_feature,,Night-shift nurses
+a-marcus-easygoing,generous-rater,friend,marcus_double_feature,everything_is_awesome,,edge
+a-noah-a24-drama,a-maya-anime-gym,friend,noah_shoots_35mm,maya_lifts_and_anime,,Uni film society
+a-omar-omnivore,a-maya-anime-gym,friend,omar_watches_everything,maya_lifts_and_anime,,Uni film society
+a-maya-anime-gym,a-priya-romcom-music,friend,maya_lifts_and_anime,meetcute_priya,,Uni film society
+a-maya-anime-gym,a-sofia-crime-mystery,friend,maya_lifts_and_anime,sofia_objection,,Uni film society
+a-maya-anime-gym,a-tomas-war-history,friend,maya_lifts_and_anime,eastern_front_tomas,,Uni film society
+a-maya-anime-gym,anime-ghibli,friend,maya_lifts_and_anime,totoro_umbrella,,edge
+a-omar-omnivore,a-noah-a24-drama,close,omar_watches_everything,noah_shoots_35mm,close friends (both),Uni film society
+a-noah-a24-drama,a-priya-romcom-music,friend,noah_shoots_35mm,meetcute_priya,,Uni film society
+a-noah-a24-drama,a-sofia-crime-mystery,friend,noah_shoots_35mm,sofia_objection,,Uni film society
+a-noah-a24-drama,a-tomas-war-history,friend,noah_shoots_35mm,eastern_front_tomas,,Uni film society
+a-noah-a24-drama,a24-hipster,friend,noah_shoots_35mm,slow_cinema_wren,same darkroom,edge
+a-noah-a24-drama,d-lyon-cinephile,friend,noah_shoots_35mm,cine_club_odile,her former student,edge
+a-omar-omnivore,a-priya-romcom-music,friend,omar_watches_everything,meetcute_priya,,Uni film society
+a-omar-omnivore,a-sofia-crime-mystery,friend,omar_watches_everything,sofia_objection,,Uni film society
+a-omar-omnivore,a-tomas-war-history,friend,omar_watches_everything,eastern_front_tomas,,Uni film society
+e-grad-student-procrastinator,a-omar-omnivore,friend,chapter_three_someday,omar_watches_everything,,edge
+a-omar-omnivore,omnivore,close,omar_watches_everything,watches_it_all,close friends (a-omar-omnivore only); omnivore idol,edge
+a-priya-romcom-music,a-sofia-crime-mystery,friend,meetcute_priya,sofia_objection,,Uni film society
+a-priya-romcom-music,a-tomas-war-history,friend,meetcute_priya,eastern_front_tomas,,Uni film society
+a-tomas-war-history,a-sofia-crime-mystery,friend,eastern_front_tomas,sofia_objection,,Uni film society
+a-sofia-crime-mystery,e-courtroom-lawyer,friend,sofia_objection,objection_sustained,summer internship mentor,edge
+a-tomas-war-history,war-history-buff,friend,eastern_front_tomas,flanking_frank,,edge
+b-lagos-london-producer,a-tunde-casual,friend,four_bar_aisha,tunde_popcorn_guy,,Naija diaspora circle
+c-lagos-banker-action,a-tunde-casual,close,tunde_in_transit,tunde_popcorn_guy,close friends (both),Naija diaspora circle
+e-nollywood-houston,a-tunde-casual,friend,jollof_and_drama,tunde_popcorn_guy,,Naija diaspora circle
+f-rio-favela-teen-action,a-tunde-casual,friend,lucas_da_rocinha,tunde_popcorn_guy,,Fast & Furious fan Discord
+g-sione-mtdruitt-omnivore,a-tunde-casual,friend,sione_fam_movie_nite,tunde_popcorn_guy,,Fast & Furious fan Discord
+i-baltimore-group-home-teen,a-tunde-casual,friend,nevaeh_after_lights_out,tunde_popcorn_guy,,Fast & Furious fan Discord
+i-glasgow-care-unit-teen,a-tunde-casual,friend,con_film_night,tunde_popcorn_guy,,Fast & Furious fan Discord
+a-tunde-casual,i-toronto-vietnamese-student,friend,tunde_popcorn_guy,linh_homesick_reels,,Fast & Furious fan Discord
+a-tunde-casual,j-ones-and-tens,friend,tunde_popcorn_guy,zero_or_hero_kofi,,Fast & Furious fan Discord
+a-tunde-casual,j-trend-follower,friend,tunde_popcorn_guy,whats_everyone_watching_tay,,Fast & Furious fan Discord
+h-akinyi-kisumu-mysteries,a-zoe-13-pixar,friend,akinyi_solves_it_first,zoe_draws_dragons,school pen-pal programme,edge
+a-zoe-13-pixar,kid-gamer-10yo,friend,zoe_draws_dragons,respawn_max,,Year 9 lunch table
+a-zoe-13-pixar,pixar-crier,friend,zoe_draws_dragons,ugly_cry_ollie,aunt,edge
+a24-hipster,cinematography-snob,friend,slow_cinema_wren,golden_hour_gus,,Film school friends
 contrarian,a24-hipster,friend,actually_overrated,slow_cinema_wren,,edge
 film-bro,a24-hipster,friend,kubrick_stare,slow_cinema_wren,,Film school friends
+a24-hipster,k-cinema-fan,friend,slow_cinema_wren,hallyu_hannah,,Film school friends
 a24-hipster,nolan-stan,friend,slow_cinema_wren,tenet_backwards,,Film school friends
 a24-hipster,oscar-completionist,friend,slow_cinema_wren,best_picture_bea,,Film school friends
 a24-hipster,world-cinephile,friend,slow_cinema_wren,subtitle_sofia,,Film school friends
+b-alberta-trucker,action-dad,friend,long_haul_dale,yippee_ki_yay_rick,,edge
 action-dad,eighties-kid,friend,yippee_ki_yay_rick,rad_tubular_tina,,Dads' fantasy league
 action-dad,family-war-dad,friend,yippee_ki_yay_rick,bedtime_and_bunkers,,Dads' fantasy league
+i-kentucky-army-vet,action-dad,friend,rural_route_dwayne,yippee_ki_yay_rick,VFW buddy,edge
 action-dad,sports-dad,friend,yippee_ki_yay_rick,fourth_and_long_ed,,Dads' fantasy league
+b-manila-call-centre,anime-ghibli,friend,graveyard_shift_gab,totoro_umbrella,,edge
 anime-ghibli,cult-trash,friend,totoro_umbrella,so_bad_its_good,,College roommates
+d-stop-motion-prague,anime-ghibli,friend,plasticine_pavla,totoro_umbrella,,edge
 anime-ghibli,eighties-kid,friend,totoro_umbrella,rad_tubular_tina,,College roommates
+f-sanjuan-13yo-animation,anime-ghibli,friend,valeria_dibuja_sj,totoro_umbrella,Ghibli fan-art Discord,edge
 anime-ghibli,lotr-fantasy,friend,totoro_umbrella,second_breakfast_sam,,College roommates
 omnivore,anime-ghibli,close,watches_it_all,totoro_umbrella,close friends (anime-ghibli only); one-way close flag,edge
 stoner-comedy,anime-ghibli,friend,couch_lock_chaz,totoro_umbrella,,College roommates
+war-animation,anime-ghibli,friend,fireflies_and_flak,totoro_umbrella,,edge
+anime-western,biopic-fan,friend,spike_and_the_drifter,true_story_marcus,,Classic film society
 classic-hollywood,anime-western,friend,nitrate_nora,spike_and_the_drifter,,Classic film society
+h-aibek-steppe-westerns-anime,anime-western,close,aibek_rides_and_draws,spike_and_the_drifter,close friends (h-aibek-steppe-westerns-anime only); Cowboy Bebop forum,edge
+anime-western,retired-teacher,friend,spike_and_the_drifter,mrs_hargrove_reads,,Classic film society
 war-history-buff,anime-western,friend,flanking_frank,spike_and_the_drifter,,Classic film society
 western-grandpa,anime-western,friend,dusty_trail_earl,spike_and_the_drifter,,Classic film society
+anime-western,western-musical,friend,spike_and_the_drifter,yeehaw_showtunes,,Classic film society
+c-cotswolds-book-club,austen-period-drama,friend,hilary_reads_on,pemberley_or_bust,,edge
 austen-period-drama,disney-mom,friend,pemberley_or_bust,magic_kingdom_meg,,Book-club moms
 hallmark-cozy,austen-period-drama,close,cocoa_and_cardigans,pemberley_or_bust,close friends (both),Book-club moms
 austen-period-drama,halloween-disney-mom,friend,pemberley_or_bust,spooky_mouse_mom,,Book-club moms
 austen-period-drama,pixar-crier,friend,pemberley_or_bust,ugly_cry_ollie,,Book-club moms
+retired-teacher,austen-period-drama,friend,mrs_hargrove_reads,pemberley_or_bust,former student,edge
 austen-period-drama,sensitive-viewer,friend,pemberley_or_bust,no_jumpscares_please,,Book-club moms
 austen-period-drama,strict-parent,friend,pemberley_or_bust,screen_time_sarah,,Book-club moms
+b-boston-firefighter,b-alberta-trucker,friend,dorchester_ladder_sean,long_haul_dale,,Sports bar crew
+c-boston-firefighter,b-alberta-trucker,friend,ladder_and_league_sully,long_haul_dale,,Sports bar crew
+c-electrician-hockey-dad,b-alberta-trucker,friend,sparky_kowalski,long_haul_dale,,Sports bar crew
+d-sports-docs-manc,b-alberta-trucker,friend,terrace_doc_dan,long_haul_dale,,Sports bar crew
+f-bogota-driver-thrillers,b-alberta-trucker,friend,parcero_al_volante,long_haul_dale,,Taxi rank (drivers' forum)
+g-kaho-hk-taxi-crime-cantopop,b-alberta-trucker,friend,kaho_redtaxi,long_haul_dale,,Taxi rank (drivers' forum)
+h-brian-kampala-boda,b-alberta-trucker,friend,boda_brian_action,long_haul_dale,,Taxi rank (drivers' forum)
+h-dragan-belgrade-taxi,b-alberta-trucker,friend,dragan_meter_running,long_haul_dale,,Taxi rank (drivers' forum)
+i-surrey-sikh-trucker-nights,b-alberta-trucker,close,coquihalla_night_haul,long_haul_dale,close friends (both),Taxi rank (drivers' forum)
+b-alberta-trucker,sports-dad,friend,long_haul_dale,fourth_and_long_ed,,Sports bar crew
+c-sao-paulo-architect-cinephile,b-amsterdam-arthouse-barista,friend,bia_em_pinheiros,noor_slow_cinema,,International film forum
+d-lyon-cinephile,b-amsterdam-arthouse-barista,friend,cine_club_odile,noor_slow_cinema,,International film forum
+b-amsterdam-arthouse-barista,d-osaka-jidaigeki,friend,noor_slow_cinema,naniwa_samurai_kenji,,International film forum
+b-amsterdam-arthouse-barista,d-silent-film-pianist,friend,noor_slow_cinema,nitrate_and_ivories,,International film forum
+e-hong-kong-action,b-amsterdam-arthouse-barista,friend,bullet_ballet_bo,noor_slow_cinema,,International film forum
+e-italian-neorealism,b-amsterdam-arthouse-barista,friend,bicycle_thief_bruno,noor_slow_cinema,,International film forum
+e-new-hollywood-70s,b-amsterdam-arthouse-barista,friend,director_s_decade,noor_slow_cinema,,International film forum
+e-nouvelle-vague,b-amsterdam-arthouse-barista,friend,cahiers_claudine,noor_slow_cinema,,International film forum
+e-spaghetti-westerns,b-amsterdam-arthouse-barista,friend,morricone_whistle,noor_slow_cinema,,International film forum
+b-amsterdam-arthouse-barista,world-cinephile,friend,noor_slow_cinema,subtitle_sofia,,International film forum
+b-auckland-musical-teacher,b-lagos-london-producer,friend,kia_ora_grace,four_bar_aisha,,Musicians' green room
+c-auckland-dnd-mum,b-auckland-musical-teacher,friend,aroha_rolls_d20,kia_ora_grace,same school gate,edge
+c-bengaluru-musicals-romance,b-auckland-musical-teacher,friend,sunita_hums_along,kia_ora_grace,,edge
+c-nola-bassist-music-crime,b-auckland-musical-teacher,friend,curtis_on_frenchmen,kia_ora_grace,,Musicians' green room
+e-dancer-dance-films,b-auckland-musical-teacher,friend,five_six_seven_eight,kia_ora_grace,,Musicians' green room
+e-session-bassist,b-auckland-musical-teacher,friend,low_end_lyle,kia_ora_grace,,Musicians' green room
+g-tama-rotorua-teacher,b-auckland-musical-teacher,close,whaea_tama,kia_ora_grace,close friends (both); teacher training college,edge
+b-berlin-ux-scifi,c-auckland-dnd-mum,friend,lena_in_orbit,aroha_rolls_d20,,Sci-fi Discord
+c-berlin-history-teacher,b-berlin-ux-scifi,friend,frau_vogel_lehrt,lena_in_orbit,Berlin neighbours,edge
+b-berlin-ux-scifi,c-cardiff-plumber-scifi-horror,friend,lena_in_orbit,gaz_fixes_leaks,,Sci-fi Discord
+b-berlin-ux-scifi,d-kaiju-busan,friend,lena_in_orbit,gojira_gaming_minho,,Sci-fi Discord
+b-berlin-ux-scifi,e-gamer-adaptations,friend,lena_in_orbit,frame_perfect_fin,,Sci-fi Discord
+b-berlin-ux-scifi,g-wei-shanghai-scifi,friend,lena_in_orbit,wei_lightyear,,Sci-fi Discord
+b-berlin-ux-scifi,h-kaspar-tallinn-gamedev,friend,lena_in_orbit,kaspar_watches_all_of_it,,Sci-fi Discord
+b-berlin-ux-scifi,hard-scifi-engineer,friend,lena_in_orbit,delta_v_priya,,Sci-fi Discord
+b-boston-firefighter,c-boston-firefighter,close,dorchester_ladder_sean,ladder_and_league_sully,close friends (both),Sports bar crew
+b-boston-firefighter,c-electrician-hockey-dad,friend,dorchester_ladder_sean,sparky_kowalski,,Sports bar crew
+b-boston-firefighter,d-sports-docs-manc,friend,dorchester_ladder_sean,terrace_doc_dan,,Sports bar crew
+b-boston-firefighter,sports-dad,friend,dorchester_ladder_sean,fourth_and_long_ed,,Sports bar crew
+b-toronto-toddler-dad,b-buenos-aires-horror,friend,bluey_and_brews,diego_after_midnight,college roommates,edge
+b-buenos-aires-horror,c-divorced-romcom-horror,friend,diego_after_midnight,renee_after_dark,,edge
+f-buenos-aires-psychoanalyst,b-buenos-aires-horror,friend,lic_freud_palermo,diego_after_midnight,,Cineclub del Río de la Plata
+f-cordoba-horror-dad,b-buenos-aires-horror,friend,papa_del_terror_cba,diego_after_midnight,,Cineclub del Río de la Plata
+f-montevideo-newlyweds-romance,b-buenos-aires-horror,friend,rambla_al_atardecer,diego_after_midnight,,Cineclub del Río de la Plata
+f-santiago-retired-projectionist,b-buenos-aires-horror,friend,proyector_de_santiago,diego_after_midnight,,Cineclub del Río de la Plata
+f-uruguay-gaucho-westerns-docs,b-buenos-aires-horror,friend,tropero_de_tacuarembo,diego_after_midnight,,Cineclub del Río de la Plata
+b-buenos-aires-horror,horror-fanatic,friend,diego_after_midnight,final_girl_dana,,edge
+b-sleepless-new-mom,b-cdmx-adventure-dad,friend,naptime_hannah,papa_rafa_aventuras,,New-parents group chat
+b-toronto-toddler-dad,b-cdmx-adventure-dad,friend,bluey_and_brews,papa_rafa_aventuras,,New-parents group chat
+b-cdmx-adventure-dad,c-blended-family-movie-night,friend,papa_rafa_aventuras,five_on_the_couch,,New-parents group chat
+b-cdmx-adventure-dad,e-mexican-family-cine,friend,papa_rafa_aventuras,domingo_de_cine,,New-parents group chat
+e-new-dad-sleepless,b-cdmx-adventure-dad,friend,two_am_bottle_ben,papa_rafa_aventuras,,New-parents group chat
+b-cdmx-adventure-dad,pixar-crier,friend,papa_rafa_aventuras,ugly_cry_ollie,,New-parents group chat
+b-war-romance-teacher,b-darwin-war-comedy,friend,letters_from_krakow,dig_in_digger,,War-film forum
+c-berlin-history-teacher,b-darwin-war-comedy,friend,frau_vogel_lehrt,dig_in_digger,,War-film forum
+b-darwin-war-comedy,c-osaka-war-anime-dad,friend,dig_in_digger,morita_salaryman,,War-film forum
+b-darwin-war-comedy,comedy-war,close,dig_in_digger,strangelove_sid,close friends (both),edge
+d-war-modeler-gdansk,b-darwin-war-comedy,friend,scale_1_35_tomasz,dig_in_digger,,War-film forum
+e-civil-war-reenactor,b-darwin-war-comedy,friend,fife_and_drum_frank,dig_in_digger,,War-film forum
+f-lisbon-bandsman-musicals-war,b-darwin-war-comedy,friend,sargento_da_banda,dig_in_digger,,Veterans' movie night
+b-darwin-war-comedy,h-noam-telaviv-engineer,friend,dig_in_digger,noam_compiles_scifi,,Veterans' movie night
+i-kentucky-army-vet,b-darwin-war-comedy,close,rural_route_dwayne,dig_in_digger,close friends (both),Veterans' movie night
+i-raf-tech-omnivore,b-darwin-war-comedy,friend,lossie_jet_wash,dig_in_digger,,Veterans' movie night
+war-history-buff,b-darwin-war-comedy,friend,flanking_frank,dig_in_digger,,War-film forum
+j-okafor-family-account,b-houston-refinery-tech,friend,okafor_household_tv,kwame_on_rotation,Ghana-Naija church in Houston,edge
+b-kyiv-in-warsaw,b-war-romance-teacher,friend,sasha_noir_waw,letters_from_krakow,neighbours in Warsaw,edge
+d-nordic-noir-aarhus,b-kyiv-in-warsaw,friend,skagerrak_sofie,sasha_noir_waw,,edge
+h-dragan-belgrade-taxi,b-kyiv-in-warsaw,friend,dragan_meter_running,sasha_noir_waw,,Balkan & Black Sea neighbours
+h-ioana-bucharest-teacher,b-kyiv-in-warsaw,friend,ioana_new_wave_notes,sasha_noir_waw,,Balkan & Black Sea neighbours
+h-mykola-lviv-retiree,b-kyiv-in-warsaw,close,mykola_soviet_classics,sasha_noir_waw,close friends (both),Balkan & Black Sea neighbours
+h-nino-tbilisi-romance-war,b-kyiv-in-warsaw,friend,nino_sings_polyphony,sasha_noir_waw,,Balkan & Black Sea neighbours
+b-lagos-london-producer,c-lagos-banker-action,friend,four_bar_aisha,tunde_in_transit,,Naija diaspora circle
+c-nola-bassist-music-crime,b-lagos-london-producer,friend,curtis_on_frenchmen,four_bar_aisha,,Musicians' green room
+e-dancer-dance-films,b-lagos-london-producer,friend,five_six_seven_eight,four_bar_aisha,,Musicians' green room
+e-nollywood-houston,b-lagos-london-producer,friend,jollof_and_drama,four_bar_aisha,,Naija diaspora circle
+e-session-bassist,b-lagos-london-producer,friend,low_end_lyle,four_bar_aisha,,Musicians' green room
+e-chef-food-films,b-lyon-romcom-couple,friend,mise_en_place_mo,chloe_et_cinema,catered her engagement,edge
+b-lyon-romcom-couple,e-wedding-planners,friend,chloe_et_cinema,save_the_date_sd,wedding forum,edge
+b-lyon-romcom-couple,romcom-lover,friend,chloe_et_cinema,meet_cute_maya,,edge
+b-manila-call-centre,b-pune-to-seattle,friend,graveyard_shift_gab,chai_and_cinema_arjun,,Dubai Media City alumni
+b-manila-call-centre,d-cape-town-diplomat,friend,graveyard_shift_gab,chancery_gray_thabo,,Dubai Media City alumni
+d-martial-arts-cebu,b-manila-call-centre,friend,wingchun_wally,graveyard_shift_gab,,edge
+h-mariam-dubai-marketing,b-manila-call-centre,friend,mariam_karak_and_film,graveyard_shift_gab,,Dubai Media City alumni
+h-rita-beirut-pharmacist,b-manila-call-centre,friend,rita_after_the_pharmacy,graveyard_shift_gab,,Dubai Media City alumni
+b-melbourne-omnivore,c-melbourne-video-store-power,close,watches_everything_dan,rewind_please_graham,close friends (both); video-store regular,edge
+b-melbourne-omnivore,omnivore,friend,watches_everything_dan,watches_it_all,,edge
+b-montana-rancher,c-montana-rancher-docs-westerns,close,big_sky_bodie,wade_on_the_high_line,close friends (both); neighbouring ranches,edge
+e-rock-climber-docs,b-montana-rancher,friend,crimp_and_send,big_sky_bodie,climbs on his land,edge
+b-night-shift-nurse,c-cork-icu-nurse-crime,friend,icu_after_hours,night_shift_siobhan,,Night-shift nurses
+d-sports-docs-manc,b-night-shift-nurse,friend,terrace_doc_dan,icu_after_hours,cousins,edge
+b-night-shift-nurse,e-er-nurse-comedies,close,icu_after_hours,night_shift_noor,close friends (both),Night-shift nurses
+b-ohio-holiday-movies,c-nova-scotia-tv-mysteries,friend,porch_light_jenna,donna_by_the_fire,,Grace Fellowship small group
+d-faith-family-homeschool,b-ohio-holiday-movies,close,grace_and_popcorn,porch_light_jenna,close friends (both),Grace Fellowship small group
+b-ohio-holiday-movies,e-recovering-feelgood,friend,porch_light_jenna,slow_mend_maggie,,Grace Fellowship small group
+b-ohio-holiday-movies,hallmark-cozy,friend,porch_light_jenna,cocoa_and_cardigans,,Grace Fellowship small group
+b-osaka-pharmacist-mystery,c-osaka-war-anime-dad,friend,yuki_whodunit,morita_salaryman,,Kansai film circle
+d-osaka-jidaigeki,b-osaka-pharmacist-mystery,friend,naniwa_samurai_kenji,yuki_whodunit,,Kansai film circle
+b-osaka-pharmacist-mystery,e-japanese-expat,friend,yuki_whodunit,osaka_in_seattle,school friends,edge
+g-haruko-kyoto-widow,b-osaka-pharmacist-mystery,friend,haruko_ozu_fan,yuki_whodunit,,Kansai film circle
+b-osaka-pharmacist-mystery,g-ren-osaka-salaryman,friend,yuki_whodunit,ren_watches_all,,Kansai film circle
+b-osaka-pharmacist-mystery,whodunit-lover,friend,yuki_whodunit,little_grey_cells,,edge
+b-pune-to-seattle,bollywood-fan,friend,chai_and_cinema_arjun,masala_mehta,,Desi movie night
+b-pune-to-seattle,c-bengaluru-musicals-romance,friend,chai_and_cinema_arjun,sunita_hums_along,,Desi movie night
+b-pune-to-seattle,d-bollywood-leicester,friend,chai_and_cinema_arjun,masala_mornings_priya,,Desi movie night
+b-pune-to-seattle,d-cape-town-diplomat,friend,chai_and_cinema_arjun,chancery_gray_thabo,,Dubai Media City alumni
+b-pune-to-seattle,e-desi-diaspora,close,chai_and_cinema_arjun,chai_and_blockbusters,close friends (both),Desi movie night
+h-mariam-dubai-marketing,b-pune-to-seattle,friend,mariam_karak_and_film,chai_and_cinema_arjun,,Dubai Media City alumni
+h-rita-beirut-pharmacist,b-pune-to-seattle,friend,rita_after_the_pharmacy,chai_and_cinema_arjun,,Dubai Media City alumni
+b-pune-to-seattle,hard-scifi-engineer,friend,chai_and_cinema_arjun,delta_v_priya,same team,edge
+b-sao-paulo-history,c-denver-dating-again-dad,friend,fernanda_footnotes,tom_tries_again,,Bar association film night
+c-sao-paulo-architect-cinephile,b-sao-paulo-history,friend,bia_em_pinheiros,fernanda_footnotes,,Moema condo residents
+c-stockholm-lawyer-mindbenders,b-sao-paulo-history,friend,henrik_reads_footnotes,fernanda_footnotes,,Bar association film night
+e-brazilian-lisbon,b-sao-paulo-history,close,saudade_sessions,fernanda_footnotes,close friends (both); sisters,edge
+e-courtroom-lawyer,b-sao-paulo-history,friend,objection_sustained,fernanda_footnotes,,Bar association film night
+f-sao-paulo-banker-dad,b-sao-paulo-history,friend,faria_lima_family_man,fernanda_footnotes,,Moema condo residents
+b-sleepless-new-mom,b-toronto-toddler-dad,friend,naptime_hannah,bluey_and_brews,,New-parents group chat
+b-sleepless-new-mom,c-blended-family-movie-night,friend,naptime_hannah,five_on_the_couch,,New-parents group chat
+b-sleepless-new-mom,e-mexican-family-cine,friend,naptime_hannah,domingo_de_cine,,New-parents group chat
+b-sleepless-new-mom,e-new-dad-sleepless,close,naptime_hannah,two_am_bottle_ben,close friends (both),New-parents group chat
+b-sleepless-new-mom,pixar-crier,friend,naptime_hannah,ugly_cry_ollie,,New-parents group chat
+b-spooky-family-mum,c-brisbane-horror-family-mum,close,cosy_creepy_siobhan,kerry_anne_creeps,close friends (both),Spooky Parents Club
+b-spooky-family-mum,d-horror-family-grandpa,friend,cosy_creepy_siobhan,hammer_and_grandkids,,Spooky Parents Club
+b-spooky-family-mum,halloween-disney-mom,friend,cosy_creepy_siobhan,spooky_mouse_mom,,Spooky Parents Club
+j-horror-family,b-spooky-family-mum,friend,spooky_family_night_ro,cosy_creepy_siobhan,spooky-kids forum,edge
+b-spooky-family-mum,spooky-family-dad,friend,cosy_creepy_siobhan,creature_feature_dad,,Spooky Parents Club
+b-toronto-toddler-dad,c-blended-family-movie-night,friend,bluey_and_brews,five_on_the_couch,,New-parents group chat
+b-toronto-toddler-dad,c-cardiff-plumber-scifi-horror,friend,bluey_and_brews,gaz_fixes_leaks,old gaming buddies,edge
+b-toronto-toddler-dad,disney-mom,friend,bluey_and_brews,magic_kingdom_meg,,edge
+b-toronto-toddler-dad,e-mexican-family-cine,friend,bluey_and_brews,domingo_de_cine,,New-parents group chat
+e-new-dad-sleepless,b-toronto-toddler-dad,friend,two_am_bottle_ben,bluey_and_brews,,New-parents group chat
+i-toronto-orthodox-accountant,b-toronto-toddler-dad,friend,sunday_double_bill_ari,bluey_and_brews,Toronto neighbours,edge
+b-toronto-toddler-dad,pixar-crier,friend,bluey_and_brews,ugly_cry_ollie,,New-parents group chat
+c-berlin-history-teacher,b-war-romance-teacher,friend,frau_vogel_lehrt,letters_from_krakow,,War-film forum
+b-war-romance-teacher,c-osaka-war-anime-dad,friend,letters_from_krakow,morita_salaryman,,War-film forum
+d-war-modeler-gdansk,b-war-romance-teacher,friend,scale_1_35_tomasz,letters_from_krakow,,War-film forum
+e-civil-war-reenactor,b-war-romance-teacher,friend,fife_and_drum_frank,letters_from_krakow,,War-film forum
+war-history-buff,b-war-romance-teacher,friend,flanking_frank,letters_from_krakow,,War-film forum
+classic-hollywood,biopic-fan,friend,nitrate_nora,true_story_marcus,,Classic film society
+biopic-fan,doc-nerd,friend,true_story_marcus,verite_vik,,edge
+e-session-bassist,biopic-fan,friend,low_end_lyle,true_story_marcus,,edge
+retired-teacher,biopic-fan,friend,mrs_hargrove_reads,true_story_marcus,,Classic film society
+war-history-buff,biopic-fan,friend,flanking_frank,true_story_marcus,,Classic film society
+western-grandpa,biopic-fan,friend,dusty_trail_earl,true_story_marcus,,Classic film society
+western-musical,biopic-fan,friend,yeehaw_showtunes,true_story_marcus,,Classic film society
+c-bengaluru-musicals-romance,bollywood-fan,friend,sunita_hums_along,masala_mehta,,Desi movie night
+comedy-truecrime-podcaster,bollywood-fan,friend,murder_and_giggles,masala_mehta,,Office crew
+d-bollywood-leicester,bollywood-fan,friend,masala_mornings_priya,masala_mehta,,Desi movie night
+doc-nerd,bollywood-fan,friend,verite_vik,masala_mehta,,Office crew
+e-desi-diaspora,bollywood-fan,friend,chai_and_blockbusters,masala_mehta,,Desi movie night
+flat-six,bollywood-fan,friend,solid_six_steve,masala_mehta,,Office crew
+hard-scifi-engineer,bollywood-fan,friend,delta_v_priya,masala_mehta,,Office crew
+bollywood-fan,musical-theatre-kid,friend,masala_mehta,jazz_hands_jess,,edge
+romcom-lover,bollywood-fan,friend,meet_cute_maya,masala_mehta,,Office crew
+scifi-docs-only,bollywood-fan,friend,lightyear_lucas,masala_mehta,,Office crew
+sports-dad,bollywood-fan,friend,fourth_and_long_ed,masala_mehta,,Office crew
+true-crime-thriller,bollywood-fan,friend,cold_case_carla,masala_mehta,,Office crew
+whodunit-lover,bollywood-fan,friend,little_grey_cells,masala_mehta,,Office crew
+c-auckland-dnd-mum,c-cardiff-plumber-scifi-horror,friend,aroha_rolls_d20,gaz_fixes_leaks,,Sci-fi Discord
+c-auckland-dnd-mum,d-kaiju-busan,friend,aroha_rolls_d20,gojira_gaming_minho,,Sci-fi Discord
+d-stop-motion-prague,c-auckland-dnd-mum,friend,plasticine_pavla,aroha_rolls_d20,,edge
+c-auckland-dnd-mum,e-gamer-adaptations,friend,aroha_rolls_d20,frame_perfect_fin,,Sci-fi Discord
+c-auckland-dnd-mum,g-wei-shanghai-scifi,friend,aroha_rolls_d20,wei_lightyear,,Sci-fi Discord
+c-auckland-dnd-mum,h-kaspar-tallinn-gamedev,friend,aroha_rolls_d20,kaspar_watches_all_of_it,,Sci-fi Discord
+c-auckland-dnd-mum,hard-scifi-engineer,friend,aroha_rolls_d20,delta_v_priya,,Sci-fi Discord
+c-auckland-dnd-mum,lotr-fantasy,friend,aroha_rolls_d20,second_breakfast_sam,,edge
+d-bollywood-leicester,c-bengaluru-musicals-romance,friend,masala_mornings_priya,sunita_hums_along,,Desi movie night
+e-desi-diaspora,c-bengaluru-musicals-romance,friend,chai_and_blockbusters,sunita_hums_along,,Desi movie night
+g-ayesha-lahore-medstudent,c-bengaluru-musicals-romance,friend,ayesha_filmi_dil,sunita_hums_along,,Bollywood-and-beyond Discord
+g-tharindu-kandy-fantasy,c-bengaluru-musicals-romance,friend,tharindu_middle_earth,sunita_hums_along,,Bollywood-and-beyond Discord
+c-berlin-history-teacher,c-osaka-war-anime-dad,friend,frau_vogel_lehrt,morita_salaryman,,War-film forum
+d-war-modeler-gdansk,c-berlin-history-teacher,friend,scale_1_35_tomasz,frau_vogel_lehrt,,War-film forum
+e-civil-war-reenactor,c-berlin-history-teacher,friend,fife_and_drum_frank,frau_vogel_lehrt,,War-film forum
+j-harsh-critic,c-berlin-history-teacher,friend,seven_is_a_rave_hugo,frau_vogel_lehrt,history-teacher conference,edge
+war-history-buff,c-berlin-history-teacher,friend,flanking_frank,frau_vogel_lehrt,,War-film forum
+c-blended-family-movie-night,c-nj-pharma-soccer-mom,friend,five_on_the_couch,priya_carpools,kids on the same team,edge
+e-mexican-family-cine,c-blended-family-movie-night,friend,domingo_de_cine,five_on_the_couch,,New-parents group chat
+e-new-dad-sleepless,c-blended-family-movie-night,friend,two_am_bottle_ben,five_on_the_couch,,New-parents group chat
+c-blended-family-movie-night,pixar-crier,friend,five_on_the_couch,ugly_cry_ollie,,New-parents group chat
+c-boston-firefighter,c-electrician-hockey-dad,friend,ladder_and_league_sully,sparky_kowalski,,Sports bar crew
+c-boston-firefighter,d-sports-docs-manc,friend,ladder_and_league_sully,terrace_doc_dan,,Sports bar crew
+c-boston-firefighter,sports-dad,friend,ladder_and_league_sully,fourth_and_long_ed,,Sports bar crew
+c-divorced-romcom-horror,c-brisbane-horror-family-mum,friend,renee_after_dark,kerry_anne_creeps,,edge
+c-brisbane-horror-family-mum,d-horror-family-grandpa,friend,kerry_anne_creeps,hammer_and_grandkids,,Spooky Parents Club
+c-brisbane-horror-family-mum,halloween-disney-mom,friend,kerry_anne_creeps,spooky_mouse_mom,,Spooky Parents Club
+c-brisbane-horror-family-mum,spooky-family-dad,friend,kerry_anne_creeps,creature_feature_dad,,Spooky Parents Club
+c-cardiff-plumber-scifi-horror,c-denver-dating-again-dad,friend,gaz_fixes_leaks,tom_tries_again,,Weekend-dads WhatsApp
+c-cardiff-plumber-scifi-horror,c-electrician-hockey-dad,friend,gaz_fixes_leaks,sparky_kowalski,,Weekend-dads WhatsApp
+c-turin-chef-weekend-dad,c-cardiff-plumber-scifi-horror,friend,paolo_al_dente,gaz_fixes_leaks,,Weekend-dads WhatsApp
+d-kaiju-busan,c-cardiff-plumber-scifi-horror,friend,gojira_gaming_minho,gaz_fixes_leaks,,Sci-fi Discord
+e-gamer-adaptations,c-cardiff-plumber-scifi-horror,friend,frame_perfect_fin,gaz_fixes_leaks,,Sci-fi Discord
+c-cardiff-plumber-scifi-horror,g-wei-shanghai-scifi,friend,gaz_fixes_leaks,wei_lightyear,,Sci-fi Discord
+c-cardiff-plumber-scifi-horror,h-kaspar-tallinn-gamedev,friend,gaz_fixes_leaks,kaspar_watches_all_of_it,,Sci-fi Discord
+c-cardiff-plumber-scifi-horror,hard-scifi-engineer,friend,gaz_fixes_leaks,delta_v_priya,,Sci-fi Discord
+c-cork-icu-nurse-crime,d-nordic-noir-aarhus,friend,night_shift_siobhan,skagerrak_sofie,,edge
+c-cork-icu-nurse-crime,e-er-nurse-comedies,friend,night_shift_siobhan,night_shift_noor,,Night-shift nurses
+j-flat-genres,c-cork-icu-nurse-crime,friend,eh_its_fine_gerald,night_shift_siobhan,Cork neighbours,edge
+c-cotswolds-book-club,c-inverness-librarian-omnivore,friend,hilary_reads_on,fiona_due_back,library book club,edge
+c-cotswolds-book-club,d-widow-musicals-history,close,hilary_reads_on,harrogate_hymns_maggie,close friends (both); sisters,edge
+e-recovering-feelgood,c-cotswolds-book-club,friend,slow_mend_maggie,hilary_reads_on,,edge
+c-denver-dating-again-dad,c-electrician-hockey-dad,friend,tom_tries_again,sparky_kowalski,,Weekend-dads WhatsApp
+c-stockholm-lawyer-mindbenders,c-denver-dating-again-dad,friend,henrik_reads_footnotes,tom_tries_again,,Bar association film night
+c-turin-chef-weekend-dad,c-denver-dating-again-dad,friend,paolo_al_dente,tom_tries_again,,Weekend-dads WhatsApp
+e-courtroom-lawyer,c-denver-dating-again-dad,friend,objection_sustained,tom_tries_again,,Bar association film night
+c-divorced-romcom-horror,romance-horror,close,renee_after_dark,crimson_claire,close friends (both),edge
+c-nj-pharma-soccer-mom,c-electrician-hockey-dad,friend,priya_carpools,sparky_kowalski,carpool,edge
+c-turin-chef-weekend-dad,c-electrician-hockey-dad,friend,paolo_al_dente,sparky_kowalski,,Weekend-dads WhatsApp
+c-electrician-hockey-dad,d-sports-docs-manc,friend,sparky_kowalski,terrace_doc_dan,,Sports bar crew
+c-electrician-hockey-dad,sports-dad,friend,sparky_kowalski,fourth_and_long_ed,,Sports bar crew
+i-raf-tech-omnivore,c-inverness-librarian-omnivore,friend,lossie_jet_wash,fiona_due_back,Moray library film club,edge
+j-completionist,c-inverness-librarian-omnivore,close,every_ticket_stub_agnes,fiona_due_back,close friends (both); retired / working librarians,edge
+c-inverness-librarian-omnivore,omnivore,friend,fiona_due_back,watches_it_all,,edge
+d-heist-madrid,c-lagos-banker-action,friend,el_golpe_perfecto,tunde_in_transit,met in an airport lounge,edge
+e-airline-pilot,c-lagos-banker-action,friend,flight_level_350,tunde_in_transit,his regular route,edge
+e-nollywood-houston,c-lagos-banker-action,friend,jollof_and_drama,tunde_in_transit,,Naija diaspora circle
+c-melbourne-video-store-power,cult-trash,friend,rewind_please_graham,so_bad_its_good,,edge
+c-montana-rancher-docs-westerns,western-grandpa,friend,wade_on_the_high_line,dusty_trail_earl,,edge
+c-nj-pharma-soccer-mom,mcu-teen,friend,priya_carpools,webhead_jayden,drives him to practice,edge
+c-nola-bassist-music-crime,e-dancer-dance-films,friend,curtis_on_frenchmen,five_six_seven_eight,,Musicians' green room
+c-nola-bassist-music-crime,e-session-bassist,close,curtis_on_frenchmen,low_end_lyle,close friends (both),Musicians' green room
+d-faith-family-homeschool,c-nova-scotia-tv-mysteries,friend,grace_and_popcorn,donna_by_the_fire,,Grace Fellowship small group
+e-recovering-feelgood,c-nova-scotia-tv-mysteries,friend,slow_mend_maggie,donna_by_the_fire,,Grace Fellowship small group
+c-nova-scotia-tv-mysteries,hallmark-cozy,friend,donna_by_the_fire,cocoa_and_cardigans,,Grace Fellowship small group
+d-osaka-jidaigeki,c-osaka-war-anime-dad,friend,naniwa_samurai_kenji,morita_salaryman,,Kansai film circle
+d-war-modeler-gdansk,c-osaka-war-anime-dad,friend,scale_1_35_tomasz,morita_salaryman,,War-film forum
+e-civil-war-reenactor,c-osaka-war-anime-dad,friend,fife_and_drum_frank,morita_salaryman,,War-film forum
+g-haruko-kyoto-widow,c-osaka-war-anime-dad,friend,haruko_ozu_fan,morita_salaryman,,Kansai film circle
+c-osaka-war-anime-dad,g-ren-osaka-salaryman,friend,morita_salaryman,ren_watches_all,,Kansai film circle
+war-history-buff,c-osaka-war-anime-dad,friend,flanking_frank,morita_salaryman,,War-film forum
+d-lyon-cinephile,c-sao-paulo-architect-cinephile,friend,cine_club_odile,bia_em_pinheiros,,International film forum
+c-sao-paulo-architect-cinephile,d-osaka-jidaigeki,friend,bia_em_pinheiros,naniwa_samurai_kenji,,International film forum
+c-sao-paulo-architect-cinephile,d-silent-film-pianist,friend,bia_em_pinheiros,nitrate_and_ivories,,International film forum
+c-sao-paulo-architect-cinephile,e-brazilian-lisbon,friend,bia_em_pinheiros,saudade_sessions,,edge
+e-hong-kong-action,c-sao-paulo-architect-cinephile,friend,bullet_ballet_bo,bia_em_pinheiros,,International film forum
+e-italian-neorealism,c-sao-paulo-architect-cinephile,friend,bicycle_thief_bruno,bia_em_pinheiros,,International film forum
+e-new-hollywood-70s,c-sao-paulo-architect-cinephile,friend,director_s_decade,bia_em_pinheiros,,International film forum
+e-nouvelle-vague,c-sao-paulo-architect-cinephile,friend,cahiers_claudine,bia_em_pinheiros,,International film forum
+e-spaghetti-westerns,c-sao-paulo-architect-cinephile,friend,morricone_whistle,bia_em_pinheiros,,International film forum
+f-sao-paulo-banker-dad,c-sao-paulo-architect-cinephile,friend,faria_lima_family_man,bia_em_pinheiros,,Moema condo residents
+c-sao-paulo-architect-cinephile,world-cinephile,friend,bia_em_pinheiros,subtitle_sofia,,International film forum
+d-active-senior-tramper,c-singapore-retired-couple,friend,ridgeline_ruth,auntie_meiling,,Sunset Grove film club
+c-singapore-retired-couple,d-avo-grandkids,friend,auntie_meiling,vovo_e_os_netos,,Sunset Grove film club
+c-singapore-retired-couple,d-cape-town-diplomat,friend,auntie_meiling,chancery_gray_thabo,,Sunset Grove film club
+d-cozy-mystery-nonna,c-singapore-retired-couple,friend,miss_marple_mabel,auntie_meiling,,Sunset Grove film club
+d-gold-coast-couple,c-singapore-retired-couple,friend,grey_nomad_bev,auntie_meiling,,Sunset Grove film club
+d-retired-detective,c-singapore-retired-couple,friend,ret_det_kowalczyk,auntie_meiling,,Sunset Grove film club
+d-retired-physicist,c-singapore-retired-couple,friend,prof_entropie,auntie_meiling,,Sunset Grove film club
+d-widow-musicals-history,c-singapore-retired-couple,friend,harrogate_hymns_maggie,auntie_meiling,,Sunset Grove film club
+d-widower-romance,c-singapore-retired-couple,friend,galway_claddagh_sean,auntie_meiling,,Sunset Grove film club
+e-widower-gentle-comedy,c-singapore-retired-couple,friend,porch_light_walt,auntie_meiling,,Sunset Grove film club
+c-singapore-retired-couple,retired-teacher,friend,auntie_meiling,mrs_hargrove_reads,,Sunset Grove film club
+e-courtroom-lawyer,c-stockholm-lawyer-mindbenders,friend,objection_sustained,henrik_reads_footnotes,,Bar association film night
+d-spaghetti-western-turin,c-turin-chef-weekend-dad,friend,sergio_e_morricone,paolo_al_dente,his trattoria,edge
+c-turin-chef-weekend-dad,e-chef-food-films,close,paolo_al_dente,mise_en_place_mo,close friends (both); worked the same line,edge
+film-bro,cinematography-snob,friend,kubrick_stare,golden_hour_gus,,Film school friends
+cinematography-snob,harsh-critic,close,golden_hour_gus,two_stars_max,close friends (both); trade 3/10s,edge
+cinematography-snob,k-cinema-fan,friend,golden_hour_gus,hallyu_hannah,,Film school friends
+nolan-stan,cinematography-snob,friend,tenet_backwards,golden_hour_gus,,Film school friends
+oscar-completionist,cinematography-snob,friend,best_picture_bea,golden_hour_gus,,Film school friends
+world-cinephile,cinematography-snob,friend,subtitle_sofia,golden_hour_gus,,Film school friends
+d-silent-film-pianist,classic-hollywood,close,nitrate_and_ivories,nitrate_nora,close friends (both),edge
+j-pre-1970-only,classic-hollywood,friend,nothing_after_69_marguerite,nitrate_nora,classics forum,edge
+classic-hollywood,retired-teacher,friend,nitrate_nora,mrs_hargrove_reads,,Classic film society
 classic-hollywood,war-history-buff,friend,nitrate_nora,flanking_frank,,Classic film society
 classic-hollywood,western-grandpa,friend,nitrate_nora,dusty_trail_earl,,Classic film society
+classic-hollywood,western-musical,friend,nitrate_nora,yeehaw_showtunes,,Classic film society
+comedy-war,college-cinephile-on-a-budget,friend,strangelove_sid,free_trial_fiona,,Game night crew
+e-grad-student-procrastinator,college-cinephile-on-a-budget,close,chapter_three_someday,free_trial_fiona,close friends (both),edge
+musical-crime,college-cinephile-on-a-budget,friend,all_that_jazz_jules,free_trial_fiona,,Game night crew
+college-cinephile-on-a-budget,stoner-comedy,friend,free_trial_fiona,couch_lock_chaz,,Game night crew
+college-cinephile-on-a-budget,superhero-burnout,friend,free_trial_fiona,post_endgame_pete,,Game night crew
+western-scifi,college-cinephile-on-a-budget,friend,space_cowboy_cal,free_trial_fiona,,Game night crew
 doc-nerd,comedy-truecrime-podcaster,friend,verite_vik,murder_and_giggles,,Office crew
 comedy-truecrime-podcaster,flat-six,friend,murder_and_giggles,solid_six_steve,,Office crew
 hard-scifi-engineer,comedy-truecrime-podcaster,friend,delta_v_priya,murder_and_giggles,,Office crew
 romcom-lover,comedy-truecrime-podcaster,friend,meet_cute_maya,murder_and_giggles,,Office crew
+comedy-truecrime-podcaster,scifi-docs-only,friend,murder_and_giggles,lightyear_lucas,,Office crew
 sports-dad,comedy-truecrime-podcaster,friend,fourth_and_long_ed,murder_and_giggles,,Office crew
 true-crime-thriller,comedy-truecrime-podcaster,close,cold_case_carla,murder_and_giggles,close friends (both),Office crew
 whodunit-lover,comedy-truecrime-podcaster,friend,little_grey_cells,murder_and_giggles,,Office crew
+comedy-war,musical-crime,friend,strangelove_sid,all_that_jazz_jules,,Game night crew
+comedy-war,stoner-comedy,friend,strangelove_sid,couch_lock_chaz,,Game night crew
+comedy-war,superhero-burnout,friend,strangelove_sid,post_endgame_pete,,Game night crew
+comedy-war,western-scifi,close,strangelove_sid,space_cowboy_cal,close friends (both),Game night crew
+j-contrarian,contrarian,friend,against_the_grain_gil,actually_overrated,online sparring partners,edge
 eighties-kid,cult-trash,friend,rad_tubular_tina,so_bad_its_good,,College roommates
 cult-trash,halloween-disney-mom,friend,so_bad_its_good,spooky_mouse_mom,,Horror club
 cult-trash,harsh-critic,friend,so_bad_its_good,two_stars_max,,Horror club
+cult-trash,horror-docs,friend,so_bad_its_good,found_footage_fern,,Horror club
 horror-fanatic,cult-trash,friend,final_girl_dana,so_bad_its_good,,Horror club
 lotr-fantasy,cult-trash,friend,second_breakfast_sam,so_bad_its_good,,College roommates
 cult-trash,musical-horror,friend,so_bad_its_good,time_warp_toni,,Horror club
+cult-trash,romance-horror,friend,so_bad_its_good,crimson_claire,,Horror club
 cult-trash,slasher-romcom-teen,friend,so_bad_its_good,ghostface_xoxo,,Horror club
 stoner-comedy,cult-trash,friend,couch_lock_chaz,so_bad_its_good,,College roommates
+d-active-senior-tramper,d-avo-grandkids,friend,ridgeline_ruth,vovo_e_os_netos,,Sunset Grove film club
+d-active-senior-tramper,d-cape-town-diplomat,friend,ridgeline_ruth,chancery_gray_thabo,,Sunset Grove film club
+d-cozy-mystery-nonna,d-active-senior-tramper,friend,miss_marple_mabel,ridgeline_ruth,,Sunset Grove film club
+d-gold-coast-couple,d-active-senior-tramper,friend,grey_nomad_bev,ridgeline_ruth,,Sunset Grove film club
+d-retired-detective,d-active-senior-tramper,friend,ret_det_kowalczyk,ridgeline_ruth,,Sunset Grove film club
+d-retired-physicist,d-active-senior-tramper,friend,prof_entropie,ridgeline_ruth,,Sunset Grove film club
+d-widow-musicals-history,d-active-senior-tramper,friend,harrogate_hymns_maggie,ridgeline_ruth,,Sunset Grove film club
+d-widower-romance,d-active-senior-tramper,friend,galway_claddagh_sean,ridgeline_ruth,,Sunset Grove film club
+d-active-senior-tramper,e-rock-climber-docs,friend,ridgeline_ruth,crimp_and_send,,edge
+e-widower-gentle-comedy,d-active-senior-tramper,friend,porch_light_walt,ridgeline_ruth,,Sunset Grove film club
+d-active-senior-tramper,retired-teacher,friend,ridgeline_ruth,mrs_hargrove_reads,,Sunset Grove film club
+d-cape-town-diplomat,d-avo-grandkids,friend,chancery_gray_thabo,vovo_e_os_netos,,Sunset Grove film club
+d-cozy-mystery-nonna,d-avo-grandkids,friend,miss_marple_mabel,vovo_e_os_netos,,Sunset Grove film club
+d-gold-coast-couple,d-avo-grandkids,friend,grey_nomad_bev,vovo_e_os_netos,,Sunset Grove film club
+d-retired-detective,d-avo-grandkids,friend,ret_det_kowalczyk,vovo_e_os_netos,,Sunset Grove film club
+d-retired-physicist,d-avo-grandkids,friend,prof_entropie,vovo_e_os_netos,,Sunset Grove film club
+d-widow-musicals-history,d-avo-grandkids,friend,harrogate_hymns_maggie,vovo_e_os_netos,,Sunset Grove film club
+d-widower-romance,d-avo-grandkids,friend,galway_claddagh_sean,vovo_e_os_netos,,Sunset Grove film club
+e-mexican-family-cine,d-avo-grandkids,friend,domingo_de_cine,vovo_e_os_netos,,edge
+e-widower-gentle-comedy,d-avo-grandkids,friend,porch_light_walt,vovo_e_os_netos,,Sunset Grove film club
+j-contrarian,d-avo-grandkids,friend,against_the_grain_gil,vovo_e_os_netos,aunt,edge
+d-avo-grandkids,retired-teacher,friend,vovo_e_os_netos,mrs_hargrove_reads,,Sunset Grove film club
+e-desi-diaspora,d-bollywood-leicester,friend,chai_and_blockbusters,masala_mornings_priya,,Desi movie night
+d-cozy-mystery-nonna,d-cape-town-diplomat,friend,miss_marple_mabel,chancery_gray_thabo,,Sunset Grove film club
+d-gold-coast-couple,d-cape-town-diplomat,friend,grey_nomad_bev,chancery_gray_thabo,,Sunset Grove film club
+d-retired-detective,d-cape-town-diplomat,close,ret_det_kowalczyk,chancery_gray_thabo,close friends (both),Sunset Grove film club
+d-retired-physicist,d-cape-town-diplomat,friend,prof_entropie,chancery_gray_thabo,,Sunset Grove film club
+d-widow-musicals-history,d-cape-town-diplomat,friend,harrogate_hymns_maggie,chancery_gray_thabo,,Sunset Grove film club
+d-widower-romance,d-cape-town-diplomat,friend,galway_claddagh_sean,chancery_gray_thabo,,Sunset Grove film club
+e-widower-gentle-comedy,d-cape-town-diplomat,friend,porch_light_walt,chancery_gray_thabo,,Sunset Grove film club
+h-mariam-dubai-marketing,d-cape-town-diplomat,friend,mariam_karak_and_film,chancery_gray_thabo,,Dubai Media City alumni
+h-rita-beirut-pharmacist,d-cape-town-diplomat,friend,rita_after_the_pharmacy,chancery_gray_thabo,,Dubai Media City alumni
+h-thandi-joburg-omnivore,d-cape-town-diplomat,friend,thandi_cuts_reels,chancery_gray_thabo,uncle,edge
+d-cape-town-diplomat,retired-teacher,friend,chancery_gray_thabo,mrs_hargrove_reads,,Sunset Grove film club
+d-cozy-mystery-nonna,d-gold-coast-couple,friend,miss_marple_mabel,grey_nomad_bev,,Sunset Grove film club
+d-cozy-mystery-nonna,d-retired-detective,friend,miss_marple_mabel,ret_det_kowalczyk,,Sunset Grove film club
+d-cozy-mystery-nonna,d-retired-physicist,friend,miss_marple_mabel,prof_entropie,,Sunset Grove film club
+d-cozy-mystery-nonna,d-widow-musicals-history,friend,miss_marple_mabel,harrogate_hymns_maggie,,Sunset Grove film club
+d-cozy-mystery-nonna,d-widower-romance,friend,miss_marple_mabel,galway_claddagh_sean,,Sunset Grove film club
+d-cozy-mystery-nonna,e-widower-gentle-comedy,friend,miss_marple_mabel,porch_light_walt,,Sunset Grove film club
+d-cozy-mystery-nonna,retired-teacher,friend,miss_marple_mabel,mrs_hargrove_reads,,Sunset Grove film club
+d-faith-family-homeschool,e-recovering-feelgood,friend,grace_and_popcorn,slow_mend_maggie,,Grace Fellowship small group
+d-faith-family-homeschool,hallmark-cozy,friend,grace_and_popcorn,cocoa_and_cardigans,,Grace Fellowship small group
+i-missouri-baptist-cashier,d-faith-family-homeschool,friend,crystal_sunday_best,grace_and_popcorn,faith-films Facebook group,edge
+d-faith-family-homeschool,strict-parent,friend,grace_and_popcorn,screen_time_sarah,,edge
+d-retired-detective,d-gold-coast-couple,friend,ret_det_kowalczyk,grey_nomad_bev,,Sunset Grove film club
+d-gold-coast-couple,d-retired-physicist,friend,grey_nomad_bev,prof_entropie,,Sunset Grove film club
+d-widow-musicals-history,d-gold-coast-couple,friend,harrogate_hymns_maggie,grey_nomad_bev,,Sunset Grove film club
+d-widower-romance,d-gold-coast-couple,friend,galway_claddagh_sean,grey_nomad_bev,,Sunset Grove film club
+d-gold-coast-couple,e-widower-gentle-comedy,friend,grey_nomad_bev,porch_light_walt,,Sunset Grove film club
+g-doug-dubbo-grazier,d-gold-coast-couple,friend,doug_out_west,grey_nomad_bev,old school mates,edge
+d-gold-coast-couple,retired-teacher,friend,grey_nomad_bev,mrs_hargrove_reads,,Sunset Grove film club
+d-heist-madrid,d-nordic-noir-aarhus,friend,el_golpe_perfecto,skagerrak_sofie,,edge
+e-brazilian-lisbon,d-heist-madrid,friend,saudade_sessions,el_golpe_perfecto,,Cineclube Ibérico
+d-heist-madrid,e-hong-kong-action,friend,el_golpe_perfecto,bullet_ballet_bo,,edge
+f-barcelona-horror-student,d-heist-madrid,friend,gracia_after_dark,el_golpe_perfecto,,Cineclube Ibérico
+f-galicia-fisherman-adventure,d-heist-madrid,friend,marineiro_de_muros,el_golpe_perfecto,,Cineclube Ibérico
+f-lisbon-bandsman-musicals-war,d-heist-madrid,friend,sargento_da_banda,el_golpe_perfecto,,Cineclube Ibérico
+f-madrid-omnivore-programmer,d-heist-madrid,friend,malasana_mira_todo,el_golpe_perfecto,,Cineclube Ibérico
+f-porto-student-scifi,d-heist-madrid,friend,ribeira_replicante,el_golpe_perfecto,,Cineclube Ibérico
+d-horror-family-grandpa,halloween-disney-mom,friend,hammer_and_grandkids,spooky_mouse_mom,,Spooky Parents Club
+d-horror-family-grandpa,spooky-family-dad,friend,hammer_and_grandkids,creature_feature_dad,,Spooky Parents Club
+e-gamer-adaptations,d-kaiju-busan,friend,frame_perfect_fin,gojira_gaming_minho,,Sci-fi Discord
+g-hyunwoo-busan-middle,d-kaiju-busan,close,hyunwoo_webs,gojira_gaming_minho,close friends (both); uncle and nephew,edge
+g-jiyeon-seoul-thriller,d-kaiju-busan,close,jiyeon_twist_hunter,gojira_gaming_minho,close friends (both),Seoul–Busan friends
+d-kaiju-busan,g-wei-shanghai-scifi,friend,gojira_gaming_minho,wei_lightyear,,Sci-fi Discord
+d-kaiju-busan,h-kaspar-tallinn-gamedev,friend,gojira_gaming_minho,kaspar_watches_all_of_it,,Sci-fi Discord
+d-kaiju-busan,hard-scifi-engineer,friend,gojira_gaming_minho,delta_v_priya,,Sci-fi Discord
+d-kaiju-busan,k-cinema-fan,close,gojira_gaming_minho,hallyu_hannah,close friends (both),Seoul–Busan friends
+d-lyon-cinephile,d-osaka-jidaigeki,friend,cine_club_odile,naniwa_samurai_kenji,,International film forum
+d-lyon-cinephile,d-silent-film-pianist,friend,cine_club_odile,nitrate_and_ivories,,International film forum
+d-lyon-cinephile,e-hong-kong-action,friend,cine_club_odile,bullet_ballet_bo,,International film forum
+d-lyon-cinephile,e-italian-neorealism,friend,cine_club_odile,bicycle_thief_bruno,,International film forum
+d-lyon-cinephile,e-new-hollywood-70s,friend,cine_club_odile,director_s_decade,,International film forum
+d-lyon-cinephile,e-nouvelle-vague,close,cine_club_odile,cahiers_claudine,close friends (both),International film forum
+d-lyon-cinephile,e-spaghetti-westerns,friend,cine_club_odile,morricone_whistle,,International film forum
+d-lyon-cinephile,harsh-critic,friend,cine_club_odile,two_stars_max,,edge
+j-festival-goer,d-lyon-cinephile,close,lanyard_season_lea,cine_club_odile,close friends (both); Lyon film society,edge
+d-lyon-cinephile,world-cinephile,friend,cine_club_odile,subtitle_sofia,,International film forum
+d-martial-arts-cebu,e-hong-kong-action,close,wingchun_wally,bullet_ballet_bo,close friends (both); trade bootleg DVDs,edge
+g-aziz-kl-documentaries,d-martial-arts-cebu,friend,cikgu_aziz_docs,wingchun_wally,,ASEAN film Telegram
+g-budi-jakarta-commuter,d-martial-arts-cebu,friend,budi_nonton_terus,wingchun_wally,,ASEAN film Telegram
+d-martial-arts-cebu,g-linh-saigon-student,friend,wingchun_wally,linh_xem_phim,,ASEAN film Telegram
+d-nordic-noir-aarhus,true-crime-thriller,friend,skagerrak_sofie,cold_case_carla,,edge
+d-osaka-jidaigeki,d-silent-film-pianist,friend,naniwa_samurai_kenji,nitrate_and_ivories,,International film forum
+e-hong-kong-action,d-osaka-jidaigeki,friend,bullet_ballet_bo,naniwa_samurai_kenji,,International film forum
+e-italian-neorealism,d-osaka-jidaigeki,friend,bicycle_thief_bruno,naniwa_samurai_kenji,,International film forum
+e-new-hollywood-70s,d-osaka-jidaigeki,friend,director_s_decade,naniwa_samurai_kenji,,International film forum
+e-nouvelle-vague,d-osaka-jidaigeki,friend,cahiers_claudine,naniwa_samurai_kenji,,International film forum
+e-spaghetti-westerns,d-osaka-jidaigeki,friend,morricone_whistle,naniwa_samurai_kenji,,International film forum
+d-osaka-jidaigeki,g-haruko-kyoto-widow,close,naniwa_samurai_kenji,haruko_ozu_fan,close friends (both),Kansai film circle
+d-osaka-jidaigeki,g-ren-osaka-salaryman,friend,naniwa_samurai_kenji,ren_watches_all,,Kansai film circle
+d-osaka-jidaigeki,world-cinephile,friend,naniwa_samurai_kenji,subtitle_sofia,,International film forum
+d-retired-detective,d-retired-physicist,friend,ret_det_kowalczyk,prof_entropie,,Sunset Grove film club
+d-widow-musicals-history,d-retired-detective,friend,harrogate_hymns_maggie,ret_det_kowalczyk,,Sunset Grove film club
+d-retired-detective,d-widower-romance,friend,ret_det_kowalczyk,galway_claddagh_sean,,Sunset Grove film club
+d-retired-detective,e-new-hollywood-70s,friend,ret_det_kowalczyk,director_s_decade,son-in-law,edge
+d-retired-detective,e-widower-gentle-comedy,friend,ret_det_kowalczyk,porch_light_walt,,Sunset Grove film club
+d-retired-detective,retired-teacher,friend,ret_det_kowalczyk,mrs_hargrove_reads,,Sunset Grove film club
+d-retired-detective,western-grandpa,friend,ret_det_kowalczyk,dusty_trail_earl,,edge
+d-widow-musicals-history,d-retired-physicist,friend,harrogate_hymns_maggie,prof_entropie,,Sunset Grove film club
+d-widower-romance,d-retired-physicist,friend,galway_claddagh_sean,prof_entropie,,Sunset Grove film club
+e-widower-gentle-comedy,d-retired-physicist,friend,porch_light_walt,prof_entropie,,Sunset Grove film club
+d-retired-physicist,retired-teacher,friend,prof_entropie,mrs_hargrove_reads,,Sunset Grove film club
+e-hong-kong-action,d-silent-film-pianist,friend,bullet_ballet_bo,nitrate_and_ivories,,International film forum
+e-italian-neorealism,d-silent-film-pianist,friend,bicycle_thief_bruno,nitrate_and_ivories,,International film forum
+e-new-hollywood-70s,d-silent-film-pianist,friend,director_s_decade,nitrate_and_ivories,,International film forum
+e-nouvelle-vague,d-silent-film-pianist,friend,cahiers_claudine,nitrate_and_ivories,,International film forum
+e-spaghetti-westerns,d-silent-film-pianist,friend,morricone_whistle,nitrate_and_ivories,,International film forum
+i-deaf-visual-storyteller,d-silent-film-pianist,close,signs_and_spectacle,nitrate_and_ivories,close friends (both); silent-film screenings,edge
+j-pre-1970-only,d-silent-film-pianist,friend,nothing_after_69_marguerite,nitrate_and_ivories,silent-film screenings,edge
+d-silent-film-pianist,world-cinephile,friend,nitrate_and_ivories,subtitle_sofia,,International film forum
+h-hassan-marrakech-concierge,d-spaghetti-western-turin,friend,hassan_of_the_medina,sergio_e_morricone,met on an Ouarzazate shoot,edge
+d-spaghetti-western-turin,western-grandpa,friend,sergio_e_morricone,dusty_trail_earl,,edge
+i-blind-audio-description-fan,d-sports-docs-manc,friend,ears_on_the_script,terrace_doc_dan,Stockport pub quiz team,edge
+d-sports-docs-manc,sports-dad,friend,terrace_doc_dan,fourth_and_long_ed,,Sports bar crew
+d-stop-motion-prague,pixar-crier,friend,plasticine_pavla,ugly_cry_ollie,,edge
+e-civil-war-reenactor,d-war-modeler-gdansk,friend,fife_and_drum_frank,scale_1_35_tomasz,,War-film forum
+j-new-releases-only,d-war-modeler-gdansk,friend,opening_night_ana,scale_1_35_tomasz,Polish film forum,edge
+war-history-buff,d-war-modeler-gdansk,friend,flanking_frank,scale_1_35_tomasz,,War-film forum
+d-widow-musicals-history,d-widower-romance,friend,harrogate_hymns_maggie,galway_claddagh_sean,,Sunset Grove film club
+d-widow-musicals-history,e-new-hollywood-70s,friend,harrogate_hymns_maggie,director_s_decade,son-in-law,edge
+d-widow-musicals-history,e-widower-gentle-comedy,friend,harrogate_hymns_maggie,porch_light_walt,,Sunset Grove film club
+d-widow-musicals-history,retired-teacher,friend,harrogate_hymns_maggie,mrs_hargrove_reads,,Sunset Grove film club
+d-widower-romance,e-widower-gentle-comedy,close,galway_claddagh_sean,porch_light_walt,close friends (both),Sunset Grove film club
+d-widower-romance,retired-teacher,friend,galway_claddagh_sean,mrs_hargrove_reads,,Sunset Grove film club
 disney-mom,family-war-dad,close,magic_kingdom_meg,bedtime_and_bunkers,close friends (both),Alvarez family
 disney-mom,film-bro,friend,magic_kingdom_meg,kubrick_stare,cousins,edge
 generous-rater,disney-mom,close,everything_is_awesome,magic_kingdom_meg,close friends (generous-rater only); one-way close flag,edge
@@ -50,76 +623,364 @@ disney-mom,sensitive-viewer,friend,magic_kingdom_meg,no_jumpscares_please,,Book-
 disney-mom,strict-parent,friend,magic_kingdom_meg,screen_time_sarah,,Book-club moms
 disney-mom,western-grandpa,friend,magic_kingdom_meg,dusty_trail_earl,,Alvarez family
 docs-superhero,doc-nerd,friend,cape_and_footnotes,verite_vik,,edge
+e-rock-climber-docs,doc-nerd,friend,crimp_and_send,verite_vik,,edge
 doc-nerd,flat-six,friend,verite_vik,solid_six_steve,,Office crew
+g-aziz-kl-documentaries,doc-nerd,friend,cikgu_aziz_docs,verite_vik,documentary list swap,edge
 hard-scifi-engineer,doc-nerd,friend,delta_v_priya,verite_vik,,Office crew
 romcom-lover,doc-nerd,friend,meet_cute_maya,verite_vik,,Office crew
+doc-nerd,scifi-docs-only,friend,verite_vik,lightyear_lucas,,Office crew
 doc-nerd,sports-dad,friend,verite_vik,fourth_and_long_ed,,Office crew
 true-crime-thriller,doc-nerd,friend,cold_case_carla,verite_vik,,Office crew
 doc-nerd,whodunit-lover,friend,verite_vik,little_grey_cells,,Office crew
 docs-superhero,mcu-teen,friend,cape_and_footnotes,webhead_jayden,cool uncle,edge
+superhero-burnout,docs-superhero,friend,post_endgame_pete,cape_and_footnotes,used to do MCU opening nights together,edge
+e-airline-pilot,hard-scifi-engineer,friend,flight_level_350,delta_v_priya,,edge
+e-airline-pilot,nolan-stan,friend,flight_level_350,tenet_backwards,,edge
+f-barcelona-horror-student,e-brazilian-lisbon,friend,gracia_after_dark,saudade_sessions,,Cineclube Ibérico
+f-galicia-fisherman-adventure,e-brazilian-lisbon,friend,marineiro_de_muros,saudade_sessions,,Cineclube Ibérico
+f-lisbon-bandsman-musicals-war,e-brazilian-lisbon,friend,sargento_da_banda,saudade_sessions,,Cineclube Ibérico
+f-madrid-omnivore-programmer,e-brazilian-lisbon,friend,malasana_mira_todo,saudade_sessions,,Cineclube Ibérico
+f-porto-student-scifi,e-brazilian-lisbon,friend,ribeira_replicante,saudade_sessions,,Cineclube Ibérico
+e-brazilian-lisbon,world-cinephile,friend,saudade_sessions,subtitle_sofia,,edge
+war-history-buff,e-civil-war-reenactor,friend,flanking_frank,fife_and_drum_frank,,War-film forum
+e-civil-war-reenactor,western-grandpa,friend,fife_and_drum_frank,dusty_trail_earl,,edge
+e-session-bassist,e-dancer-dance-films,friend,low_end_lyle,five_six_seven_eight,,Musicians' green room
+f-kingston-nurse-mom,e-er-nurse-comedies,friend,nurse_shanice_ja,night_shift_noor,,Night-shift carers
+i-navajo-aide-nights,e-er-nurse-comedies,friend,shiprock_night_owl,night_shift_noor,,Night-shift carers
+i-rotherham-care-home-nights,e-er-nurse-comedies,friend,leanne_on_nights,night_shift_noor,,Night-shift carers
+e-er-nurse-comedies,stoner-comedy,friend,night_shift_noor,couch_lock_chaz,,edge
+e-gamer-adaptations,g-wei-shanghai-scifi,friend,frame_perfect_fin,wei_lightyear,,Sci-fi Discord
+e-gamer-adaptations,h-kaspar-tallinn-gamedev,friend,frame_perfect_fin,kaspar_watches_all_of_it,,Sci-fi Discord
+e-gamer-adaptations,hard-scifi-engineer,friend,frame_perfect_fin,delta_v_priya,,Sci-fi Discord
+e-italian-neorealism,e-hong-kong-action,friend,bicycle_thief_bruno,bullet_ballet_bo,,International film forum
+e-new-hollywood-70s,e-hong-kong-action,friend,director_s_decade,bullet_ballet_bo,,International film forum
+e-nouvelle-vague,e-hong-kong-action,friend,cahiers_claudine,bullet_ballet_bo,,International film forum
+e-hong-kong-action,e-spaghetti-westerns,friend,bullet_ballet_bo,morricone_whistle,,International film forum
+g-kaho-hk-taxi-crime-cantopop,e-hong-kong-action,close,kaho_redtaxi,bullet_ballet_bo,close friends (both); father and son (Kowloon / Richmond BC),edge
+e-hong-kong-action,world-cinephile,friend,bullet_ballet_bo,subtitle_sofia,,International film forum
+e-italian-neorealism,e-new-hollywood-70s,friend,bicycle_thief_bruno,director_s_decade,,International film forum
+e-nouvelle-vague,e-italian-neorealism,friend,cahiers_claudine,bicycle_thief_bruno,,International film forum
+e-italian-neorealism,e-spaghetti-westerns,friend,bicycle_thief_bruno,morricone_whistle,,International film forum
+e-italian-neorealism,world-cinephile,friend,bicycle_thief_bruno,subtitle_sofia,,International film forum
+e-japanese-expat,horror-fanatic,friend,osaka_in_seattle,final_girl_dana,,edge
+e-japanese-expat,k-cinema-fan,friend,osaka_in_seattle,hallyu_hannah,,edge
+e-new-dad-sleepless,e-mexican-family-cine,friend,two_am_bottle_ben,domingo_de_cine,,New-parents group chat
+f-cdmx-abuela-telenovelas,e-mexican-family-cine,close,abuela_lupita_coyoacan,domingo_de_cine,close friends (both),Familia Hernández WhatsApp
+f-oaxaca-bisabuelo-westerns,e-mexican-family-cine,friend,don_chuy_de_mitla,domingo_de_cine,,Familia Hernández WhatsApp
+e-mexican-family-cine,f-sanjuan-13yo-animation,friend,domingo_de_cine,valeria_dibuja_sj,,Familia Hernández WhatsApp
+e-mexican-family-cine,j-generous-rater,friend,domingo_de_cine,everything_slaps_marisol,,Familia Hernández WhatsApp
+e-mexican-family-cine,pixar-crier,friend,domingo_de_cine,ugly_cry_ollie,,New-parents group chat
+e-new-dad-sleepless,pixar-crier,friend,two_am_bottle_ben,ugly_cry_ollie,,New-parents group chat
+e-nouvelle-vague,e-new-hollywood-70s,friend,cahiers_claudine,director_s_decade,,International film forum
+e-new-hollywood-70s,e-spaghetti-westerns,friend,director_s_decade,morricone_whistle,,International film forum
+e-new-hollywood-70s,world-cinephile,friend,director_s_decade,subtitle_sofia,,International film forum
+j-okafor-family-account,e-nollywood-houston,close,okafor_household_tv,jollof_and_drama,close friends (both),Okafor household
+e-nouvelle-vague,e-spaghetti-westerns,friend,cahiers_claudine,morricone_whistle,,International film forum
+j-festival-goer,e-nouvelle-vague,friend,lanyard_season_lea,cahiers_claudine,Cannes queue friends,edge
+e-nouvelle-vague,world-cinephile,friend,cahiers_claudine,subtitle_sofia,,International film forum
+e-recovering-feelgood,hallmark-cozy,friend,slow_mend_maggie,cocoa_and_cardigans,,Grace Fellowship small group
+e-spaghetti-westerns,world-cinephile,friend,morricone_whistle,subtitle_sofia,,International film forum
+e-wedding-planners,romcom-lover,friend,save_the_date_sd,meet_cute_maya,,edge
+e-widower-gentle-comedy,retired-teacher,friend,porch_light_walt,mrs_hargrove_reads,,Sunset Grove film club
 family-war-dad,eighties-kid,friend,bedtime_and_bunkers,rad_tubular_tina,,Dads' fantasy league
+i-adhd-80s-rewatcher,eighties-kid,friend,great_scott_callum,rad_tubular_tina,80s fan forum,edge
 lotr-fantasy,eighties-kid,friend,second_breakfast_sam,rad_tubular_tina,,College roommates
 sports-dad,eighties-kid,friend,fourth_and_long_ed,rad_tubular_tina,,Dads' fantasy league
 stoner-comedy,eighties-kid,friend,couch_lock_chaz,rad_tubular_tina,,College roommates
+f-barcelona-horror-student,f-galicia-fisherman-adventure,friend,gracia_after_dark,marineiro_de_muros,,Cineclube Ibérico
+f-barcelona-horror-student,f-lisbon-bandsman-musicals-war,friend,gracia_after_dark,sargento_da_banda,,Cineclube Ibérico
+f-madrid-omnivore-programmer,f-barcelona-horror-student,close,malasana_mira_todo,gracia_after_dark,close friends (both),Cineclube Ibérico
+f-barcelona-horror-student,f-porto-student-scifi,friend,gracia_after_dark,ribeira_replicante,,Cineclube Ibérico
+h-deniz-istanbul-horror-musicals,f-barcelona-horror-student,friend,deniz_screams_in_key,gracia_after_dark,Sitges festival,edge
+f-costa-rica-eco-guide,f-bogota-driver-thrillers,friend,pura_vida_guide_ana,parcero_al_volante,,Cine en Casa Telegram
+f-cusco-rural-teacher,f-bogota-driver-thrillers,friend,profe_de_urubamba,parcero_al_volante,,Cine en Casa Telegram
+f-guatemala-goth-romance-horror,f-bogota-driver-thrillers,friend,noche_y_rosas_gt,parcero_al_volante,,Cine en Casa Telegram
+f-santo-domingo-romcom-baseball,f-bogota-driver-thrillers,friend,yanelis_en_la_zona,parcero_al_volante,,Cine en Casa Telegram
+g-kaho-hk-taxi-crime-cantopop,f-bogota-driver-thrillers,friend,kaho_redtaxi,parcero_al_volante,,Taxi rank (drivers' forum)
+f-bogota-driver-thrillers,h-brian-kampala-boda,friend,parcero_al_volante,boda_brian_action,,Taxi rank (drivers' forum)
+h-dragan-belgrade-taxi,f-bogota-driver-thrillers,friend,dragan_meter_running,parcero_al_volante,,Taxi rank (drivers' forum)
+f-bogota-driver-thrillers,i-surrey-sikh-trucker-nights,friend,parcero_al_volante,coquihalla_night_haul,,Taxi rank (drivers' forum)
+f-buenos-aires-psychoanalyst,f-cordoba-horror-dad,friend,lic_freud_palermo,papa_del_terror_cba,,Cineclub del Río de la Plata
+f-madrid-omnivore-programmer,f-buenos-aires-psychoanalyst,friend,malasana_mira_todo,lic_freud_palermo,film-log mutuals,edge
+f-buenos-aires-psychoanalyst,f-montevideo-newlyweds-romance,friend,lic_freud_palermo,rambla_al_atardecer,,Cineclub del Río de la Plata
+f-buenos-aires-psychoanalyst,f-santiago-retired-projectionist,close,lic_freud_palermo,proyector_de_santiago,close friends (both),Cineclub del Río de la Plata
+f-buenos-aires-psychoanalyst,f-uruguay-gaucho-westerns-docs,friend,lic_freud_palermo,tropero_de_tacuarembo,,Cineclub del Río de la Plata
+f-cdmx-abuela-telenovelas,f-oaxaca-bisabuelo-westerns,friend,abuela_lupita_coyoacan,don_chuy_de_mitla,,Familia Hernández WhatsApp
+f-cdmx-abuela-telenovelas,f-sanjuan-13yo-animation,friend,abuela_lupita_coyoacan,valeria_dibuja_sj,,Familia Hernández WhatsApp
+f-cdmx-abuela-telenovelas,j-generous-rater,friend,abuela_lupita_coyoacan,everything_slaps_marisol,,Familia Hernández WhatsApp
+f-montevideo-newlyweds-romance,f-cordoba-horror-dad,friend,rambla_al_atardecer,papa_del_terror_cba,,Cineclub del Río de la Plata
+f-santiago-retired-projectionist,f-cordoba-horror-dad,friend,proyector_de_santiago,papa_del_terror_cba,,Cineclub del Río de la Plata
+f-uruguay-gaucho-westerns-docs,f-cordoba-horror-dad,friend,tropero_de_tacuarembo,papa_del_terror_cba,,Cineclub del Río de la Plata
+j-horror-family,f-cordoba-horror-dad,friend,spooky_family_night_ro,papa_del_terror_cba,spooky-kids forum,edge
+f-costa-rica-eco-guide,f-cusco-rural-teacher,close,pura_vida_guide_ana,profe_de_urubamba,close friends (both),Cine en Casa Telegram
+f-guatemala-goth-romance-horror,f-costa-rica-eco-guide,friend,noche_y_rosas_gt,pura_vida_guide_ana,,Cine en Casa Telegram
+f-santo-domingo-romcom-baseball,f-costa-rica-eco-guide,friend,yanelis_en_la_zona,pura_vida_guide_ana,,Cine en Casa Telegram
+f-guatemala-goth-romance-horror,f-cusco-rural-teacher,friend,noche_y_rosas_gt,profe_de_urubamba,,Cine en Casa Telegram
+f-santo-domingo-romcom-baseball,f-cusco-rural-teacher,friend,yanelis_en_la_zona,profe_de_urubamba,,Cine en Casa Telegram
+f-galicia-fisherman-adventure,f-lisbon-bandsman-musicals-war,friend,marineiro_de_muros,sargento_da_banda,,Cineclube Ibérico
+f-madrid-omnivore-programmer,f-galicia-fisherman-adventure,friend,malasana_mira_todo,marineiro_de_muros,,Cineclube Ibérico
+f-galicia-fisherman-adventure,f-porto-student-scifi,friend,marineiro_de_muros,ribeira_replicante,,Cineclube Ibérico
+f-guatemala-goth-romance-horror,f-santo-domingo-romcom-baseball,friend,noche_y_rosas_gt,yanelis_en_la_zona,,Cine en Casa Telegram
+f-guatemala-goth-romance-horror,romance-horror,close,noche_y_rosas_gt,crimson_claire,close friends (f-guatemala-goth-romance-horror only); gothic romance Tumblr,edge
+f-havana-abuela-musica,f-lisbon-bandsman-musicals-war,friend,yeya_del_vedado,sargento_da_banda,band exchange in the 80s,edge
+i-navajo-aide-nights,f-kingston-nurse-mom,friend,shiprock_night_owl,nurse_shanice_ja,,Night-shift carers
+i-rotherham-care-home-nights,f-kingston-nurse-mom,close,leanne_on_nights,nurse_shanice_ja,close friends (both),Night-shift carers
+f-madrid-omnivore-programmer,f-lisbon-bandsman-musicals-war,friend,malasana_mira_todo,sargento_da_banda,,Cineclube Ibérico
+f-lisbon-bandsman-musicals-war,f-porto-student-scifi,friend,sargento_da_banda,ribeira_replicante,,Cineclube Ibérico
+f-lisbon-bandsman-musicals-war,h-noam-telaviv-engineer,friend,sargento_da_banda,noam_compiles_scifi,,Veterans' movie night
+i-kentucky-army-vet,f-lisbon-bandsman-musicals-war,friend,rural_route_dwayne,sargento_da_banda,,Veterans' movie night
+i-raf-tech-omnivore,f-lisbon-bandsman-musicals-war,friend,lossie_jet_wash,sargento_da_banda,,Veterans' movie night
+f-madrid-omnivore-programmer,f-porto-student-scifi,friend,malasana_mira_todo,ribeira_replicante,,Cineclube Ibérico
+f-madrid-omnivore-programmer,f-santiago-retired-projectionist,friend,malasana_mira_todo,proyector_de_santiago,film-log mutuals,edge
+f-santiago-retired-projectionist,f-montevideo-newlyweds-romance,friend,proyector_de_santiago,rambla_al_atardecer,,Cineclub del Río de la Plata
+f-montevideo-newlyweds-romance,f-uruguay-gaucho-westerns-docs,friend,rambla_al_atardecer,tropero_de_tacuarembo,,Cineclub del Río de la Plata
+f-oaxaca-bisabuelo-westerns,f-sanjuan-13yo-animation,friend,don_chuy_de_mitla,valeria_dibuja_sj,,Familia Hernández WhatsApp
+f-oaxaca-bisabuelo-westerns,j-generous-rater,friend,don_chuy_de_mitla,everything_slaps_marisol,,Familia Hernández WhatsApp
+g-sione-mtdruitt-omnivore,f-rio-favela-teen-action,friend,sione_fam_movie_nite,lucas_da_rocinha,,Fast & Furious fan Discord
+i-baltimore-group-home-teen,f-rio-favela-teen-action,friend,nevaeh_after_lights_out,lucas_da_rocinha,,Fast & Furious fan Discord
+i-glasgow-care-unit-teen,f-rio-favela-teen-action,friend,con_film_night,lucas_da_rocinha,,Fast & Furious fan Discord
+f-rio-favela-teen-action,i-toronto-vietnamese-student,friend,lucas_da_rocinha,linh_homesick_reels,,Fast & Furious fan Discord
+f-rio-favela-teen-action,j-ones-and-tens,friend,lucas_da_rocinha,zero_or_hero_kofi,,Fast & Furious fan Discord
+f-rio-favela-teen-action,j-trend-follower,friend,lucas_da_rocinha,whats_everyone_watching_tay,,Fast & Furious fan Discord
+j-generous-rater,f-sanjuan-13yo-animation,friend,everything_slaps_marisol,valeria_dibuja_sj,,Familia Hernández WhatsApp
+f-santiago-retired-projectionist,f-uruguay-gaucho-westerns-docs,friend,proyector_de_santiago,tropero_de_tacuarembo,,Cineclub del Río de la Plata
 family-war-dad,mcu-teen,friend,bedtime_and_bunkers,webhead_jayden,,Alvarez family
 sports-dad,family-war-dad,friend,fourth_and_long_ed,bedtime_and_bunkers,,Dads' fantasy league
 family-war-dad,western-grandpa,friend,bedtime_and_bunkers,dusty_trail_earl,,Alvarez family
+film-bro,k-cinema-fan,friend,kubrick_stare,hallyu_hannah,,Film school friends
 film-bro,nolan-stan,close,kubrick_stare,tenet_backwards,close friends (both),Film school friends
 omnivore,film-bro,friend,watches_it_all,kubrick_stare,the connector,edge
 film-bro,oscar-completionist,friend,kubrick_stare,best_picture_bea,,Film school friends
 film-bro,world-cinephile,friend,kubrick_stare,subtitle_sofia,,Film school friends
 hard-scifi-engineer,flat-six,friend,delta_v_priya,solid_six_steve,,Office crew
 romcom-lover,flat-six,friend,meet_cute_maya,solid_six_steve,,Office crew
+flat-six,scifi-docs-only,friend,solid_six_steve,lightyear_lucas,,Office crew
 sports-dad,flat-six,friend,fourth_and_long_ed,solid_six_steve,,Office crew
 true-crime-thriller,flat-six,friend,cold_case_carla,solid_six_steve,,Office crew
 whodunit-lover,flat-six,friend,little_grey_cells,solid_six_steve,,Office crew
+g-ayesha-lahore-medstudent,g-tharindu-kandy-fantasy,friend,ayesha_filmi_dil,tharindu_middle_earth,,Bollywood-and-beyond Discord
+g-budi-jakarta-commuter,g-aziz-kl-documentaries,friend,budi_nonton_terus,cikgu_aziz_docs,,ASEAN film Telegram
+g-aziz-kl-documentaries,g-linh-saigon-student,friend,cikgu_aziz_docs,linh_xem_phim,,ASEAN film Telegram
+g-budi-jakarta-commuter,g-linh-saigon-student,friend,budi_nonton_terus,linh_xem_phim,,ASEAN film Telegram
+g-sari-yogya-teen,g-budi-jakarta-commuter,friend,sari_singalong,budi_nonton_terus,niece and uncle,edge
+g-doug-dubbo-grazier,j-weekend-only,friend,doug_out_west,sunday_western_raj,westerns forum,edge
+g-wei-shanghai-scifi,g-guo-henan-village-grandpa,close,wei_lightyear,lao_guo_wuxia,close friends (g-wei-shanghai-scifi only); grandson set up his TV box,edge
+g-haruko-kyoto-widow,g-ren-osaka-salaryman,friend,haruko_ozu_fan,ren_watches_all,,Kansai film circle
+g-jiyeon-seoul-thriller,k-cinema-fan,friend,jiyeon_twist_hunter,hallyu_hannah,,Seoul–Busan friends
+g-kaho-hk-taxi-crime-cantopop,h-brian-kampala-boda,friend,kaho_redtaxi,boda_brian_action,,Taxi rank (drivers' forum)
+g-kaho-hk-taxi-crime-cantopop,h-dragan-belgrade-taxi,friend,kaho_redtaxi,dragan_meter_running,,Taxi rank (drivers' forum)
+g-kaho-hk-taxi-crime-cantopop,i-surrey-sikh-trucker-nights,friend,kaho_redtaxi,coquihalla_night_haul,,Taxi rank (drivers' forum)
+g-linh-saigon-student,g-minh-hanoi-war-dad,friend,linh_xem_phim,anh_minh_hn,,Nguyen cousins Zalo
+g-linh-saigon-student,i-toronto-vietnamese-student,close,linh_xem_phim,linh_homesick_reels,close friends (both),Nguyen cousins Zalo
+g-minh-hanoi-war-dad,i-toronto-vietnamese-student,friend,anh_minh_hn,linh_homesick_reels,,Nguyen cousins Zalo
+g-minh-hanoi-war-dad,war-history-buff,friend,anh_minh_hn,flanking_frank,war-film forum,edge
+g-somchai-bangkok-horror-comedy,g-ploy-chiangmai-grandma,friend,somchai_phi_laugh,yai_ploy_cm,grandson and grandma,edge
+g-rafiq-dhaka-supervisor,i-bradford-pharmacist-mum,friend,rafiq_bhai_movies,hafsa_family_matinee,cousins,edge
+g-sari-yogya-teen,musical-theatre-kid,friend,sari_singalong,jazz_hands_jess,musicals fandom,edge
+g-tama-rotorua-teacher,g-sione-mtdruitt-omnivore,friend,whaea_tama,sione_fam_movie_nite,Pasifika youth league,edge
+g-sione-mtdruitt-omnivore,i-baltimore-group-home-teen,friend,sione_fam_movie_nite,nevaeh_after_lights_out,,Fast & Furious fan Discord
+g-sione-mtdruitt-omnivore,i-glasgow-care-unit-teen,friend,sione_fam_movie_nite,con_film_night,,Fast & Furious fan Discord
+g-sione-mtdruitt-omnivore,i-toronto-vietnamese-student,friend,sione_fam_movie_nite,linh_homesick_reels,,Fast & Furious fan Discord
+g-sione-mtdruitt-omnivore,j-ones-and-tens,friend,sione_fam_movie_nite,zero_or_hero_kofi,,Fast & Furious fan Discord
+g-sione-mtdruitt-omnivore,j-trend-follower,friend,sione_fam_movie_nite,whats_everyone_watching_tay,,Fast & Furious fan Discord
+i-cree-kokum-raising-grandsons,g-tama-rotorua-teacher,friend,kokum_movie_night,whaea_tama,,Indigenous film festival friends
+i-navajo-aide-nights,g-tama-rotorua-teacher,friend,shiprock_night_owl,whaea_tama,,Indigenous film festival friends
+i-sami-reindeer-herder,g-tama-rotorua-teacher,friend,vidda_and_westerns,whaea_tama,,Indigenous film festival friends
+h-yazan-amman-student,g-tharindu-kandy-fantasy,friend,yazan_in_wadi_rum,tharindu_middle_earth,fantasy Discord,edge
+g-tharindu-kandy-fantasy,lotr-fantasy,friend,tharindu_middle_earth,second_breakfast_sam,Middle-earth forum,edge
+h-kaspar-tallinn-gamedev,g-wei-shanghai-scifi,friend,kaspar_watches_all_of_it,wei_lightyear,,Sci-fi Discord
+hard-scifi-engineer,g-wei-shanghai-scifi,friend,delta_v_priya,wei_lightyear,,Sci-fi Discord
+i-clare-dairy-farmer,g-yuting-taipei-bookstore,friend,calving_season_aoife,yuting_slow_cinema,,Queer film night
+i-trans-bike-mechanic-synths,g-yuting-taipei-bookstore,friend,spokes_and_synths,yuting_slow_cinema,,Queer film night
+i-wyoming-hardware-grant,g-yuting-taipei-bookstore,friend,singin_in_lander,yuting_slow_cinema,,Queer film night
+i-wyoming-hardware-luis,g-yuting-taipei-bookstore,friend,lander_whodunit_luis,yuting_slow_cinema,,Queer film night
+g-yuting-taipei-bookstore,j-mood-driven,close,yuting_slow_cinema,depends_on_my_mood_lu,close friends (both); Taipei friends,edge
 generous-rater,musical-theatre-kid,friend,everything_is_awesome,jazz_hands_jess,,edge
+h-dragan-belgrade-taxi,h-brian-kampala-boda,friend,dragan_meter_running,boda_brian_action,,Taxi rank (drivers' forum)
+h-brian-kampala-boda,i-surrey-sikh-trucker-nights,friend,boda_brian_action,coquihalla_night_haul,,Taxi rank (drivers' forum)
+h-deniz-istanbul-horror-musicals,musical-horror,friend,deniz_screams_in_key,time_warp_toni,Rocky Horror fandom,edge
+h-ioana-bucharest-teacher,h-dragan-belgrade-taxi,friend,ioana_new_wave_notes,dragan_meter_running,,Balkan & Black Sea neighbours
+h-dragan-belgrade-taxi,h-mykola-lviv-retiree,friend,dragan_meter_running,mykola_soviet_classics,,Balkan & Black Sea neighbours
+h-dragan-belgrade-taxi,h-nino-tbilisi-romance-war,friend,dragan_meter_running,nino_sings_polyphony,,Balkan & Black Sea neighbours
+h-dragan-belgrade-taxi,i-surrey-sikh-trucker-nights,friend,dragan_meter_running,coquihalla_night_haul,,Taxi rank (drivers' forum)
+h-hassan-marrakech-concierge,western-grandpa,friend,hassan_of_the_medina,dusty_trail_earl,westerns forum,edge
+h-ioana-bucharest-teacher,h-mykola-lviv-retiree,friend,ioana_new_wave_notes,mykola_soviet_classics,,Balkan & Black Sea neighbours
+h-ioana-bucharest-teacher,h-nino-tbilisi-romance-war,friend,ioana_new_wave_notes,nino_sings_polyphony,,Balkan & Black Sea neighbours
+h-parisa-tehran-architect,h-ioana-bucharest-teacher,close,parisa_slow_frames,ioana_new_wave_notes,close friends (both); festival friends,edge
+hard-scifi-engineer,h-kaspar-tallinn-gamedev,friend,delta_v_priya,kaspar_watches_all_of_it,,Sci-fi Discord
+h-kofi-accra-family-dad,i-lund-ghanaian-student,friend,kofi_and_the_three,kofi_in_the_dark_months,cousins,edge
+h-kofi-accra-family-dad,j-ones-and-tens,friend,kofi_and_the_three,zero_or_hero_kofi,church youth leader / former youth group member,edge
+h-malak-cairo-teen,h-mariam-dubai-marketing,friend,malak_sings_in_zamalek,mariam_karak_and_film,cousins,edge
+h-mariam-dubai-marketing,h-rita-beirut-pharmacist,close,mariam_karak_and_film,rita_after_the_pharmacy,close friends (both),Dubai Media City alumni
+h-umm-faisal-riyadh-grandma,h-mariam-dubai-marketing,friend,umm_faisal_and_grandkids,mariam_karak_and_film,family friend,edge
+h-nino-tbilisi-romance-war,h-mykola-lviv-retiree,friend,nino_sings_polyphony,mykola_soviet_classics,,Balkan & Black Sea neighbours
+h-noam-telaviv-engineer,hard-scifi-engineer,friend,noam_compiles_scifi,delta_v_priya,work Slack,edge
+i-kentucky-army-vet,h-noam-telaviv-engineer,friend,rural_route_dwayne,noam_compiles_scifi,,Veterans' movie night
+i-raf-tech-omnivore,h-noam-telaviv-engineer,friend,lossie_jet_wash,noam_compiles_scifi,,Veterans' movie night
+h-selam-addis-docs-scifi,h-ousmane-dakar-sound,close,selam_data_and_stars,ousmane_on_the_sabar,close friends (both),Addis–Dakar–Accra film students
+h-ousmane-dakar-sound,h-thandi-joburg-omnivore,friend,ousmane_on_the_sabar,thandi_cuts_reels,,Addis–Dakar–Accra film students
+h-ousmane-dakar-sound,i-lund-ghanaian-student,friend,ousmane_on_the_sabar,kofi_in_the_dark_months,,Addis–Dakar–Accra film students
+h-ousmane-dakar-sound,j-ones-and-tens,friend,ousmane_on_the_sabar,zero_or_hero_kofi,,Addis–Dakar–Accra film students
+h-parisa-tehran-architect,world-cinephile,friend,parisa_slow_frames,subtitle_sofia,world-cinema forum,edge
+h-selam-addis-docs-scifi,h-thandi-joburg-omnivore,friend,selam_data_and_stars,thandi_cuts_reels,,Addis–Dakar–Accra film students
+h-selam-addis-docs-scifi,i-lund-ghanaian-student,friend,selam_data_and_stars,kofi_in_the_dark_months,,Addis–Dakar–Accra film students
+h-selam-addis-docs-scifi,j-ones-and-tens,friend,selam_data_and_stars,zero_or_hero_kofi,,Addis–Dakar–Accra film students
+i-lund-ghanaian-student,h-thandi-joburg-omnivore,friend,kofi_in_the_dark_months,thandi_cuts_reels,,Addis–Dakar–Accra film students
+h-thandi-joburg-omnivore,j-ones-and-tens,friend,thandi_cuts_reels,zero_or_hero_kofi,,Addis–Dakar–Accra film students
 hallmark-cozy,halloween-disney-mom,friend,cocoa_and_cardigans,spooky_mouse_mom,,Book-club moms
 hallmark-cozy,pixar-crier,friend,cocoa_and_cardigans,ugly_cry_ollie,,Book-club moms
 hallmark-cozy,sensitive-viewer,friend,cocoa_and_cardigans,no_jumpscares_please,,Book-club moms
 hallmark-cozy,strict-parent,friend,cocoa_and_cardigans,screen_time_sarah,,Book-club moms
+halloween-disney-mom,halloween-only,close,spooky_mouse_mom,october_only_paige,close friends (both),Maple Street parents
 halloween-disney-mom,harsh-critic,friend,spooky_mouse_mom,two_stars_max,,Horror club
+halloween-disney-mom,horror-docs,friend,spooky_mouse_mom,found_footage_fern,,Horror club
 horror-fanatic,halloween-disney-mom,friend,final_girl_dana,spooky_mouse_mom,,Horror club
 halloween-disney-mom,musical-horror,friend,spooky_mouse_mom,time_warp_toni,,Horror club
+mystery-family,halloween-disney-mom,friend,clue_crew_nadia,spooky_mouse_mom,,Maple Street parents
 halloween-disney-mom,pixar-crier,friend,spooky_mouse_mom,ugly_cry_ollie,,Book-club moms
+halloween-disney-mom,romance-horror,friend,spooky_mouse_mom,crimson_claire,,Horror club
 halloween-disney-mom,sensitive-viewer,friend,spooky_mouse_mom,no_jumpscares_please,,Book-club moms
 halloween-disney-mom,slasher-romcom-teen,friend,spooky_mouse_mom,ghostface_xoxo,,Horror club
-halloween-disney-mom,strict-parent,friend,spooky_mouse_mom,screen_time_sarah,,Book-club moms
+spooky-family-dad,halloween-disney-mom,friend,creature_feature_dad,spooky_mouse_mom,,"Maple Street parents, Spooky Parents Club"
+halloween-disney-mom,sports-dad,friend,spooky_mouse_mom,fourth_and_long_ed,,Maple Street parents
+halloween-disney-mom,strict-parent,friend,spooky_mouse_mom,screen_time_sarah,,"Book-club moms, Maple Street parents"
+mystery-family,halloween-only,friend,clue_crew_nadia,october_only_paige,,Maple Street parents
+spooky-family-dad,halloween-only,friend,creature_feature_dad,october_only_paige,,Maple Street parents
+halloween-only,sports-dad,friend,october_only_paige,fourth_and_long_ed,,Maple Street parents
+halloween-only,strict-parent,friend,october_only_paige,screen_time_sarah,,Maple Street parents
 romcom-lover,hard-scifi-engineer,friend,meet_cute_maya,delta_v_priya,,Office crew
+hard-scifi-engineer,scifi-docs-only,close,delta_v_priya,lightyear_lucas,close friends (both),Office crew
 scifi-romance,hard-scifi-engineer,close,starcrossed_lena,delta_v_priya,close friends (both); couple,edge
 hard-scifi-engineer,sports-dad,friend,delta_v_priya,fourth_and_long_ed,,Office crew
 true-crime-thriller,hard-scifi-engineer,friend,cold_case_carla,delta_v_priya,,Office crew
 hard-scifi-engineer,whodunit-lover,friend,delta_v_priya,little_grey_cells,,Office crew
+harsh-critic,horror-docs,friend,two_stars_max,found_footage_fern,,Horror club
 horror-fanatic,harsh-critic,friend,final_girl_dana,two_stars_max,,Horror club
 musical-horror,harsh-critic,friend,time_warp_toni,two_stars_max,,Horror club
+harsh-critic,romance-horror,friend,two_stars_max,crimson_claire,,Horror club
 slasher-romcom-teen,harsh-critic,friend,ghostface_xoxo,two_stars_max,,Horror club
+horror-fanatic,horror-docs,friend,final_girl_dana,found_footage_fern,,Horror club
+musical-horror,horror-docs,friend,time_warp_toni,found_footage_fern,,Horror club
+romance-horror,horror-docs,friend,crimson_claire,found_footage_fern,,Horror club
+slasher-romcom-teen,horror-docs,friend,ghostface_xoxo,found_footage_fern,,Horror club
+horror-docs,true-crime-thriller,friend,found_footage_fern,cold_case_carla,,edge
 horror-fanatic,musical-horror,friend,final_girl_dana,time_warp_toni,,Horror club
 omnivore,horror-fanatic,friend,watches_it_all,final_girl_dana,,edge
+horror-fanatic,romance-horror,friend,final_girl_dana,crimson_claire,,Horror club
 horror-fanatic,slasher-romcom-teen,friend,final_girl_dana,ghostface_xoxo,,Horror club
+i-autistic-comfort-rewatcher,i-adhd-80s-rewatcher,friend,totoro_on_repeat,great_scott_callum,,Accessible cinema club
+i-blind-audio-description-fan,i-adhd-80s-rewatcher,friend,ears_on_the_script,great_scott_callum,,Accessible cinema club
+i-deaf-visual-storyteller,i-adhd-80s-rewatcher,friend,signs_and_spectacle,great_scott_callum,,Accessible cinema club
+i-adhd-80s-rewatcher,j-binge-watcher,close,great_scott_callum,whole_saga_saturday_tom,close friends (both); same Leeds warehouse,edge
+i-blind-audio-description-fan,i-autistic-comfort-rewatcher,friend,ears_on_the_script,totoro_on_repeat,,Accessible cinema club
+i-deaf-visual-storyteller,i-autistic-comfort-rewatcher,friend,signs_and_spectacle,totoro_on_repeat,,Accessible cinema club
+i-glasgow-care-unit-teen,i-baltimore-group-home-teen,close,con_film_night,nevaeh_after_lights_out,close friends (both),Fast & Furious fan Discord
+i-baltimore-group-home-teen,i-toronto-vietnamese-student,friend,nevaeh_after_lights_out,linh_homesick_reels,,Fast & Furious fan Discord
+i-baltimore-group-home-teen,i-winnipeg-foster-mum,friend,nevaeh_after_lights_out,foster_couch_lisa,foster-youth forum mentor,edge
+i-baltimore-group-home-teen,j-ones-and-tens,friend,nevaeh_after_lights_out,zero_or_hero_kofi,,Fast & Furious fan Discord
+i-baltimore-group-home-teen,j-trend-follower,friend,nevaeh_after_lights_out,whats_everyone_watching_tay,,Fast & Furious fan Discord
+i-deaf-visual-storyteller,i-blind-audio-description-fan,friend,signs_and_spectacle,ears_on_the_script,,Accessible cinema club
+i-clare-dairy-farmer,i-trans-bike-mechanic-synths,friend,calving_season_aoife,spokes_and_synths,,Queer film night
+i-wyoming-hardware-grant,i-clare-dairy-farmer,friend,singin_in_lander,calving_season_aoife,,Queer film night
+i-wyoming-hardware-luis,i-clare-dairy-farmer,friend,lander_whodunit_luis,calving_season_aoife,,Queer film night
+i-clare-dairy-farmer,j-couple-shared-login,friend,calving_season_aoife,dani_and_theo_one_login,Dani is her cousin,edge
+i-cree-kokum-raising-grandsons,i-navajo-aide-nights,close,kokum_movie_night,shiprock_night_owl,close friends (both),Indigenous film festival friends
+i-sami-reindeer-herder,i-cree-kokum-raising-grandsons,friend,vidda_and_westerns,kokum_movie_night,,Indigenous film festival friends
+i-cree-kokum-raising-grandsons,i-winnipeg-foster-mum,close,kokum_movie_night,foster_couch_lisa,close friends (both); kinship-care support network,edge
+i-glasgow-care-unit-teen,i-raf-tech-omnivore,friend,con_film_night,lossie_jet_wash,RAF cadets mentor,edge
+i-glasgow-care-unit-teen,i-toronto-vietnamese-student,friend,con_film_night,linh_homesick_reels,,Fast & Furious fan Discord
+i-glasgow-care-unit-teen,j-ones-and-tens,friend,con_film_night,zero_or_hero_kofi,,Fast & Furious fan Discord
+i-glasgow-care-unit-teen,j-trend-follower,friend,con_film_night,whats_everyone_watching_tay,,Fast & Furious fan Discord
+i-kentucky-army-vet,i-raf-tech-omnivore,friend,rural_route_dwayne,lossie_jet_wash,,Veterans' movie night
+i-lund-ghanaian-student,j-ones-and-tens,friend,kofi_in_the_dark_months,zero_or_hero_kofi,,Addis–Dakar–Accra film students
+i-missouri-baptist-cashier,j-strict-parent-account,friend,crystal_sunday_best,pg_or_nothing_ruth,homeschool co-op forum,edge
+i-rotherham-care-home-nights,i-navajo-aide-nights,friend,leanne_on_nights,shiprock_night_owl,,Night-shift carers
+i-sami-reindeer-herder,i-navajo-aide-nights,friend,vidda_and_westerns,shiprock_night_owl,,Indigenous film festival friends
+i-rotherham-care-home-nights,whodunit-lover,friend,leanne_on_nights,little_grey_cells,Agatha Christie group,edge
+i-surrey-sikh-trucker-nights,j-note-writer,friend,coquihalla_night_haul,three_paragraphs_iris,Lower Mainland neighbours,edge
+i-toronto-orthodox-accountant,i-toronto-vietnamese-student,friend,sunday_double_bill_ari,linh_homesick_reels,internship mentor,edge
+j-ones-and-tens,i-toronto-vietnamese-student,friend,zero_or_hero_kofi,linh_homesick_reels,,Fast & Furious fan Discord
+j-trend-follower,i-toronto-vietnamese-student,friend,whats_everyone_watching_tay,linh_homesick_reels,,Fast & Furious fan Discord
+i-wyoming-hardware-grant,i-trans-bike-mechanic-synths,friend,singin_in_lander,spokes_and_synths,,Queer film night
+i-wyoming-hardware-luis,i-trans-bike-mechanic-synths,friend,lander_whodunit_luis,spokes_and_synths,,Queer film night
+i-trans-bike-mechanic-synths,j-horror-family,friend,spokes_and_synths,spooky_family_night_ro,Utrecht neighbours,edge
+i-wyoming-hardware-grant,i-wyoming-hardware-luis,close,singin_in_lander,lander_whodunit_luis,close friends (both),Queer film night
+j-horror-family,spooky-family-dad,friend,spooky_family_night_ro,creature_feature_dad,spooky-kids forum,edge
+j-trend-follower,j-ones-and-tens,friend,whats_everyone_watching_tay,zero_or_hero_kofi,,Fast & Furious fan Discord
+nolan-stan,k-cinema-fan,friend,tenet_backwards,hallyu_hannah,,Film school friends
+oscar-completionist,k-cinema-fan,friend,best_picture_bea,hallyu_hannah,,Film school friends
+world-cinephile,k-cinema-fan,friend,subtitle_sofia,hallyu_hannah,,Film school friends
+kid-gamer-10yo,mcu-teen,friend,respawn_max,webhead_jayden,cousins,edge
+mystery-family,kid-gamer-10yo,friend,clue_crew_nadia,respawn_max,neighbour kid,edge
+spooky-family-dad,kid-gamer-10yo,close,creature_feature_dad,respawn_max,close friends (both); father and son,edge
 stoner-comedy,lotr-fantasy,close,couch_lock_chaz,second_breakfast_sam,close friends (both),College roommates
 musical-theatre-kid,mcu-teen,friend,jazz_hands_jess,webhead_jayden,,edge
 mcu-teen,western-grandpa,close,webhead_jayden,dusty_trail_earl,close friends (both),Alvarez family
+musical-crime,musical-theatre-kid,close,all_that_jazz_jules,jazz_hands_jess,close friends (musical-crime only),edge
+musical-crime,stoner-comedy,friend,all_that_jazz_jules,couch_lock_chaz,,Game night crew
+musical-crime,superhero-burnout,friend,all_that_jazz_jules,post_endgame_pete,,Game night crew
+western-scifi,musical-crime,friend,space_cowboy_cal,all_that_jazz_jules,,Game night crew
+musical-horror,romance-horror,friend,time_warp_toni,crimson_claire,,Horror club
 slasher-romcom-teen,musical-horror,friend,ghostface_xoxo,time_warp_toni,,Horror club
 musical-theatre-kid,slasher-romcom-teen,friend,jazz_hands_jess,ghostface_xoxo,same school,edge
+spooky-family-dad,mystery-family,close,creature_feature_dad,clue_crew_nadia,close friends (both),Maple Street parents
+mystery-family,sports-dad,friend,clue_crew_nadia,fourth_and_long_ed,,Maple Street parents
+mystery-family,strict-parent,friend,clue_crew_nadia,screen_time_sarah,,Maple Street parents
 nolan-stan,oscar-completionist,friend,tenet_backwards,best_picture_bea,,Film school friends
 world-cinephile,nolan-stan,friend,subtitle_sofia,tenet_backwards,,Film school friends
 omnivore,romcom-lover,friend,watches_it_all,meet_cute_maya,,edge
 world-cinephile,oscar-completionist,friend,subtitle_sofia,best_picture_bea,,Film school friends
 pixar-crier,sensitive-viewer,friend,ugly_cry_ollie,no_jumpscares_please,,Book-club moms
 pixar-crier,strict-parent,friend,ugly_cry_ollie,screen_time_sarah,,Book-club moms
+war-history-buff,retired-teacher,friend,flanking_frank,mrs_hargrove_reads,,Classic film society
+western-grandpa,retired-teacher,friend,dusty_trail_earl,mrs_hargrove_reads,,Classic film society
+retired-teacher,western-musical,friend,mrs_hargrove_reads,yeehaw_showtunes,,Classic film society
+slasher-romcom-teen,romance-horror,friend,ghostface_xoxo,crimson_claire,,Horror club
+romcom-lover,scifi-docs-only,friend,meet_cute_maya,lightyear_lucas,,Office crew
 scifi-romance,romcom-lover,friend,starcrossed_lena,meet_cute_maya,,edge
+spooky-family-dad,romcom-lover,friend,creature_feature_dad,meet_cute_maya,sister-in-law,edge
 romcom-lover,sports-dad,friend,meet_cute_maya,fourth_and_long_ed,,Office crew
 romcom-lover,true-crime-thriller,friend,meet_cute_maya,cold_case_carla,,Office crew
 romcom-lover,whodunit-lover,friend,meet_cute_maya,little_grey_cells,,Office crew
+sports-dad,scifi-docs-only,friend,fourth_and_long_ed,lightyear_lucas,,Office crew
+true-crime-thriller,scifi-docs-only,friend,cold_case_carla,lightyear_lucas,,Office crew
+whodunit-lover,scifi-docs-only,friend,little_grey_cells,lightyear_lucas,,Office crew
 strict-parent,sensitive-viewer,friend,screen_time_sarah,no_jumpscares_please,,Book-club moms
 strict-parent,slasher-romcom-teen,friend,screen_time_sarah,ghostface_xoxo,babysitter,edge
+spooky-family-dad,sports-dad,friend,creature_feature_dad,fourth_and_long_ed,,Maple Street parents
+spooky-family-dad,strict-parent,friend,creature_feature_dad,screen_time_sarah,,Maple Street parents
+spooky-family-dad,war-history-buff,friend,creature_feature_dad,flanking_frank,bowling league,edge
+strict-parent,sports-dad,friend,screen_time_sarah,fourth_and_long_ed,,Maple Street parents
 true-crime-thriller,sports-dad,friend,cold_case_carla,fourth_and_long_ed,,Office crew
 sports-dad,whodunit-lover,friend,fourth_and_long_ed,little_grey_cells,,Office crew
+stoner-comedy,superhero-burnout,friend,couch_lock_chaz,post_endgame_pete,,Game night crew
+western-scifi,stoner-comedy,friend,space_cowboy_cal,couch_lock_chaz,,Game night crew
+western-scifi,superhero-burnout,friend,space_cowboy_cal,post_endgame_pete,,Game night crew
 true-crime-thriller,whodunit-lover,friend,cold_case_carla,little_grey_cells,,Office crew
+war-animation,war-history-buff,close,fireflies_and_flak,flanking_frank,close friends (both); both teach history,edge
 war-history-buff,western-grandpa,friend,flanking_frank,dusty_trail_earl,,Classic film society
+war-history-buff,western-musical,friend,flanking_frank,yeehaw_showtunes,,Classic film society
+western-grandpa,western-musical,close,dusty_trail_earl,yeehaw_showtunes,close friends (both),Classic film society
+a-ben-mystery-family,whodunit-lover,pending,ben_case_closed,little_grey_cells,"a-ben-mystery-family sent, whodunit-lover never answered",edge
+a-tunde-casual,a-jade-harsh-cinephile,pending,tunde_popcorn_guy,jade_two_stars,"a-tunde-casual sent, a-jade-harsh-cinephile never answered; she ignores teen requests",edge
+f-madrid-omnivore-programmer,a-jade-harsh-cinephile,pending,malasana_mira_todo,jade_two_stars,"f-madrid-omnivore-programmer sent, a-jade-harsh-cinephile never answered; she ignores requests",edge
+e-nollywood-houston,b-houston-refinery-tech,pending,jollof_and_drama,kwame_on_rotation,"e-nollywood-houston sent, b-houston-refinery-tech never answered; never finished setting up his account",edge
+b-ohio-holiday-movies,christmas-only,pending,porch_light_jenna,tinsel_tara,"b-ohio-holiday-movies sent, christmas-only never answered; never finished signing up",edge
+c-denver-dating-again-dad,c-divorced-romcom-horror,pending,tom_tries_again,renee_after_dark,"c-denver-dating-again-dad sent, c-divorced-romcom-horror never answered; she never wrote back",edge
+hallmark-cozy,christmas-only,pending,cocoa_and_cardigans,tinsel_tara,"hallmark-cozy sent, christmas-only never answered; christmas-only never finished signing up",edge
 doc-nerd,classic-hollywood,pending,verite_vik,nitrate_nora,"doc-nerd sent, classic-hollywood never answered",edge
 contrarian,film-bro,pending,actually_overrated,kubrick_stare,"contrarian sent, film-bro never answered; film-bro never answered",edge
+e-grad-student-procrastinator,d-lyon-cinephile,pending,chapter_three_someday,cine_club_odile,"e-grad-student-procrastinator sent, d-lyon-cinephile never answered; asked for thesis help",edge
+f-barcelona-horror-student,j-abandoned-onboarding,pending,gracia_after_dark,signed_up_and_gone_pia,"f-barcelona-horror-student sent, j-abandoned-onboarding never answered; she never came back after the group invite",edge
+j-trend-follower,film-bro,pending,whats_everyone_watching_tay,kubrick_stare,"j-trend-follower sent, film-bro never answered; film-bro never answered",edge
 mcu-teen,film-bro,pending,webhead_jayden,kubrick_stare,"mcu-teen sent, film-bro never answered",edge
+g-hyunwoo-busan-middle,mcu-teen,pending,hyunwoo_webs,webhead_jayden,"g-hyunwoo-busan-middle sent, mcu-teen never answered; random superhero-fan add",edge
 hallmark-cozy,horror-fanatic,pending,cocoa_and_cardigans,final_girl_dana,"hallmark-cozy sent, horror-fanatic never answered",edge
+mcu-teen,superhero-burnout,pending,webhead_jayden,post_endgame_pete,"mcu-teen sent, superhero-burnout never answered; burnout won't accept a Marvel kid",edge
 a24-hipster,mcu-teen,block,slow_cinema_wren,webhead_jayden,a24-hipster blocked mcu-teen,edge
+b-amsterdam-arthouse-barista,superhero-burnout,block,noor_slow_cinema,post_endgame_pete,b-amsterdam-arthouse-barista blocked superhero-burnout; argued in the comments,edge
+cinematography-snob,cult-trash,block,golden_hour_gus,so_bad_its_good,cinematography-snob blocked cult-trash; 'so bad it's good' is not a category,edge
+e-spaghetti-westerns,d-spaghetti-western-turin,block,morricone_whistle,sergio_e_morricone,e-spaghetti-westerns blocked d-spaghetti-western-turin; Leone vs Corbucci flame war,edge
 harsh-critic,generous-rater,block,two_stars_max,everything_is_awesome,harsh-critic blocked generous-rater; can't stand the 10/10s,edge
+j-trend-follower,j-contrarian,block,whats_everyone_watching_tay,against_the_grain_gil,j-trend-follower blocked j-contrarian; he trashed her Barbie rating,edge
+j-ones-and-tens,j-note-writer,block,zero_or_hero_kofi,three_paragraphs_iris,j-ones-and-tens blocked j-note-writer; too many essays in his feed,edge

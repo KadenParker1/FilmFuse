@@ -5,13 +5,15 @@
 
 Outputs (UTF-8 with BOM, RFC 4180 via the csv module, so Excel / Numbers open them cleanly):
 
-* tools/personas/accounts.csv - one row per persona: login, taste, favourites, friends, groups.
+* tools/personas/accounts.csv - one row per persona: login, taste, favourites, least favourites,
+  friends, groups.
   The passwords are LOCAL-ONLY throwaway credentials for the `supabase start` stack (like the
   table in tools/e2e/README.md); they exist nowhere else.
 * tools/personas/networks.csv - one row per edge: a, b, type (friend | close | pending | block).
 * tools/personas/groups.csv - one row per saved group: group, creator, members, intent.
 * tools/personas/ROSTER.md - the readable roster (GENERATED): single-lane archetypes, cross-genre
-  combos, behaviour & edge cases, each with what it tests, top genres, ratings, comfort, groups.
+  combos, behaviour & edge cases, each with what it tests, top genres, least favourites, ratings,
+  comfort, groups.
 
 total_ratings counts anchors + SYNTHETIC generated ratings (out/ratings.generated.json; when that
 file is missing, the volume's nominal count, which is what generate.py produces).
@@ -40,6 +42,7 @@ ACCOUNTS_COLUMNS = [
     "disliked_genres",
     "moods",
     "favorite_movies",
+    "least_favorite_movies",
     "anchor_loves",
     "anchor_hates",
     "rating_volume",
@@ -84,6 +87,10 @@ def moods(persona: dict) -> str:
         ((m, int(s)) for m, s in persona.get("moods", {}).items()), key=lambda r: (-r[1], r[0])
     )
     return _scored(rows)
+
+
+def least_favorite_movies(persona: dict) -> str:
+    return SEP.join(common.title_year(f) for f in persona.get("leastFavorites") or [])
 
 
 def anchors(persona: dict, loves: bool) -> str:
@@ -131,6 +138,7 @@ def account_rows(
                 "disliked_genres": disliked_genres(p),
                 "moods": moods(p),
                 "favorite_movies": SEP.join(common.title_year(f) for f in p.get("favorites", [])),
+                "least_favorite_movies": least_favorite_movies(p),
                 "anchor_loves": anchors(p, loves=True),
                 "anchor_hates": anchors(p, loves=False),
                 "rating_volume": p.get("volume", "none"),
@@ -213,6 +221,8 @@ TAG_NOTES = {
     "omnivore": "omnivore: no clear type, scores almost every genre high",
     "critic": "professional critic voice",
     "cold-start": "cold start: only onboarding prefs, no ratings history",
+    "narrow": "narrow: loves only these few genres, scores most others 1-3",
+    "burnout": "burnout: loved a genre once, now hates it (least favourites)",
 }
 BIAS_EXTREME = 1.5
 SPREAD_FLAT = 0.4
@@ -319,6 +329,7 @@ def roster_markdown(data: dict, generated: dict | None, net: networks_mod.Networ
             p.get("bio", ""),
             what_it_tests(p),
             top,
+            least_favorite_movies(p) or "-",
             f"{p.get('volume', 'none')}: {anchors_n} anchors + {gen_n} generated = "
             f"{anchors_n + gen_n}",
             common.comfort_summary(p.get("comfort")),
@@ -342,8 +353,9 @@ def roster_markdown(data: dict, generated: dict | None, net: networks_mod.Networ
         "",
     ]
     header = (
-        "| User | Archetype | Bio | What it tests | Top genres | Ratings | Comfort | Groups |\n"
-        "|---|---|---|---|---|---|---|---|"
+        "| User | Archetype | Bio | What it tests | Top genres | Least favourites | Ratings | "
+        "Comfort | Groups |\n"
+        "|---|---|---|---|---|---|---|---|---|"
     )
     for s in SECTIONS:
         out += [f"## {s}", "", header, *rows[s], ""]

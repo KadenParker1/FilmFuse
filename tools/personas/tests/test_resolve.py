@@ -395,6 +395,151 @@ def test_validate_overrides() -> None:
     assert_error(r.validate_overrides([]), "must be an object")
 
 
+LEAST = [{"title": "Halloween", "year": 2007}]
+
+
+def test_least_favorites_optional_and_valid() -> None:
+    assert errors_for() == []
+    assert errors_for(leastFavorites=[]) == []
+    assert errors_for(leastFavorites=LEAST) == []
+    low = [{"title": "Halloween", "year": 1978, "score": 2}]
+    assert (
+        errors_for(anchorRatings=low, leastFavorites=[{"title": "Halloween", "year": 1978}]) == []
+    )
+
+
+@pytest.mark.parametrize(
+    ("over", "fragment"),
+    [
+        ({"leastFavorites": "nope"}, "leastFavorites must be a list"),
+        (
+            {"leastFavorites": [{"title": f"M{i}", "year": 2000} for i in range(6)]},
+            "leastFavorites has 6 entries (max 5)",
+        ),
+        ({"leastFavorites": [{"title": "", "year": 2000}]}, "leastFavorites[0]: title must be"),
+        ({"leastFavorites": [{"title": "X", "year": "2000"}]}, "leastFavorites[0]: year must be"),
+        ({"leastFavorites": ["Halloween"]}, "must be an object with title and year"),
+        ({"leastFavorites": LEAST + LEAST}, "least favourite listed twice"),
+        (
+            {"leastFavorites": [{"title": "Toy Story", "year": 1995}]},
+            "least favourite is also a favourite: Toy Story (1995)",
+        ),
+        (
+            {"leastFavorites": [{"title": "Halloween", "year": 1978}]},
+            "least favourite is an anchor love (8/10): Halloween (1978)",
+        ),
+        (
+            {
+                "anchorRatings": [{"title": "Halloween", "year": 1978, "score": 5}],
+                "leastFavorites": [{"title": "Halloween", "year": 1978}],
+            },
+            "has anchor score 5; it needs <= 3",
+        ),
+    ],
+)
+def test_least_favorites_validation_errors(over: dict, fragment: str) -> None:
+    assert_error(errors_for(**over), fragment)
+
+
+GENRE_MOVIES = [
+    (101, "Scary One (2001)", "Horror"),
+    (102, "Funny One (2002)", "Comedy"),
+    (103, "Sad One (2003)", "Drama|Romance"),
+]
+
+
+@pytest.fixture
+def genre_index() -> r.MovieIndex:
+    return r.MovieIndex.from_rows(MOVIES + GENRE_MOVIES, {**LINKS, 101: 5101, 102: 5102, 103: 5103})
+
+
+def test_movielens_genres_are_mapped(genre_index: r.MovieIndex) -> None:
+    assert genre_index.match("Scary One", 2001).genre_ids == (27,)
+    assert genre_index.match("Sad One", 2003).genre_ids == (18, 10749)
+    assert genre_index.match("Toy Story", 1995).genre_ids == ()  # 2-tuple rows: no genres
+
+
+def test_resolve_least_favorites_ids_and_counts(genre_index: r.MovieIndex) -> None:
+    # persona(): Horror 2 -> a horror movie fits the dislikes without an anchor
+    p = persona(leastFavorites=[{"title": "Scary One", "year": 2001}])
+    resolved, errors = r.resolve_document(document(p), genre_index, {})
+    assert errors == []
+    assert resolved["personas"][0]["leastFavorites"][0]["tmdbId"] == 5101
+    assert resolved["resolvedFrom"] == {"movielens": 5, "overrides": 0}
+
+
+def test_resolve_least_favorite_must_fit_dislikes(genre_index: r.MovieIndex) -> None:
+    # Comedy is scored 8: no anchor and a liked genre -> error
+    p = persona(leastFavorites=[{"title": "Funny One", "year": 2002}])
+    _, errors = r.resolve_document(document(p), genre_index, {})
+    assert_error(errors, "Funny One (2002) doesn't fit the persona's dislikes (genre affinity 8.0")
+    # ...unless a low anchor says so
+    p = persona(
+        anchorRatings=[{"title": "Funny One", "year": 2002, "score": 2}],
+        leastFavorites=[{"title": "Funny One", "year": 2002}],
+    )
+    assert r.resolve_document(document(p), genre_index, {})[1] == []
+
+
+def test_resolve_least_favorite_override_needs_low_anchor(genre_index: r.MovieIndex) -> None:
+    overrides = {"Cats (2019)": 536869}
+    p = persona(leastFavorites=[{"title": "Cats", "year": 2019}])
+    _, errors = r.resolve_document(document(p), genre_index, overrides)
+    assert_error(errors, "Cats (2019) needs an anchor <= 3")
+    p = persona(
+        anchorRatings=[{"title": "Cats", "year": 2019, "score": 1}],
+        leastFavorites=[{"title": "Cats", "year": 2019}],
+    )
+    resolved, errors = r.resolve_document(document(p), genre_index, overrides)
+    assert errors == []
+    assert resolved["resolvedFrom"] == {"movielens": 3, "overrides": 2}
+
+
+def test_resolve_least_favorite_overlap_by_tmdb_id(index: r.MovieIndex) -> None:
+    # "Seven" and "Se7en" pass the title check but are one movie.
+    p = persona(
+        favorites=[
+            {"title": "Se7en", "year": 1995},
+            {"title": "Toy Story", "year": 1995},
+            {"title": "The Godfather", "year": 1972},
+        ],
+        leastFavorites=[{"title": "Seven", "year": 1995}],
+    )
+    assert r.validate_document(document(p)) == []
+    _, errors = r.resolve_document(document(p), index, {})
+    assert_error(errors, "least favourite is also a favourite (tmdbId 1004)")
+
+
+def test_resolve_least_favorite_unresolved(index: r.MovieIndex) -> None:
+    p = persona(leastFavorites=[{"title": "Nope", "year": 2001}])
+    _, errors = r.resolve_document(document(p), index, {})
+    assert_error(errors, "leastFavorites: not found in MovieLens: Nope (2001)")
+
+
+def test_load_resolved_requires_least_favorite_ids(tmp_path: Path) -> None:
+    doc = document(persona(leastFavorites=LEAST))
+    for p in doc["personas"]:
+        for ref in p["favorites"] + p["anchorRatings"]:
+            ref["tmdbId"] = 1
+    path = tmp_path / "resolved.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(ValueError, match=r"leastFavorites\[0\] has no tmdbId"):
+        r.load_resolved(path)
+
+
+def test_real_least_favorites(real: dict) -> None:
+    by_key = {p["key"]: p for p in real["personas"]}
+    for p in real["personas"]:
+        if "narrow" in p["tags"]:
+            assert "multi-genre" in p["tags"], p["key"]
+            assert 1 <= len(p.get("leastFavorites", [])) <= 5, p["key"]
+            loved = [s for s in p["genres"].values() if s >= 8]
+            assert 2 <= len(loved) <= 3, f"{p['key']} should love only 2-3 genres"
+            low = [s for s in p["genres"].values() if s <= 3]
+            assert len(low) >= len(p["genres"]) / 2, f"{p['key']} should dislike most genres"
+    assert len(by_key["superhero-burnout"]["leastFavorites"]) == 5
+
+
 # --------------------------------------------------------------------------- resolution
 
 
@@ -540,7 +685,10 @@ def test_real_personas_fully_resolve(real: dict, tmp_path: Path) -> None:
     resolved, errors = r.run(REAL_PERSONAS, REAL_OVERRIDES, MOVIELENS_DIR, tmp_path / "out.json")
     assert errors == []
     assert resolved is not None
-    total = sum(len(p["favorites"]) + len(p["anchorRatings"]) for p in real["personas"])
+    total = sum(
+        len(p["favorites"]) + len(p["anchorRatings"]) + len(p.get("leastFavorites", []))
+        for p in real["personas"]
+    )
     counts = resolved["resolvedFrom"]
     assert counts["movielens"] + counts["overrides"] == total
     loaded = r.load_resolved(tmp_path / "out.json")
@@ -564,18 +712,27 @@ def test_every_override_is_used(real: dict) -> None:
     used = {
         r.override_key(ref["title"], ref["year"])
         for p in real["personas"]
-        for ref in p["favorites"] + p["anchorRatings"]
+        for ref in p["favorites"] + p["anchorRatings"] + p.get("leastFavorites", [])
     }
     assert set(overrides) - used == set()
-    assert len(overrides) <= 60
+    # 59 overrides for the first 44 personas, +23 (each checked by hand against
+    # themoviedb.org/movie/<id>) for the 2026-11 sweep's 20 personas. MovieLens stays the default;
+    # raise this only together with new hand-verified entries. +10 net new (92 total) for the
+    # 125 personas merged from batches a-e (2026-11); most of their newer titles were already here.
+    # +10 (102 total) for the 111 personas merged from batches f-j (2026-11): The Platform,
+    # Argentina 1985, A Fantastic Woman, Honeyland, Atlantics, Capernaum, Prey, CODA, Portrait of a
+    # Lady on Fire, The Farewell; their other override titles were already here with the same ids.
+    assert len(overrides) <= 102
 
 
 def test_real_coverage_counts(real: dict) -> None:
     personas = real["personas"]
-    assert len(personas) >= 35
+    assert len(personas) >= 300
     assert {p["volume"] for p in personas} == r.VOLUMES
     assert any(p["onboarded"] is False for p in personas)
-    assert sum("multi-genre" in p["tags"] for p in personas) >= 6
+    assert sum("multi-genre" in p["tags"] for p in personas) >= 175
+    assert sum("narrow" in p["tags"] for p in personas) >= 60
+    assert sum(bool(p.get("leastFavorites")) for p in personas) >= 185
     volumes = [p["volume"] for p in personas]
     # Realistic skew: light + medium outnumber heavy + power + none.
     light_medium = volumes.count("light") + volumes.count("medium")
@@ -622,8 +779,8 @@ def test_real_anchor_counts(real: dict) -> None:
 
 def test_real_uses_the_full_score_range(real: dict) -> None:
     for p in real["personas"]:
-        if {"flat-rater", "generous-rater"} & set(p["tags"]):
-            continue  # by design they never go low
-        scores = [a["score"] for a in p["anchorRatings"]] + list(p["genres"].values())
-        assert min(scores) <= 3, f"{p['key']} never really dislikes anything"
-        assert max(scores) >= 9, f"{p['key']} never really loves anything"
+        if p["volume"] == "none" or {"flat-rater", "generous-rater"} & set(p["tags"]):
+            continue  # no anchors at all, or by design they never go low
+        scores = [a["score"] for a in p["anchorRatings"]]
+        assert min(scores) <= 3, f"{p['key']} has no anchor <= 3"
+        assert max(scores) >= 9, f"{p['key']} has no anchor >= 9"

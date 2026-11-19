@@ -1,15 +1,20 @@
 # Test personas and fake social networks (local stack)
 
-44 hand-written test personas (Disney mom, film bro, horror fanatic, cross-genre combos, edge
-cases such as a G-capped parent or a never-onboarded account), wired into fake social networks
-(family, film school, office, roommates, horror club, book club, …) and seeded into the **local**
-stack through the real APIs. Use them to click around the app as realistic users and to run group
-sessions for the recommender.
+300 hand-written test personas (Disney mom, film bro, horror fanatic, cross-genre combos, "narrow"
+fans who love exactly two or three rarely-paired genres and dislike almost everything else, edge
+cases such as a G-capped parent, a shared family account or a never-onboarded account, and people
+from Latin America, Iberia, Asia-Pacific, the Middle East, Africa and Eastern Europe), wired into
+fake social networks (family, film school, office, roommates, horror club, book club, university,
+nurses, a retirement-village film club, an international film forum, diaspora circles, a Mexican
+family WhatsApp, an Iberian film club, a drivers' forum, Gulf ex-colleagues, Balkan neighbours,
+African film students, Indigenous festival friends, veterans, night-shift carers, …) and seeded into
+the **local** stack through the real APIs. Use them to click around the app as realistic users and
+to run group sessions for the recommender.
 
 - **[ROSTER.md](ROSTER.md)**: who's who, split into single-lane archetypes, cross-genre combos and
   behaviour & edge cases, with what each persona tests. GENERATED, don't edit it.
-- **[accounts.csv](accounts.csv)**: one row per login (email, password, taste, favourites, friends,
-  groups). It opens in Excel or Numbers.
+- **[accounts.csv](accounts.csv)**: one row per login (email, password, taste, favourites, least
+  favourites, friends, groups). It opens in Excel or Numbers.
 - **[networks.csv](networks.csv)** / **[groups.csv](groups.csv)**: every edge
   (friend | close | pending | block) and every saved group with its intent
   (easy | hard | big | pair).
@@ -28,7 +33,7 @@ The passwords are **local-only throwaway credentials** for `supabase start`, lik
 |---|---|
 | `SCHEMA.md` | the persona file contract |
 | `personas.json` | the personas (hand-written) |
-| `tmdb-overrides.json` | `"Title (Year)": tmdbId` for titles MovieLens doesn't have (post-2018) |
+| `tmdb-overrides.json` | `"Title (Year)": tmdbId` for titles MovieLens doesn't have (post-2018 or missing). Every entry is checked by hand against `https://www.themoviedb.org/movie/<id>` (title + year); never guess an id |
 | `resolve.py` | validates `personas.json` and resolves every title to a TMDB id, writing `personas.resolved.json` (committed) |
 | `generate.py` | writes deterministic synthetic ratings to `out/ratings.generated.json` (gitignored) |
 | `networks.json` / `networks.py` | the fake social networks (clusters, extra edges, isolates, groups), plus `validate` / `summary` |
@@ -49,7 +54,10 @@ This is the same as `tools/e2e/README.md`, plus the two seeding notes below.
 ```bash
 supabase start                                   # ports 553xx (API 55321, Studio 55323, Mailpit 55324)
 
-cd python-ml-service && ENV=local .venv/bin/uvicorn app.main:app --port 8001 &
+# content-v1 reads movies through the read-only ml_reader role; give it a local-only login once
+# (see python-ml-service/README.md). Without ML_DATABASE_URL the model just keeps the pool order.
+cd python-ml-service && ENV=local ML_DATABASE_URL=postgresql://ml_reader:<local-only>@127.0.0.1:55322/postgres \
+  .venv/bin/uvicorn app.main:app --port 8001 &
 
 cd core-api && ./mvnw -q -DskipTests package
 eval "$(supabase status -o env | grep -E '^(SERVICE_ROLE_KEY|ANON_KEY)=')"
@@ -60,7 +68,7 @@ SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" ML_SERVICE_URL=http://127.0.0.1:80
 ```
 
 - **`FILMFUSE_RATE_LIMIT_ENABLED=false`** turns off core-api's rate limits (120 requests/min per
-  user, 600/min per IP, `POST /sessions` 30/hour), so a full seed of about 3,000 ratings runs in
+  user, 600/min per IP, `POST /sessions` 30/hour), so a full seed of about 20,000 ratings runs in
   minutes. With limits on, `seed.py` still works: it honours `429 Retry-After`, only more slowly.
   `prod` refuses this setting.
 - **The movie catalog must know the persona movies.** Without `TMDB_ACCESS_TOKEN`, core-api serves
@@ -71,9 +79,9 @@ SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" ML_SERVICE_URL=http://127.0.0.1:80
   `--filmfuse.catalog.seed.id-file=../tools/catalog/out/movielens-tmdb-ids.txt` (see the
   Commands block in `CLAUDE.md`). Check with `seed.py --preflight`.
 - **Supabase Auth also rate-limits** sign-ups and sign-ins (`[auth.rate_limit] sign_in_sign_ups =
-  30` per 5 minutes per IP in `supabase/config.toml`). Seeding 44 new accounts hits that limit
-  once. `seed.py` backs off and retries (Auth sends no `Retry-After`), so the first run pauses for
-  a few minutes. Re-runs sign in once per persona.
+  30` per 5 minutes per IP in `supabase/config.toml`). Seeding 300 new accounts hits that limit
+  several times. `seed.py` backs off and retries (Auth sends no `Retry-After`), so the first run
+  pauses for roughly half an hour in total. Re-runs sign in once per persona.
 
 ### 2. Build the data (no stack needed)
 
@@ -101,7 +109,11 @@ For each persona, `seed.py` does the following:
 
 1. Signs up, or signs in if the account exists.
 2. Calls `GET /me`, then `PATCH /me` with the username, display name and bio.
-3. `PUT`s the genre, mood and favourite preferences.
+3. `PUT`s the genre, mood and favourite preferences, then the least favourites
+   (`PUT /me/preferences/least-favorites`, ranked, max 5). That call replaces the list, so it is
+   always sent (`[]` for a persona without any) and re-runs converge. A least favourite the
+   catalog doesn't know (404) is skipped like a favourite, and one that ended up a favourite is
+   dropped (core-api answers 400 for a movie in both lists).
 4. `PUT`s the comfort settings.
 5. Completes onboarding, unless the persona has `onboarded: false`.
 6. `PUT /ratings/{id}` for the anchors plus the generated ratings. About 20% are PUBLIC, some with

@@ -9,8 +9,9 @@ never direct SQL. Re-running is safe: existing accounts sign in, unchanged ratin
 existing friendships / requests / blocks / groups are detected first, 409s are explained.
 
 Per persona: sign up (or sign in) -> GET /me -> PATCH /me -> PUT genre / mood / favourite prefs
--> PUT comfort -> POST onboarding/complete (unless onboarded: false) -> PUT /ratings/{id} for the
-anchors plus the SYNTHETIC generated ratings (out/ratings.generated.json, see generate.py).
+-> PUT least favourites (replace; [] clears) -> PUT comfort -> POST onboarding/complete (unless
+onboarded: false) -> PUT /ratings/{id} for the anchors plus the SYNTHETIC generated ratings
+(out/ratings.generated.json, see generate.py).
 Movies the local catalog doesn't know (404) are skipped and reported. Then the network from
 networks.json: friend requests + accepts, close-friend flags, pending requests, blocks, groups.
 
@@ -44,6 +45,8 @@ PRIVATE_SHARE = 0.10
 NOTE_SHARE = 0.40  # of PUBLIC ratings
 MIN_FAVORITES = 3
 MAX_FAVORITES = 10
+MAX_LEAST_FAVORITES = 5
+LEAST_FAVORITES_PATH = "/me/preferences/least-favorites"
 FIXTURE_PROBE_IDS = (278, 238, 155)  # in core-api's offline fixture catalog
 DEFAULT_RETRY_WAIT = 10.0
 MAX_RETRY_WAIT = 120.0
@@ -352,6 +355,14 @@ def mood_payload(persona: dict) -> list[dict]:
     return [{"moodTag": m, "score": int(s)} for m, s in sorted(persona.get("moods", {}).items())]
 
 
+def least_favorites(persona: dict) -> list[dict]:
+    return list(persona.get("leastFavorites") or [])[:MAX_LEAST_FAVORITES]
+
+
+def least_favorites_payload(movie_ids: list[int]) -> list[dict]:
+    return [{"movieId": m, "rank": i + 1} for i, m in enumerate(movie_ids[:MAX_LEAST_FAVORITES])]
+
+
 def profile_payload(persona: dict) -> dict:
     body = {"username": persona["username"], "displayName": persona["displayName"]}
     if persona.get("bio"):
@@ -494,7 +505,8 @@ class Seeder:
             if status != 200:
                 rep.errors.append(f"PUT {path}: HTTP {status} {_msg(body)}")
 
-        self._favorites(p, rep)
+        favorite_ids = self._favorites(p, rep)
+        self._least_favorites(p, rep, favorite_ids)
 
         try:
             comfort = common.normalise_comfort(p.get("comfort"))
@@ -527,7 +539,8 @@ class Seeder:
             return False
         raise SeedError(f"GET /movies/{movie_id}: HTTP {status} {_msg(body)}")
 
-    def _favorites(self, p: dict, rep: PersonaReport) -> None:
+    def _favorites(self, p: dict, rep: PersonaReport) -> list[int]:
+        """PUT the favourites; returns the ids actually set."""
         key = p["key"]
         chosen: list[int] = []
         missing: list[dict] = []
@@ -573,11 +586,31 @@ class Seeder:
                 )
         if not chosen:
             rep.errors.append("no favourites could be set (empty catalog?)")
-            return
+            return []
         payload = [{"movieId": m, "rank": i + 1} for i, m in enumerate(chosen)]
         status, body = self.call(key, "PUT", "/me/preferences/favorites", payload)
         if status != 200:
             rep.errors.append(f"PUT favorites: HTTP {status} {_msg(body)}")
+        return chosen
+
+    def _least_favorites(self, p: dict, rep: PersonaReport, favorite_ids: list[int]) -> None:
+        """PUT the least favourites. The endpoint replaces the list ([] clears it), so this is
+        always sent and re-runs converge. Unknown movies (404) are skipped like favourites; a
+        movie that ended up a favourite is dropped (core-api answers 400 for one in both)."""
+        key = p["key"]
+        chosen: list[int] = []
+        for ref in least_favorites(p):
+            mid = common.movie_id(ref)
+            if mid is None or mid in chosen or mid in favorite_ids:
+                continue
+            if self._movie_exists(key, mid):
+                chosen.append(mid)
+            else:
+                rep.skipped_movies.append(f"least favourite {common.title_year(ref)} [{mid}]")
+        payload = least_favorites_payload(chosen)
+        status, body = self.call(key, "PUT", LEAST_FAVORITES_PATH, payload)
+        if status != 200:
+            rep.errors.append(f"PUT least-favorites: HTTP {status} {_msg(body)}")
 
     def _ratings(self, p: dict, rep: PersonaReport) -> None:
         key = p["key"]
@@ -798,7 +831,8 @@ def dry_run_plan(
             lines.append(
                 f"[{p['key']}] {common.email_for(data, p)} @{p['username']}: "
                 f"{len(p.get('genres', {}))} genres, {len(p.get('moods', {}))} moods, "
-                f"{len(p.get('favorites', []))} favourites, comfort {json.dumps(comfort)}, "
+                f"{len(p.get('favorites', []))} favourites, "
+                f"{len(least_favorites(p))} least favourites, comfort {json.dumps(comfort)}, "
                 f"{'complete onboarding' if p.get('onboarded', True) else 'SKIP onboarding'}, "
                 f"{len(planned)} ratings ({sum(r['kind'] == 'anchor' for r in planned)} anchors, "
                 f"{pub} public, {notes} with notes)"

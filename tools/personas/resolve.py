@@ -11,6 +11,9 @@ Resolution order for each ``{title, year}``:
   2. MovieLens ``ml-latest-small`` (``movies.csv`` + ``links.csv``), matched on a normalised
      title and the release year (exact year, or +/-1 only when exactly one candidate fits).
 
+``leastFavorites`` resolve the same way and are checked against the favourites and anchors
+(see LEAST_FAVORITES_MAX and friends).
+
 Writes ``personas.resolved.json`` (sorted keys, 2-space indent) on success. On any problem it
 prints every error and exits non-zero without writing.
 """
@@ -84,6 +87,35 @@ ONBOARDING_MIN_LOVED = 3
 ONBOARDING_LOVED_SCORE = 8
 FAVORITES_MIN, FAVORITES_MAX = 3, 10
 ANCHORS_MAX = 40
+# Least favourites (PUT /me/preferences/least-favorites): optional, 0-5, never a favourite or an
+# anchor love. Each one needs an anchor <= LEAST_ANCHOR_MAX, or (without an anchor) MovieLens
+# genres whose mean stated affinity is <= LEAST_AFFINITY_MAX, i.e. it fits the persona's dislikes.
+LEAST_FAVORITES_MAX = 5
+ANCHOR_LOVE_MIN = 8
+LEAST_ANCHOR_MAX = 3
+LEAST_AFFINITY_MAX = 5.0
+
+# MovieLens genre -> TMDB genre id (same table as generate.py / python-ml-service/eval/data.py).
+MOVIELENS_TO_TMDB_GENRE: dict[str, int] = {
+    "Action": 28,
+    "Adventure": 12,
+    "Animation": 16,
+    "Children": 10751,
+    "Comedy": 35,
+    "Crime": 80,
+    "Documentary": 99,
+    "Drama": 18,
+    "Fantasy": 14,
+    "Film-Noir": 80,
+    "Horror": 27,
+    "Musical": 10402,
+    "Mystery": 9648,
+    "Romance": 10749,
+    "Sci-Fi": 878,
+    "Thriller": 53,
+    "War": 10752,
+    "Western": 37,
+}
 
 # Leading articles stripped during normalisation (English plus the common ones MovieLens
 # moves to the end of foreign titles, e.g. "Fabuleux destin d'Amélie Poulain, Le").
@@ -195,6 +227,7 @@ class Movie:
     raw_title: str
     year: int | None
     tmdb_id: int | None
+    genre_ids: tuple[int, ...] = ()
 
 
 @dataclass
@@ -206,11 +239,21 @@ class MovieIndex:
             self.by_key.setdefault(key, []).append(movie)
 
     @classmethod
-    def from_rows(cls, movies: list[tuple[int, str]], links: dict[int, int | None]) -> MovieIndex:
+    def from_rows(cls, movies: list[tuple], links: dict[int, int | None]) -> MovieIndex:
+        """movies: (movieId, raw title) or (movieId, raw title, 'Genre|Genre')."""
         index = cls()
-        for movie_id, raw in movies:
+        for movie_id, raw, *rest in movies:
             keys, year = title_keys(raw)
-            index.add(Movie(movie_id, raw, year, links.get(movie_id)), keys)
+            genre_ids = tuple(
+                sorted(
+                    {
+                        MOVIELENS_TO_TMDB_GENRE[g]
+                        for g in (rest[0] if rest else "").split("|")
+                        if g in MOVIELENS_TO_TMDB_GENRE
+                    }
+                )
+            )
+            index.add(Movie(movie_id, raw, year, links.get(movie_id), genre_ids), keys)
         return index
 
     @classmethod
@@ -224,10 +267,10 @@ class MovieIndex:
             for row in csv.DictReader(fh):
                 tmdb = (row.get("tmdbId") or "").strip()
                 links[int(row["movieId"])] = int(tmdb) if tmdb else None
-        movies: list[tuple[int, str]] = []
+        movies: list[tuple[int, str, str]] = []
         with movies_csv.open(newline="", encoding="utf-8") as fh:
             for row in csv.DictReader(fh):
-                movies.append((int(row["movieId"]), row["title"]))
+                movies.append((int(row["movieId"]), row["title"], row.get("genres") or ""))
         return cls.from_rows(movies, links)
 
     def match(self, title: str, year: int) -> Movie:
@@ -256,15 +299,30 @@ def resolve_title(
     title: str, year: int, index: MovieIndex | None, overrides: dict[str, int]
 ) -> tuple[int, str]:
     """Return (tmdbId, source) where source is 'overrides' or 'movielens'."""
+    tmdb_id, source, _ = resolve_movie(title, year, index, overrides)
+    return tmdb_id, source
+
+
+def resolve_movie(
+    title: str, year: int, index: MovieIndex | None, overrides: dict[str, int]
+) -> tuple[int, str, Movie | None]:
+    """Like resolve_title, plus the MovieLens row (None for an override)."""
     key = override_key(title, year)
     if key in overrides:
-        return overrides[key], "overrides"
+        return overrides[key], "overrides", None
     if index is None:
         raise ResolveError(f"not in overrides and no MovieLens index: {key}")
     movie = index.match(title, year)
     if movie.tmdb_id is None:
         raise ResolveError(f"MovieLens has no TMDB link for {movie.raw_title}")
-    return movie.tmdb_id, "movielens"
+    return movie.tmdb_id, "movielens", movie
+
+
+def stated_affinity(genres: dict, genre_ids: tuple[int, ...]) -> float:
+    """Mean stated genre score over these genres (unscored genre = neutral 5)."""
+    if not genre_ids:
+        return 5.0
+    return sum(float(genres.get(str(g), 5)) for g in genre_ids) / len(genre_ids)
 
 
 # --------------------------------------------------------------------------- validation
@@ -360,6 +418,7 @@ def validate_persona(p: Any, idx: int) -> list[str]:
         errors.append(f"{label}: anchorRatings has {len(anchors)} entries (max {ANCHORS_MAX})")
 
     seen: dict[tuple[str, int], str] = {}
+    anchor_scores: dict[tuple[str, int], Any] = {}
     for kind, refs, scored in (
         ("favorites", favorites, False),
         ("anchorRatings", anchors, True),
@@ -369,6 +428,8 @@ def validate_persona(p: Any, idx: int) -> list[str]:
             if not _check_movie_ref(ref, where, errors, scored=scored):
                 continue
             ident = (normalize_title(ref["title"]), ref["year"])
+            if kind == "anchorRatings":
+                anchor_scores[ident] = ref.get("score")
             if ident in seen:
                 errors.append(
                     f"{label}: same movie twice: {ref['title']} ({ref['year']}) "
@@ -376,6 +437,8 @@ def validate_persona(p: Any, idx: int) -> list[str]:
                 )
             else:
                 seen[ident] = kind
+
+    errors.extend(_validate_least_favorites(p, label, seen, anchor_scores))
 
     if p.get("volume") not in VOLUMES:
         errors.append(f"{label}: volume must be one of {sorted(VOLUMES)}: {p.get('volume')!r}")
@@ -410,6 +473,44 @@ def validate_persona(p: Any, idx: int) -> list[str]:
 
     if not isinstance(p.get("onboarded"), bool):
         errors.append(f"{label}: onboarded must be true or false")
+    return errors
+
+
+def _validate_least_favorites(
+    p: dict, label: str, seen: dict[tuple[str, int], str], anchor_scores: dict
+) -> list[str]:
+    """Optional leastFavorites: 0-5 unscored refs, no duplicates, never a favourite or an anchor
+    love; an anchor for the same movie must score <= LEAST_ANCHOR_MAX."""
+    if "leastFavorites" not in p:
+        return []
+    least = p["leastFavorites"]
+    if not isinstance(least, list):
+        return [f"{label}: leastFavorites must be a list"]
+    errors: list[str] = []
+    if len(least) > LEAST_FAVORITES_MAX:
+        errors.append(
+            f"{label}: leastFavorites has {len(least)} entries (max {LEAST_FAVORITES_MAX})"
+        )
+    own: set[tuple[str, int]] = set()
+    for i, ref in enumerate(least):
+        where = f"{label}: leastFavorites[{i}]"
+        if not _check_movie_ref(ref, where, errors, scored=False):
+            continue
+        ident = (normalize_title(ref["title"]), ref["year"])
+        name = f"{ref['title']} ({ref['year']})"
+        if ident in own:
+            errors.append(f"{label}: least favourite listed twice: {name}")
+        own.add(ident)
+        if seen.get(ident) == "favorites":
+            errors.append(f"{label}: least favourite is also a favourite: {name}")
+        score = anchor_scores.get(ident)
+        if _is_int(score) and score >= ANCHOR_LOVE_MIN:
+            errors.append(f"{label}: least favourite is an anchor love ({score}/10): {name}")
+        elif _is_int(score) and score > LEAST_ANCHOR_MAX:
+            errors.append(
+                f"{label}: least favourite {name} has anchor score {score}; "
+                f"it needs <= {LEAST_ANCHOR_MAX} (or no anchor)"
+            )
     return errors
 
 
@@ -519,8 +620,62 @@ def resolve_document(
                     )
                 else:
                     ids_seen[tmdb_id] = f"{ref['title']} ({ref['year']})"
+        errors.extend(_resolve_least_favorites(p, label, index, overrides, counts))
     out["resolvedFrom"] = counts
     return out, errors
+
+
+def _resolve_least_favorites(
+    p: dict, label: str, index: MovieIndex | None, overrides: dict[str, int], counts: dict
+) -> list[str]:
+    """Resolve leastFavorites (in place) and check them by TMDB id against favourites and
+    anchors; without a low anchor the movie's MovieLens genres must fit the persona's dislikes."""
+    errors: list[str] = []
+    favs = {r.get("tmdbId") for r in p.get("favorites", []) if isinstance(r, dict)}
+    anchors = {
+        r.get("tmdbId"): r.get("score") for r in p.get("anchorRatings", []) if isinstance(r, dict)
+    }
+    own: set[int] = set()
+    for ref in p.get("leastFavorites", []) or []:
+        if not isinstance(ref, dict) or "title" not in ref or "year" not in ref:
+            continue
+        name = f"{ref['title']} ({ref['year']})"
+        try:
+            tmdb_id, source, movie = resolve_movie(ref["title"], ref["year"], index, overrides)
+        except ResolveError as exc:
+            errors.append(f"{label}: leastFavorites: {exc}")
+            continue
+        ref["tmdbId"] = tmdb_id
+        counts[source] += 1
+        if tmdb_id in own:
+            errors.append(f"{label}: least favourite listed twice (tmdbId {tmdb_id}): {name}")
+        own.add(tmdb_id)
+        if tmdb_id in favs:
+            errors.append(
+                f"{label}: least favourite is also a favourite (tmdbId {tmdb_id}): {name}"
+            )
+        score = anchors.get(tmdb_id)
+        if _is_int(score):
+            if score > LEAST_ANCHOR_MAX:
+                errors.append(
+                    f"{label}: least favourite {name} has anchor score {score}; "
+                    f"it needs <= {LEAST_ANCHOR_MAX}"
+                )
+            continue
+        if movie is None or not movie.genre_ids:
+            errors.append(
+                f"{label}: least favourite {name} needs an anchor <= {LEAST_ANCHOR_MAX} "
+                "(no MovieLens genres to check it against the persona's dislikes)"
+            )
+            continue
+        affinity = stated_affinity(p.get("genres", {}), movie.genre_ids)
+        if affinity > LEAST_AFFINITY_MAX:
+            errors.append(
+                f"{label}: least favourite {name} doesn't fit the persona's dislikes "
+                f"(genre affinity {affinity:.1f} > {LEAST_AFFINITY_MAX:g}); "
+                f"add an anchor <= {LEAST_ANCHOR_MAX}"
+            )
+    return errors
 
 
 def dump_json(data: Any) -> str:
@@ -565,8 +720,8 @@ def load_resolved(path: str | Path | None = None) -> dict:
     doc = json.loads(resolved_path.read_text(encoding="utf-8"))
     errors = validate_document(doc)
     for p in doc.get("personas", []) if isinstance(doc, dict) else []:
-        for kind in ("favorites", "anchorRatings"):
-            for i, ref in enumerate(p.get(kind, [])):
+        for kind in ("favorites", "anchorRatings", "leastFavorites"):
+            for i, ref in enumerate(p.get(kind, []) or []):
                 if not isinstance(ref, dict) or not _is_int(ref.get("tmdbId")):
                     errors.append(f"persona {p.get('key')}: {kind}[{i}] has no tmdbId")
     if errors:

@@ -28,6 +28,12 @@ Everything is created through the real APIs (Supabase Auth + core-api), never by
         { "title": "Frozen", "year": 2013, "score": 9 },
         { "title": "Hereditary", "year": 2018, "score": 2 }
       ],
+      "leastFavorites": [                     // optional, 0-5, ordered (rank 1 = most disliked).
+        { "title": "Hereditary", "year": 2018 }   // Seeded via PUT /me/preferences/least-favorites.
+      ],                                      // Never a favourite or an anchor love (>= 8); an anchor
+                                              // for the same movie must be <= 3. Without an anchor,
+                                              // its MovieLens genres must average <= 5 on this
+                                              // persona's genre scores (override titles need the anchor).
       "volume": "medium",                     // how many generated ratings on top of anchors:
                                               //   none = 0, light = 10, medium = 40, heavy = 120, power = 300
       "rater": { "bias": 0.5, "spread": 1.0 },// generated-score style: bias shifts the mean (-3..+3,
@@ -45,12 +51,18 @@ Everything is created through the real APIs (Supabase Auth + core-api), never by
 }
 ```
 
-Title resolution: every `{title, year}` is resolved to a TMDB id by `resolve.py`, first through the
-local MovieLens `ml-latest-small` (`movies.csv` + `links.csv`, covers releases up to 2018), then through
+Tags with a meaning: `multi-genre` puts a persona in the cross-genre section of ROSTER.md;
+`narrow` (always with `multi-genre`) marks someone who loves exactly 2-3 genres that rarely go
+together and scores most other genres 1-3 (they carry least favourites); `edge-case` forces the
+behaviour section.
+
+Title resolution: every `{title, year}` (favourites, anchors and least favourites) is resolved to a
+TMDB id by `resolve.py`, first through the local MovieLens `ml-latest-small` (`movies.csv` + `links.csv`, covers releases up to 2018), then through
 `tmdb-overrides.json` (`{"<title> (<year>)": <tmdbId>}`), which holds movies after 2018 and must be
-hand-verified. The output is the committed `personas.resolved.json`, which the seeder reads.
+hand-verified against `https://www.themoviedb.org/movie/<id>` (title and year). The output is
+the committed `personas.resolved.json`, which the seeder reads.
 An unresolved title is an error.
 
 Generated ratings come from MovieLens movies (deterministic per persona key, seeded). Each movie's
-score comes from the persona's genre affinities, `rater`, `era` and `popularity`. Anchors and favourites
-are never overwritten. This is test-data generation, not the recommendation algorithm.
+score comes from the persona's genre affinities, `rater`, `era` and `popularity`. Anchors, favourites
+and least favourites are never overwritten (generated ratings skip them). This is test-data generation, not the recommendation algorithm.

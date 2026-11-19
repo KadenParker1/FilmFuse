@@ -155,6 +155,14 @@ class FakeStack:
                     return 409, {"message": "That username is already taken."}
                 prof.update(data)
             return 200, prof
+        if p == "/me/preferences/least-favorites":
+            favs = {
+                f["movieId"] for f in self.prefs.get(uid, {}).get("/me/preferences/favorites", [])
+            }
+            if len(data) > 5 or favs & {f["movieId"] for f in data}:
+                return 400, {"message": "Validation failed", "fieldErrors": {"leastFavorites": "x"}}
+            self.prefs.setdefault(uid, {})[p] = copy.deepcopy(data)
+            return 200, [{"rank": f["rank"], "movie": self.catalog[f["movieId"]]} for f in data]
         if p.startswith("/me/preferences/") or p == "/me/settings/comfort":
             self.prefs.setdefault(uid, {})[p] = copy.deepcopy(data)
             return 200, data

@@ -79,6 +79,8 @@ def test_columns_and_order(paths):
     assert header == export_csv.ACCOUNTS_COLUMNS
     assert header[:3] == ["email", "password", "username"]
     assert header[-5:] == ["onboarded", "friends", "close_friends", "groups", "tags"]
+    i = header.index("favorite_movies")
+    assert header[i + 1] == "least_favorite_movies"
 
 
 def test_bom_and_round_trip(paths):
@@ -92,6 +94,11 @@ def test_bom_and_round_trip(paths):
     assert meg["moods"] == "feel-good 10; cozy 9; tearjerker 8; dark-gritty 1"
     assert meg["anchor_loves"] == "Up (2009) 10/10; Frozen (2013) 9/10"
     assert meg["anchor_hates"] == "Hereditary (2018) 2/10"
+    assert meg["least_favorite_movies"] == "Hereditary (2018)"
+    assert rows["horror-fanatic@filmfuse.test"]["least_favorite_movies"] == (
+        "The Notebook (2004); Frozen (2013)"
+    )
+    assert rows["film-bro@filmfuse.test"]["least_favorite_movies"] == ""
     assert meg["total_ratings"] == "7"  # 3 anchors + 4 generated
     assert meg["rater_style"] == "generous"
     assert meg["comfort"] == "max PG; frightening <= mild; violence <= mild; unrated blocked"

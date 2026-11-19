@@ -133,9 +133,15 @@ def movie_id(entry: dict) -> int | None:
 
 
 def reserved_ids(persona: dict) -> set[int]:
-    """Favourite + anchor TMDB ids: generated ratings must never include these."""
+    """Favourite + anchor + least-favourite TMDB ids: generated ratings must never include these
+    (and seed.py's fallback favourites never pick them)."""
     out: set[int] = set()
-    for entry in list(persona.get("favorites", [])) + list(persona.get("anchorRatings", [])):
+    entries = (
+        list(persona.get("favorites", []))
+        + list(persona.get("anchorRatings", []))
+        + list(persona.get("leastFavorites", None) or [])
+    )
+    for entry in entries:
         mid = movie_id(entry)
         if mid is not None:
             out.add(mid)

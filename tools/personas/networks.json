@@ -5,83 +5,2608 @@
     {
       "name": "Alvarez family",
       "kind": "family",
-      "members": ["disney-mom", "family-war-dad", "mcu-teen", "western-grandpa"],
-      "close": [["disney-mom", "family-war-dad"], ["mcu-teen", "western-grandpa"]]
+      "members": [
+        "disney-mom",
+        "family-war-dad",
+        "mcu-teen",
+        "western-grandpa"
+      ],
+      "close": [
+        [
+          "disney-mom",
+          "family-war-dad"
+        ],
+        [
+          "mcu-teen",
+          "western-grandpa"
+        ]
+      ]
     },
     {
       "name": "Film school friends",
       "kind": "film-school",
-      "members": ["film-bro", "a24-hipster", "world-cinephile", "nolan-stan", "oscar-completionist"],
-      "close": [["film-bro", "nolan-stan"]]
+      "members": [
+        "film-bro",
+        "a24-hipster",
+        "world-cinephile",
+        "nolan-stan",
+        "oscar-completionist",
+        "cinematography-snob",
+        "k-cinema-fan"
+      ],
+      "close": [
+        [
+          "film-bro",
+          "nolan-stan"
+        ]
+      ]
     },
     {
       "name": "Office crew",
       "kind": "office",
-      "members": ["romcom-lover", "true-crime-thriller", "hard-scifi-engineer", "doc-nerd", "sports-dad", "whodunit-lover", "comedy-truecrime-podcaster", "flat-six"],
-      "close": [["true-crime-thriller", "comedy-truecrime-podcaster"]]
+      "members": [
+        "romcom-lover",
+        "true-crime-thriller",
+        "hard-scifi-engineer",
+        "doc-nerd",
+        "sports-dad",
+        "whodunit-lover",
+        "comedy-truecrime-podcaster",
+        "flat-six",
+        "scifi-docs-only",
+        "bollywood-fan"
+      ],
+      "close": [
+        [
+          "true-crime-thriller",
+          "comedy-truecrime-podcaster"
+        ],
+        [
+          "scifi-docs-only",
+          "hard-scifi-engineer"
+        ]
+      ]
     },
     {
       "name": "College roommates",
       "kind": "roommates",
-      "members": ["stoner-comedy", "anime-ghibli", "lotr-fantasy", "eighties-kid", "cult-trash"],
-      "close": [["stoner-comedy", "lotr-fantasy"]]
+      "members": [
+        "stoner-comedy",
+        "anime-ghibli",
+        "lotr-fantasy",
+        "eighties-kid",
+        "cult-trash"
+      ],
+      "close": [
+        [
+          "stoner-comedy",
+          "lotr-fantasy"
+        ]
+      ]
     },
     {
       "name": "Horror club",
       "kind": "club",
-      "members": ["horror-fanatic", "cult-trash", "halloween-disney-mom", "slasher-romcom-teen", "musical-horror", "harsh-critic"]
+      "members": [
+        "horror-fanatic",
+        "cult-trash",
+        "halloween-disney-mom",
+        "slasher-romcom-teen",
+        "musical-horror",
+        "harsh-critic",
+        "romance-horror",
+        "horror-docs"
+      ]
     },
     {
       "name": "Book-club moms",
       "kind": "book-club",
-      "members": ["hallmark-cozy", "austen-period-drama", "halloween-disney-mom", "disney-mom", "pixar-crier", "strict-parent", "sensitive-viewer"],
-      "close": [["hallmark-cozy", "austen-period-drama"]]
+      "members": [
+        "hallmark-cozy",
+        "austen-period-drama",
+        "halloween-disney-mom",
+        "disney-mom",
+        "pixar-crier",
+        "strict-parent",
+        "sensitive-viewer"
+      ],
+      "close": [
+        [
+          "hallmark-cozy",
+          "austen-period-drama"
+        ]
+      ]
     },
     {
       "name": "Classic film society",
       "kind": "society",
-      "members": ["classic-hollywood", "war-history-buff", "western-grandpa", "anime-western"]
+      "members": [
+        "classic-hollywood",
+        "war-history-buff",
+        "western-grandpa",
+        "anime-western",
+        "retired-teacher",
+        "western-musical",
+        "biopic-fan"
+      ],
+      "close": [
+        [
+          "western-grandpa",
+          "western-musical"
+        ]
+      ]
     },
     {
       "name": "Dads' fantasy league",
       "kind": "sports",
-      "members": ["action-dad", "sports-dad", "family-war-dad", "eighties-kid"]
+      "members": [
+        "action-dad",
+        "sports-dad",
+        "family-war-dad",
+        "eighties-kid"
+      ]
+    },
+    {
+      "name": "Maple Street parents",
+      "kind": "neighbourhood",
+      "members": [
+        "spooky-family-dad",
+        "mystery-family",
+        "halloween-disney-mom",
+        "halloween-only",
+        "strict-parent",
+        "sports-dad"
+      ],
+      "close": [
+        [
+          "spooky-family-dad",
+          "mystery-family"
+        ],
+        [
+          "halloween-disney-mom",
+          "halloween-only"
+        ]
+      ]
+    },
+    {
+      "name": "Game night crew",
+      "kind": "friends",
+      "members": [
+        "comedy-war",
+        "western-scifi",
+        "musical-crime",
+        "college-cinephile-on-a-budget",
+        "stoner-comedy",
+        "superhero-burnout"
+      ],
+      "close": [
+        [
+          "comedy-war",
+          "western-scifi"
+        ]
+      ]
+    },
+    {
+      "name": "Uni film society",
+      "kind": "university",
+      "members": [
+        "a-omar-omnivore",
+        "a-noah-a24-drama",
+        "a-maya-anime-gym",
+        "a-priya-romcom-music",
+        "a-tomas-war-history",
+        "a-sofia-crime-mystery",
+        "a-arjun-masala-mix",
+        "a-elena-period-romance",
+        "a-ines-western-musical",
+        "a-lucia-doc-music",
+        "a-kwame-scifi-thriller"
+      ],
+      "close": [
+        [
+          "a-omar-omnivore",
+          "a-noah-a24-drama"
+        ],
+        [
+          "a-priya-romcom-music",
+          "a-elena-period-romance"
+        ]
+      ]
+    },
+    {
+      "name": "Year 9 lunch table",
+      "kind": "school",
+      "members": [
+        "a-zoe-13-pixar",
+        "a-aiko-fantasy-romance",
+        "a-ben-mystery-family",
+        "kid-gamer-10yo"
+      ],
+      "close": [
+        [
+          "a-zoe-13-pixar",
+          "a-aiko-fantasy-romance"
+        ]
+      ]
+    },
+    {
+      "name": "Sixth-form common room",
+      "kind": "school",
+      "members": [
+        "a-jonas-horror-family",
+        "a-ethan-western-gamer",
+        "a-liam-comedy-kid",
+        "a-chloe-musical-theatre",
+        "a-freya-scifi-horror",
+        "slasher-romcom-teen"
+      ],
+      "close": [
+        [
+          "a-jonas-horror-family",
+          "a-freya-scifi-horror"
+        ]
+      ]
+    },
+    {
+      "name": "New-parents group chat",
+      "kind": "parents",
+      "members": [
+        "b-sleepless-new-mom",
+        "e-new-dad-sleepless",
+        "b-toronto-toddler-dad",
+        "b-cdmx-adventure-dad",
+        "e-mexican-family-cine",
+        "c-blended-family-movie-night",
+        "pixar-crier"
+      ],
+      "close": [
+        [
+          "b-sleepless-new-mom",
+          "e-new-dad-sleepless"
+        ]
+      ]
+    },
+    {
+      "name": "Night-shift nurses",
+      "kind": "coworkers",
+      "members": [
+        "b-night-shift-nurse",
+        "c-cork-icu-nurse-crime",
+        "e-er-nurse-comedies",
+        "a-emma-truecrime-nurse",
+        "a-marcus-easygoing"
+      ],
+      "close": [
+        [
+          "b-night-shift-nurse",
+          "e-er-nurse-comedies"
+        ]
+      ]
+    },
+    {
+      "name": "Sunset Grove film club",
+      "kind": "retirement-village",
+      "members": [
+        "d-cozy-mystery-nonna",
+        "d-widow-musicals-history",
+        "d-retired-detective",
+        "d-widower-romance",
+        "d-gold-coast-couple",
+        "e-widower-gentle-comedy",
+        "d-retired-physicist",
+        "d-active-senior-tramper",
+        "c-singapore-retired-couple",
+        "d-cape-town-diplomat",
+        "d-avo-grandkids",
+        "retired-teacher"
+      ],
+      "close": [
+        [
+          "d-widower-romance",
+          "e-widower-gentle-comedy"
+        ],
+        [
+          "d-retired-detective",
+          "d-cape-town-diplomat"
+        ]
+      ]
+    },
+    {
+      "name": "International film forum",
+      "kind": "forum",
+      "members": [
+        "d-lyon-cinephile",
+        "e-nouvelle-vague",
+        "e-italian-neorealism",
+        "e-new-hollywood-70s",
+        "e-hong-kong-action",
+        "e-spaghetti-westerns",
+        "c-sao-paulo-architect-cinephile",
+        "b-amsterdam-arthouse-barista",
+        "d-osaka-jidaigeki",
+        "a-jade-harsh-cinephile",
+        "d-silent-film-pianist",
+        "world-cinephile"
+      ],
+      "close": [
+        [
+          "d-lyon-cinephile",
+          "e-nouvelle-vague"
+        ]
+      ]
+    },
+    {
+      "name": "Sports bar crew",
+      "kind": "sports-bar",
+      "members": [
+        "b-boston-firefighter",
+        "c-boston-firefighter",
+        "c-electrician-hockey-dad",
+        "d-sports-docs-manc",
+        "a-diego-futbol",
+        "b-alberta-trucker",
+        "sports-dad"
+      ],
+      "close": [
+        [
+          "b-boston-firefighter",
+          "c-boston-firefighter"
+        ]
+      ]
+    },
+    {
+      "name": "Grace Fellowship small group",
+      "kind": "church",
+      "members": [
+        "d-faith-family-homeschool",
+        "b-ohio-holiday-movies",
+        "e-recovering-feelgood",
+        "c-nova-scotia-tv-mysteries",
+        "hallmark-cozy"
+      ],
+      "close": [
+        [
+          "d-faith-family-homeschool",
+          "b-ohio-holiday-movies"
+        ]
+      ]
+    },
+    {
+      "name": "Naija diaspora circle",
+      "kind": "diaspora",
+      "members": [
+        "e-nollywood-houston",
+        "b-lagos-london-producer",
+        "c-lagos-banker-action",
+        "a-tunde-casual"
+      ],
+      "close": [
+        [
+          "c-lagos-banker-action",
+          "a-tunde-casual"
+        ]
+      ]
+    },
+    {
+      "name": "Spooky Parents Club",
+      "kind": "club",
+      "members": [
+        "b-spooky-family-mum",
+        "c-brisbane-horror-family-mum",
+        "d-horror-family-grandpa",
+        "a-jonas-horror-family",
+        "spooky-family-dad",
+        "halloween-disney-mom"
+      ],
+      "close": [
+        [
+          "b-spooky-family-mum",
+          "c-brisbane-horror-family-mum"
+        ]
+      ]
+    },
+    {
+      "name": "Desi movie night",
+      "kind": "diaspora",
+      "members": [
+        "b-pune-to-seattle",
+        "e-desi-diaspora",
+        "d-bollywood-leicester",
+        "c-bengaluru-musicals-romance",
+        "bollywood-fan"
+      ],
+      "close": [
+        [
+          "b-pune-to-seattle",
+          "e-desi-diaspora"
+        ]
+      ]
+    },
+    {
+      "name": "War-film forum",
+      "kind": "forum",
+      "members": [
+        "war-history-buff",
+        "e-civil-war-reenactor",
+        "d-war-modeler-gdansk",
+        "c-berlin-history-teacher",
+        "b-war-romance-teacher",
+        "b-darwin-war-comedy",
+        "c-osaka-war-anime-dad"
+      ]
+    },
+    {
+      "name": "Sci-fi Discord",
+      "kind": "online",
+      "members": [
+        "b-berlin-ux-scifi",
+        "c-auckland-dnd-mum",
+        "e-gamer-adaptations",
+        "d-kaiju-busan",
+        "c-cardiff-plumber-scifi-horror",
+        "hard-scifi-engineer",
+        "h-kaspar-tallinn-gamedev",
+        "g-wei-shanghai-scifi"
+      ]
+    },
+    {
+      "name": "Musicians' green room",
+      "kind": "coworkers",
+      "members": [
+        "c-nola-bassist-music-crime",
+        "e-session-bassist",
+        "e-dancer-dance-films",
+        "b-auckland-musical-teacher",
+        "b-lagos-london-producer"
+      ],
+      "close": [
+        [
+          "c-nola-bassist-music-crime",
+          "e-session-bassist"
+        ]
+      ]
+    },
+    {
+      "name": "Bar association film night",
+      "kind": "coworkers",
+      "members": [
+        "e-courtroom-lawyer",
+        "c-stockholm-lawyer-mindbenders",
+        "b-sao-paulo-history",
+        "c-denver-dating-again-dad"
+      ]
+    },
+    {
+      "name": "Weekend-dads WhatsApp",
+      "kind": "friends",
+      "members": [
+        "c-turin-chef-weekend-dad",
+        "c-cardiff-plumber-scifi-horror",
+        "c-denver-dating-again-dad",
+        "c-electrician-hockey-dad"
+      ]
+    },
+    {
+      "name": "Familia Hernández WhatsApp",
+      "kind": "family",
+      "members": [
+        "f-cdmx-abuela-telenovelas",
+        "f-oaxaca-bisabuelo-westerns",
+        "e-mexican-family-cine",
+        "j-generous-rater",
+        "f-sanjuan-13yo-animation"
+      ],
+      "close": [
+        [
+          "f-cdmx-abuela-telenovelas",
+          "e-mexican-family-cine"
+        ]
+      ]
+    },
+    {
+      "name": "Cineclub del Río de la Plata",
+      "kind": "club",
+      "members": [
+        "f-buenos-aires-psychoanalyst",
+        "f-santiago-retired-projectionist",
+        "f-montevideo-newlyweds-romance",
+        "f-uruguay-gaucho-westerns-docs",
+        "f-cordoba-horror-dad",
+        "b-buenos-aires-horror",
+        "a-lucia-doc-music"
+      ],
+      "close": [
+        [
+          "f-buenos-aires-psychoanalyst",
+          "f-santiago-retired-projectionist"
+        ]
+      ]
+    },
+    {
+      "name": "Cineclube Ibérico",
+      "kind": "club",
+      "members": [
+        "f-madrid-omnivore-programmer",
+        "f-barcelona-horror-student",
+        "f-galicia-fisherman-adventure",
+        "f-lisbon-bandsman-musicals-war",
+        "f-porto-student-scifi",
+        "e-brazilian-lisbon",
+        "d-heist-madrid"
+      ],
+      "close": [
+        [
+          "f-madrid-omnivore-programmer",
+          "f-barcelona-horror-student"
+        ]
+      ]
+    },
+    {
+      "name": "Cine en Casa Telegram",
+      "kind": "online",
+      "members": [
+        "f-guatemala-goth-romance-horror",
+        "f-santo-domingo-romcom-baseball",
+        "f-costa-rica-eco-guide",
+        "f-cusco-rural-teacher",
+        "f-bogota-driver-thrillers"
+      ],
+      "close": [
+        [
+          "f-costa-rica-eco-guide",
+          "f-cusco-rural-teacher"
+        ]
+      ]
+    },
+    {
+      "name": "Moema condo residents",
+      "kind": "neighbourhood",
+      "members": [
+        "f-sao-paulo-banker-dad",
+        "c-sao-paulo-architect-cinephile",
+        "b-sao-paulo-history"
+      ],
+      "close": []
+    },
+    {
+      "name": "Seoul–Busan friends",
+      "kind": "friends",
+      "members": [
+        "g-jiyeon-seoul-thriller",
+        "d-kaiju-busan",
+        "k-cinema-fan"
+      ],
+      "close": [
+        [
+          "g-jiyeon-seoul-thriller",
+          "d-kaiju-busan"
+        ],
+        [
+          "d-kaiju-busan",
+          "k-cinema-fan"
+        ]
+      ]
+    },
+    {
+      "name": "Taxi rank (drivers' forum)",
+      "kind": "forum",
+      "members": [
+        "g-kaho-hk-taxi-crime-cantopop",
+        "h-dragan-belgrade-taxi",
+        "f-bogota-driver-thrillers",
+        "h-brian-kampala-boda",
+        "i-surrey-sikh-trucker-nights",
+        "b-alberta-trucker"
+      ],
+      "close": [
+        [
+          "i-surrey-sikh-trucker-nights",
+          "b-alberta-trucker"
+        ]
+      ]
+    },
+    {
+      "name": "Dubai Media City alumni",
+      "kind": "coworkers",
+      "members": [
+        "h-mariam-dubai-marketing",
+        "h-rita-beirut-pharmacist",
+        "b-manila-call-centre",
+        "b-pune-to-seattle",
+        "d-cape-town-diplomat"
+      ],
+      "close": [
+        [
+          "h-mariam-dubai-marketing",
+          "h-rita-beirut-pharmacist"
+        ]
+      ]
+    },
+    {
+      "name": "Balkan & Black Sea neighbours",
+      "kind": "forum",
+      "members": [
+        "h-ioana-bucharest-teacher",
+        "h-dragan-belgrade-taxi",
+        "h-nino-tbilisi-romance-war",
+        "h-mykola-lviv-retiree",
+        "b-kyiv-in-warsaw"
+      ],
+      "close": [
+        [
+          "h-mykola-lviv-retiree",
+          "b-kyiv-in-warsaw"
+        ]
+      ]
+    },
+    {
+      "name": "Addis–Dakar–Accra film students",
+      "kind": "university",
+      "members": [
+        "h-selam-addis-docs-scifi",
+        "h-ousmane-dakar-sound",
+        "i-lund-ghanaian-student",
+        "h-thandi-joburg-omnivore",
+        "j-ones-and-tens"
+      ],
+      "close": [
+        [
+          "h-selam-addis-docs-scifi",
+          "h-ousmane-dakar-sound"
+        ]
+      ]
+    },
+    {
+      "name": "Indigenous film festival friends",
+      "kind": "festival",
+      "members": [
+        "i-sami-reindeer-herder",
+        "i-cree-kokum-raising-grandsons",
+        "i-navajo-aide-nights",
+        "g-tama-rotorua-teacher"
+      ],
+      "close": [
+        [
+          "i-cree-kokum-raising-grandsons",
+          "i-navajo-aide-nights"
+        ]
+      ]
+    },
+    {
+      "name": "Veterans' movie night",
+      "kind": "veterans",
+      "members": [
+        "i-kentucky-army-vet",
+        "i-raf-tech-omnivore",
+        "f-lisbon-bandsman-musicals-war",
+        "b-darwin-war-comedy",
+        "h-noam-telaviv-engineer"
+      ],
+      "close": [
+        [
+          "i-kentucky-army-vet",
+          "b-darwin-war-comedy"
+        ]
+      ]
+    },
+    {
+      "name": "Night-shift carers",
+      "kind": "care-workers",
+      "members": [
+        "i-rotherham-care-home-nights",
+        "i-navajo-aide-nights",
+        "f-kingston-nurse-mom",
+        "a-emma-truecrime-nurse",
+        "e-er-nurse-comedies"
+      ],
+      "close": [
+        [
+          "i-rotherham-care-home-nights",
+          "f-kingston-nurse-mom"
+        ]
+      ]
+    },
+    {
+      "name": "Okafor household",
+      "kind": "shared-account",
+      "members": [
+        "j-okafor-family-account",
+        "e-nollywood-houston"
+      ],
+      "close": [
+        [
+          "j-okafor-family-account",
+          "e-nollywood-houston"
+        ]
+      ]
+    },
+    {
+      "name": "Nguyen cousins Zalo",
+      "kind": "family",
+      "members": [
+        "g-linh-saigon-student",
+        "g-minh-hanoi-war-dad",
+        "i-toronto-vietnamese-student"
+      ],
+      "close": [
+        [
+          "g-linh-saigon-student",
+          "i-toronto-vietnamese-student"
+        ]
+      ]
+    },
+    {
+      "name": "Kansai film circle",
+      "kind": "club",
+      "members": [
+        "d-osaka-jidaigeki",
+        "g-haruko-kyoto-widow",
+        "b-osaka-pharmacist-mystery",
+        "c-osaka-war-anime-dad",
+        "g-ren-osaka-salaryman"
+      ],
+      "close": [
+        [
+          "d-osaka-jidaigeki",
+          "g-haruko-kyoto-widow"
+        ]
+      ]
+    },
+    {
+      "name": "Bollywood-and-beyond Discord",
+      "kind": "online",
+      "members": [
+        "g-ayesha-lahore-medstudent",
+        "g-tharindu-kandy-fantasy",
+        "a-arjun-masala-mix",
+        "c-bengaluru-musicals-romance"
+      ],
+      "close": []
+    },
+    {
+      "name": "ASEAN film Telegram",
+      "kind": "online",
+      "members": [
+        "g-budi-jakarta-commuter",
+        "g-aziz-kl-documentaries",
+        "d-martial-arts-cebu",
+        "g-linh-saigon-student"
+      ],
+      "close": []
+    },
+    {
+      "name": "Accessible cinema club",
+      "kind": "online",
+      "members": [
+        "i-deaf-visual-storyteller",
+        "i-blind-audio-description-fan",
+        "i-autistic-comfort-rewatcher",
+        "i-adhd-80s-rewatcher"
+      ],
+      "close": []
+    },
+    {
+      "name": "Queer film night",
+      "kind": "online",
+      "members": [
+        "i-wyoming-hardware-grant",
+        "i-wyoming-hardware-luis",
+        "i-clare-dairy-farmer",
+        "i-trans-bike-mechanic-synths",
+        "g-yuting-taipei-bookstore"
+      ],
+      "close": [
+        [
+          "i-wyoming-hardware-grant",
+          "i-wyoming-hardware-luis"
+        ]
+      ]
+    },
+    {
+      "name": "Fast & Furious fan Discord",
+      "kind": "online",
+      "members": [
+        "g-sione-mtdruitt-omnivore",
+        "i-glasgow-care-unit-teen",
+        "i-baltimore-group-home-teen",
+        "f-rio-favela-teen-action",
+        "a-tunde-casual",
+        "j-trend-follower",
+        "j-ones-and-tens",
+        "i-toronto-vietnamese-student"
+      ],
+      "close": [
+        [
+          "i-glasgow-care-unit-teen",
+          "i-baltimore-group-home-teen"
+        ]
+      ]
     }
   ],
   "edges": [
-    {"a": "disney-mom", "b": "horror-fanatic", "type": "friend", "note": "next-door neighbours"},
-    {"a": "disney-mom", "b": "film-bro", "type": "friend", "note": "cousins"},
-    {"a": "omnivore", "b": "film-bro", "type": "friend", "note": "the connector"},
-    {"a": "omnivore", "b": "romcom-lover", "type": "friend"},
-    {"a": "omnivore", "b": "horror-fanatic", "type": "friend"},
-    {"a": "omnivore", "b": "anime-ghibli", "type": "friend", "close": "b", "note": "one-way close flag"},
-    {"a": "docs-superhero", "b": "mcu-teen", "type": "friend", "note": "cool uncle"},
-    {"a": "docs-superhero", "b": "doc-nerd", "type": "friend"},
-    {"a": "scifi-romance", "b": "hard-scifi-engineer", "type": "friend", "close": true, "note": "couple"},
-    {"a": "scifi-romance", "b": "romcom-lover", "type": "friend"},
-    {"a": "contrarian", "b": "a24-hipster", "type": "friend"},
-    {"a": "generous-rater", "b": "disney-mom", "type": "friend", "close": "a", "note": "one-way close flag"},
-    {"a": "generous-rater", "b": "musical-theatre-kid", "type": "friend"},
-    {"a": "musical-theatre-kid", "b": "slasher-romcom-teen", "type": "friend", "note": "same school"},
-    {"a": "musical-theatre-kid", "b": "mcu-teen", "type": "friend"},
-    {"a": "strict-parent", "b": "slasher-romcom-teen", "type": "friend", "note": "babysitter"},
-    {"a": "contrarian", "b": "film-bro", "type": "pending", "note": "film-bro never answered"},
-    {"a": "hallmark-cozy", "b": "horror-fanatic", "type": "pending"},
-    {"a": "mcu-teen", "b": "film-bro", "type": "pending"},
-    {"a": "doc-nerd", "b": "classic-hollywood", "type": "pending"},
-    {"a": "harsh-critic", "b": "generous-rater", "type": "block", "note": "can't stand the 10/10s"},
-    {"a": "a24-hipster", "b": "mcu-teen", "type": "block"}
+    {
+      "a": "disney-mom",
+      "b": "horror-fanatic",
+      "type": "friend",
+      "note": "next-door neighbours"
+    },
+    {
+      "a": "disney-mom",
+      "b": "film-bro",
+      "type": "friend",
+      "note": "cousins"
+    },
+    {
+      "a": "omnivore",
+      "b": "film-bro",
+      "type": "friend",
+      "note": "the connector"
+    },
+    {
+      "a": "omnivore",
+      "b": "romcom-lover",
+      "type": "friend"
+    },
+    {
+      "a": "omnivore",
+      "b": "horror-fanatic",
+      "type": "friend"
+    },
+    {
+      "a": "omnivore",
+      "b": "anime-ghibli",
+      "type": "friend",
+      "close": "b",
+      "note": "one-way close flag"
+    },
+    {
+      "a": "docs-superhero",
+      "b": "mcu-teen",
+      "type": "friend",
+      "note": "cool uncle"
+    },
+    {
+      "a": "docs-superhero",
+      "b": "doc-nerd",
+      "type": "friend"
+    },
+    {
+      "a": "scifi-romance",
+      "b": "hard-scifi-engineer",
+      "type": "friend",
+      "close": true,
+      "note": "couple"
+    },
+    {
+      "a": "scifi-romance",
+      "b": "romcom-lover",
+      "type": "friend"
+    },
+    {
+      "a": "contrarian",
+      "b": "a24-hipster",
+      "type": "friend"
+    },
+    {
+      "a": "generous-rater",
+      "b": "disney-mom",
+      "type": "friend",
+      "close": "a",
+      "note": "one-way close flag"
+    },
+    {
+      "a": "generous-rater",
+      "b": "musical-theatre-kid",
+      "type": "friend"
+    },
+    {
+      "a": "musical-theatre-kid",
+      "b": "slasher-romcom-teen",
+      "type": "friend",
+      "note": "same school"
+    },
+    {
+      "a": "musical-theatre-kid",
+      "b": "mcu-teen",
+      "type": "friend"
+    },
+    {
+      "a": "strict-parent",
+      "b": "slasher-romcom-teen",
+      "type": "friend",
+      "note": "babysitter"
+    },
+    {
+      "a": "contrarian",
+      "b": "film-bro",
+      "type": "pending",
+      "note": "film-bro never answered"
+    },
+    {
+      "a": "hallmark-cozy",
+      "b": "horror-fanatic",
+      "type": "pending"
+    },
+    {
+      "a": "mcu-teen",
+      "b": "film-bro",
+      "type": "pending"
+    },
+    {
+      "a": "doc-nerd",
+      "b": "classic-hollywood",
+      "type": "pending"
+    },
+    {
+      "a": "harsh-critic",
+      "b": "generous-rater",
+      "type": "block",
+      "note": "can't stand the 10/10s"
+    },
+    {
+      "a": "a24-hipster",
+      "b": "mcu-teen",
+      "type": "block"
+    },
+    {
+      "a": "spooky-family-dad",
+      "b": "kid-gamer-10yo",
+      "type": "friend",
+      "close": true,
+      "note": "father and son"
+    },
+    {
+      "a": "kid-gamer-10yo",
+      "b": "mcu-teen",
+      "type": "friend",
+      "note": "cousins"
+    },
+    {
+      "a": "mystery-family",
+      "b": "kid-gamer-10yo",
+      "type": "friend",
+      "note": "neighbour kid"
+    },
+    {
+      "a": "spooky-family-dad",
+      "b": "romcom-lover",
+      "type": "friend",
+      "note": "sister-in-law"
+    },
+    {
+      "a": "spooky-family-dad",
+      "b": "war-history-buff",
+      "type": "friend",
+      "note": "bowling league"
+    },
+    {
+      "a": "war-animation",
+      "b": "war-history-buff",
+      "type": "friend",
+      "close": true,
+      "note": "both teach history"
+    },
+    {
+      "a": "war-animation",
+      "b": "anime-ghibli",
+      "type": "friend"
+    },
+    {
+      "a": "superhero-burnout",
+      "b": "docs-superhero",
+      "type": "friend",
+      "note": "used to do MCU opening nights together"
+    },
+    {
+      "a": "bollywood-fan",
+      "b": "musical-theatre-kid",
+      "type": "friend"
+    },
+    {
+      "a": "musical-crime",
+      "b": "musical-theatre-kid",
+      "type": "friend",
+      "close": "a"
+    },
+    {
+      "a": "cinematography-snob",
+      "b": "harsh-critic",
+      "type": "friend",
+      "close": true,
+      "note": "trade 3/10s"
+    },
+    {
+      "a": "biopic-fan",
+      "b": "doc-nerd",
+      "type": "friend"
+    },
+    {
+      "a": "horror-docs",
+      "b": "true-crime-thriller",
+      "type": "friend"
+    },
+    {
+      "a": "retired-teacher",
+      "b": "austen-period-drama",
+      "type": "friend",
+      "note": "former student"
+    },
+    {
+      "a": "mcu-teen",
+      "b": "superhero-burnout",
+      "type": "pending",
+      "note": "burnout won't accept a Marvel kid"
+    },
+    {
+      "a": "hallmark-cozy",
+      "b": "christmas-only",
+      "type": "pending",
+      "note": "christmas-only never finished signing up"
+    },
+    {
+      "a": "cinematography-snob",
+      "b": "cult-trash",
+      "type": "block",
+      "note": "'so bad it's good' is not a category"
+    },
+    {
+      "a": "a-sofia-crime-mystery",
+      "b": "e-courtroom-lawyer",
+      "type": "friend",
+      "note": "summer internship mentor"
+    },
+    {
+      "a": "a-maya-anime-gym",
+      "b": "anime-ghibli",
+      "type": "friend"
+    },
+    {
+      "a": "a-noah-a24-drama",
+      "b": "a24-hipster",
+      "type": "friend",
+      "note": "same darkroom"
+    },
+    {
+      "a": "a-noah-a24-drama",
+      "b": "d-lyon-cinephile",
+      "type": "friend",
+      "note": "her former student"
+    },
+    {
+      "a": "a-omar-omnivore",
+      "b": "omnivore",
+      "type": "friend",
+      "close": "a",
+      "note": "omnivore idol"
+    },
+    {
+      "a": "a-kwame-scifi-thriller",
+      "b": "b-berlin-ux-scifi",
+      "type": "friend",
+      "note": "met on the sci-fi Discord"
+    },
+    {
+      "a": "a-kwame-scifi-thriller",
+      "b": "b-lagos-london-producer",
+      "type": "friend",
+      "note": "London flatmates"
+    },
+    {
+      "a": "a-arjun-masala-mix",
+      "b": "e-desi-diaspora",
+      "type": "friend",
+      "note": "cousins"
+    },
+    {
+      "a": "a-lucia-doc-music",
+      "b": "c-nola-bassist-music-crime",
+      "type": "friend",
+      "note": "masterclass"
+    },
+    {
+      "a": "a-elena-period-romance",
+      "b": "austen-period-drama",
+      "type": "friend"
+    },
+    {
+      "a": "a-ines-western-musical",
+      "b": "western-musical",
+      "type": "friend",
+      "close": true,
+      "note": "grandfather and granddaughter"
+    },
+    {
+      "a": "a-tomas-war-history",
+      "b": "war-history-buff",
+      "type": "friend"
+    },
+    {
+      "a": "a-ben-mystery-family",
+      "b": "a-jonas-horror-family",
+      "type": "friend",
+      "close": true,
+      "note": "brothers"
+    },
+    {
+      "a": "a-ethan-western-gamer",
+      "b": "anime-western",
+      "type": "friend"
+    },
+    {
+      "a": "a-chloe-musical-theatre",
+      "b": "musical-theatre-kid",
+      "type": "friend",
+      "close": true,
+      "note": "same drama club"
+    },
+    {
+      "a": "a-chloe-musical-theatre",
+      "b": "e-dancer-dance-films",
+      "type": "friend",
+      "note": "dance teacher"
+    },
+    {
+      "a": "a-freya-scifi-horror",
+      "b": "horror-fanatic",
+      "type": "friend"
+    },
+    {
+      "a": "a-freya-scifi-horror",
+      "b": "d-lyon-cinephile",
+      "type": "friend",
+      "close": "b",
+      "note": "granddaughter"
+    },
+    {
+      "a": "a-liam-comedy-kid",
+      "b": "d-widow-musicals-history",
+      "type": "friend",
+      "note": "grandson"
+    },
+    {
+      "a": "a-zoe-13-pixar",
+      "b": "pixar-crier",
+      "type": "friend",
+      "note": "aunt"
+    },
+    {
+      "a": "a-emma-truecrime-nurse",
+      "b": "comedy-truecrime-podcaster",
+      "type": "friend",
+      "note": "podcast superfan"
+    },
+    {
+      "a": "c-cork-icu-nurse-crime",
+      "b": "d-nordic-noir-aarhus",
+      "type": "friend"
+    },
+    {
+      "a": "a-marcus-easygoing",
+      "b": "generous-rater",
+      "type": "friend"
+    },
+    {
+      "a": "b-toronto-toddler-dad",
+      "b": "disney-mom",
+      "type": "friend"
+    },
+    {
+      "a": "b-toronto-toddler-dad",
+      "b": "b-buenos-aires-horror",
+      "type": "friend",
+      "note": "college roommates"
+    },
+    {
+      "a": "b-toronto-toddler-dad",
+      "b": "c-cardiff-plumber-scifi-horror",
+      "type": "friend",
+      "note": "old gaming buddies"
+    },
+    {
+      "a": "c-blended-family-movie-night",
+      "b": "c-nj-pharma-soccer-mom",
+      "type": "friend",
+      "note": "kids on the same team"
+    },
+    {
+      "a": "c-nj-pharma-soccer-mom",
+      "b": "c-electrician-hockey-dad",
+      "type": "friend",
+      "note": "carpool"
+    },
+    {
+      "a": "c-nj-pharma-soccer-mom",
+      "b": "mcu-teen",
+      "type": "friend",
+      "note": "drives him to practice"
+    },
+    {
+      "a": "e-mexican-family-cine",
+      "b": "d-avo-grandkids",
+      "type": "friend"
+    },
+    {
+      "a": "d-faith-family-homeschool",
+      "b": "strict-parent",
+      "type": "friend"
+    },
+    {
+      "a": "e-recovering-feelgood",
+      "b": "c-cotswolds-book-club",
+      "type": "friend"
+    },
+    {
+      "a": "c-cotswolds-book-club",
+      "b": "austen-period-drama",
+      "type": "friend"
+    },
+    {
+      "a": "c-cotswolds-book-club",
+      "b": "d-widow-musicals-history",
+      "type": "friend",
+      "close": true,
+      "note": "sisters"
+    },
+    {
+      "a": "c-cotswolds-book-club",
+      "b": "c-inverness-librarian-omnivore",
+      "type": "friend",
+      "note": "library book club"
+    },
+    {
+      "a": "c-inverness-librarian-omnivore",
+      "b": "omnivore",
+      "type": "friend"
+    },
+    {
+      "a": "d-retired-detective",
+      "b": "western-grandpa",
+      "type": "friend"
+    },
+    {
+      "a": "d-retired-detective",
+      "b": "e-new-hollywood-70s",
+      "type": "friend",
+      "note": "son-in-law"
+    },
+    {
+      "a": "d-widow-musicals-history",
+      "b": "e-new-hollywood-70s",
+      "type": "friend",
+      "note": "son-in-law"
+    },
+    {
+      "a": "d-silent-film-pianist",
+      "b": "classic-hollywood",
+      "type": "friend",
+      "close": true
+    },
+    {
+      "a": "d-active-senior-tramper",
+      "b": "e-rock-climber-docs",
+      "type": "friend"
+    },
+    {
+      "a": "e-rock-climber-docs",
+      "b": "doc-nerd",
+      "type": "friend"
+    },
+    {
+      "a": "e-rock-climber-docs",
+      "b": "b-montana-rancher",
+      "type": "friend",
+      "note": "climbs on his land"
+    },
+    {
+      "a": "b-montana-rancher",
+      "b": "c-montana-rancher-docs-westerns",
+      "type": "friend",
+      "close": true,
+      "note": "neighbouring ranches"
+    },
+    {
+      "a": "c-montana-rancher-docs-westerns",
+      "b": "western-grandpa",
+      "type": "friend"
+    },
+    {
+      "a": "d-lyon-cinephile",
+      "b": "harsh-critic",
+      "type": "friend"
+    },
+    {
+      "a": "a-jade-harsh-cinephile",
+      "b": "film-bro",
+      "type": "friend"
+    },
+    {
+      "a": "c-sao-paulo-architect-cinephile",
+      "b": "e-brazilian-lisbon",
+      "type": "friend"
+    },
+    {
+      "a": "e-brazilian-lisbon",
+      "b": "b-sao-paulo-history",
+      "type": "friend",
+      "close": true,
+      "note": "sisters"
+    },
+    {
+      "a": "e-brazilian-lisbon",
+      "b": "world-cinephile",
+      "type": "friend"
+    },
+    {
+      "a": "b-osaka-pharmacist-mystery",
+      "b": "whodunit-lover",
+      "type": "friend"
+    },
+    {
+      "a": "b-osaka-pharmacist-mystery",
+      "b": "e-japanese-expat",
+      "type": "friend",
+      "note": "school friends"
+    },
+    {
+      "a": "e-japanese-expat",
+      "b": "k-cinema-fan",
+      "type": "friend"
+    },
+    {
+      "a": "e-japanese-expat",
+      "b": "horror-fanatic",
+      "type": "friend"
+    },
+    {
+      "a": "d-martial-arts-cebu",
+      "b": "e-hong-kong-action",
+      "type": "friend",
+      "close": true,
+      "note": "trade bootleg DVDs"
+    },
+    {
+      "a": "d-martial-arts-cebu",
+      "b": "b-manila-call-centre",
+      "type": "friend"
+    },
+    {
+      "a": "b-manila-call-centre",
+      "b": "anime-ghibli",
+      "type": "friend"
+    },
+    {
+      "a": "d-heist-madrid",
+      "b": "c-lagos-banker-action",
+      "type": "friend",
+      "note": "met in an airport lounge"
+    },
+    {
+      "a": "d-heist-madrid",
+      "b": "e-hong-kong-action",
+      "type": "friend"
+    },
+    {
+      "a": "d-heist-madrid",
+      "b": "d-nordic-noir-aarhus",
+      "type": "friend"
+    },
+    {
+      "a": "d-nordic-noir-aarhus",
+      "b": "true-crime-thriller",
+      "type": "friend"
+    },
+    {
+      "a": "d-nordic-noir-aarhus",
+      "b": "b-kyiv-in-warsaw",
+      "type": "friend"
+    },
+    {
+      "a": "b-kyiv-in-warsaw",
+      "b": "b-war-romance-teacher",
+      "type": "friend",
+      "note": "neighbours in Warsaw"
+    },
+    {
+      "a": "d-spaghetti-western-turin",
+      "b": "c-turin-chef-weekend-dad",
+      "type": "friend",
+      "note": "his trattoria"
+    },
+    {
+      "a": "d-spaghetti-western-turin",
+      "b": "western-grandpa",
+      "type": "friend"
+    },
+    {
+      "a": "c-turin-chef-weekend-dad",
+      "b": "e-chef-food-films",
+      "type": "friend",
+      "close": true,
+      "note": "worked the same line"
+    },
+    {
+      "a": "e-chef-food-films",
+      "b": "b-lyon-romcom-couple",
+      "type": "friend",
+      "note": "catered her engagement"
+    },
+    {
+      "a": "b-lyon-romcom-couple",
+      "b": "e-wedding-planners",
+      "type": "friend",
+      "note": "wedding forum"
+    },
+    {
+      "a": "e-wedding-planners",
+      "b": "romcom-lover",
+      "type": "friend"
+    },
+    {
+      "a": "b-lyon-romcom-couple",
+      "b": "romcom-lover",
+      "type": "friend"
+    },
+    {
+      "a": "b-melbourne-omnivore",
+      "b": "c-melbourne-video-store-power",
+      "type": "friend",
+      "close": true,
+      "note": "video-store regular"
+    },
+    {
+      "a": "b-melbourne-omnivore",
+      "b": "omnivore",
+      "type": "friend"
+    },
+    {
+      "a": "c-melbourne-video-store-power",
+      "b": "cult-trash",
+      "type": "friend"
+    },
+    {
+      "a": "b-buenos-aires-horror",
+      "b": "horror-fanatic",
+      "type": "friend"
+    },
+    {
+      "a": "b-buenos-aires-horror",
+      "b": "c-divorced-romcom-horror",
+      "type": "friend"
+    },
+    {
+      "a": "c-divorced-romcom-horror",
+      "b": "romance-horror",
+      "type": "friend",
+      "close": true
+    },
+    {
+      "a": "c-divorced-romcom-horror",
+      "b": "c-brisbane-horror-family-mum",
+      "type": "friend"
+    },
+    {
+      "a": "b-pune-to-seattle",
+      "b": "hard-scifi-engineer",
+      "type": "friend",
+      "note": "same team"
+    },
+    {
+      "a": "c-bengaluru-musicals-romance",
+      "b": "b-auckland-musical-teacher",
+      "type": "friend"
+    },
+    {
+      "a": "c-auckland-dnd-mum",
+      "b": "b-auckland-musical-teacher",
+      "type": "friend",
+      "note": "same school gate"
+    },
+    {
+      "a": "c-auckland-dnd-mum",
+      "b": "lotr-fantasy",
+      "type": "friend"
+    },
+    {
+      "a": "d-stop-motion-prague",
+      "b": "anime-ghibli",
+      "type": "friend"
+    },
+    {
+      "a": "d-stop-motion-prague",
+      "b": "pixar-crier",
+      "type": "friend"
+    },
+    {
+      "a": "d-stop-motion-prague",
+      "b": "c-auckland-dnd-mum",
+      "type": "friend"
+    },
+    {
+      "a": "e-session-bassist",
+      "b": "biopic-fan",
+      "type": "friend"
+    },
+    {
+      "a": "e-airline-pilot",
+      "b": "c-lagos-banker-action",
+      "type": "friend",
+      "note": "his regular route"
+    },
+    {
+      "a": "e-airline-pilot",
+      "b": "nolan-stan",
+      "type": "friend"
+    },
+    {
+      "a": "e-airline-pilot",
+      "b": "hard-scifi-engineer",
+      "type": "friend"
+    },
+    {
+      "a": "e-grad-student-procrastinator",
+      "b": "college-cinephile-on-a-budget",
+      "type": "friend",
+      "close": true
+    },
+    {
+      "a": "e-grad-student-procrastinator",
+      "b": "a-omar-omnivore",
+      "type": "friend"
+    },
+    {
+      "a": "e-er-nurse-comedies",
+      "b": "stoner-comedy",
+      "type": "friend"
+    },
+    {
+      "a": "b-darwin-war-comedy",
+      "b": "comedy-war",
+      "type": "friend",
+      "close": true
+    },
+    {
+      "a": "e-civil-war-reenactor",
+      "b": "western-grandpa",
+      "type": "friend"
+    },
+    {
+      "a": "c-berlin-history-teacher",
+      "b": "b-berlin-ux-scifi",
+      "type": "friend",
+      "note": "Berlin neighbours"
+    },
+    {
+      "a": "b-alberta-trucker",
+      "b": "action-dad",
+      "type": "friend"
+    },
+    {
+      "a": "d-sports-docs-manc",
+      "b": "b-night-shift-nurse",
+      "type": "friend",
+      "note": "cousins"
+    },
+    {
+      "a": "b-ohio-holiday-movies",
+      "b": "christmas-only",
+      "type": "pending",
+      "note": "never finished signing up"
+    },
+    {
+      "a": "e-nollywood-houston",
+      "b": "b-houston-refinery-tech",
+      "type": "pending",
+      "note": "never finished setting up his account"
+    },
+    {
+      "a": "a-tunde-casual",
+      "b": "a-jade-harsh-cinephile",
+      "type": "pending",
+      "note": "she ignores teen requests"
+    },
+    {
+      "a": "e-grad-student-procrastinator",
+      "b": "d-lyon-cinephile",
+      "type": "pending",
+      "note": "asked for thesis help"
+    },
+    {
+      "a": "a-ben-mystery-family",
+      "b": "whodunit-lover",
+      "type": "pending"
+    },
+    {
+      "a": "c-denver-dating-again-dad",
+      "b": "c-divorced-romcom-horror",
+      "type": "pending",
+      "note": "she never wrote back"
+    },
+    {
+      "a": "e-spaghetti-westerns",
+      "b": "d-spaghetti-western-turin",
+      "type": "block",
+      "note": "Leone vs Corbucci flame war"
+    },
+    {
+      "a": "b-amsterdam-arthouse-barista",
+      "b": "superhero-burnout",
+      "type": "block",
+      "note": "argued in the comments"
+    },
+    {
+      "a": "g-kaho-hk-taxi-crime-cantopop",
+      "b": "e-hong-kong-action",
+      "type": "friend",
+      "note": "father and son (Kowloon / Richmond BC)",
+      "close": true
+    },
+    {
+      "a": "g-hyunwoo-busan-middle",
+      "b": "d-kaiju-busan",
+      "type": "friend",
+      "note": "uncle and nephew",
+      "close": true
+    },
+    {
+      "a": "g-somchai-bangkok-horror-comedy",
+      "b": "g-ploy-chiangmai-grandma",
+      "type": "friend",
+      "note": "grandson and grandma"
+    },
+    {
+      "a": "g-wei-shanghai-scifi",
+      "b": "g-guo-henan-village-grandpa",
+      "type": "friend",
+      "note": "grandson set up his TV box",
+      "close": "a"
+    },
+    {
+      "a": "g-yuting-taipei-bookstore",
+      "b": "j-mood-driven",
+      "type": "friend",
+      "note": "Taipei friends",
+      "close": true
+    },
+    {
+      "a": "g-sari-yogya-teen",
+      "b": "g-budi-jakarta-commuter",
+      "type": "friend",
+      "note": "niece and uncle"
+    },
+    {
+      "a": "g-sari-yogya-teen",
+      "b": "musical-theatre-kid",
+      "type": "friend",
+      "note": "musicals fandom"
+    },
+    {
+      "a": "g-minh-hanoi-war-dad",
+      "b": "war-history-buff",
+      "type": "friend",
+      "note": "war-film forum"
+    },
+    {
+      "a": "g-aziz-kl-documentaries",
+      "b": "doc-nerd",
+      "type": "friend",
+      "note": "documentary list swap"
+    },
+    {
+      "a": "g-tharindu-kandy-fantasy",
+      "b": "lotr-fantasy",
+      "type": "friend",
+      "note": "Middle-earth forum"
+    },
+    {
+      "a": "g-tama-rotorua-teacher",
+      "b": "b-auckland-musical-teacher",
+      "type": "friend",
+      "note": "teacher training college",
+      "close": true
+    },
+    {
+      "a": "g-tama-rotorua-teacher",
+      "b": "g-sione-mtdruitt-omnivore",
+      "type": "friend",
+      "note": "Pasifika youth league"
+    },
+    {
+      "a": "g-doug-dubbo-grazier",
+      "b": "j-weekend-only",
+      "type": "friend",
+      "note": "westerns forum"
+    },
+    {
+      "a": "g-doug-dubbo-grazier",
+      "b": "d-gold-coast-couple",
+      "type": "friend",
+      "note": "old school mates"
+    },
+    {
+      "a": "g-rafiq-dhaka-supervisor",
+      "b": "i-bradford-pharmacist-mum",
+      "type": "friend",
+      "note": "cousins"
+    },
+    {
+      "a": "h-malak-cairo-teen",
+      "b": "h-mariam-dubai-marketing",
+      "type": "friend",
+      "note": "cousins"
+    },
+    {
+      "a": "h-umm-faisal-riyadh-grandma",
+      "b": "h-mariam-dubai-marketing",
+      "type": "friend",
+      "note": "family friend"
+    },
+    {
+      "a": "h-hassan-marrakech-concierge",
+      "b": "d-spaghetti-western-turin",
+      "type": "friend",
+      "note": "met on an Ouarzazate shoot"
+    },
+    {
+      "a": "h-hassan-marrakech-concierge",
+      "b": "western-grandpa",
+      "type": "friend",
+      "note": "westerns forum"
+    },
+    {
+      "a": "h-parisa-tehran-architect",
+      "b": "h-ioana-bucharest-teacher",
+      "type": "friend",
+      "note": "festival friends",
+      "close": true
+    },
+    {
+      "a": "h-parisa-tehran-architect",
+      "b": "world-cinephile",
+      "type": "friend",
+      "note": "world-cinema forum"
+    },
+    {
+      "a": "h-deniz-istanbul-horror-musicals",
+      "b": "musical-horror",
+      "type": "friend",
+      "note": "Rocky Horror fandom"
+    },
+    {
+      "a": "h-deniz-istanbul-horror-musicals",
+      "b": "f-barcelona-horror-student",
+      "type": "friend",
+      "note": "Sitges festival"
+    },
+    {
+      "a": "h-noam-telaviv-engineer",
+      "b": "hard-scifi-engineer",
+      "type": "friend",
+      "note": "work Slack"
+    },
+    {
+      "a": "h-yazan-amman-student",
+      "b": "g-tharindu-kandy-fantasy",
+      "type": "friend",
+      "note": "fantasy Discord"
+    },
+    {
+      "a": "h-aibek-steppe-westerns-anime",
+      "b": "anime-western",
+      "type": "friend",
+      "note": "Cowboy Bebop forum",
+      "close": "a"
+    },
+    {
+      "a": "h-aibek-steppe-westerns-anime",
+      "b": "a-ethan-western-gamer",
+      "type": "friend",
+      "note": "Red Dead Discord"
+    },
+    {
+      "a": "h-akinyi-kisumu-mysteries",
+      "b": "a-ben-mystery-family",
+      "type": "friend",
+      "note": "school pen-pal programme"
+    },
+    {
+      "a": "h-akinyi-kisumu-mysteries",
+      "b": "a-zoe-13-pixar",
+      "type": "friend",
+      "note": "school pen-pal programme"
+    },
+    {
+      "a": "h-thandi-joburg-omnivore",
+      "b": "d-cape-town-diplomat",
+      "type": "friend",
+      "note": "uncle"
+    },
+    {
+      "a": "h-kofi-accra-family-dad",
+      "b": "j-ones-and-tens",
+      "type": "friend",
+      "note": "church youth leader / former youth group member"
+    },
+    {
+      "a": "h-kofi-accra-family-dad",
+      "b": "i-lund-ghanaian-student",
+      "type": "friend",
+      "note": "cousins"
+    },
+    {
+      "a": "i-cree-kokum-raising-grandsons",
+      "b": "i-winnipeg-foster-mum",
+      "type": "friend",
+      "note": "kinship-care support network",
+      "close": true
+    },
+    {
+      "a": "i-surrey-sikh-trucker-nights",
+      "b": "j-note-writer",
+      "type": "friend",
+      "note": "Lower Mainland neighbours"
+    },
+    {
+      "a": "i-toronto-orthodox-accountant",
+      "b": "i-toronto-vietnamese-student",
+      "type": "friend",
+      "note": "internship mentor"
+    },
+    {
+      "a": "i-toronto-orthodox-accountant",
+      "b": "b-toronto-toddler-dad",
+      "type": "friend",
+      "note": "Toronto neighbours"
+    },
+    {
+      "a": "i-raf-tech-omnivore",
+      "b": "c-inverness-librarian-omnivore",
+      "type": "friend",
+      "note": "Moray library film club"
+    },
+    {
+      "a": "i-kentucky-army-vet",
+      "b": "action-dad",
+      "type": "friend",
+      "note": "VFW buddy"
+    },
+    {
+      "a": "i-blind-audio-description-fan",
+      "b": "d-sports-docs-manc",
+      "type": "friend",
+      "note": "Stockport pub quiz team"
+    },
+    {
+      "a": "i-deaf-visual-storyteller",
+      "b": "d-silent-film-pianist",
+      "type": "friend",
+      "note": "silent-film screenings",
+      "close": true
+    },
+    {
+      "a": "i-rotherham-care-home-nights",
+      "b": "whodunit-lover",
+      "type": "friend",
+      "note": "Agatha Christie group"
+    },
+    {
+      "a": "i-missouri-baptist-cashier",
+      "b": "d-faith-family-homeschool",
+      "type": "friend",
+      "note": "faith-films Facebook group"
+    },
+    {
+      "a": "i-missouri-baptist-cashier",
+      "b": "j-strict-parent-account",
+      "type": "friend",
+      "note": "homeschool co-op forum"
+    },
+    {
+      "a": "i-adhd-80s-rewatcher",
+      "b": "eighties-kid",
+      "type": "friend",
+      "note": "80s fan forum"
+    },
+    {
+      "a": "i-adhd-80s-rewatcher",
+      "b": "j-binge-watcher",
+      "type": "friend",
+      "note": "same Leeds warehouse",
+      "close": true
+    },
+    {
+      "a": "i-trans-bike-mechanic-synths",
+      "b": "j-horror-family",
+      "type": "friend",
+      "note": "Utrecht neighbours"
+    },
+    {
+      "a": "i-clare-dairy-farmer",
+      "b": "j-couple-shared-login",
+      "type": "friend",
+      "note": "Dani is her cousin"
+    },
+    {
+      "a": "i-glasgow-care-unit-teen",
+      "b": "i-raf-tech-omnivore",
+      "type": "friend",
+      "note": "RAF cadets mentor"
+    },
+    {
+      "a": "i-baltimore-group-home-teen",
+      "b": "i-winnipeg-foster-mum",
+      "type": "friend",
+      "note": "foster-youth forum mentor"
+    },
+    {
+      "a": "j-okafor-family-account",
+      "b": "b-houston-refinery-tech",
+      "type": "friend",
+      "note": "Ghana-Naija church in Houston"
+    },
+    {
+      "a": "j-completionist",
+      "b": "c-inverness-librarian-omnivore",
+      "type": "friend",
+      "note": "retired / working librarians",
+      "close": true
+    },
+    {
+      "a": "j-pre-1970-only",
+      "b": "classic-hollywood",
+      "type": "friend",
+      "note": "classics forum"
+    },
+    {
+      "a": "j-pre-1970-only",
+      "b": "d-silent-film-pianist",
+      "type": "friend",
+      "note": "silent-film screenings"
+    },
+    {
+      "a": "j-new-releases-only",
+      "b": "d-war-modeler-gdansk",
+      "type": "friend",
+      "note": "Polish film forum"
+    },
+    {
+      "a": "j-festival-goer",
+      "b": "d-lyon-cinephile",
+      "type": "friend",
+      "note": "Lyon film society",
+      "close": true
+    },
+    {
+      "a": "j-festival-goer",
+      "b": "e-nouvelle-vague",
+      "type": "friend",
+      "note": "Cannes queue friends"
+    },
+    {
+      "a": "j-harsh-critic",
+      "b": "c-berlin-history-teacher",
+      "type": "friend",
+      "note": "history-teacher conference"
+    },
+    {
+      "a": "j-contrarian",
+      "b": "contrarian",
+      "type": "friend",
+      "note": "online sparring partners"
+    },
+    {
+      "a": "j-contrarian",
+      "b": "d-avo-grandkids",
+      "type": "friend",
+      "note": "aunt"
+    },
+    {
+      "a": "j-flat-genres",
+      "b": "c-cork-icu-nurse-crime",
+      "type": "friend",
+      "note": "Cork neighbours"
+    },
+    {
+      "a": "j-horror-family",
+      "b": "f-cordoba-horror-dad",
+      "type": "friend",
+      "note": "spooky-kids forum"
+    },
+    {
+      "a": "j-horror-family",
+      "b": "b-spooky-family-mum",
+      "type": "friend",
+      "note": "spooky-kids forum"
+    },
+    {
+      "a": "j-horror-family",
+      "b": "spooky-family-dad",
+      "type": "friend",
+      "note": "spooky-kids forum"
+    },
+    {
+      "a": "f-havana-abuela-musica",
+      "b": "a-lucia-doc-music",
+      "type": "friend",
+      "note": "music-teacher exchange"
+    },
+    {
+      "a": "f-havana-abuela-musica",
+      "b": "f-lisbon-bandsman-musicals-war",
+      "type": "friend",
+      "note": "band exchange in the 80s"
+    },
+    {
+      "a": "f-rio-favela-teen-action",
+      "b": "a-diego-futbol",
+      "type": "friend",
+      "note": "futsal tournament"
+    },
+    {
+      "a": "f-guatemala-goth-romance-horror",
+      "b": "romance-horror",
+      "type": "friend",
+      "note": "gothic romance Tumblr",
+      "close": "a"
+    },
+    {
+      "a": "f-sanjuan-13yo-animation",
+      "b": "anime-ghibli",
+      "type": "friend",
+      "note": "Ghibli fan-art Discord"
+    },
+    {
+      "a": "f-madrid-omnivore-programmer",
+      "b": "f-santiago-retired-projectionist",
+      "type": "friend",
+      "note": "film-log mutuals"
+    },
+    {
+      "a": "f-madrid-omnivore-programmer",
+      "b": "f-buenos-aires-psychoanalyst",
+      "type": "friend",
+      "note": "film-log mutuals"
+    },
+    {
+      "a": "f-barcelona-horror-student",
+      "b": "j-abandoned-onboarding",
+      "type": "pending",
+      "note": "she never came back after the group invite"
+    },
+    {
+      "a": "f-madrid-omnivore-programmer",
+      "b": "a-jade-harsh-cinephile",
+      "type": "pending",
+      "note": "she ignores requests"
+    },
+    {
+      "a": "g-hyunwoo-busan-middle",
+      "b": "mcu-teen",
+      "type": "pending",
+      "note": "random superhero-fan add"
+    },
+    {
+      "a": "j-trend-follower",
+      "b": "film-bro",
+      "type": "pending",
+      "note": "film-bro never answered"
+    },
+    {
+      "a": "j-trend-follower",
+      "b": "j-contrarian",
+      "type": "block",
+      "note": "he trashed her Barbie rating"
+    },
+    {
+      "a": "j-ones-and-tens",
+      "b": "j-note-writer",
+      "type": "block",
+      "note": "too many essays in his feed"
+    }
   ],
-  "isolates": ["brand-new", "never-onboarded"],
+  "isolates": [
+    "brand-new",
+    "never-onboarded",
+    "a-hana-tvmovie-cozy",
+    "b-singapore-blockbuster",
+    "c-texas-trucker-couple",
+    "d-pune-new-grandfather",
+    "d-nature-docs-nairobi",
+    "e-architect-visuals",
+    "j-sporadic",
+    "g-pemba-khumbu-guide",
+    "j-anti-trend-snob",
+    "h-ona-latgale-grandmother",
+    "j-rewatcher"
+  ],
   "groups": [
-    {"name": "Thesis Screening", "emoji": "🎬", "creator": "film-bro", "members": ["a24-hipster", "world-cinephile", "nolan-stan"], "intent": "easy", "note": "film-school friends, overlapping auteur/drama taste"},
-    {"name": "Fright Club", "emoji": "🔪", "creator": "horror-fanatic", "members": ["cult-trash", "musical-horror", "slasher-romcom-teen"], "intent": "easy", "note": "everyone rates horror 9-10"},
-    {"name": "Cozy Book Club", "emoji": "📚", "creator": "hallmark-cozy", "members": ["austen-period-drama", "pixar-crier"], "intent": "easy", "note": "romance / feel-good overlap"},
-    {"name": "Chaos Movie Night", "emoji": "🌀", "creator": "disney-mom", "members": ["horror-fanatic", "film-bro"], "intent": "hard", "note": "Disney mom + horror fan + film bro: almost no shared genre"},
-    {"name": "Sleepover Standoff", "emoji": "🧸", "creator": "strict-parent", "members": ["halloween-disney-mom", "slasher-romcom-teen", "sensitive-viewer"], "intent": "hard", "note": "G-cap parent + no-scares viewer vs slasher/horror fans"},
-    {"name": "Family Movie Night", "emoji": "🍿", "creator": "disney-mom", "members": ["family-war-dad", "mcu-teen", "western-grandpa"], "intent": "hard", "note": "three generations, a PG-13 teen"},
-    {"name": "Office Happy Hour", "emoji": "🍻", "creator": "romcom-lover", "members": ["true-crime-thriller", "hard-scifi-engineer", "doc-nerd", "sports-dad", "whodunit-lover", "comedy-truecrime-podcaster", "flat-six"], "intent": "big", "note": "8 mixed tastes"},
-    {"name": "Date Night", "emoji": "💑", "creator": "disney-mom", "members": ["family-war-dad"], "intent": "pair"},
-    {"name": "Couch Co-op", "emoji": "🎮", "creator": "stoner-comedy", "members": ["anime-ghibli"], "intent": "pair"}
+    {
+      "name": "Thesis Screening",
+      "emoji": "🎬",
+      "creator": "film-bro",
+      "members": [
+        "a24-hipster",
+        "world-cinephile",
+        "nolan-stan"
+      ],
+      "intent": "easy",
+      "note": "film-school friends, overlapping auteur/drama taste"
+    },
+    {
+      "name": "Fright Club",
+      "emoji": "🔪",
+      "creator": "horror-fanatic",
+      "members": [
+        "cult-trash",
+        "musical-horror",
+        "slasher-romcom-teen"
+      ],
+      "intent": "easy",
+      "note": "everyone rates horror 9-10"
+    },
+    {
+      "name": "Cozy Book Club",
+      "emoji": "📚",
+      "creator": "hallmark-cozy",
+      "members": [
+        "austen-period-drama",
+        "pixar-crier"
+      ],
+      "intent": "easy",
+      "note": "romance / feel-good overlap"
+    },
+    {
+      "name": "Chaos Movie Night",
+      "emoji": "🌀",
+      "creator": "disney-mom",
+      "members": [
+        "horror-fanatic",
+        "film-bro"
+      ],
+      "intent": "hard",
+      "note": "Disney mom + horror fan + film bro: almost no shared genre"
+    },
+    {
+      "name": "Sleepover Standoff",
+      "emoji": "🧸",
+      "creator": "strict-parent",
+      "members": [
+        "halloween-disney-mom",
+        "slasher-romcom-teen",
+        "sensitive-viewer"
+      ],
+      "intent": "hard",
+      "note": "G-cap parent + no-scares viewer vs slasher/horror fans"
+    },
+    {
+      "name": "Family Movie Night",
+      "emoji": "🍿",
+      "creator": "disney-mom",
+      "members": [
+        "family-war-dad",
+        "mcu-teen",
+        "western-grandpa"
+      ],
+      "intent": "hard",
+      "note": "three generations, a PG-13 teen"
+    },
+    {
+      "name": "Office Happy Hour",
+      "emoji": "🍻",
+      "creator": "romcom-lover",
+      "members": [
+        "true-crime-thriller",
+        "hard-scifi-engineer",
+        "doc-nerd",
+        "sports-dad",
+        "whodunit-lover",
+        "comedy-truecrime-podcaster",
+        "flat-six"
+      ],
+      "intent": "big",
+      "note": "8 mixed tastes"
+    },
+    {
+      "name": "Date Night",
+      "emoji": "💑",
+      "creator": "disney-mom",
+      "members": [
+        "family-war-dad"
+      ],
+      "intent": "pair"
+    },
+    {
+      "name": "Couch Co-op",
+      "emoji": "🎮",
+      "creator": "stoner-comedy",
+      "members": [
+        "anime-ghibli"
+      ],
+      "intent": "pair"
+    },
+    {
+      "name": "Bowling League Movie Night",
+      "emoji": "🎳",
+      "creator": "spooky-family-dad",
+      "members": [
+        "romcom-lover",
+        "war-history-buff"
+      ],
+      "intent": "hard",
+      "note": "narrow horror+family dad vs rom-com lover vs war buff: each hates what the others love"
+    },
+    {
+      "name": "Pumpkin Patch Crew",
+      "emoji": "🎃",
+      "creator": "halloween-disney-mom",
+      "members": [
+        "spooky-family-dad",
+        "halloween-only"
+      ],
+      "intent": "easy",
+      "note": "narrow match: everyone loves cozy-spooky family films"
+    },
+    {
+      "name": "Game Night Leftovers",
+      "emoji": "🎲",
+      "creator": "comedy-war",
+      "members": [
+        "western-scifi",
+        "musical-crime",
+        "college-cinephile-on-a-budget",
+        "stoner-comedy",
+        "superhero-burnout"
+      ],
+      "intent": "big",
+      "note": "three narrow two-genre fans, a broad student, a stoner and a superhero hater"
+    },
+    {
+      "name": "Gothic Double Feature",
+      "emoji": "🦇",
+      "creator": "romance-horror",
+      "members": [
+        "horror-docs"
+      ],
+      "intent": "pair",
+      "note": "both love horror; romance vs documentary on the other side"
+    },
+    {
+      "name": "Mamie's Ciné-Club",
+      "emoji": "🎞️",
+      "creator": "d-lyon-cinephile",
+      "members": [
+        "a-freya-scifi-horror",
+        "e-italian-neorealism",
+        "a-noah-a24-drama"
+      ],
+      "intent": "hard",
+      "note": "retired film teacher + her sci-fi-horror teen granddaughter + a neorealism scholar + an A24 student"
+    },
+    {
+      "name": "Sunday at Gran's",
+      "emoji": "🫖",
+      "creator": "d-widow-musicals-history",
+      "members": [
+        "a-liam-comedy-kid",
+        "e-new-hollywood-70s"
+      ],
+      "intent": "hard",
+      "note": "PG-13-capped senior (musicals/history) + comedy-only teen + 70s New Hollywood loyalist"
+    },
+    {
+      "name": "Forum Meetup",
+      "emoji": "🌍",
+      "creator": "e-nouvelle-vague",
+      "members": [
+        "e-hong-kong-action",
+        "e-italian-neorealism",
+        "e-spaghetti-westerns",
+        "d-osaka-jidaigeki"
+      ],
+      "intent": "hard",
+      "note": "five film movements, each narrow, barely overlapping"
+    },
+    {
+      "name": "Kids Asleep, Finally",
+      "emoji": "🍼",
+      "creator": "b-toronto-toddler-dad",
+      "members": [
+        "b-buenos-aires-horror",
+        "c-cardiff-plumber-scifi-horror",
+        "b-cdmx-adventure-dad"
+      ],
+      "intent": "hard",
+      "note": "PG-capped dad + PG-13 dad vs two R-rated horror fans: comfort caps vs gore"
+    },
+    {
+      "name": "Spooky Season Potluck",
+      "emoji": "🎃",
+      "creator": "b-spooky-family-mum",
+      "members": [
+        "c-brisbane-horror-family-mum",
+        "d-horror-family-grandpa",
+        "spooky-family-dad",
+        "a-jonas-horror-family"
+      ],
+      "intent": "easy",
+      "note": "narrow horror+family fans across batches: should be an easy match"
+    },
+    {
+      "name": "Low End Theory",
+      "emoji": "🎸",
+      "creator": "c-nola-bassist-music-crime",
+      "members": [
+        "e-session-bassist",
+        "b-lagos-london-producer"
+      ],
+      "intent": "easy",
+      "note": "three music-film obsessives"
+    },
+    {
+      "name": "Ranch Hands",
+      "emoji": "🐄",
+      "creator": "b-montana-rancher",
+      "members": [
+        "c-montana-rancher-docs-westerns"
+      ],
+      "intent": "pair",
+      "note": "both narrow westerns+documentaries: trivially easy"
+    },
+    {
+      "name": "Sunset Grove Big Screen",
+      "emoji": "🎦",
+      "creator": "d-cozy-mystery-nonna",
+      "members": [
+        "d-widow-musicals-history",
+        "d-retired-detective",
+        "d-widower-romance",
+        "d-gold-coast-couple",
+        "e-widower-gentle-comedy",
+        "d-retired-physicist",
+        "d-active-senior-tramper"
+      ],
+      "intent": "big",
+      "note": "8 retirees: PG-13 caps next to an R-OK widower and a harsh physicist"
+    },
+    {
+      "name": "Uni Film Society Screening",
+      "emoji": "🎓",
+      "creator": "a-omar-omnivore",
+      "members": [
+        "a-noah-a24-drama",
+        "a-maya-anime-gym",
+        "a-priya-romcom-music",
+        "a-tomas-war-history",
+        "a-sofia-crime-mystery",
+        "a-arjun-masala-mix",
+        "a-elena-period-romance"
+      ],
+      "intent": "big",
+      "note": "8 students, an omnivore host and seven different lanes"
+    },
+    {
+      "name": "Discord Watch Party",
+      "emoji": "🚀",
+      "creator": "b-berlin-ux-scifi",
+      "members": [
+        "c-auckland-dnd-mum",
+        "e-gamer-adaptations",
+        "d-kaiju-busan",
+        "hard-scifi-engineer"
+      ],
+      "intent": "easy",
+      "note": "everyone loves sci-fi"
+    },
+    {
+      "name": "Naija Night In",
+      "emoji": "🇳🇬",
+      "creator": "e-nollywood-houston",
+      "members": [
+        "c-lagos-banker-action",
+        "b-lagos-london-producer",
+        "a-tunde-casual"
+      ],
+      "intent": "hard",
+      "note": "Nollywood drama vs action/heist vs music docs vs teen blockbusters"
+    },
+    {
+      "name": "Fellowship Friday",
+      "emoji": "🙏",
+      "creator": "d-faith-family-homeschool",
+      "members": [
+        "b-ohio-holiday-movies",
+        "e-recovering-feelgood",
+        "hallmark-cozy"
+      ],
+      "intent": "easy",
+      "note": "faith/family, TV movies, feel-good: wholesome overlap, PG-13 cap"
+    },
+    {
+      "name": "Desi Movie Night",
+      "emoji": "🪔",
+      "creator": "b-pune-to-seattle",
+      "members": [
+        "e-desi-diaspora",
+        "d-bollywood-leicester",
+        "bollywood-fan"
+      ],
+      "intent": "easy",
+      "note": "Bollywood fans"
+    },
+    {
+      "name": "Domingo en Familia",
+      "emoji": "🌮",
+      "creator": "e-mexican-family-cine",
+      "members": [
+        "f-cdmx-abuela-telenovelas",
+        "f-oaxaca-bisabuelo-westerns",
+        "j-generous-rater",
+        "f-sanjuan-13yo-animation"
+      ],
+      "intent": "hard",
+      "note": "four generations: two PG-13 caps, an 85-year-old westerns fan, a generous rater"
+    },
+    {
+      "name": "Sessão do Cineclube",
+      "emoji": "🎞️",
+      "creator": "f-madrid-omnivore-programmer",
+      "members": [
+        "f-barcelona-horror-student",
+        "f-galicia-fisherman-adventure",
+        "f-lisbon-bandsman-musicals-war",
+        "f-porto-student-scifi",
+        "e-brazilian-lisbon",
+        "d-heist-madrid",
+        "f-santiago-retired-projectionist"
+      ],
+      "intent": "big",
+      "note": "8 Iberian club members: horror, sea adventures, musicals+war, sci-fi, crime, heists"
+    },
+    {
+      "name": "Thursday Mall Cinema",
+      "emoji": "🛍️",
+      "creator": "h-mariam-dubai-marketing",
+      "members": [
+        "h-umm-faisal-riyadh-grandma",
+        "h-malak-cairo-teen",
+        "h-rita-beirut-pharmacist",
+        "d-cape-town-diplomat",
+        "b-manila-call-centre"
+      ],
+      "intent": "hard",
+      "note": "comfort caps (PG grandma, PG-13 teen and host) next to R-rated thriller and spy fans"
+    },
+    {
+      "name": "Little Goths",
+      "emoji": "🦇",
+      "creator": "j-horror-family",
+      "members": [
+        "f-cordoba-horror-dad",
+        "b-spooky-family-mum"
+      ],
+      "intent": "easy",
+      "note": "narrow horror+family match across three countries"
+    },
+    {
+      "name": "Lander Store Hours",
+      "emoji": "🔨",
+      "creator": "i-wyoming-hardware-grant",
+      "members": [
+        "i-wyoming-hardware-luis"
+      ],
+      "intent": "pair",
+      "note": "married couple: comfort/period vs twisty thrillers"
+    },
+    {
+      "name": "Warehouse Breakroom",
+      "emoji": "📦",
+      "creator": "j-binge-watcher",
+      "members": [
+        "i-adhd-80s-rewatcher"
+      ],
+      "intent": "pair",
+      "note": "Leeds coworkers: franchise binges and 80s rewatches"
+    },
+    {
+      "name": "Wuxia with Grandpa",
+      "emoji": "🐉",
+      "creator": "g-wei-shanghai-scifi",
+      "members": [
+        "g-guo-henan-village-grandpa"
+      ],
+      "intent": "pair",
+      "note": "harsh hard-sci-fi grandson + generous wuxia/war grandpa"
+    },
+    {
+      "name": "Festival Friends",
+      "emoji": "🪶",
+      "creator": "i-cree-kokum-raising-grandsons",
+      "members": [
+        "i-sami-reindeer-herder",
+        "i-navajo-aide-nights",
+        "g-tama-rotorua-teacher"
+      ],
+      "intent": "hard",
+      "note": "PG-13-capped family kokum vs a narrow night-shift viewer and two broad parents"
+    },
+    {
+      "name": "Taxi Rank Late Show",
+      "emoji": "🚕",
+      "creator": "g-kaho-hk-taxi-crime-cantopop",
+      "members": [
+        "h-dragan-belgrade-taxi",
+        "f-bogota-driver-thrillers",
+        "h-brian-kampala-boda",
+        "i-surrey-sikh-trucker-nights",
+        "b-alberta-trucker"
+      ],
+      "intent": "easy",
+      "note": "drivers who all lean crime/action/thriller"
+    },
+    {
+      "name": "Black Sea Forum Night",
+      "emoji": "🌊",
+      "creator": "h-ioana-bucharest-teacher",
+      "members": [
+        "h-dragan-belgrade-taxi",
+        "h-nino-tbilisi-romance-war",
+        "h-mykola-lviv-retiree",
+        "b-kyiv-in-warsaw"
+      ],
+      "intent": "hard",
+      "note": "art-house teacher, harsh crime cabbie, narrow romance+war widow, war classics"
+    },
+    {
+      "name": "Furious Watch Party",
+      "emoji": "🏎️",
+      "creator": "g-sione-mtdruitt-omnivore",
+      "members": [
+        "i-glasgow-care-unit-teen",
+        "i-baltimore-group-home-teen",
+        "f-rio-favela-teen-action",
+        "a-tunde-casual",
+        "j-trend-follower",
+        "j-ones-and-tens",
+        "i-toronto-vietnamese-student"
+      ],
+      "intent": "big",
+      "note": "8 Discord friends: car chases for all, a 1-or-10 rater and a trend follower"
+    },
+    {
+      "name": "Pan-African Film Circle",
+      "emoji": "🌍",
+      "creator": "h-thandi-joburg-omnivore",
+      "members": [
+        "h-selam-addis-docs-scifi",
+        "h-ousmane-dakar-sound",
+        "i-lund-ghanaian-student",
+        "j-ones-and-tens"
+      ],
+      "intent": "hard",
+      "note": "omnivore editor, narrow docs+sci-fi, music docs, broad student, binary rater"
+    },
+    {
+      "name": "Kansai Film Circle",
+      "emoji": "⛩️",
+      "creator": "d-osaka-jidaigeki",
+      "members": [
+        "g-haruko-kyoto-widow",
+        "b-osaka-pharmacist-mystery",
+        "c-osaka-war-anime-dad",
+        "g-ren-osaka-salaryman"
+      ],
+      "intent": "easy",
+      "note": "drama/history overlap; one PG-13 widow"
+    },
+    {
+      "name": "Okafor Living Room",
+      "emoji": "📺",
+      "creator": "j-okafor-family-account",
+      "members": [
+        "e-nollywood-houston",
+        "b-houston-refinery-tech"
+      ],
+      "intent": "hard",
+      "note": "a shared family account (mixed signals) in a group"
+    }
   ]
 }

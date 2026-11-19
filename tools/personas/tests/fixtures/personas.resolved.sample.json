@@ -23,6 +23,9 @@
         {"title": "Up", "year": 2009, "score": 10, "tmdbId": 14160},
         {"title": "Hereditary", "year": 2018, "score": 2, "tmdbId": 493922}
       ],
+      "leastFavorites": [
+        {"title": "Hereditary", "year": 2018, "tmdbId": 493922}
+      ],
       "volume": "medium",
       "rater": {"bias": 1.5, "spread": 0.8},
       "era": {"from": 1990, "to": 2026},
@@ -47,6 +50,10 @@
       "anchorRatings": [
         {"title": "Get Out", "year": 2017, "score": 9, "tmdbId": 419430},
         {"title": "The Notebook", "year": 2004, "score": 2, "tmdbId": 11036}
+      ],
+      "leastFavorites": [
+        {"title": "The Notebook", "year": 2004, "tmdbId": 11036},
+        {"title": "Frozen", "year": 2013, "tmdbId": 109445}
       ],
       "volume": "heavy",
       "rater": {"bias": -1.5, "spread": 1.2},
