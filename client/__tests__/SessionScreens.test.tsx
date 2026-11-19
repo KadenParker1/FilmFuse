@@ -178,6 +178,11 @@ describe('SessionScreen', () => {
   });
   const show = (session = makeSession()) =>
     m('useSession').mockReturnValue(queryResult({ data: session }));
+  /** The open session's List view (Swipe is the default; the deck has its own tests). */
+  const renderList = async () => {
+    await render(<SessionScreen />);
+    await fireEvent.press(screen.getByRole('tab', { name: 'List' }));
+  };
 
   it('OPEN: header, live indicator, filter banner, members and ranked results', async () => {
     show(
@@ -189,7 +194,7 @@ describe('SessionScreen', () => {
         ],
       }),
     );
-    await render(<SessionScreen />);
+    await renderList();
     expect(m('useSession')).toHaveBeenCalledWith('s1');
     expect(useSessionLive).toHaveBeenCalledWith('s1');
     expect(screen.getByRole('header', { name: 'Film club' })).toBeOnTheScreen();
@@ -203,6 +208,77 @@ describe('SessionScreen', () => {
     expect(screen.getByText('1. Heat')).toBeOnTheScreen();
     expect(screen.getByText('2. Up')).toBeOnTheScreen();
     expect(screen.getAllByTestId('fuse-meter')).toHaveLength(2);
+  });
+
+  it('OPEN defaults to the swipe deck; the toggle switches to the list and back', async () => {
+    show();
+    await render(<SessionScreen />);
+    expect(screen.getByRole('tab', { name: 'Swipe' })).toBeSelected();
+    expect(screen.getByTestId('swipe-deck')).toBeOnTheScreen();
+    expect(screen.getByTestId('swipe-card-100')).toBeOnTheScreen();
+    expect(screen.queryByTestId(/^result-/)).toBeNull();
+    await fireEvent.press(screen.getByRole('tab', { name: 'List' }));
+    expect(screen.getByRole('tab', { name: 'List' })).toBeSelected();
+    expect(screen.queryByTestId('swipe-deck')).toBeNull();
+    expect(screen.getAllByTestId(/^result-/)).toHaveLength(2);
+    await fireEvent.press(screen.getByRole('tab', { name: 'Swipe' }));
+    expect(screen.getByTestId('swipe-deck')).toBeOnTheScreen();
+  });
+
+  it('swipe: Yes votes through the shared mutation', async () => {
+    show();
+    await render(<SessionScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Yes' }));
+    expect(muts.useCastVote.mutate).toHaveBeenCalledWith({ sessionId: 's1', movieId: 100, vote: 'UP' }, expect.anything());
+    expect(screen.getByTestId('swipe-card-200')).toBeOnTheScreen();
+  });
+
+  it('swipe: Veto opens the same confirm sheet, and confirming vetoes', async () => {
+    show();
+    await render(<SessionScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Veto' }));
+    expect(screen.getByText('Veto Heat?')).toBeOnTheScreen();
+    expect(muts.useCastVote.mutate).not.toHaveBeenCalled();
+    const buttons = screen.getAllByRole('button', { name: 'Veto' });
+    await fireEvent.press(buttons[buttons.length - 1]!);
+    expect(muts.useCastVote.mutate).toHaveBeenCalledWith({ sessionId: 's1', movieId: 100, vote: 'VETO' });
+    expect(screen.queryByText('Veto Heat?')).toBeNull();
+  });
+
+  it('swipe: Details opens the movie', async () => {
+    show();
+    await render(<SessionScreen />);
+    await fireEvent.press(screen.getByRole('link', { name: 'Details for Heat' }));
+    expect(routerState.router.push).toHaveBeenCalledWith('/movie/100');
+  });
+
+  it('swipe: a match picks through the same pick sheet', async () => {
+    const results = (up: number) => [
+      makeResult(),
+      makeResult({ rank: 2, movie: makeMovie({ id: 200, title: 'Up' }), votes: { up, down: 0, vetoed: false } }),
+    ];
+    show(makeSession({ results: results(1) }));
+    const { rerender } = await render(<SessionScreen />);
+    show(makeSession({ results: results(2) }));
+    await rerender(<SessionScreen />);
+    expect(screen.getByTestId('match-card')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: 'Pick Up' }));
+    expect(screen.getByText('Watch Up?')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: 'Pick this' }));
+    expect(muts.usePickMovie.mutate).toHaveBeenCalledWith({ sessionId: 's1', movieId: 200 }, expect.anything());
+  });
+
+  it('swipe: the end of the deck links to the list', async () => {
+    show(
+      makeSession({
+        results: [makeResult({ myVote: 'UP', votes: { up: 1, down: 0, vetoed: false } })],
+      }),
+    );
+    await render(<SessionScreen />);
+    expect(screen.getByTestId('deck-end')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: 'See the list' }));
+    expect(screen.getByRole('tab', { name: 'List' })).toBeSelected();
+    expect(screen.getByTestId('result-100')).toBeOnTheScreen();
   });
 
   it('shows the polling fallback indicator', async () => {
@@ -220,7 +296,7 @@ describe('SessionScreen', () => {
 
   it('votes up/down and clears a vote', async () => {
     show(makeSession({ results: [makeResult({ myVote: 'UP', votes: { up: 1, down: 0, vetoed: false } })] }));
-    await render(<SessionScreen />);
+    await renderList();
     await fireEvent.press(screen.getByRole('button', { name: 'Thumbs down, 0' }));
     expect(muts.useCastVote.mutate).toHaveBeenCalledWith({ sessionId: 's1', movieId: 100, vote: 'DOWN' });
     await fireEvent.press(screen.getByRole('button', { name: 'Thumbs up, 1' }));
@@ -229,7 +305,7 @@ describe('SessionScreen', () => {
 
   it('veto asks for confirmation first', async () => {
     show();
-    await render(<SessionScreen />);
+    await renderList();
     await fireEvent.press(screen.getAllByRole('button', { name: 'Veto' })[0]!);
     expect(muts.useCastVote.mutate).not.toHaveBeenCalled();
     expect(screen.getByText('Veto Heat?')).toBeOnTheScreen();
@@ -253,7 +329,7 @@ describe('SessionScreen', () => {
         ],
       }),
     );
-    await render(<SessionScreen />);
+    await renderList();
     const ids = screen.getAllByTestId(/^result-/).map((e) => e.props.testID);
     expect(ids).toEqual(['result-200', 'result-100']);
     expect(screen.getByTestId('vetoed-100')).toBeOnTheScreen();
@@ -264,7 +340,7 @@ describe('SessionScreen', () => {
   it('pick confirms in a sheet, then picks', async () => {
     show();
     muts.usePickMovie.mutate.mockImplementation((_v: unknown, o: { onSuccess: () => void }) => o.onSuccess());
-    await render(<SessionScreen />);
+    await renderList();
     await fireEvent.press(screen.getByRole('button', { name: 'Pick Up' }));
     expect(screen.getByText('Watch Up?')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Pick this' }));
@@ -276,7 +352,7 @@ describe('SessionScreen', () => {
     show();
     muts.usePickMovie.isError = true;
     muts.usePickMovie.error = new ApiError(409, 'Session is no longer open');
-    await render(<SessionScreen />);
+    await renderList();
     await fireEvent.press(screen.getByRole('button', { name: 'Pick Heat' }));
     expect(screen.getByRole('alert')).toHaveTextContent('Session is no longer open');
     await fireEvent.press(screen.getByRole('button', { name: 'Cancel' }));
@@ -285,7 +361,7 @@ describe('SessionScreen', () => {
 
   it('More options refreshes; errors show inline', async () => {
     show();
-    await render(<SessionScreen />);
+    await renderList();
     await fireEvent.press(screen.getByRole('button', { name: 'More options' }));
     expect(muts.useRefreshSession.mutate).toHaveBeenCalledWith('s1');
   });
@@ -297,7 +373,7 @@ describe('SessionScreen', () => {
     muts.useRefreshSession.isError = true;
     muts.useRefreshSession.error = new NetworkError();
     muts.useRefreshSession.isPending = true;
-    await render(<SessionScreen />);
+    await renderList();
     const alerts = screen.getAllByRole('alert');
     expect(alerts[0]).toHaveTextContent('Voting has closed');
     expect(alerts[1]).toHaveTextContent(/Couldn't reach/);
@@ -306,14 +382,14 @@ describe('SessionScreen', () => {
 
   it('opens a movie from its poster', async () => {
     show();
-    await render(<SessionScreen />);
+    await renderList();
     await fireEvent.press(screen.getByRole('button', { name: 'Up' }));
     expect(routerState.router.push).toHaveBeenCalledWith('/movie/200');
   });
 
   it('OPEN with no results suggests more options', async () => {
     show(makeSession({ results: [] }));
-    await render(<SessionScreen />);
+    await renderList();
     expect(screen.getByText('Nothing fits yet')).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: 'More options' })).toBeOnTheScreen();
   });
@@ -331,6 +407,8 @@ describe('SessionScreen', () => {
     expect(screen.queryByTestId('live-indicator')).toBeNull();
     expect(screen.queryByRole('button', { name: 'More options' })).toBeNull();
     expect(screen.queryByRole('button', { name: /^Thumbs/ })).toBeNull();
+    expect(screen.queryByRole('tab', { name: 'Swipe' })).toBeNull();
+    expect(screen.queryByTestId('swipe-deck')).toBeNull();
     await fireEvent.press(screen.getByRole('button', { name: 'Movie details' }));
     expect(routerState.router.push).toHaveBeenCalledWith('/movie/200');
   });
@@ -344,6 +422,8 @@ describe('SessionScreen', () => {
     expect(screen.queryByRole('button', { name: 'Pick Heat' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'More options' })).toBeNull();
     expect(screen.queryByTestId('live-indicator')).toBeNull();
+    expect(screen.queryByRole('tab', { name: 'Swipe' })).toBeNull();
+    expect(screen.queryByTestId('swipe-deck')).toBeNull();
   });
 
   it('loading, not found and error', async () => {

@@ -23,6 +23,7 @@ import { SessionResultCard } from '../../components/sessions/SessionResultCard';
 import { ShareSessionButton } from '../../components/sessions/ShareSessionButton';
 import { TallyPanel } from '../../components/sessions/TallyPanel';
 import { SessionCountdown } from '../../components/sessions/SessionCountdown';
+import { SwipeDeck } from '../../components/sessions/SwipeDeck';
 import { STATUS_LABELS, orderResults, strategyLabel } from '../../components/sessions/sessionCopy';
 import { computeTally } from '../../components/sessions/tally';
 import {
@@ -34,8 +35,10 @@ import {
   ErrorState,
   Heading,
   Screen,
+  SegmentedControl,
   Skeleton,
   errorMessage,
+  type Segment,
 } from '../../components/ui';
 import { ApiError } from '../../lib/apiClient';
 import { pluralize } from '../../lib/format';
@@ -83,27 +86,33 @@ function DecidedHero({ movie }: { movie: MovieSummaryDTO }) {
   );
 }
 
-function OpenResults({ session, myId }: { session: SessionDTO; myId: string | undefined }) {
-  const router = useRouter();
-  const vote = useCastVote();
-  const clear = useClearVote();
-  const refresh = useRefreshSession();
-  const pick = usePickMovie();
-  const [vetoing, setVetoing] = useState<SessionResultDTO | null>(null);
-  const [picking, setPicking] = useState<SessionResultDTO | null>(null);
-  // Display order stays the ML rank order; the tally only highlights.
-  const results = orderResults(session.results);
-  const tally = computeTally(session.results, session.memberCount, session.votedCount);
-  const tiedIds = new Set(tally.isTie ? tally.tied.map((r) => r.movie.id) : []);
-  const voteError = vote.isError ? vote.error : clear.isError ? clear.error : null;
+type VoteMutation = ReturnType<typeof useCastVote>;
+type ClearMutation = ReturnType<typeof useClearVote>;
+type RefreshMutation = ReturnType<typeof useRefreshSession>;
+type OpenView = 'swipe' | 'list';
+
+const VIEW_SEGMENTS: Segment<OpenView>[] = [
+  { value: 'swipe', label: 'Swipe' },
+  { value: 'list', label: 'List' },
+];
+
+/** Hidden-for-comfort picks and the joined-late note; shown above both the deck and the list. */
+function OpenNotices({
+  session,
+  myId,
+  refresh,
+}: {
+  session: SessionDTO;
+  myId: string | undefined;
+  refresh: RefreshMutation;
+}) {
+  const results = session.results;
   // Joined after these picks were ranked: none of them carries the caller's fit.
   const joinedLate =
     !!myId && results.length > 0 && session.members.some((m) => m.user.id === myId) &&
     results.every((r) => r.memberScores[myId] === undefined);
-
   return (
-    <View className="gap-4">
-      {results.length ? <TallyPanel tally={tally} onPickLeader={setPicking} /> : null}
+    <>
       {session.hiddenResultCount > 0 ? (
         <Card testID="hidden-results" className="gap-2">
           <Body className="text-sm">
@@ -118,6 +127,39 @@ function OpenResults({ session, myId }: { session: SessionDTO; myId: string | un
           You joined after these picks were made. “More options” adds picks that include your taste.
         </Body>
       ) : null}
+    </>
+  );
+}
+
+/** The ranked list: every result with its votes, the live tally and More options. */
+function OpenResultsList({
+  session,
+  myId,
+  vote,
+  clear,
+  refresh,
+  onVeto,
+  onPick,
+}: {
+  session: SessionDTO;
+  myId: string | undefined;
+  vote: VoteMutation;
+  clear: ClearMutation;
+  refresh: RefreshMutation;
+  onVeto: (result: SessionResultDTO) => void;
+  onPick: (result: SessionResultDTO) => void;
+}) {
+  const router = useRouter();
+  // Display order stays the ML rank order; the tally only highlights.
+  const results = orderResults(session.results);
+  const tally = computeTally(session.results, session.memberCount, session.votedCount);
+  const tiedIds = new Set(tally.isTie ? tally.tied.map((r) => r.movie.id) : []);
+  const voteError = vote.isError ? vote.error : clear.isError ? clear.error : null;
+
+  return (
+    <View className="gap-4">
+      {results.length ? <TallyPanel tally={tally} onPickLeader={onPick} /> : null}
+      <OpenNotices session={session} myId={myId} refresh={refresh} />
       {voteError ? (
         <Body accessibilityRole="alert" className="text-sm text-danger">
           {errorMessage(voteError)}
@@ -140,12 +182,10 @@ function OpenResults({ session, myId }: { session: SessionDTO; myId: string | un
             everyoneLikes={tally.everyoneLikes.has(r.movie.id)}
             onOpenMovie={() => router.push(`/movie/${r.movie.id}`)}
             onVote={(v) =>
-              v === 'VETO'
-                ? setVetoing(r)
-                : vote.mutate({ sessionId: session.id, movieId: r.movie.id, vote: v })
+              v === 'VETO' ? onVeto(r) : vote.mutate({ sessionId: session.id, movieId: r.movie.id, vote: v })
             }
             onClearVote={() => clear.mutate({ sessionId: session.id, movieId: r.movie.id })}
-            onPick={() => setPicking(r)}
+            onPick={() => onPick(r)}
           />
         ))
       )}
@@ -160,6 +200,52 @@ function OpenResults({ session, myId }: { session: SessionDTO; myId: string | un
         loading={refresh.isPending}
         onPress={() => refresh.mutate(session.id)}
       />
+    </View>
+  );
+}
+
+/**
+ * An open session: Swipe (default, the fixed deck) or List. Both views share one set of vote
+ * mutations and the veto / pick confirm sheets.
+ */
+function OpenResults({ session, myId }: { session: SessionDTO; myId: string | undefined }) {
+  const router = useRouter();
+  const vote = useCastVote();
+  const clear = useClearVote();
+  const refresh = useRefreshSession();
+  const pick = usePickMovie();
+  const [view, setView] = useState<OpenView>('swipe');
+  const [vetoing, setVetoing] = useState<SessionResultDTO | null>(null);
+  const [picking, setPicking] = useState<SessionResultDTO | null>(null);
+
+  return (
+    <View className="gap-4">
+      <SegmentedControl segments={VIEW_SEGMENTS} value={view} onChange={setView} label="Session view" />
+      {view === 'swipe' ? (
+        <View className="gap-4">
+          <OpenNotices session={session} myId={myId} refresh={refresh} />
+          <SwipeDeck
+            session={session}
+            vote={vote}
+            clear={clear}
+            refresh={refresh}
+            onVeto={setVetoing}
+            onPick={setPicking}
+            onOpenMovie={(movieId) => router.push(`/movie/${movieId}`)}
+            onShowList={() => setView('list')}
+          />
+        </View>
+      ) : (
+        <OpenResultsList
+          session={session}
+          myId={myId}
+          vote={vote}
+          clear={clear}
+          refresh={refresh}
+          onVeto={setVetoing}
+          onPick={setPicking}
+        />
+      )}
 
       <ConfirmSheet
         visible={vetoing !== null}

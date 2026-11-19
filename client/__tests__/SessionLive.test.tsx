@@ -215,6 +215,7 @@ describe('SessionScreen — live tally', () => {
   it('shows the tally overlay without reordering the ranked results', async () => {
     show(makeSession({ results: [res(1, 1, 0), res(2, 2, 2)], memberCount: 2, votedCount: 2 }));
     await render(<SessionScreen />);
+    await fireEvent.press(screen.getByRole('tab', { name: 'List' }));
     expect(screen.getByTestId('tally-live-region')).toHaveTextContent(/Leading: Movie 2/);
     expect(screen.getByTestId('everyone-voted')).toBeOnTheScreen();
     expect(screen.getByTestId('leader-2')).toBeOnTheScreen();
@@ -226,6 +227,7 @@ describe('SessionScreen — live tally', () => {
   it('marks every tied result and "Pick the leader" confirms the rank-first one', async () => {
     show(makeSession({ results: [res(1, 1, 1), res(2, 2, 1), res(3, 3, 0)] }));
     await render(<SessionScreen />);
+    await fireEvent.press(screen.getByRole('tab', { name: 'List' }));
     expect(screen.getByTestId('tied-1')).toBeOnTheScreen();
     expect(screen.getByTestId('tied-2')).toBeOnTheScreen();
     expect(screen.queryByTestId('tied-3')).toBeNull();
@@ -283,6 +285,23 @@ describe('SessionScreen — live tally', () => {
     );
     await fireEvent.press(screen.getByRole('button', { name: 'Get more options' }));
     expect(muts.useRefreshSession.mutate).toHaveBeenCalledWith('s1');
+  });
+
+  it('shows the hidden-results and late-joiner notes in the list view too', async () => {
+    mockUserId = 'u9';
+    show(
+      makeSession({
+        hiddenResultCount: 1,
+        members: [makeSessionMember({ id: 'u1' }), makeSessionMember({ id: 'u9', displayName: 'Late' })],
+      }),
+    );
+    await render(<SessionScreen />);
+    expect(screen.getByTestId('swipe-deck')).toBeOnTheScreen();
+    expect(screen.getByTestId('hidden-results')).toHaveTextContent(/^1 pick no longer fits/);
+    expect(screen.getByTestId('joined-late')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('tab', { name: 'List' }));
+    expect(screen.getByTestId('hidden-results')).toBeOnTheScreen();
+    expect(screen.getByTestId('joined-late')).toBeOnTheScreen();
   });
 
   it('tells a late joiner the picks predate them', async () => {
