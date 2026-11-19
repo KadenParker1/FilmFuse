@@ -84,6 +84,19 @@ export function useSaveFavorites() {
   });
 }
 
+/** Replaces the optional least favourites (0–5, rank 1 = most disliked); `[]` clears them. */
+export function useSaveLeastFavorites() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (leastFavorites: FavoriteDTO[]) =>
+      apiClient.put<FavoriteMovieDTO[]>('/me/preferences/least-favorites', leastFavorites),
+    onSuccess: (leastFavorites) => {
+      qc.setQueryData<OnboardingStateDTO>(queryKeys.onboarding, (s) => (s ? { ...s, leastFavorites } : s));
+      markTasteRebuilding(qc);
+    },
+  });
+}
+
 type CalibrationBatchOptions = { enabled?: boolean; count?: number };
 
 /**

@@ -1,5 +1,7 @@
 import { render, screen } from '@testing-library/react-native';
-import { moveItem } from '../components/onboarding/FavoritesStep';
+import { moveItem, planFavoritesSave } from '../components/onboarding/FavoritesStep';
+import { togglePick } from '../components/onboarding/MoviePicker';
+import { makeMovie } from '../test-utils/fixtures';
 import { clampStep, describeError, genreGate, onboardingPath, prefsToSend, TOTAL_STEPS } from '../components/onboarding/steps';
 import { formatScore, parseDimensionKey, statedVsLearned } from '../components/taste/tasteCopy';
 import { Toast } from '../components/ui/Toast';
@@ -88,6 +90,51 @@ describe('moveItem', () => {
     const list = ['a', 'b'];
     expect(moveItem(list, 0, -1)).toBe(list);
     expect(moveItem(list, 1, 1)).toBe(list);
+  });
+});
+
+describe('togglePick', () => {
+  const a = makeMovie({ id: 1 });
+  const b = makeMovie({ id: 2 });
+  it('removes a picked movie and appends a new one while there is room', () => {
+    expect(togglePick([a, b], a, 5)).toEqual([b]);
+    expect(togglePick([a], b, 5)).toEqual([a, b]);
+  });
+  it('ignores a new pick once full (but still removes)', () => {
+    const full = [a];
+    expect(togglePick(full, b, 1)).toBe(full);
+    expect(togglePick(full, a, 1)).toEqual([]);
+  });
+});
+
+describe('planFavoritesSave', () => {
+  it('saves favourites only when least favourites are unchanged', () => {
+    expect(planFavoritesSave([1, 2, 3], [], [], [])).toEqual([{ list: 'favorites', movieIds: [1, 2, 3] }]);
+    expect(planFavoritesSave([1, 2, 3], [7, 8], [], [7, 8])).toEqual([{ list: 'favorites', movieIds: [1, 2, 3] }]);
+  });
+  it('saves favourites, then least favourites when they changed (order and clearing count)', () => {
+    expect(planFavoritesSave([1, 2, 3], [8, 7], [], [7, 8])).toEqual([
+      { list: 'favorites', movieIds: [1, 2, 3] },
+      { list: 'leastFavorites', movieIds: [8, 7] },
+    ]);
+    expect(planFavoritesSave([1, 2, 3], [], [1, 2, 3], [7])).toEqual([
+      { list: 'favorites', movieIds: [1, 2, 3] },
+      { list: 'leastFavorites', movieIds: [] },
+    ]);
+  });
+  it('saves least favourites first when a saved least favourite became a favourite', () => {
+    expect(planFavoritesSave([1, 2, 7], [8], [1, 2, 3], [7, 8])).toEqual([
+      { list: 'leastFavorites', movieIds: [8] },
+      { list: 'favorites', movieIds: [1, 2, 7] },
+    ]);
+  });
+  it('swaps in both directions with an interim least-favourites write', () => {
+    // 3 moves favourites → least, 7 moves least → favourites.
+    expect(planFavoritesSave([1, 2, 7], [3, 8], [1, 2, 3], [7, 8])).toEqual([
+      { list: 'leastFavorites', movieIds: [8] },
+      { list: 'favorites', movieIds: [1, 2, 7] },
+      { list: 'leastFavorites', movieIds: [3, 8] },
+    ]);
   });
 });
 

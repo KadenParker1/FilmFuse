@@ -76,7 +76,7 @@ public class VectorBuildService {
         StoredVector row = snapshot.row();
         TasteSignals s = snapshot.signals();
         MlUserVectorRequest request = new MlUserVectorRequest(userId, row.toMl(), s.genrePrefs(), s.moodPrefs(),
-                s.favorites(), s.ratings(), s.unseen(), s.dismissals());
+                s.favorites(), s.leastFavorites(), s.ratings(), s.unseen(), s.dismissals());
 
         MlUserVectorResponse built = build(request, row);
         if (built == null) {

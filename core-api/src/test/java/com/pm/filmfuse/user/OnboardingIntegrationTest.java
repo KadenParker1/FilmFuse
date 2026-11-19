@@ -60,6 +60,7 @@ class OnboardingIntegrationTest extends AbstractTasteIntegrationTest {
                 .andExpect(jsonPath("$.genrePrefs", hasSize(0)))
                 .andExpect(jsonPath("$.moodPrefs", hasSize(0)))
                 .andExpect(jsonPath("$.favorites", hasSize(0)))
+                .andExpect(jsonPath("$.leastFavorites", hasSize(0)))
                 .andExpect(jsonPath("$.calibrationRatedCount").value(0))
                 .andExpect(jsonPath("$.comfort.maxCertification").value(nullValue()))
                 .andExpect(jsonPath("$.comfort.allowUnrated").value(false));

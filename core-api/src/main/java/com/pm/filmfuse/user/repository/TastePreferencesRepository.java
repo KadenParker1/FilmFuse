@@ -10,7 +10,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-/** {@code app.user_genre_prefs}, {@code app.user_mood_prefs}, {@code app.user_favorite_movies}. Replace-all writes. */
+/**
+ * {@code app.user_genre_prefs}, {@code app.user_mood_prefs}, {@code app.user_favorite_movies},
+ * {@code app.user_least_favorite_movies}. Replace-all writes.
+ */
 @Repository
 public class TastePreferencesRepository {
 
@@ -55,7 +58,16 @@ public class TastePreferencesRepository {
 
     /** By rank. */
     public List<Favorite> favorites(UUID userId) {
-        return jdbc.query("select rank, movie_id from app.user_favorite_movies where user_id = :id order by rank",
+        return ranked("user_favorite_movies", userId);
+    }
+
+    /** By rank (1 = most disliked). */
+    public List<Favorite> leastFavorites(UUID userId) {
+        return ranked("user_least_favorite_movies", userId);
+    }
+
+    private List<Favorite> ranked(String table, UUID userId) {
+        return jdbc.query("select rank, movie_id from app." + table + " where user_id = :id order by rank",
                 new MapSqlParameterSource("id", userId), (rs, n) -> new Favorite(rs.getInt("rank"), rs.getInt("movie_id")));
     }
 
@@ -78,10 +90,19 @@ public class TastePreferencesRepository {
     }
 
     public void replaceFavorites(UUID userId, List<Favorite> favorites, Instant now) {
-        jdbc.update("delete from app.user_favorite_movies where user_id = :id", new MapSqlParameterSource("id", userId));
-        favorites.forEach(f -> jdbc.update("""
-                insert into app.user_favorite_movies (user_id, movie_id, rank, created_at) values (:id, :movie, :rank, :now)
-                """, new MapSqlParameterSource("id", userId).addValue("movie", f.movieId()).addValue("rank", f.rank())
-                .addValue("now", Timestamp.from(now))));
+        replaceRanked("user_favorite_movies", userId, favorites, now);
+    }
+
+    public void replaceLeastFavorites(UUID userId, List<Favorite> leastFavorites, Instant now) {
+        replaceRanked("user_least_favorite_movies", userId, leastFavorites, now);
+    }
+
+    /** {@code table} is one of the two constant names above, never caller input. */
+    private void replaceRanked(String table, UUID userId, List<Favorite> items, Instant now) {
+        jdbc.update("delete from app." + table + " where user_id = :id", new MapSqlParameterSource("id", userId));
+        items.forEach(f -> jdbc.update(
+                "insert into app." + table + " (user_id, movie_id, rank, created_at) values (:id, :movie, :rank, :now)",
+                new MapSqlParameterSource("id", userId).addValue("movie", f.movieId()).addValue("rank", f.rank())
+                        .addValue("now", Timestamp.from(now))));
     }
 }

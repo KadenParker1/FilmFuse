@@ -18,11 +18,12 @@ class PreferencesIntegrationTest extends AbstractTasteIntegrationTest {
     private static final String GENRES = "/api/v1/me/preferences/genres";
     private static final String MOODS = "/api/v1/me/preferences/moods";
     private static final String FAVORITES = "/api/v1/me/preferences/favorites";
+    private static final String LEAST_FAVORITES = "/api/v1/me/preferences/least-favorites";
 
     @Test
     void everyEndpointRequiresAToken() throws Exception {
         mockMvc.perform(get("/api/v1/moods")).andExpect(status().isUnauthorized());
-        for (String path : new String[] {GENRES, MOODS, FAVORITES}) {
+        for (String path : new String[] {GENRES, MOODS, FAVORITES, LEAST_FAVORITES}) {
             mockMvc.perform(put(path).contentType(MediaType.APPLICATION_JSON).content("[]"))
                     .andExpect(status().isUnauthorized());
         }

@@ -445,13 +445,16 @@ export interface MoodPrefDTO {
   score: number;
 }
 
-/** com.pm.filmfuse.user.dto.FavoriteDTO — PUT /me/preferences/favorites item; ranks start at 1. */
+/**
+ * com.pm.filmfuse.user.dto.FavoriteDTO — PUT /me/preferences/favorites item (rank 1 = top), or a
+ * PUT /me/preferences/least-favorites item (rank 1 = most disliked); ranks start at 1.
+ */
 export interface FavoriteDTO {
   movieId: number;
   rank: number;
 }
 
-/** com.pm.filmfuse.user.dto.FavoriteMovieDTO */
+/** com.pm.filmfuse.user.dto.FavoriteMovieDTO — a stored favourite or least favourite, by rank. */
 export interface FavoriteMovieDTO {
   rank: number;
   movie: MovieSummaryDTO;
@@ -465,6 +468,8 @@ export interface OnboardingStateDTO {
   genrePrefs: GenrePrefDTO[];
   moodPrefs: MoodPrefDTO[];
   favorites: FavoriteMovieDTO[];
+  /** Optional, 0–5, by rank (1 = most disliked); plays no part in completion. Always present. */
+  leastFavorites: FavoriteMovieDTO[];
   calibrationRatedCount: number;
   comfort: ComfortSettingsDTO;
 }

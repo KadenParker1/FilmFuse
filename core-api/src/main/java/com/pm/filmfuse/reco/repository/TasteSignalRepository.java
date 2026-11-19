@@ -19,7 +19,7 @@ import org.springframework.stereotype.Repository;
  * Reads every taste-signal table of one user for the vector build (the same tables the ML service
  * can read itself) and the "already seen" sets used to exclude movies from For you / calibration.
  *
- * <p>Order sent to the ML service: prefs in the fixed vector order, favourites by rank, ratings and
+ * <p>Order sent to the ML service: prefs in the fixed vector order, favourites and least favourites by rank, ratings and
  * id lists by movie id. A rating's {@code createdAt} is when its current score was given
  * ({@code ratings.updated_at}): re-rating overwrites the row.
  */
@@ -45,11 +45,14 @@ public class TasteSignalRepository {
         List<MlFavorite> favorites = jdbc.query(
                 "select movie_id, rank from app.user_favorite_movies where user_id = :id order by rank", id,
                 (rs, n) -> new MlFavorite(rs.getInt("movie_id"), rs.getInt("rank")));
+        List<MlFavorite> leastFavorites = jdbc.query(
+                "select movie_id, rank from app.user_least_favorite_movies where user_id = :id order by rank", id,
+                (rs, n) -> new MlFavorite(rs.getInt("movie_id"), rs.getInt("rank")));
         List<MlRating> ratings = jdbc.query(
                 "select movie_id, score, source, updated_at from app.ratings where user_id = :id order by movie_id", id,
                 (rs, n) -> new MlRating(rs.getInt("movie_id"), rs.getInt("score"), rs.getString("source"),
                         rs.getTimestamp("updated_at").toInstant().toString()));
-        return new TasteSignals(genres, moods, favorites, ratings, unseenIds(userId), dismissedIds(userId));
+        return new TasteSignals(genres, moods, favorites, leastFavorites, ratings, unseenIds(userId), dismissedIds(userId));
     }
 
     public List<Integer> ratedIds(UUID userId) {
@@ -68,23 +71,30 @@ public class TasteSignalRepository {
         return ids("select movie_id from app.user_favorite_movies where user_id = :id order by movie_id", userId);
     }
 
+    public List<Integer> leastFavoriteIds(UUID userId) {
+        return ids("select movie_id from app.user_least_favorite_movies where user_id = :id order by movie_id", userId);
+    }
+
     /**
-     * Never recommended in For you: rated, marked unseen, dismissed or a favourite (they already
-     * love it). Group sessions do not use this - a favourite there is a fair rewatch.
+     * Never recommended in For you: rated, marked unseen, dismissed, a favourite (they already love
+     * it) or a least favourite (seen and disliked). Group sessions do not use this - a favourite
+     * there is a fair rewatch.
      */
     public Set<Integer> forYouExclusions(UUID userId) {
         Set<Integer> excluded = new HashSet<>(ratedIds(userId));
         excluded.addAll(unseenIds(userId));
         excluded.addAll(dismissedIds(userId));
         excluded.addAll(favoriteIds(userId));
+        excluded.addAll(leastFavoriteIds(userId));
         return excluded;
     }
 
-    /** Never offered for calibration: rated, marked unseen or a favourite. */
+    /** Never offered for calibration: rated, marked unseen, a favourite or a least favourite. */
     public Set<Integer> calibrationSeen(UUID userId) {
         Set<Integer> seen = new HashSet<>(ratedIds(userId));
         seen.addAll(unseenIds(userId));
         seen.addAll(favoriteIds(userId));
+        seen.addAll(leastFavoriteIds(userId));
         return seen;
     }
 

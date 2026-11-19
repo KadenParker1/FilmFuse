@@ -1,6 +1,7 @@
 package com.pm.filmfuse.user.service;
 
 import com.pm.filmfuse.common.exception.BadRequestException;
+import com.pm.filmfuse.common.exception.FieldValidationException;
 import com.pm.filmfuse.movie.dto.MovieSummaryDTO;
 import com.pm.filmfuse.movie.service.MovieService;
 import com.pm.filmfuse.movie.service.MovieSummaries;
@@ -22,12 +23,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Stated taste - genre and mood scores (1-10) and all-time favourites. Used by onboarding and the
+ * Stated taste - genre and mood scores (1-10), all-time favourites and (optional) least favourites.
+ * A movie is never in both favourite lists. Used by onboarding and the
  * Taste editor alike; every write replaces the whole list and marks the vector dirty
  * ({@code TASTE_EDIT}) in the same transaction. Lists come back in the fixed vector order
  * (favourites by rank).
@@ -36,6 +39,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class TastePreferencesService {
 
     public static final int MAX_FAVORITES = 10;
+    public static final int MAX_LEAST_FAVORITES = 5;
 
     static final String SCORE_RANGE = "Every score must be a whole number from 1 to 10.";
     static final String UNKNOWN_GENRE = "Unknown genre: ";
@@ -45,6 +49,11 @@ public class TastePreferencesService {
     static final String TOO_MANY_FAVORITES = "Pick at most " + MAX_FAVORITES + " favourites.";
     static final String FAVORITE_FIELDS = "Each favourite needs a movieId and a rank of 1 or more.";
     static final String DUPLICATE_FAVORITE = "Each movie and each rank can appear only once.";
+    static final String TOO_MANY_LEAST_FAVORITES = "Pick at most " + MAX_LEAST_FAVORITES + " least favourites.";
+    static final String LEAST_FAVORITE_FIELDS = "Each least favourite needs a movieId and a rank of 1 or more.";
+    static final String OVERLAP = "A movie can't be both a favourite and a least favourite.";
+    static final String IN_FAVORITES = "Already in your favourites: ";
+    static final String IN_LEAST_FAVORITES = "Already in your least favourites: ";
     static final String NULL_ITEM = "The list cannot contain null items.";
     static final String TOO_MANY_GENRES = "Send at most one score per genre.";
     static final String TOO_MANY_MOODS = "Send at most one score per mood.";
@@ -87,6 +96,11 @@ public class TastePreferencesService {
 
     public List<FavoriteMovieDTO> favorites(UUID userId) {
         return readTx.execute(status -> toFavoriteDTOs(repository.favorites(userId)));
+    }
+
+    /** By rank (1 = most disliked). */
+    public List<FavoriteMovieDTO> leastFavorites(UUID userId) {
+        return readTx.execute(status -> toFavoriteDTOs(repository.leastFavorites(userId)));
     }
 
     // ------------------------------------------------------------------------------- writes
@@ -145,12 +159,44 @@ public class TastePreferencesService {
 
     /**
      * 0-{@value #MAX_FAVORITES} favourites with unique movies and unique ranks (1+). A movie not yet
-     * cached is fetched from the catalog first (404 when the catalog does not know it).
+     * cached is fetched from the catalog first (404 when the catalog does not know it). 400 with
+     * {@code fieldErrors.favorites} when a movie is already a least favourite.
      */
     public List<FavoriteMovieDTO> replaceFavorites(UUID userId, List<FavoriteDTO> request) {
+        List<Favorite> favorites = validateRanked(request, MAX_FAVORITES, TOO_MANY_FAVORITES, FAVORITE_FIELDS);
+        return tx.execute(status -> {
+            repository.lockUser(userId);
+            rejectOverlap(favorites, repository.leastFavorites(userId), "favorites", IN_LEAST_FAVORITES);
+            repository.replaceFavorites(userId, favorites, clock.instant());
+            dirtyMarker.markDirty(userId, VectorChangeReason.TASTE_EDIT);
+            return toFavoriteDTOs(favorites);
+        });
+    }
+
+    /**
+     * 0-{@value #MAX_LEAST_FAVORITES} least favourites (optional; rank 1 = most disliked), validated
+     * like favourites. 400 with {@code fieldErrors.leastFavorites} when a movie is already a favourite.
+     */
+    public List<FavoriteMovieDTO> replaceLeastFavorites(UUID userId, List<FavoriteDTO> request) {
+        List<Favorite> leastFavorites = validateRanked(request, MAX_LEAST_FAVORITES, TOO_MANY_LEAST_FAVORITES,
+                LEAST_FAVORITE_FIELDS);
+        return tx.execute(status -> {
+            repository.lockUser(userId);
+            rejectOverlap(leastFavorites, repository.favorites(userId), "leastFavorites", IN_FAVORITES);
+            repository.replaceLeastFavorites(userId, leastFavorites, clock.instant());
+            dirtyMarker.markDirty(userId, VectorChangeReason.TASTE_EDIT);
+            return toFavoriteDTOs(leastFavorites);
+        });
+    }
+
+    /**
+     * Shape checks (count, fields, unique movies and ranks), then caches unknown movies - before any
+     * transaction, so it never waits on TMDB. Sorted by rank.
+     */
+    private List<Favorite> validateRanked(List<FavoriteDTO> request, int max, String tooMany, String fields) {
         List<FavoriteDTO> items = requireList(request);
-        if (items.size() > MAX_FAVORITES) {
-            throw new BadRequestException(TOO_MANY_FAVORITES);
+        if (items.size() > max) {
+            throw new BadRequestException(tooMany);
         }
         Set<Integer> movies = new HashSet<>();
         Set<Integer> ranks = new HashSet<>();
@@ -159,24 +205,31 @@ public class TastePreferencesService {
                 throw new BadRequestException(NULL_ITEM);
             }
             if (favorite.movieId() == null || favorite.movieId() < 1 || favorite.rank() == null || favorite.rank() < 1) {
-                throw new BadRequestException(FAVORITE_FIELDS);
+                throw new BadRequestException(fields);
             }
             if (!movies.add(favorite.movieId()) || !ranks.add(favorite.rank())) {
                 throw new BadRequestException(DUPLICATE_FAVORITE);
             }
         }
-        // Catalog calls happen before the transaction, so it never waits on TMDB.
         movieService.ensureCached(movies);
-        List<Favorite> favorites = items.stream()
+        return items.stream()
                 .map(f -> new Favorite(f.rank(), f.movieId()))
                 .sorted(Comparator.comparingInt(Favorite::rank))
                 .toList();
-        return tx.execute(status -> {
-            repository.lockUser(userId);
-            repository.replaceFavorites(userId, favorites, clock.instant());
-            dirtyMarker.markDirty(userId, VectorChangeReason.TASTE_EDIT);
-            return toFavoriteDTOs(favorites);
-        });
+    }
+
+    /** Checked under the user lock, so two concurrent writes can't put one movie in both lists. */
+    private void rejectOverlap(List<Favorite> incoming, List<Favorite> other, String field, String prefix) {
+        Set<Integer> otherIds = other.stream().map(Favorite::movieId).collect(Collectors.toSet());
+        List<Integer> clashes = incoming.stream().map(Favorite::movieId).filter(otherIds::contains).toList();
+        if (clashes.isEmpty()) {
+            return;
+        }
+        Map<Integer, MovieSummaryDTO> movies = movieSummaries.of(clashes);
+        String names = clashes.stream()
+                .map(id -> movies.containsKey(id) ? movies.get(id).title() : String.valueOf(id))
+                .collect(Collectors.joining(", "));
+        throw new FieldValidationException(OVERLAP, Map.of(field, prefix + names + "."));
     }
 
     // ------------------------------------------------------------------------------- helpers

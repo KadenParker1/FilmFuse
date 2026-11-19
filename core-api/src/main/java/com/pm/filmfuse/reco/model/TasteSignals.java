@@ -11,6 +11,7 @@ public record TasteSignals(
         List<MlGenrePref> genrePrefs,
         List<MlMoodPref> moodPrefs,
         List<MlFavorite> favorites,
+        List<MlFavorite> leastFavorites,
         List<MlRating> ratings,
         List<Integer> unseen,
         List<Integer> dismissals) {

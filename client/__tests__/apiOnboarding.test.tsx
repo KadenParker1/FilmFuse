@@ -12,10 +12,12 @@ import {
   useOnboardingState,
   useSaveFavorites,
   useSaveGenrePrefs,
+  useSaveLeastFavorites,
   useSaveMoodPrefs,
   useSetOnboardingStep,
   useSubmitCalibration,
 } from '../api/onboarding';
+import { ApiError } from '../lib/apiClient';
 import { queryKeys } from '../lib/queryKeys';
 import { makeMovie, makeOnboardingState, makeProfile, makeTasteProfile } from '../test-utils/fixtures';
 import { createTestQueryClient, jsonResponse, renderHookWithClient } from '../test-utils/render';
@@ -139,6 +141,65 @@ describe('preference saves', () => {
     expect(body()).toEqual([{ movieId: 5, rank: 1 }]);
     expect(onboarding(client)?.favorites).toEqual(favorites);
     expect(taste(client)?.status).toBe('REBUILDING');
+  });
+
+  it('useSaveLeastFavorites PUTs ranks and caches the returned movies', async () => {
+    const client = seeded(makeOnboardingState({ favorites: [{ rank: 1, movie: makeMovie({ id: 1 }) }] }));
+    const leastFavorites = [
+      { rank: 1, movie: makeMovie({ id: 7 }) },
+      { rank: 2, movie: makeMovie({ id: 8 }) },
+    ];
+    fetchMock.mockResolvedValue(jsonResponse(200, leastFavorites));
+    const { result } = await renderHookWithClient(() => useSaveLeastFavorites(), client);
+    await act(async () => {
+      await result.current.mutateAsync([
+        { movieId: 7, rank: 1 },
+        { movieId: 8, rank: 2 },
+      ]);
+    });
+    expect(call().url).toBe(`${BASE}/me/preferences/least-favorites`);
+    expect(call().init.method).toBe('PUT');
+    expect(body()).toEqual([
+      { movieId: 7, rank: 1 },
+      { movieId: 8, rank: 2 },
+    ]);
+    expect(onboarding(client)?.leastFavorites).toEqual(leastFavorites);
+    // Favourites are left alone.
+    expect(onboarding(client)?.favorites).toHaveLength(1);
+    expect(taste(client)?.status).toBe('REBUILDING');
+  });
+
+  it('useSaveLeastFavorites clears the list with []', async () => {
+    const client = seeded(makeOnboardingState({ leastFavorites: [{ rank: 1, movie: makeMovie({ id: 7 }) }] }));
+    fetchMock.mockResolvedValue(jsonResponse(200, []));
+    const { result } = await renderHookWithClient(() => useSaveLeastFavorites(), client);
+    await act(async () => {
+      await result.current.mutateAsync([]);
+    });
+    expect(body()).toEqual([]);
+    expect(onboarding(client)?.leastFavorites).toEqual([]);
+  });
+
+  it('useSaveLeastFavorites surfaces the overlap error without touching the cache', async () => {
+    const saved = [{ rank: 1, movie: makeMovie({ id: 7 }) }];
+    const client = seeded(makeOnboardingState({ leastFavorites: saved }));
+    fetchMock.mockResolvedValue(
+      jsonResponse(400, {
+        message: "A movie can't be both a favourite and a least favourite.",
+        fieldErrors: { leastFavorites: 'Already in your favourites: Heat.' },
+      }),
+    );
+    const { result } = await renderHookWithClient(() => useSaveLeastFavorites(), client);
+    let caught: unknown;
+    await act(async () => {
+      await result.current.mutateAsync([{ movieId: 5, rank: 1 }]).catch((e: unknown) => {
+        caught = e;
+      });
+    });
+    expect(caught).toBeInstanceOf(ApiError);
+    expect((caught as ApiError).fieldErrors).toEqual({ leastFavorites: 'Already in your favourites: Heat.' });
+    expect(onboarding(client)?.leastFavorites).toEqual(saved);
+    expect(taste(client)?.status).toBe('FRESH');
   });
 
   it('does not mark taste rebuilding while there is no vector yet (status stays NONE)', async () => {

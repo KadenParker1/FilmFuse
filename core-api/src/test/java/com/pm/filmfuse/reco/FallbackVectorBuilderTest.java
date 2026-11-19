@@ -25,6 +25,7 @@ class FallbackVectorBuilderTest {
                 List.of(new MlGenrePref(37, 1), new MlGenrePref(28, 10)),
                 List.of(new MlMoodPref("feel-good", 2), new MlMoodPref("mind-bending", 9)),
                 List.of(new MlFavorite(603, 1)),
+                List.of(new MlFavorite(278, 1)),
                 List.of(new MlRating(603, 10, "quick_rate", "2026-10-16T00:00:00Z")),
                 List.of(13), List.of(550));
 
@@ -44,7 +45,7 @@ class FallbackVectorBuilderTest {
     @Test
     void noPrefsIsAllNeutral() {
         MlUserVectorResponse response = new FallbackVectorBuilder().build(new MlUserVectorRequest(UUID.randomUUID(),
-                null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of()));
+                null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of()));
         assertThat(response.vector().interpretable()).hasSize(27).containsOnly(5.0);
     }
 }

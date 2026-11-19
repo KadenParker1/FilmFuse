@@ -400,13 +400,13 @@ describe('step 3: Favourites', () => {
     expect(continueButton()).toBeEnabled();
 
     // Reorder: Heat to the top.
-    await fireEvent.press(screen.getByRole('button', { name: 'Move Heat up' }));
-    await fireEvent.press(screen.getByRole('button', { name: 'Move Heat up' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Move Heat up in favourites' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Move Heat up in favourites' }));
     expect(ranked()).toHaveLength(3);
     expect(screen.getByTestId('favorite-1')).toHaveTextContent(/Heat/);
-    expect(screen.getByRole('button', { name: 'Move Heat up' })).toBeDisabled();
-    await fireEvent.press(screen.getByRole('button', { name: 'Move Pop 2 down' }));
-    expect(screen.getByRole('button', { name: 'Move Pop 2 down' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Move Heat up in favourites' })).toBeDisabled();
+    await fireEvent.press(screen.getByRole('button', { name: 'Move Pop 2 down in favourites' }));
+    expect(screen.getByRole('button', { name: 'Move Pop 2 down in favourites' })).toBeDisabled();
 
     await fireEvent.press(continueButton());
     await expectAdvancedTo(api, 4);
@@ -428,7 +428,7 @@ describe('step 3: Favourites', () => {
     expect(screen.getByTestId('favorites-count')).toHaveTextContent('10 of 10 picked');
     expect(screen.getByRole('checkbox', { name: /^Pop 1/ })).not.toBeChecked();
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Remove Fav 59' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Remove Fav 59 from favourites' }));
     expect(screen.getByTestId('favorites-count')).toHaveTextContent('9 of 10 picked');
     await pick('Pop 1');
     await pick('Pop 1');
@@ -456,6 +456,224 @@ describe('step 3: Favourites', () => {
     ]);
     await fireEvent.changeText(screen.getByLabelText('Search favourite movies'), 'zzz');
     await waitFor(() => expect(screen.getByText('Nothing found for “zzz”.')).toBeOnTheScreen());
+  });
+
+  describe('least favourites (optional)', () => {
+    const many = Array.from({ length: 10 }, (_, i) => makeMovie({ id: i + 1, title: `Pop ${i + 1}`, releaseYear: 2001 + i }));
+    const leastRoutes: Route[] = [
+      { path: '/movies/popular', body: { items: many, nextCursor: null } },
+      { path: '/movies/search?q=heat', body: { items: [makeMovie({ id: 100, title: 'Heat', releaseYear: 1995 })], nextCursor: null } },
+      { method: 'PUT', path: '/me/preferences/favorites', body: [] },
+      { method: 'PUT', path: '/me/preferences/least-favorites', body: [] },
+    ];
+    const favCheckbox = (title: string) => screen.getByRole('checkbox', { name: new RegExp(`^${title} \\(`) });
+    const leastCheckbox = (title: string) => screen.getByRole('checkbox', { name: new RegExp(`^Couldn’t stand ${title} \\(`) });
+    const pickFavorites = async (...titles: string[]) => {
+      for (const t of titles) await fireEvent.press(favCheckbox(t));
+    };
+    const pickLeast = async (...titles: string[]) => {
+      for (const t of titles) await fireEvent.press(leastCheckbox(t));
+    };
+    const expandLeast = async () => {
+      await fireEvent.press(screen.getByRole('button', { name: 'Add movies you couldn’t stand' }));
+      await waitFor(() => expect(screen.getByTestId('least-favorites-results')).toBeOnTheScreen());
+    };
+
+    it('starts collapsed and empty, says why it asks, and continues with none', async () => {
+      const { api } = await open(3, makeOnboardingState({ step: 3 }), leastRoutes);
+      await waitFor(() => expect(screen.getByTestId('favorites-results')).toBeOnTheScreen());
+      expect(screen.getByText('Any movies you couldn’t stand?')).toBeOnTheScreen();
+      expect(screen.getByTestId('least-favorites-section')).toHaveTextContent(/Optional, up to 5\. It helps us steer away from what you don’t like/);
+      expect(screen.queryByTestId('least-favorites-count')).toBeNull();
+      expect(screen.queryByLabelText('Search movies you couldn’t stand')).toBeNull();
+
+      await pickFavorites('Pop 1', 'Pop 2', 'Pop 3');
+      expect(continueButton()).toBeEnabled();
+      await fireEvent.press(continueButton());
+      await expectAdvancedTo(api, 4);
+      expect(api.callsTo('PUT', '/me/preferences/favorites')).toHaveLength(1);
+      expect(api.callsTo('PUT', '/me/preferences/least-favorites')).toHaveLength(0);
+    });
+
+    it('expanded but left empty still continues without saving least favourites', async () => {
+      const { api } = await open(3, makeOnboardingState({ step: 3 }), leastRoutes);
+      await waitFor(() => expect(screen.getByTestId('favorites-results')).toBeOnTheScreen());
+      await expandLeast();
+      expect(screen.getByTestId('least-favorites-count')).toHaveTextContent('0 of 5 picked');
+      expect(screen.queryByTestId('least-favorite-1')).toBeNull();
+      await pickFavorites('Pop 1', 'Pop 2', 'Pop 3');
+      await fireEvent.press(continueButton());
+      await expectAdvancedTo(api, 4);
+      expect(api.callsTo('PUT', '/me/preferences/least-favorites')).toHaveLength(0);
+    });
+
+    it('adds, reorders, removes, stops at 5, then saves both lists in rank order', async () => {
+      const { api } = await open(3, makeOnboardingState({ step: 3 }), leastRoutes);
+      await waitFor(() => expect(screen.getByTestId('favorites-results')).toBeOnTheScreen());
+      await pickFavorites('Pop 1', 'Pop 2', 'Pop 3');
+      await expandLeast();
+
+      await pickLeast('Pop 4', 'Pop 5', 'Pop 6', 'Pop 7', 'Pop 8');
+      expect(screen.getByTestId('least-favorites-count')).toHaveTextContent('5 of 5 picked');
+      expect(screen.getByTestId('least-favorites-hint')).toHaveTextContent('That’s the maximum of 5. Remove one to swap it.');
+      expect(leastCheckbox('Pop 4')).toBeChecked();
+      // Full: a sixth pick is ignored.
+      await pickLeast('Pop 9');
+      expect(screen.getByTestId('least-favorites-count')).toHaveTextContent('5 of 5 picked');
+      expect(leastCheckbox('Pop 9')).not.toBeChecked();
+
+      // Remove from the list, and unpick from the grid.
+      await fireEvent.press(screen.getByRole('button', { name: 'Remove Pop 4 from least favourites' }));
+      await pickLeast('Pop 7');
+      expect(screen.getByTestId('least-favorites-count')).toHaveTextContent('3 of 5 picked');
+      expect(screen.queryByTestId('least-favorites-hint')).toBeNull();
+
+      // Search adds too.
+      await fireEvent.changeText(screen.getByLabelText('Search movies you couldn’t stand'), 'heat');
+      await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Couldn’t stand Heat (1995)' })).toBeOnTheScreen());
+      await fireEvent.press(screen.getByRole('checkbox', { name: 'Couldn’t stand Heat (1995)' }));
+      // The favourites search is untouched.
+      expect(screen.getByLabelText('Search favourite movies')).toHaveDisplayValue('');
+
+      // Reorder: Heat to the top; the labels name the list.
+      await fireEvent.press(screen.getByRole('button', { name: 'Move Heat up in least favourites' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Move Heat up in least favourites' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Move Heat up in least favourites' }));
+      expect(screen.getByTestId('least-favorite-1')).toHaveTextContent(/Heat/);
+      expect(screen.getByRole('button', { name: 'Move Heat up in least favourites' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Move Pop 1 up in favourites' })).toBeDisabled();
+
+      await fireEvent.press(continueButton());
+      await expectAdvancedTo(api, 4);
+      expect(api.callsTo('PUT', '/me/preferences/favorites')[0]?.body).toEqual([
+        { movieId: 1, rank: 1 },
+        { movieId: 2, rank: 2 },
+        { movieId: 3, rank: 3 },
+      ]);
+      expect(api.callsTo('PUT', '/me/preferences/least-favorites')[0]?.body).toEqual([
+        { movieId: 100, rank: 1 },
+        { movieId: 5, rank: 2 },
+        { movieId: 6, rank: 3 },
+        { movieId: 8, rank: 4 },
+      ]);
+      // Favourites are saved first.
+      const order = api.calls().filter((c) => c.method === 'PUT').map((c) => c.path);
+      expect(order.slice(0, 2)).toEqual(['/me/preferences/favorites', '/me/preferences/least-favorites']);
+    });
+
+    it('won’t put a movie in both lists: it shows disabled with the reason', async () => {
+      await open(3, makeOnboardingState({ step: 3 }), leastRoutes);
+      await waitFor(() => expect(screen.getByTestId('favorites-results')).toBeOnTheScreen());
+      await pickFavorites('Pop 1');
+      await expandLeast();
+
+      const blocked = screen.getByRole('checkbox', { name: 'Couldn’t stand Pop 1 (2001), in favourites' });
+      expect(blocked).toBeDisabled();
+      await fireEvent.press(blocked);
+      expect(screen.getByTestId('least-favorites-count')).toHaveTextContent('0 of 5 picked');
+
+      await pickLeast('Pop 2');
+      const blockedFav = screen.getByRole('checkbox', { name: 'Pop 2 (2002), in least favourites' });
+      expect(blockedFav).toBeDisabled();
+      await fireEvent.press(blockedFav);
+      expect(screen.getByTestId('favorites-count')).toHaveTextContent('1 of 10 picked');
+
+      // Removing it from favourites frees it up for the other list.
+      await fireEvent.press(screen.getByRole('button', { name: 'Remove Pop 1 from favourites' }));
+      expect(leastCheckbox('Pop 1')).toBeEnabled();
+      await pickLeast('Pop 1');
+      expect(screen.getByTestId('least-favorites-count')).toHaveTextContent('2 of 5 picked');
+    });
+
+    it('shows the server’s overlap error and stays on the step', async () => {
+      const { api } = await open(3, makeOnboardingState({ step: 3 }), [
+        {
+          method: 'PUT',
+          path: '/me/preferences/least-favorites',
+          status: 400,
+          body: {
+            message: "A movie can't be both a favourite and a least favourite.",
+            fieldErrors: { leastFavorites: 'Already in your favourites: Pop 9.' },
+          },
+        },
+        ...leastRoutes,
+      ]);
+      await waitFor(() => expect(screen.getByTestId('favorites-results')).toBeOnTheScreen());
+      await pickFavorites('Pop 1', 'Pop 2', 'Pop 3');
+      await expandLeast();
+      await pickLeast('Pop 9');
+      await fireEvent.press(continueButton());
+      await waitFor(() => expect(screen.getByTestId('onboarding-error')).toHaveTextContent('Already in your favourites: Pop 9.'));
+      expect(api.callsTo('PUT', '/me/onboarding/step')).toHaveLength(0);
+      // Editing either list clears it.
+      await pickLeast('Pop 9');
+      expect(screen.queryByTestId('onboarding-error')).toBeNull();
+    });
+
+    it('resumes with saved least favourites, expanded and in rank order', async () => {
+      const state = makeOnboardingState({
+        step: 3,
+        favorites: [1, 2, 3].map((id) => ({ rank: id, movie: many[id - 1]! })),
+        leastFavorites: [
+          { rank: 2, movie: many[4]! },
+          { rank: 1, movie: many[5]! },
+        ],
+      });
+      const { api } = await open(3, state, leastRoutes);
+      await waitFor(() => expect(screen.getByTestId('least-favorites-results')).toBeOnTheScreen());
+      expect(screen.queryByRole('button', { name: 'Add movies you couldn’t stand' })).toBeNull();
+      expect(screen.getByTestId('least-favorites-count')).toHaveTextContent('2 of 5 picked');
+      expect(screen.getByTestId('least-favorite-1')).toHaveTextContent(/Pop 6/);
+      expect(screen.getByTestId('least-favorite-2')).toHaveTextContent(/Pop 5/);
+      expect(leastCheckbox('Pop 6')).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Pop 6 (2006), in least favourites' })).toBeDisabled();
+
+      // Clearing them sends [].
+      await fireEvent.press(screen.getByRole('button', { name: 'Remove Pop 6 from least favourites' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Remove Pop 5 from least favourites' }));
+      await fireEvent.press(continueButton());
+      await expectAdvancedTo(api, 4);
+      expect(api.callsTo('PUT', '/me/preferences/least-favorites')[0]?.body).toEqual([]);
+    });
+
+    it('resumes unchanged without re-saving least favourites', async () => {
+      const state = makeOnboardingState({
+        step: 3,
+        favorites: [1, 2, 3].map((id) => ({ rank: id, movie: many[id - 1]! })),
+        leastFavorites: [{ rank: 1, movie: many[5]! }],
+      });
+      const { api } = await open(3, state, leastRoutes);
+      await waitFor(() => expect(screen.getByTestId('least-favorites-results')).toBeOnTheScreen());
+      await fireEvent.press(continueButton());
+      await expectAdvancedTo(api, 4);
+      expect(api.callsTo('PUT', '/me/preferences/least-favorites')).toHaveLength(0);
+    });
+
+    it('moving a saved least favourite into favourites saves the least favourites first', async () => {
+      const state = makeOnboardingState({
+        step: 3,
+        favorites: [1, 2, 3].map((id) => ({ rank: id, movie: many[id - 1]! })),
+        leastFavorites: [
+          { rank: 1, movie: many[5]! },
+          { rank: 2, movie: many[6]! },
+        ],
+      });
+      const { api } = await open(3, state, leastRoutes);
+      await waitFor(() => expect(screen.getByTestId('least-favorites-results')).toBeOnTheScreen());
+      await fireEvent.press(screen.getByRole('button', { name: 'Remove Pop 6 from least favourites' }));
+      await pickFavorites('Pop 6');
+      await fireEvent.press(continueButton());
+      await expectAdvancedTo(api, 4);
+      const puts = api.calls().filter((c) => c.method === 'PUT' && c.path.startsWith('/me/preferences'));
+      expect(puts).toEqual([
+        { method: 'PUT', path: '/me/preferences/least-favorites', body: [{ movieId: 7, rank: 1 }] },
+        {
+          method: 'PUT',
+          path: '/me/preferences/favorites',
+          body: [1, 2, 3, 6].map((movieId, i) => ({ movieId, rank: i + 1 })),
+        },
+      ]);
+    });
   });
 });
 

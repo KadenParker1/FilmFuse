@@ -40,9 +40,22 @@ public class PreferencesController {
         return preferences.replaceMoodPrefs(caller.getId(), request);
     }
 
-    /** 0-10 favourites, unique movies and ranks. 404 for a movie the catalog does not know. */
+    /**
+     * 0-10 favourites, unique movies and ranks. 404 for a movie the catalog does not know; 400 with
+     * {@code fieldErrors.favorites} for a movie that is already a least favourite.
+     */
     @PutMapping("/favorites")
     public List<FavoriteMovieDTO> favorites(@CurrentUser Profile caller, @RequestBody List<FavoriteDTO> request) {
         return preferences.replaceFavorites(caller.getId(), request);
+    }
+
+    /**
+     * 0-5 least favourites (optional), unique movies and ranks; rank 1 = most disliked. 404 for a
+     * movie the catalog does not know; 400 with {@code fieldErrors.leastFavorites} for a movie that
+     * is already a favourite.
+     */
+    @PutMapping("/least-favorites")
+    public List<FavoriteMovieDTO> leastFavorites(@CurrentUser Profile caller, @RequestBody List<FavoriteDTO> request) {
+        return preferences.replaceLeastFavorites(caller.getId(), request);
     }
 }

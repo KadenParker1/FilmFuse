@@ -70,6 +70,15 @@ class CalibrationIntegrationTest extends AbstractTasteIntegrationTest {
     }
 
     @Test
+    void leastFavouritesAreNeverOffered() throws Exception {
+        TestUser user = user();
+        int other = topMovie(28, "PG");
+        int least = topMovie(28, "PG"); // the most popular action movie: first in line without the exclusion
+        setLeastFavorites(user, least);
+        assertThat(next(user, 30)).doesNotContain(least).contains(other);
+    }
+
+    @Test
     void theFallbackRoundRobinsAcrossGenres() throws Exception {
         TestUser user = user();
         int action1 = topMovie(28, "PG");

@@ -117,6 +117,22 @@ class ForYouIntegrationTest extends AbstractTasteIntegrationTest {
     }
 
     @Test
+    void leastFavouritesAreNeverRecommended() throws Exception {
+        TestUser user = userWithVector();
+        int genre = uniqueGenre();
+        int least = topMovie(genre, "PG");
+        int eligible = topMovie(genre, "PG");
+        setLeastFavorites(user, least);
+        buildVector(user);
+        mlReturns(least, eligible);
+
+        assertThat(forYouIds(user)).containsExactly(eligible);
+        MlUserRecommendationRequest request = lastRequest();
+        assertThat(request.candidateMovieIds()).contains(eligible).doesNotContain(least);
+        assertThat(request.excludeMovieIds()).contains(least);
+    }
+
+    @Test
     void theFallbackSkipsFavouritesToo() throws Exception {
         TestUser user = user();
         int genre = uniqueGenre();

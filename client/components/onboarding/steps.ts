@@ -21,6 +21,8 @@ export const GENRE_HIGH_SCORE = 8;
 
 export const FAVORITES_MIN = 3;
 export const FAVORITES_MAX = 10;
+/** Least favourites are optional: 0 up to this many. */
+export const LEAST_FAVORITES_MAX = 5;
 
 /** Calibration: "Done" after this many rated, or skippable after this many cards seen. */
 export const CALIBRATION_MIN_RATED = 10;

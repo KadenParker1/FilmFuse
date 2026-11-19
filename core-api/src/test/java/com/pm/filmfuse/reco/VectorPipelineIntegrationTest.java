@@ -249,9 +249,12 @@ class VectorPipelineIntegrationTest extends AbstractTasteIntegrationTest {
         int unseen = movie(genre, "PG", 1);
         int dismissed = movie(genre, "PG", 1);
         int favorite = movie(genre, "PG", 1);
+        int leastA = movie(genre, "PG", 1);
+        int leastB = movie(genre, "PG", 1);
         setGenres(user, "[{\"genreId\": 878, \"score\": 9}, {\"genreId\": 28, \"score\": 4}]");
         setMoods(user, "[{\"moodTag\": \"cozy\", \"score\": 7}]");
         setFavorites(user, favorite);
+        setLeastFavorites(user, leastB, leastA);
         rate(user, quick, 6);
         rate(user, watched, "{\"score\": 9, \"source\": \"POST_WATCH\"}").andExpect(status().isOk());
         postJson(user, "/api/v1/me/ratings/batch", "[{\"movieId\": " + swiped + ", \"score\": 2},"
@@ -281,11 +284,12 @@ class VectorPipelineIntegrationTest extends AbstractTasteIntegrationTest {
                   "genrePrefs": [{"genreId": 28, "score": 4}, {"genreId": 878, "score": 9}],
                   "moodPrefs": [{"moodTag": "cozy", "score": 7}],
                   "favorites": [{"movieId": %d, "rank": 1}],
+                  "leastFavorites": [{"movieId": %d, "rank": 1}, {"movieId": %d, "rank": 2}],
                   "ratings": [%s],
                   "unseen": [%d],
                   "dismissals": [%d]
                 }
-                """.formatted(user.id(), previous, favorite, ratingsJson(user.id(), Map.of(
+                """.formatted(user.id(), previous, favorite, leastB, leastA, ratingsJson(user.id(), Map.of(
                 quick, "{\"movieId\": %d, \"score\": 7, \"source\": \"quick_rate\", \"createdAt\": \"%s\"}",
                 watched, "{\"movieId\": %d, \"score\": 9, \"source\": \"post_watch\", \"createdAt\": \"%s\"}",
                 swiped, "{\"movieId\": %d, \"score\": 2, \"source\": \"onboarding_swipe\", \"createdAt\": \"%s\"}")),

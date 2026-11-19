@@ -110,6 +110,16 @@ public abstract class AbstractTasteIntegrationTest extends AbstractGroupIntegrat
         putJson(user, "/api/v1/me/preferences/favorites", json.append("]").toString()).andExpect(status().isOk());
     }
 
+    /** Least favourites in the given order, ranked 1, 2, ... */
+    protected void setLeastFavorites(TestUser user, int... movieIds) throws Exception {
+        StringBuilder json = new StringBuilder("[");
+        for (int i = 0; i < movieIds.length; i++) {
+            json.append(i == 0 ? "" : ",").append("{\"movieId\": ").append(movieIds[i]).append(", \"rank\": ")
+                    .append(i + 1).append("}");
+        }
+        putJson(user, "/api/v1/me/preferences/least-favorites", json.append("]").toString()).andExpect(status().isOk());
+    }
+
     /** Genre prefs that satisfy onboarding completion: 5 genres, 3 of them 8+. */
     protected static final String QUALIFYING_GENRES = """
             [{"genreId": 28, "score": 9}, {"genreId": 878, "score": 8}, {"genreId": 10749, "score": 8},

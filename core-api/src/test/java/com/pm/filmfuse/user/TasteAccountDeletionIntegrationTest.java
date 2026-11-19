@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class TasteAccountDeletionIntegrationTest extends AbstractTasteIntegrationTest {
 
     private static final String[] TABLES = {
-            "user_genre_prefs", "user_mood_prefs", "user_favorite_movies", "ratings", "rating_unseen",
+            "user_genre_prefs", "user_mood_prefs", "user_favorite_movies", "user_least_favorite_movies", "ratings", "rating_unseen",
             "rec_dismissals", "user_interest_vectors", "user_interest_vector_history"};
 
     private void fill(TestUser user) throws Exception {
@@ -20,6 +20,7 @@ class TasteAccountDeletionIntegrationTest extends AbstractTasteIntegrationTest {
         setGenres(user, "[{\"genreId\": 28, \"score\": 9}]");
         setMoods(user, "[{\"moodTag\": \"cozy\", \"score\": 9}]");
         setFavorites(user, movie(genre, "PG", 1));
+        setLeastFavorites(user, movie(genre, "PG", 1));
         rate(user, movie(genre, "PG", 1), 7);
         postJson(user, "/api/v1/me/ratings/batch", "[{\"movieId\": " + movie(genre, "PG", 1) + ", \"unseen\": true}]")
                 .andExpect(status().isNoContent());

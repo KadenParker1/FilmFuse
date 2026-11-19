@@ -76,6 +76,7 @@ public class OnboardingService {
                 preferences.genrePrefs(profile.getId()),
                 preferences.moodPrefs(profile.getId()),
                 preferences.favorites(profile.getId()),
+                preferences.leastFavorites(profile.getId()),
                 ratingService.calibrationRatedCount(profile.getId()),
                 comfortSettings.get(profile.getId()));
     }

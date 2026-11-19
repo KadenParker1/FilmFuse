@@ -187,6 +187,7 @@ class MlServiceClientTest {
                           "genrePrefs": [{"genreId": 28, "score": 9}],
                           "moodPrefs": [{"moodTag": "cozy", "score": 7}],
                           "favorites": [{"movieId": 603, "rank": 1}],
+                          "leastFavorites": [{"movieId": 12, "rank": 1}, {"movieId": 11, "rank": 2}],
                           "ratings": [{"movieId": 550, "score": 8, "source": "post_watch",
                                        "createdAt": "2026-10-16T09:30:00.123456Z"}],
                           "unseen": [13],
@@ -200,6 +201,7 @@ class MlServiceClientTest {
         MlUserVectorResponse response = client.userVector(new MlUserVectorRequest(A,
                 new MlUserVector(List.of(5.0, 6.0), List.of(0.1)),
                 List.of(new MlGenrePref(28, 9)), List.of(new MlMoodPref("cozy", 7)), List.of(new MlFavorite(603, 1)),
+                List.of(new MlFavorite(12, 1), new MlFavorite(11, 2)),
                 List.of(new MlRating(550, 8, "post_watch", "2026-10-16T09:30:00.123456Z")), List.of(13), List.of(278)));
 
         server.verify();
@@ -212,19 +214,20 @@ class MlServiceClientTest {
         server.expect(requestTo(BASE + "/internal/user-vectors"))
                 .andExpect(content().json("""
                         {"userId": "11111111-1111-1111-1111-111111111111", "previousVector": null, "genrePrefs": [],
-                         "moodPrefs": [], "favorites": [], "ratings": [], "unseen": [], "dismissals": []}
+                         "moodPrefs": [], "favorites": [], "leastFavorites": [], "ratings": [], "unseen": [], "dismissals": []}
                         """, JsonCompareMode.STRICT))
                 .andRespond(withSuccess("""
                         {"vector": {"interpretable": [5.0]}, "dim": 1, "modelVersion": "m-1"}
                         """, MediaType.APPLICATION_JSON));
-        client.userVector(new MlUserVectorRequest(A, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of()));
+        client.userVector(new MlUserVectorRequest(A, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
+                List.of()));
         server.verify();
     }
 
     @Test
     void aVectorResponseWithoutAVectorOrModelVersionIsAnMlServiceException() {
         MlUserVectorRequest request = new MlUserVectorRequest(A, null, List.of(), List.of(), List.of(), List.of(),
-                List.of(), List.of());
+                List.of(), List.of(), List.of());
         for (String body : List.of("{}", "{\"vector\": {\"interpretable\": []}, \"dim\": 0, \"modelVersion\": \"m\"}",
                 "{\"vector\": {\"interpretable\": [1.0]}, \"dim\": 1}")) {
             MlServiceClient client = client(BASE, "secret");
@@ -295,7 +298,7 @@ class MlServiceClientTest {
         assertThatThrownBy(() -> unconfigured.calibrationCandidates(new MlCalibrationCandidatesRequest(A, List.of(), 5)))
                 .isInstanceOf(MlServiceException.class);
         assertThatThrownBy(() -> unconfigured.userVector(new MlUserVectorRequest(A, null, List.of(), List.of(), List.of(),
-                List.of(), List.of(), List.of()))).isInstanceOf(MlServiceException.class);
+                List.of(), List.of(), List.of(), List.of()))).isInstanceOf(MlServiceException.class);
         server.verify();
     }
 }

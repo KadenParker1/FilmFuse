@@ -94,6 +94,9 @@ class UserVectorRequest(ContractModel):
     genre_prefs: list[GenrePref] = []
     mood_prefs: list[MoodPref] = []
     favorites: list[Favorite] = []
+    # Additive, optional (owner-approved 2026-11-08): 0-5 ranked least-favourite movies, rank 1 =
+    # most disliked. Defaults to [] so requests without it (older senders) still validate.
+    least_favorites: list[Favorite] = []
     ratings: list[Rating] = []
     unseen: list[MovieId] = []
     dismissals: list[MovieId] = []

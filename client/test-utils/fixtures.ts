@@ -240,6 +240,7 @@ export const makeOnboardingState = (overrides: Partial<OnboardingStateDTO> = {})
   genrePrefs: [],
   moodPrefs: [],
   favorites: [],
+  leastFavorites: [],
   calibrationRatedCount: 0,
   comfort: makeComfort(),
   ...overrides,

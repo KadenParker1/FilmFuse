@@ -44,7 +44,25 @@ Content-Type: application/json
   {"movieId": 129, "rank": 3}
 ]
 
-### Step 4 - calibration deck (popular, genre-diverse; never rated / unseen / favourites; comfort-filtered)
+### Least favourites (optional, 0-5, unique movies and ranks; rank 1 = most disliked). Not needed for
+### completion. A movie can't also be a favourite: 400 {message, fieldErrors: {leastFavorites: "Already in your favourites: <titles>."}}
+PUT {{baseUrl}}/api/v1/me/preferences/least-favorites
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[
+  {"movieId": 680, "rank": 1},
+  {"movieId": 550, "rank": 2}
+]
+
+### Least favourites - clear them
+PUT {{baseUrl}}/api/v1/me/preferences/least-favorites
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[]
+
+### Step 4 - calibration deck (popular, genre-diverse; never rated / unseen / favourites / least favourites; comfort-filtered)
 GET {{baseUrl}}/api/v1/me/calibration/next?count=20
 Authorization: Bearer {{token}}
 
