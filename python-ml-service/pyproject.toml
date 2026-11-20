@@ -10,3 +10,7 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Header", "fastapi.Security
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff.lint.per-file-ignores]
+# Research scripts written during model experiments: kept as a record, not production code.
+"eval/experiments/*" = ["E501", "I001"]

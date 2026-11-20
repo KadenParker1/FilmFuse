@@ -38,10 +38,13 @@ class MovieFeatures:
     vote_average: float | None  # 0-10 (TMDB) or 1-10 (offline: mean train score)
     vote_count: int | None
     vector: np.ndarray = field(init=False, repr=False)
+    tokens: frozenset[str] = field(init=False, repr=False)
     prior: float = 0.0  # quality/popularity prior on the 1-10 score scale, set by the catalog
 
     def __post_init__(self) -> None:
         self.vector = feature_vector(self.genre_ids, self.keywords)
+        # Keywords plus genre tokens: what "Like X, which you loved" similarity compares.
+        self.tokens = self.keywords | frozenset(f"g:{g}" for g in self.genre_ids)
 
 
 # ---- quality / popularity prior ----------------------------------------------------------------
@@ -166,6 +169,7 @@ class PostgresCatalog:
         self._loaded_at = 0.0
         self._refreshing = False
         self._extra: dict[int, MovieFeatures] = {}
+        self._absent: set[int] = set()
 
     def _connect(self):  # pragma: no cover - exercised against a real database
         import psycopg
@@ -187,6 +191,7 @@ class PostgresCatalog:
                 inner, prior = InMemoryCatalog(movies), _PriorModel(movies, TMDB_PRIOR_VOTES)
                 with self._lock:
                     self._inner, self._prior, self._extra = inner, prior, {}
+                    self._absent = set()
                 log.info("catalog loaded: %d movies", len(movies))
             except Exception:
                 log.exception("catalog load failed; ranking without movie metadata")
@@ -232,16 +237,20 @@ class PostgresCatalog:
         inner = self._ensure_loaded()
         found = inner.get_many(ids)
         found.update({i: self._extra[i] for i in ids if i in self._extra})
-        missing = [i for i in ids if i not in found]
+        # Ids looked up before and not in app.movies aren't asked for again until the next reload.
+        missing = [i for i in ids if i not in found and i not in self._absent]
         if missing:
             try:
                 rows = self._query(
                     f"select {_MOVIE_COLUMNS} from app.movies where id = any(%s)", (missing,)
                 )
+                failed = False
             except Exception:
                 log.exception("catalog lookup of %d new movies failed", len(missing))
-                rows = []
+                rows, failed = [], True
             with self._lock:
+                if not failed:
+                    self._absent.update(set(missing) - {r[0] for r in rows})
                 for row in rows:
                     m = _row_to_movie(row)
                     if self._prior is not None:

@@ -5,7 +5,8 @@ the members' contract weights (0 = the member doesn't count). Output: (movie ind
 score) pairs, best first, at most k.
 
 * mean               - weighted mean.
-* least_misery       - highest minimum (members with weight > 0); ties by weighted mean.
+* least_misery       - highest minimum (members with weight > 0); ties by weighted mean. With 3+
+                       members the "minimum" is the mean of the least happy half (see _low).
 * most_pleasure      - highest maximum; ties by weighted mean.
 * closeness_weighted - c*mean + (1-c)*min, where c is the group's average closeness (0-1).
                        Close friends compromise like `mean`; a loose group protects its
@@ -27,7 +28,10 @@ import numpy as np
 
 from app.models.contract import Strategy
 
+NEUTRAL = 5.0
 MISERY_THRESHOLD = 3.0
+SOFT_MISERY_MIN = 3  # groups this big or bigger use the soft minimum (see _low)
+SOFT_MISERY_SHARE = 0.5
 # Weighted mean as a tiny tie-breaker on top of a min/max aggregate.
 _TIE = 1e-3
 
@@ -35,6 +39,17 @@ _TIE = 1e-3
 def _active(scores: np.ndarray, weights: np.ndarray) -> np.ndarray:
     mask = weights > 0
     return scores[mask] if mask.any() else scores
+
+
+def _low(active: np.ndarray) -> np.ndarray:
+    """The 'misery' side of a list: the single unhappiest member for pairs; for SOFT_MISERY_MIN
+    members or more, the mean of the least happy SOFT_MISERY_SHARE of them (protects the unhappy
+    part of a big group without letting one outlier veto everything; round 5, 2026-11-19)."""
+    n = active.shape[0]
+    if n < SOFT_MISERY_MIN:
+        return active.min(axis=0)
+    take = max(1, int(np.ceil(n * SOFT_MISERY_SHARE)))
+    return np.sort(active, axis=0)[:take].mean(axis=0)
 
 
 def weighted_mean(scores: np.ndarray, weights: np.ndarray) -> np.ndarray:
@@ -59,6 +74,26 @@ def _top(values: np.ndarray, k: int) -> list[tuple[int, float]]:
     return [(int(i), float(values[i])) for i in order]
 
 
+# How each member's scores are put on a common scale before aggregation. Predicted scores from
+# different members aren't directly comparable (a heavy rater's collaborative evidence swings
+# further than a light rater's), so least misery would otherwise pick on whoever has the widest
+# range. "zscore": per member, 5 + 2 * standard score over the candidates (so the misery
+# threshold of 3 means "a standard deviation below their own average"); "none": raw scores.
+NORMALIZE = "none"  # zscore / rank hurt least misery in the 2026-11-19 experiments
+
+
+def normalize(scores: np.ndarray, mode: str | None = None) -> np.ndarray:
+    mode = NORMALIZE if mode is None else mode
+    if mode == "none" or scores.shape[1] < 2:
+        return scores
+    if mode == "rank":
+        ranks = np.argsort(np.argsort(scores, axis=1, kind="stable"), axis=1)
+        return 1.0 + 9.0 * ranks / (scores.shape[1] - 1)
+    mean = scores.mean(axis=1, keepdims=True)
+    std = scores.std(axis=1, keepdims=True)
+    return NEUTRAL + 2.0 * (scores - mean) / np.where(std > 1e-9, std, 1.0)
+
+
 def aggregate(
     strategy: Strategy,
     scores: np.ndarray,
@@ -73,14 +108,14 @@ def aggregate(
     if strategy == Strategy.MEAN:
         return _top(mean, k)
     if strategy == Strategy.LEAST_MISERY:
-        low = active.min(axis=0)
+        low = _low(active)
         return [(i, float(low[i])) for i, _ in _top(low + _TIE * mean, k)]
     if strategy == Strategy.MOST_PLEASURE:
         high = active.max(axis=0)
         return [(i, float(high[i])) for i, _ in _top(high + _TIE * mean, k)]
     if strategy == Strategy.CLOSENESS_WEIGHTED:
         c = group_closeness(closeness, scores.shape[0])
-        return _top(c * mean + (1 - c) * active.min(axis=0), k)
+        return _top(c * mean + (1 - c) * _low(active), k)
     if strategy == Strategy.FAIRNESS:
         return _fair(scores, weights, mean, k)
     raise ValueError(f"unknown strategy {strategy}")

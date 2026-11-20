@@ -1,5 +1,8 @@
 from uuid import UUID
 
+import numpy as np
+import pytest
+
 from app.models.contract import (
     CalibrationCandidatesRequest,
     GroupMember,
@@ -273,3 +276,63 @@ def test_groups_use_the_hybrid() -> None:
     resp = rec.recommend_for_group(group_req(Strategy.MEAN))
     assert len(resp.results) == 5
     assert all(set(r.member_scores) == {USER_A, USER_B} for r in resp.results)
+
+
+def test_like_minded_group_gets_one_list_for_every_strategy() -> None:
+    """Members who rate alike rank fully on the merged profile, so strategies agree."""
+    same = {493922: 10.0, 8363: 2.0, 694: 9.0}
+    store = InMemoryTasteStore(
+        {
+            USER_A: UserTaste(ratings=dict(same), n_signals=3),
+            USER_B: UserTaste(ratings=dict(same), n_signals=3),
+        }
+    )
+    rec = fixture_recommender(store)
+    lists = {
+        s: ids(
+            rec.recommend_for_group(
+                group_req(
+                    s,
+                    [
+                        GroupMember(user_id=USER_A, vector=HORROR_FAN),
+                        GroupMember(user_id=USER_B, vector=HORROR_FAN),
+                    ],
+                )
+            )
+        )
+        for s in Strategy
+    }
+    assert len({tuple(v) for v in lists.values()}) == 1
+
+
+def test_group_scores_report_each_members_own_prediction() -> None:
+    rec = fixture_recommender()
+    group = rec.recommend_for_group(group_req(Strategy.MEAN))
+    alone = {
+        r.movie_id: r.score
+        for r in rec.recommend_for_user(user_req(HORROR_FAN, k=len(ALL_IDS))).results
+    }
+    for r in group.results:
+        if r.movie_id in alone:
+            assert r.member_scores[USER_A] == pytest.approx(alone[r.movie_id])
+
+
+def test_fill_lifts_untouched_genres_once_the_user_has_ratings() -> None:
+    """A generous rater's untouched genres shouldn't look disliked; onboarding-only users keep 5."""
+    from app.services.content_recommender import _fill_unset
+
+    v = np.full(INTERPRETABLE_DIM, 5.0)
+    v[GENRE_INDEX[HORROR]], v[GENRE_INDEX[COMEDY]] = 8.0, 7.0
+    filled = _fill_unset(v)
+    assert filled[GENRE_INDEX[FAMILY]] == pytest.approx(7.5)  # the user's average
+    assert filled[GENRE_INDEX[HORROR]] == 8.0
+    assert filled[len(GENRE_INDEX)] == 5.0  # moods untouched: nothing moved there
+
+    rated = InMemoryTasteStore({USER_A: UserTaste(ratings={694: 8.0}, n_signals=1)})
+    with_ratings = fixture_recommender(rated).score(
+        vec(**{f"g{HORROR}": 8}), rated.taste(USER_A), fixture_movies()
+    )
+    without = fixture_recommender().score(vec(**{f"g{HORROR}": 8}), UserTaste(), fixture_movies())
+    family = next(i for i, m in enumerate(fixture_movies()) if m.movie_id == 12)  # Finding Nemo
+    assert with_ratings.affinity[family] > without.affinity[family]
+    assert with_ratings.user[GENRE_INDEX[FAMILY]] == 5.0  # explanations see the real profile

@@ -88,3 +88,13 @@ def test_fairness_isnt_fooled_by_a_generous_scorer() -> None:
     s = np.array([[15.0, 14.0, 13.0, 12.5], [5.0, 5.5, 6.0, 9.0]])
     first_two = order(Strategy.FAIRNESS, s, k=2)
     assert set(first_two) == {0, 3}
+
+
+def test_soft_misery_for_three_or_more() -> None:
+    # m0: one member hates it (1), others love it; m1: everyone lukewarm (5).
+    s = np.array([[1.0, 5.0], [10.0, 5.0], [10.0, 5.0], [10.0, 5.0]])
+    # Hard minimum would pick m1 (5 > 1); the least happy half of m0 averages (1+10)/2 = 5.5.
+    assert order(Strategy.LEAST_MISERY, s, weights=np.ones(4), k=2)[0] == 0
+    # Pairs keep the hard minimum.
+    pair = np.array([[1.0, 5.0], [10.0, 5.0]])
+    assert order(Strategy.LEAST_MISERY, pair, weights=np.ones(2), k=2)[0] == 1

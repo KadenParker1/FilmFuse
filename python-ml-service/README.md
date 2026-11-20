@@ -25,7 +25,7 @@ always public; everything under `/internal` needs the key.
 .venv/bin/pytest -q && .venv/bin/ruff check . && .venv/bin/ruff format --check .
 ```
 
-## The model: hybrid-v1 (content + item-kNN)
+## The model: hybrid-v6 (content + kNN + iALS + friends)
 
 `app/services/content_recommender.py` is the live model. It starts from content-v1 (Phase 0
 of `docs/recommender-directions.md`: genre and mood matching) and blends in item-kNN
@@ -39,6 +39,8 @@ evidence (new users, movies few people rated) it is exactly content-v1.
 | User vector | `content_recommender.py` | Each of the 27 dims starts at the stated preference (5 if unset) and is pulled towards the user's scores for movies with that feature. Favourites count as a 10 and least favourites as a 1 (weight 3 each), dismissals as a mild 3, and older ratings count less. |
 | Predicted score | `content_recommender.py` | Taste affinity (0.7 × weighted mean of the user's dims + 0.3 × their lowest genre dim, so one hated genre sinks a movie), plus similarity to loved and disliked movies, plus a quality/popularity prior that weighs more for new users. |
 | Collaborative part | `collaborative.py` | Item-kNN: movies are neighbours when people rate them alike (mean-centred ratings, adjusted cosine shrunk by co-rater count, top 50 per movie). Built from all of `app.ratings` in the background, rebuilt hourly; a user's own ratings are read fresh on every request. Blended as `taste = (1-β)·content + β·kNN`, with `β = 0.9·support/(support+2)`. EASE is in the same file for offline comparison (it lost: NDCG@10 0.08 vs 0.09). |
+| Matrix factorisation | `collaborative.py` (`IALS`) | iALS (64 factors, graded preference, linear confidence), NumPy only; the user is folded in from their current ratings per request; its z-scored score is a bonus inside the blend (MF_WEIGHT 1.0). |
+| Friend signal | `social.py` | What friends thought, from ratings they share (PUBLIC/FRIENDS; never PRIVATE, blocks and suspended accounts respected); the group's merged profile gets the members' friends (not for groups of 6+). |
 | Lists | `content_recommender.py` | "For you" uses a light genre-diversity re-rank. Groups go through `group_strategies.py`: mean, least misery, most pleasure, closeness-weighted (the group's average closeness blends mean and least misery) and a GFAR-style fairness list. |
 | Explanations | `content_recommender.py` | Built from the score's largest actual contribution, for example "Because you love Horror", "Like Coco, which you loved", "Because you rated Alien 9/10" or "Highly rated and popular". Group lines never single out a member. |
 | Calibration | `content_recommender.py` | Well-known movies, round-robin across genres, starting with the genres the user has rated least. |

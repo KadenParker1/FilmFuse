@@ -17,7 +17,7 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     from app.services.recommender import get_recommender
 
     recommender = get_recommender()
-    for part in ("catalog", "ratings"):  # movie catalog, then the collaborative model
+    for part in ("catalog", "ratings", "friends"):  # catalog, CF model, friend data
         warm = getattr(getattr(recommender, part, None), "warm", None)
         if callable(warm):
             warm()

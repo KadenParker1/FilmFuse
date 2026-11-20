@@ -136,11 +136,14 @@ def get_recommender() -> Recommender:
     from app.core.config import database_url
     from app.services.catalog import InMemoryCatalog, PostgresCatalog, PostgresTasteStore
     from app.services.collaborative import PostgresRatingsSource
-    from app.services.content_recommender import ContentRecommender
+    from app.services.content_recommender import CF_MODEL, CF_MODELS, ContentRecommender
 
     url = database_url()
     if url:
+        from app.services.social import PostgresFriendSource
+
+        ratings = PostgresRatingsSource(url, factory=CF_MODELS.get(CF_MODEL))
         return ContentRecommender(
-            PostgresCatalog(url), PostgresTasteStore(url), PostgresRatingsSource(url)
+            PostgresCatalog(url), PostgresTasteStore(url), ratings, PostgresFriendSource(url)
         )
     return ContentRecommender(InMemoryCatalog([]))

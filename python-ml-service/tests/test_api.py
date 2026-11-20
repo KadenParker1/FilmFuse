@@ -44,7 +44,7 @@ def test_user_vectors(client: TestClient, auth: dict[str, str]) -> None:
     assert body["dim"] == INTERPRETABLE_DIM == len(body["vector"]["interpretable"])
     assert body["vector"]["latent"] is None
     vector = body["vector"]["interpretable"]
-    assert body["modelVersion"] == "hybrid-v1"
+    assert body["modelVersion"] == "hybrid-v6"
     # Action (28, first dim) stated 9 and the favourite (The Matrix) is Action: stays high.
     assert vector[0] >= 9.0
     assert vector[10] == 2.0  # Horror (27) stated 2, no horror evidence

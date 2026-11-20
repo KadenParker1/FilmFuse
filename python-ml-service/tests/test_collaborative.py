@@ -118,3 +118,60 @@ def test_knn_handles_many_items_in_blocks() -> None:
     m = ItemKNN(triples, k=5)
     assert m.nb_idx.shape == (1300, 5)
     assert not (m.nb_idx == np.arange(1300)[:, None]).any()  # never its own neighbour
+
+
+def test_blend_adds_watch_co_occurrence_bonus() -> None:
+    from app.services.collaborative import BlendKNN
+
+    blend = BlendKNN(TRIPLES, k=3, shrink=0.0, implicit_weight=2.0, mf_weight=0.0)
+    explicit = ItemKNN(TRIPLES, k=3, shrink=0.0, mode="sum")
+    implicit = ItemKNN(TRIPLES, k=3, shrink=0.0, mode="implicit")
+    ratings = {1: 10, 3: 2}
+    pred, support, top = blend.predict(ratings, [2, 4, 404])
+    e_pred, e_support, e_top = explicit.predict(ratings, [2, 4, 404])
+    _, evidence, _ = implicit.predict(ratings, [2, 4, 404])
+    assert pred == pytest.approx(e_pred + 2.0 * np.log1p(evidence))
+    assert support.tolist() == e_support.tolist() and top == e_top
+    assert evidence[0] > 0 and evidence[2] == 0  # co-watched vs unknown movie
+
+
+def test_ials_folds_in_current_ratings_and_ranks_co_liked_higher() -> None:
+    from app.services.collaborative import IALS
+
+    rng = np.random.default_rng(1)
+    # Two taste clusters: users 0-19 love movies 1-5, users 20-39 love 6-10.
+    triples = []
+    for u in range(40):
+        liked = range(1, 6) if u < 20 else range(6, 11)
+        for m in rng.choice(list(liked), size=4, replace=False):
+            triples.append((u, int(m), 9))
+    mf = IALS(triples, factors=2, reg=0.1, iterations=10)  # tiny data: few factors
+    scores, known = mf.scores({1: 10, 2: 9}, [3, 4, 7, 8, 404])
+    assert known.tolist() == [True, True, True, True, False]
+    assert min(scores[:2]) > max(scores[2:4])  # same cluster beats the other cluster
+    assert scores[4] == 0.0
+    assert np.mean(scores[known]) == pytest.approx(0.0, abs=1e-9)  # z-scored among known
+    # Fold-in uses the ratings given now: switching the user's taste flips the order.
+    flipped, _ = mf.scores({6: 10, 7: 9}, [3, 4, 8, 9])
+    assert max(flipped[:2]) < min(flipped[2:])
+
+
+def test_ials_without_known_ratings_or_data() -> None:
+    from app.services.collaborative import IALS
+
+    empty = IALS([])
+    assert empty.scores({1: 5}, [1, 2])[1].tolist() == [False, False]
+    mf = IALS(TRIPLES, factors=4, iterations=2)
+    assert mf.scores({999: 5}, [1, 2])[1].tolist() == [False, False]
+
+
+def test_blend_adds_the_mf_bonus() -> None:
+    from app.services.collaborative import BlendKNN
+
+    with_mf = BlendKNN(TRIPLES, k=3, mf_weight=1.0)
+    without = BlendKNN(TRIPLES, k=3, mf_weight=0.0)
+    ratings = {1: 10, 3: 2}
+    p1, _, _ = with_mf.predict(ratings, [2, 4])
+    p0, _, _ = without.predict(ratings, [2, 4])
+    mf, _ = with_mf.mf.scores(ratings, [2, 4])
+    assert p1 == pytest.approx(p0 + mf)

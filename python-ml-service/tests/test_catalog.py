@@ -149,3 +149,10 @@ def test_stale_catalog_refreshes_in_background_without_blocking() -> None:
     assert set(c.get_many([1])) == {1}  # first load (synchronous)
     assert set(c.get_many([1])) == {1}  # stale: refresh starts, old data served at once
     gate.set()
+
+
+def test_absent_ids_are_not_looked_up_again() -> None:
+    c = FakeCatalog(ROWS)
+    c.get_many([404])
+    c.get_many([404])
+    assert len([q for q in c.queries if "any(%s)" in q[0]]) == 1

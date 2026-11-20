@@ -220,3 +220,64 @@ There were 0 comfort violations across 120 sessions (`tools/personas/out/session
 - **Logging** impressions and session outcomes. It's still the top Phase 1 item, and it's what lets CF and the group strategies learn from real picks.
 - **MF/iALS** in the latent vector field, once there are a few thousand users.
 - A **friend-graph prior** for brand-new users (an average of friends' tastes).
+
+---
+
+## Update 3: the experiment loop, rounds 1–6 → hybrid-v6 (2026-11-19)
+
+**How:** subagents ran experiments in parallel. Each variant was scored on two test beds and
+recorded on a leaderboard (`python-ml-service/eval/experiment.py`, rows in
+`eval/experiments/leaderboard-v*.jsonl`).
+
+- **MovieLens:** real ratings.
+  - Production-like 1000-movie pool.
+  - Real TMDB metadata from the local catalog.
+  - Groups of similar, random and dissimilar users.
+  - A new-user test where users keep only 5 ratings.
+- **Persona friend networks** (`eval/personas.py`): 20% of each persona's ratings are held out.
+  - Uses the 40 seeded friend groups with real closeness.
+  - Results are split by group type (easy, pair, hard, big) and by measured taste similarity.
+  - The personas are synthetic, so treat these numbers as relative only.
+
+Winners were ported into the model with tests and then confirmed on a second sample (seed 7, 25% held out) before shipping.
+
+**What shipped:**
+
+| Version | Change | Gain (full run vs the version before) |
+|---|---|---|
+| hybrid-v2 | Explicit + implicit ("who watched what") item-kNN blend. Groups get a merged-profile pseudo-member that pools members' ratings. | +16% |
+| hybrid-v3 | Friend signal: friends' PUBLIC/FRIENDS ratings, never PRIVATE ones; blocks and suspended accounts respected. Groups get the members' friends (permissive rule, owner-approved). | persona accuracy +65%, persona groups ×5 |
+| hybrid-v4 | "Fill": once a user has ratings, genres they never touched count as their average, not 5/10. | new users +26% |
+| hybrid-v5 | No merged-profile friend signal for groups of 6+. Soft least misery for 3+ members (protects the least happy half). | persona groups +7%, big groups +29% |
+| hybrid-v6 | iALS matrix factorisation, NumPy only, as a bonus on the blend (owner-approved after a 2nd-sample check). | +5.5%, and +9.5% on the 2nd sample |
+
+**hybrid-v6 now** (MovieLens, all 590 eligible users, 1000-movie pool):
+- Hit rate@10 is 49% (54% on the 2nd sample). The version first pushed (hybrid-v1) had 36%.
+- NDCG@10 is 0.123, against 0.077 for hybrid-v1.
+- New users (5 ratings) have NDCG 0.038.
+- **Groups:** about +20–30% over hybrid-v1. Similar-taste groups gain the most.
+- **Live:** group requests take about 0.1 s, and 120 persona sessions ran with 0 comfort violations.
+
+**Tried and dropped:**
+- **Group score scaling** (z-score / rank): hurt least misery.
+- **Average-without-misery, Borda, adaptive strategy:** within noise.
+- **Pool-relative prior:** neutral. It exposed that persona ratings ignore popularity.
+- **No-shrinkage kNN:** the gain was mostly noise and support inflation.
+- **Keyword TF-IDF look-alike and profile:** neutral for warm users.
+- **Calibrated lists (Steck):** a product choice, not an accuracy gain. At λ 0.5, miscalibration is −18% for −0.5% NDCG, but new users lose 6%.
+- **Recency:** can't be measured on this data. MovieLens users rate their history within a day, and persona timestamps are seed times.
+
+**Lessons about the evaluation itself:**
+1. **The stated-genre persona metric can be gamed.** Ignoring quality and the hated-genre guard scored well on it.
+2. **Whole-catalog candidate pools let the obscurity penalty swamp taste.** The fix was a production-like pool plus real TMDB metadata.
+3. **Tiny persona group metrics can explode composite scores.** Ratios are now clipped.
+4. **Single-sample gains need a second sample** before shipping.
+
+**Open decisions and next steps:**
+- **Calibration** for "For you", if lists should reflect all of a user's tastes.
+- **Persona realism:** regenerate persona ratings with a realistic popularity skew.
+- **Logging:** record impressions and session outcomes. This is still the top Phase 1 item, and it's the only way to measure real accuracy and recency.
+- **Deploy:**
+  - give `ml_reader` a login on hosted Supabase;
+  - rebuild stored vectors after deploying;
+  - the friend signal reads `ratings.visibility`, `blocks` and `profiles.status` through `ml_reader`.
