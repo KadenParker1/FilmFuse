@@ -34,6 +34,12 @@ from eval.split import Split, eligible_users, relevant_items, sample_users, temp
 @dataclass
 class EvalConfig:
     k: int = 10
+    # Candidates: None = every catalog movie (default); N = the N most-rated movies in TRAIN,
+    # like core-api's pool (the most popular eligible movies), minus what was already seen.
+    pool_size: int | None = None
+    # New-user test: the sampled evaluation users keep only their first N train ratings (time
+    # order); everyone else keeps their full history (a newcomer among established users).
+    cold_ratings: int | None = None
     n_users: int = 200
     n_groups: int = 100  # per construction method
     seed: int = 42
@@ -67,6 +73,13 @@ class EvalContext:
     relevant: dict[int, set[int]]
     group_stats: dict[str, dict[str, float]]
 
+    @property
+    def pool_universe(self) -> list[int]:
+        """Movies candidates are drawn from: the catalog, or (pool_size set) most-rated first."""
+        if self.config.pool_size is None:
+            return self.all_movie_ids
+        return sorted(self.all_movie_ids, key=lambda m: self.popularity_rank[m])
+
     def training_data(self) -> EvalTrainingData:
         return EvalTrainingData(
             movies=self.dataset.movies,
@@ -79,6 +92,9 @@ def build_context(dataset: Dataset, config: EvalConfig) -> EvalContext:
     pool = eligible_users(split, config.relevance_threshold)
     users = sample_users(pool, config.n_users, config.seed)
     relevant = {u: relevant_items(split.test[u], config.relevance_threshold) for u in pool}
+    if config.cold_ratings is not None:
+        for u in users:
+            split.train[u] = split.train[u][: config.cold_ratings]
 
     train_events = [r for ev in split.train.values() for r in ev]
     counts = Counter(r.movie_id for r in train_events)
@@ -167,7 +183,7 @@ def evaluate(rec: Recommender, ctx: EvalContext, name: str) -> dict[str, Any]:
     rec_lists: list[list[int]] = []
     for u in ctx.users:
         seen = {r.movie_id for r in ctx.split.train[u]}
-        candidates = candidate_pool(ctx.all_movie_ids, seen, f"{cfg.seed}:user:{u}")
+        candidates = candidate_pool(ctx.pool_universe, seen, f"{cfg.seed}:user:{u}", cfg.pool_size)
         req = build_user_recommendation_request(u, vector_for(u), candidates, seen, k)
         t0 = time.perf_counter()
         resp = rec.recommend_for_user(req)
@@ -191,7 +207,9 @@ def evaluate(rec: Recommender, ctx: EvalContext, name: str) -> dict[str, Any]:
     raw: dict[tuple[str, str], list[dict[str, Any]]] = {}
     for g in ctx.groups:
         seen = {r.movie_id for u in g.members for r in ctx.split.train[u]}
-        candidates = candidate_pool(ctx.all_movie_ids, seen, f"{cfg.seed}:group:{g.group_id}")
+        candidates = candidate_pool(
+            ctx.pool_universe, seen, f"{cfg.seed}:group:{g.group_id}", cfg.pool_size
+        )
         cand_set = set(candidates)
         members = [(u, vector_for(u)) for u in g.members]
         member_rel = [ctx.relevant[u] for u in g.members]

@@ -102,9 +102,13 @@ def build_user_vector_request(
     )
 
 
-def candidate_pool(all_movie_ids: list[int], seen: set[int], seed_key: str) -> list[int]:
-    """All movies minus `seen`, shuffled deterministically by `seed_key`."""
-    pool = np.array([m for m in all_movie_ids if m not in seen], dtype=np.int64)
+def candidate_pool(
+    all_movie_ids: list[int], seen: set[int], seed_key: str, limit: int | None = None
+) -> list[int]:
+    """All movies minus `seen` (the first `limit` of them, when given, in the order passed),
+    shuffled deterministically by `seed_key`."""
+    unseen = [m for m in all_movie_ids if m not in seen]
+    pool = np.array(unseen if limit is None else unseen[:limit], dtype=np.int64)
     rng = np.random.default_rng(int.from_bytes(uuid.uuid5(_NAMESPACE, seed_key).bytes[:8]))
     rng.shuffle(pool)
     return pool.tolist()
