@@ -30,11 +30,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class ContentFilterService {
 
     /**
-     * How many eligible candidates are handed to the ranker (most popular first). 1000, not 200,
-     * so niche tastes (horror, documentary, Nollywood...) have something to rank: content-v1
-     * scores 1000 movies in well under the ML latency budget.
+     * How many eligible candidates are handed to the ranker (most popular first). 10,000 since
+     * hybrid-v7 (owner's call, 2026-11-22): niche tastes get far more to rank (+32% distinct movies
+     * recommended in offline tests) and the ML service scores 10k in ~0.1 s per user / ~0.5 s per
+     * group, well under its 5 s budget. Was 1000; see docs/overnight-experiments-2026-11-19.md.
      */
-    public static final int POOL_SIZE = 1000;
+    public static final int POOL_SIZE = 10_000;
+
+    /** Calibration's popular, genre round-robin fallback only needs well-known movies. */
+    public static final int CALIBRATION_POOL_SIZE = 1000;
 
     /** A pool smaller than this (twice the 20 results a session or page shows) triggers enrichment. */
     public static final int ENRICH_BELOW = 40;

@@ -28,7 +28,7 @@ def _rating(movie_id: int, score: int, days_ago: int = 0) -> Rating:
 def _vector(**kwargs) -> list[float]:
     resp = fixture_recommender().build_user_vector(UserVectorRequest(user_id=USER, **kwargs))
     assert resp.dim == INTERPRETABLE_DIM == len(resp.vector.interpretable)
-    assert resp.model_version == "hybrid-v6"
+    assert resp.model_version == "hybrid-v7"
     assert resp.vector.latent is None
     return resp.vector.interpretable
 

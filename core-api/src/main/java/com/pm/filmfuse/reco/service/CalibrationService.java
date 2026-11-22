@@ -103,10 +103,10 @@ public class CalibrationService {
 
     /** See the class comment. */
     List<Integer> fallback(ContentFilter filter, Set<Integer> skip, int count) {
-        List<Integer> pool = contentFilter.eligiblePool(filter, CandidateCriteria.NONE, skip, ContentFilterService.POOL_SIZE);
+        List<Integer> pool = contentFilter.eligiblePool(filter, CandidateCriteria.NONE, skip, ContentFilterService.CALIBRATION_POOL_SIZE);
         if (pool.size() < count) {
             warmCache();
-            pool = contentFilter.eligiblePool(filter, CandidateCriteria.NONE, skip, ContentFilterService.POOL_SIZE);
+            pool = contentFilter.eligiblePool(filter, CandidateCriteria.NONE, skip, ContentFilterService.CALIBRATION_POOL_SIZE);
         }
         Map<Integer, MovieContent> content = contentFilter.contentOf(pool);
         Map<Integer, Deque<Integer>> byGenre = new LinkedHashMap<>();

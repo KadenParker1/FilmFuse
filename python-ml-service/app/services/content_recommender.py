@@ -101,7 +101,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 log = logging.getLogger(__name__)
 
-MODEL_VERSION = "hybrid-v6"
+MODEL_VERSION = "hybrid-v7"
 
 # ---- user vector ---------------------------------------------------------------------------
 STATED_STRENGTH = 3.0  # pseudo-observations behind a stated preference

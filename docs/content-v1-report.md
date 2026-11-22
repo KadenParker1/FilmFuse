@@ -250,6 +250,7 @@ Winners were ported into the model with tests and then confirmed on a second sam
 | hybrid-v4 | "Fill": once a user has ratings, genres they never touched count as their average, not 5/10. | new users +26% |
 | hybrid-v5 | No merged-profile friend signal for groups of 6+. Soft least misery for 3+ members (protects the least happy half). | persona groups +7%, big groups +29% |
 | hybrid-v6 | iALS matrix factorisation, NumPy only, as a bonus on the blend (owner-approved after a 2nd-sample check). | +5.5%, and +9.5% on the 2nd sample |
+| hybrid-v7 | iALS weight 1.0 → 3.0 (owner-approved 2026-11-22), tuned on three ml-32m samples of 3,000 users. | +4.4% / +4.8% (full runs, 2 samples); see `docs/overnight-experiments-2026-11-19.md` |
 
 **hybrid-v6 now** (MovieLens, all 590 eligible users, 1000-movie pool):
 - Hit rate@10 is 49% (54% on the 2nd sample). The version first pushed (hybrid-v1) had 36%.
@@ -281,3 +282,26 @@ Winners were ported into the model with tests and then confirmed on a second sam
   - give `ml_reader` a login on hosted Supabase;
   - rebuild stored vectors after deploying;
   - the friend signal reads `ratings.visibility`, `blocks` and `profiles.status` through `ml_reader`.
+
+## Update 4: hybrid-v7 (2026-11-22)
+
+The overnight experiments (`docs/overnight-experiments-2026-11-19.md`) re-checked the model on three samples of 3,000 users from MovieLens ml-32m. That data is much bigger than ml-latest-small.
+
+**What held up:**
+- **iALS:** removing it scores 0.91 on all three samples.
+- **Merged group profile, CF weight and new-user fill:** still worth having.
+- **Other iALS and blend settings:** best left as they are.
+
+**The one change:** the iALS weight rose from 1.0 to 3.0.
+- **Overall:** +4.4% and +4.8% in full runs on samples 2 and 3.
+- **By measure:** NDCG@10 rose about 5%, groups 5–7%, new users 2%, and persona groups 22%.
+- **Why not higher:** 4–5 levelled off, and individual accuracy slipped.
+
+**Candidate pool size: 1,000 → 10,000** (owner's call, 2026-11-22; `ContentFilterService.POOL_SIZE` in core-api).
+- **Offline:** +32% distinct movies recommended, and accuracy about level with 1,000 when iALS weight is 3. With 10,000, groups score slightly lower on one sample (.0399 vs .0414). 3,000 was the cautious alternative.
+- **Live (local):**
+  - The ML service scores 10k candidates in about 80 ms per user and 390 ms per group, against 24 ms and 92 ms at 1k.
+  - The pool query takes about 90 ms at either size.
+- **Calibration** keeps its own 1,000-movie fallback pool (`CALIBRATION_POOL_SIZE`).
+
+**Deploy:** rebuild stored vectors after deploying (model version bump).

@@ -199,10 +199,11 @@ def cmd_run(args: argparse.Namespace) -> int:
     apply_overrides(overrides)
     started = time.perf_counter()
     split = {"seed": args.seed, "test_fraction": args.test_fraction, "data_dir": args.data}
-    ml = run_movielens(args.recommender, args.quick, POOL_SIZE, **split)
+    pool = args.pool_size
+    ml = run_movielens(args.recommender, args.quick, pool, **split)
     ml_full = run_movielens(args.recommender, args.quick, None, groups=False, **split)
     ml_cold = run_movielens(
-        args.recommender, args.quick, POOL_SIZE, groups=False, cold=COLD_RATINGS, **split
+        args.recommender, args.quick, pool, groups=False, cold=COLD_RATINGS, **split
     )
     p = run_personas(args.recommender, args.seed)
     row = {
@@ -214,6 +215,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         "seed": args.seed,
         "test_fraction": args.test_fraction,
         "data": args.data or "ml-latest-small",
+        "pool_size": pool,
         "note": args.note,
         "metrics": key_metrics(ml, ml_full, ml_cold, p),
         "detail": {
@@ -268,6 +270,12 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--quick", action="store_true", help="200 MovieLens users, 40 groups/method")
     r.add_argument("--seed", type=int, default=42, help="groups, sampling, persona hold-out")
     r.add_argument("--test-fraction", type=float, default=0.2, help="share of ratings held out")
+    r.add_argument(
+        "--pool-size",
+        type=int,
+        default=POOL_SIZE,
+        help="candidates per user/group (core-api POOL_SIZE); scored against the default baseline",
+    )
     r.add_argument(
         "--data",
         default=None,

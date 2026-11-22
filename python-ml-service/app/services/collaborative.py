@@ -40,7 +40,9 @@ KNN_SHRINK = 10.0
 EASE_LAMBDA = 200.0
 BLEND_K = 100
 IMPLICIT_WEIGHT = 2.0
-MF_WEIGHT = 1.0  # rating points per std of the iALS score; 0 = no matrix factorisation
+# Rating points per std of the iALS score; 0 = no matrix factorisation. 3.0 since hybrid-v7
+# (1.0 in v6; tuned on ml-32m samples, docs/overnight-experiments-2026-11-19.md).
+MF_WEIGHT = 3.0
 MF_FACTORS = 64
 MF_REG = 100.0
 MF_ALPHA = 40.0
