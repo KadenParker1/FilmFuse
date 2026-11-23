@@ -124,8 +124,10 @@ class Api:
         token: str | None = None,
         headers: dict | None = None,
         retries: int | None = None,
+        transient: tuple[int, ...] = (),
     ):
-        """(status, decoded body, response headers); 429s are retried `retries` times."""
+        """(status, decoded body, response headers); 429s (and any `transient` statuses, with
+        exponential backoff) are retried `retries` times."""
         retries = self.max_retries if retries is None else retries
         h = {"Accept": "application/json"}
         if body is not None:
@@ -144,15 +146,29 @@ class Api:
                 self.sleeper(wait)
                 attempt += 1
                 continue
+            if status in transient and attempt < retries:
+                wait = min(MAX_RETRY_WAIT, DEFAULT_RETRY_WAIT * (2**attempt))
+                self.log(f"    HTTP {status} on {method} {_short(url)}; retrying in {wait:.0f}s")
+                self.sleeper(wait)
+                attempt += 1
+                continue
             return status, _decode(raw), rh
 
     def core(self, method: str, path: str, body=None, token: str | None = None):
         return self.request(method, self.api + path, body, token)
 
     def auth(self, path: str, body: dict):
-        return self.request(
-            "POST", f"{self.supabase}/auth/v1{path}", body, headers={"apikey": self.anon_key}
+        # Local Supabase Auth sometimes times out reaching its database (504). Sign-in is safe to
+        # repeat; sign-up is not (the first attempt may have created the account), so only /token.
+        transient = (502, 503, 504) if path.startswith("/token") else ()
+        status, data, _ = self.request_full(
+            "POST",
+            f"{self.supabase}/auth/v1{path}",
+            body,
+            headers={"apikey": self.anon_key},
+            transient=transient,
         )
+        return status, data
 
 
 def _decode(raw: bytes):

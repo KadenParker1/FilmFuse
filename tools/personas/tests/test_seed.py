@@ -211,6 +211,29 @@ def test_429_gives_up_after_max_retries(stack, data):
     assert any("429" in e for e in rep.errors)
 
 
+def test_sign_in_retries_transient_auth_timeouts(stack, data):
+    make(stack, data).seed_persona(persona(data, "film-bro"))
+    token = "/auth/v1/token?grant_type=password"
+    stack.inject.append(("POST", "/auth/v1/token", 504, {}))  # matched without the query
+    stack.inject.append(("POST", "/auth/v1/token", 502, {}))
+    sleeps = []
+    s = make(stack, data, sleeps=sleeps)  # no state: signup (422), then sign in
+    rep = s.seed_persona(persona(data, "film-bro"))
+    assert rep.errors == []
+    assert sleeps[:2] == [seed.DEFAULT_RETRY_WAIT, seed.DEFAULT_RETRY_WAIT * 2]
+    auth = [p for m, p in stack.calls_for("film-bro@filmfuse.test") if p.startswith("/auth")]
+    assert auth[-3:] == [token, token, token]
+
+
+def test_sign_up_504_is_not_retried(stack, data):
+    stack.inject.append(("POST", "/auth/v1/signup", 504, {}))
+    s = make(stack, data)
+    rep = s._seed_one_safe(persona(data, "disney-mom"))
+    assert any("504" in e for e in rep.errors)
+    signups = [p for m, p in stack.calls_for("disney-mom@filmfuse.test") if p.endswith("/signup")]
+    assert len(signups) == 1
+
+
 def test_onboarded_false_skips_complete(stack, data):
     rep = make(stack, data).seed_persona(persona(data, "mcu-teen"))
     paths = [p for _, p in stack.calls_for("mcu-teen@filmfuse.test")]
