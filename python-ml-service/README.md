@@ -8,13 +8,18 @@ send the `X-Internal-Key` header.
 
 ```bash
 python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt -r requirements-dev.txt
+.venv/bin/pip install -r requirements.txt -r requirements-dev.txt -c constraints.txt
 ENV=local .venv/bin/uvicorn app.main:app --reload --port 8001   # dev key: local-dev-internal-key
 ```
 
+`constraints.txt` pins every package version, including transitive ones. The Docker image and CI
+install with it, so builds are reproducible; its header shows how to regenerate it after changing
+a requirements file. The container starts with `python -m app.serve`, which listens on one
+socket for both IPv6 (Railway's private network) and IPv4, on `$PORT` (default 8000).
+
 Env vars (see `.env.example`): `ENV` (`local` | `test` | `production`; unset = `production`),
 `ML_INTERNAL_KEY` (required unless `ENV=local`, and then at least 32 characters), `ML_DATABASE_URL` (read-only `ml_reader` role;
-the model reads movies and taste through it), `ML_MAX_BODY_BYTES` (request body cap, default 5 MiB; larger is a 413), `PORT`.
+the model reads movies, taste, ratings and the friend graph through it; TLS is added for hosted databases), `ML_MAX_BODY_BYTES` (request body cap, default 5 MiB; larger is a 413), `PORT`.
 
 `/docs`, `/redoc` and `/openapi.json` exist only when `ENV` is not `production`. `/health` is
 always public; everything under `/internal` needs the key.
@@ -27,10 +32,16 @@ always public; everything under `/internal` needs the key.
 
 ## The model: hybrid-v7 (content + kNN + iALS + friends)
 
-`app/services/content_recommender.py` is the live model. It starts from content-v1 (Phase 0
-of `docs/recommender-directions.md`: genre and mood matching) and blends in item-kNN
-collaborative filtering (`collaborative.py`) wherever co-ratings give evidence. Without that
-evidence (new users, movies few people rated) it is exactly content-v1.
+`app/services/content_recommender.py` is the live model. It starts from content scoring (genre
+and mood matching) and blends in collaborative filtering (`collaborative.py`: explicit and
+implicit item-kNN plus iALS matrix factorisation) wherever ratings give evidence. Without that
+evidence (new users, movies few people rated) it is pure content scoring. A friend signal and
+merged-profile groups sit on top. Design, accuracy and every experiment are in
+`docs/recommender-review.md`.
+
+Accuracy (MovieLens ml-32m, two samples of 3,000 users, 10k-movie pool):
+- Hit rate@10 is 50–53%.
+- NDCG@10 is 0.129–0.134.
 
 | Piece | File | What it does |
 |---|---|---|
@@ -38,7 +49,7 @@ evidence (new users, movies few people rated) it is exactly content-v1.
 | Catalog and taste | `catalog.py` | `app.movies` held in memory (warmed at startup, refreshed every 6h in the background, unknown ids fetched on demand); each user's loved, disliked and dismissed movies. Read through `ML_DATABASE_URL` (read-only `ml_reader`). |
 | User vector | `content_recommender.py` | Each of the 27 dims starts at the stated preference (5 if unset) and is pulled towards the user's scores for movies with that feature. Favourites count as a 10 and least favourites as a 1 (weight 3 each), dismissals as a mild 3, and older ratings count less. |
 | Predicted score | `content_recommender.py` | Taste affinity (0.7 × weighted mean of the user's dims + 0.3 × their lowest genre dim, so one hated genre sinks a movie), plus similarity to loved and disliked movies, plus a quality/popularity prior that weighs more for new users. |
-| Collaborative part | `collaborative.py` | Item-kNN: movies are neighbours when people rate them alike (mean-centred ratings, adjusted cosine shrunk by co-rater count, top 50 per movie). Built from all of `app.ratings` in the background, rebuilt hourly; a user's own ratings are read fresh on every request. Blended as `taste = (1-β)·content + β·kNN`, with `β = 0.9·support/(support+2)`. EASE is in the same file for offline comparison (it lost: NDCG@10 0.08 vs 0.09). |
+| Collaborative part | `collaborative.py` (`BlendKNN`) | Explicit item-kNN: movies are neighbours when people rate them alike (mean-centred ratings, adjusted cosine shrunk by co-rater count, top 100 per movie, "sum" mode). It adds `2.0 × log1p` of implicit evidence (who watched what) and the iALS bonus. Built from all of `app.ratings` in the background and rebuilt hourly; a user's own ratings are read fresh on every request. Blended as `taste = (1-β)·content + β·CF`, with `β = 1.0·support/(support+1)`. Memory grows with items × users (dense matrices; see the module docstring). EASE is in the same file for offline comparison (it lost: NDCG@10 0.08 vs 0.09). |
 | Matrix factorisation | `collaborative.py` (`IALS`) | iALS (64 factors, graded preference, linear confidence), NumPy only; the user is folded in from their current ratings per request; its z-scored score is a bonus inside the blend (MF_WEIGHT 3.0 since hybrid-v7; 1.0 in v6). |
 | Friend signal | `social.py` | What friends thought, from ratings they share (PUBLIC/FRIENDS; never PRIVATE, blocks and suspended accounts respected); the group's merged profile gets the members' friends (not for groups of 6+). |
 | Lists | `content_recommender.py` | "For you" uses a light genre-diversity re-rank. Groups go through `group_strategies.py`: mean, least misery, most pleasure, closeness-weighted (the group's average closeness blends mean and least misery) and a GFAR-style fairness list. |
@@ -47,7 +58,8 @@ evidence (new users, movies few people rated) it is exactly content-v1.
 
 Without `ML_DATABASE_URL` the model has no movie metadata. It then keeps core-api's pool order
 and never errors. Every weight is a named constant at the top of its file: judge a change with
-`python -m eval.run` (below) and `tools/personas/sessions.py` (live).
+`python -m eval.experiment run` (confirm on a 2nd sample; below) and `tools/personas/sessions.py`
+(live).
 
 Locally, `ml_reader` has no login until you give it one (never commit the password):
 
@@ -56,6 +68,15 @@ docker exec <supabase_db container> psql -U postgres -c "alter role ml_reader wi
 ENV=local ML_DATABASE_URL=postgresql://ml_reader:<local-only>@127.0.0.1:55322/postgres \
   .venv/bin/uvicorn app.main:app --port 8001
 ```
+
+Hosted (Supabase): use the session pooler, with the pooler username `ml_reader.<project-ref>`:
+`postgresql://ml_reader.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres`.
+All connections go through `app/core/db.py`, which:
+- adds `sslmode=require` for any non-local host (a URL's own `sslmode` wins);
+- turns prepared statements off, so either Supabase pooler works;
+- names connections `filmfuse-ml` in `pg_stat_activity`.
+
+Per-request taste lookups share a small pool of 1–4 connections, while the hourly loaders open their own.
 
 To try a different model, implement the `Recommender` protocol in `app/services/recommender.py`
 and return it from `get_recommender()`. You don't need to touch the routes or the contract.

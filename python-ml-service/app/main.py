@@ -22,6 +22,9 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
         if callable(warm):
             warm()
     yield
+    close = getattr(getattr(recommender, "tastes", None), "close", None)
+    if callable(close):
+        close()  # the taste store's connection pool
 
 
 def create_app() -> FastAPI:

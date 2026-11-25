@@ -1,4 +1,4 @@
-"""Group aggregation for hybrid-v1: turn per-member predicted scores into one ranked list.
+"""Group aggregation for the hybrid model: turn per-member predicted scores into one ranked list.
 
 Input everywhere: `scores` is an (members x movies) array of predicted 1-10 scores, `weights`
 the members' contract weights (0 = the member doesn't count). Output: (movie index, group

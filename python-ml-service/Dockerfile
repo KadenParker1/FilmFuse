@@ -9,8 +9,8 @@ WORKDIR /app
 
 RUN useradd --create-home --uid 10001 appuser
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+COPY requirements.txt constraints.txt ./
+RUN pip install -r requirements.txt -c constraints.txt
 
 COPY app ./app
 
@@ -18,5 +18,6 @@ USER appuser
 
 EXPOSE 8000
 
-# "::" binds dual-stack; Railway private networking can be IPv6-only.
-CMD ["sh", "-c", "uvicorn app.main:app --host :: --port ${PORT:-8000}"]
+# One dual-stack socket on $PORT (default 8000): IPv6 for Railway's private network, IPv4 for
+# everything else. `uvicorn --host ::` alone would be IPv6-only (see app/serve.py).
+CMD ["python", "-m", "app.serve"]

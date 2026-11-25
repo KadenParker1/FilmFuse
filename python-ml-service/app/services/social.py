@@ -161,11 +161,11 @@ class StaticFriendSource:
 
 def load_friend_graph(conninfo: str) -> tuple[FriendGraph, dict[UUID, list[tuple[int, float]]]]:
     """The friend graph plus every non-private rating, through the read-only ml_reader role."""
-    import psycopg
+    from app.core.db import connect
 
     graph = FriendGraph()
     ratings: dict[UUID, list[tuple[int, float]]] = defaultdict(list)
-    with psycopg.connect(conninfo, connect_timeout=5) as conn, conn.cursor() as cur:
+    with connect(conninfo) as conn, conn.cursor() as cur:
         cur.execute("select user_id, friend_id, score from app.friend_closeness")
         closeness: dict[UUID, dict[UUID, float]] = defaultdict(dict)
         for a, b, s in cur.fetchall():

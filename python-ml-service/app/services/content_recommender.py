@@ -1,10 +1,11 @@
-"""hybrid-v1: FilmFuse's recommender (docs/recommender-directions.md, Phase 0 + item-kNN).
+"""hybrid-v7: FilmFuse's recommender (overview and experiment history: docs/recommender-review.md).
 
-Built by Claude at the owner's request (2026-11-18). content-v1 (genre/mood content scoring) was
-Phase 0; hybrid-v1 blends in collaborative filtering (`collaborative.py`, item-kNN) wherever
-co-ratings give evidence, and is exactly content-v1 where they don't (new users, unrated
-movies). Every number below is a tunable constant; judge changes with `python -m eval.run` and
-`tools/personas/sessions.py`.
+Built by Claude at the owner's request (2026-11-18). Content scoring (genres + moods) is blended
+with collaborative filtering (`collaborative.py`: explicit + implicit item-kNN plus iALS matrix
+factorisation, `BlendKNN`) wherever ratings give evidence, and is pure content scoring where they
+don't (new users, unrated movies). A friend signal (`social.py`) and merged-profile groups sit on
+top. Every number below is a tunable constant; judge changes with `python -m eval.experiment run`
+(confirm on a 2nd sample) and `tools/personas/sessions.py`.
 
 How it works
 ------------
@@ -24,13 +25,16 @@ How it works
                     (Jaccard over genres + TMDB keywords)
        prior      = quality (Bayesian vote average) + popularity, centred on the candidates'
                     median, weighted more for users we know little about (cold start)
-       collab     = item-kNN prediction from the user's ratings of similar movies
+       collab     = BlendKNN: explicit kNN + IMPLICIT_WEIGHT*log1p(implicit kNN evidence)
+                    + MF_WEIGHT * z-scored iALS preference (MF_WEIGHT 3.0 since hybrid-v7)
+       friends    = friends' shared ratings, weighted by closeness (social.py)
        taste      = (1-beta)*(affinity + similarity) + beta*collab,
                     beta = BETA_MAX * support / (support + KAPPA) (0 with no co-rating evidence)
        predicted  = taste + alpha*prior (clamped to 1-10 only when returned)
    Movies the user disliked or dismissed score 1.
 4. "For you": top predicted scores with a light genre-diversity re-rank (MMR).
-5. Groups: per-member predicted scores, then `group_strategies.aggregate`.
+5. Groups: per-member predicted scores plus a merged-profile pseudo-member (the group's pooled
+   ratings, `group_profile.py`), then `group_strategies.aggregate`.
 6. Explanations name the largest actual contribution to the score, so they are faithful.
 """
 

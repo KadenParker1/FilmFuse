@@ -97,14 +97,14 @@ def _query(conn, sql: str, params: tuple = ()) -> list[tuple]:
 
 
 def load(url: str, seed: int = 42) -> tuple[dict[str, Persona], list[Group]]:
-    import psycopg
+    from app.core.db import connect
 
     state = json.loads((PERSONAS_DIR / "out" / "seed-state.json").read_text())["personas"]
     networks = json.loads((PERSONAS_DIR / "networks.json").read_text())
     people = {k: Persona(k, UUID(v["userId"])) for k, v in state.items()}
     by_id = {p.user_id: p for p in people.values()}
     ids = [str(p.user_id) for p in people.values()]
-    with psycopg.connect(url, connect_timeout=5) as conn:
+    with connect(url) as conn:
         for uid, g, s in _query(
             conn,
             "select user_id, genre_id, score from app.user_genre_prefs"

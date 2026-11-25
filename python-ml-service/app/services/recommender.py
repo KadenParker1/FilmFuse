@@ -1,7 +1,8 @@
 """Recommender interface, the shared vector layout, and the model the service runs.
 
-The live model is `hybrid-v1` (`app/services/content_recommender.py` blended with
-`app/services/collaborative.py`; see docs/recommender-directions.md). To try another
+The live model is `hybrid-v7` (`app/services/content_recommender.py`: content scoring blended
+with `app/services/collaborative.py`'s kNN + iALS, plus the friend signal in `social.py`; see
+docs/recommender-review.md). To try another
 model, implement every method of `Recommender` and return it from `get_recommender()`.
 Routes, auth and the request/response contract (`app/models/contract.py`) do not need to change.
 
@@ -130,9 +131,9 @@ def _take(candidates: list[int], exclude: list[int], k: int) -> list[int]:
 
 @lru_cache
 def get_recommender() -> Recommender:
-    """hybrid-v1 (content + item-kNN), reading movies, taste and all ratings through
-    ML_DATABASE_URL when it is set. Without it the catalog is empty and the model keeps
-    core-api's pool order (still never errors)."""
+    """hybrid-v7 (content + kNN/iALS blend + friends), reading movies, taste, all ratings and the
+    friend graph through ML_DATABASE_URL when it is set. Without it the catalog is empty and the
+    model keeps core-api's pool order (still never errors)."""
     from app.core.config import database_url
     from app.services.catalog import InMemoryCatalog, PostgresCatalog, PostgresTasteStore
     from app.services.collaborative import PostgresRatingsSource

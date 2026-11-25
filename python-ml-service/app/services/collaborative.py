@@ -1,19 +1,23 @@
-"""Collaborative filtering for hybrid-v1: learn from which movies people rate alike.
+"""Collaborative filtering for hybrid-v7: learn from which movies people rate alike.
 
-Two models with one interface, `predict(user_ratings, item_ids)`. It returns, per item:
+Served: `BlendKNN` = explicit item-kNN ("sum" mode) + implicit (who-watched-what) item-kNN + iALS
+matrix factorisation (MF_WEIGHT 3.0). The pieces below share one interface,
+`predict(user_ratings, item_ids)`. It returns, per item:
 * `pred`: a predicted 1-10 score (centred on the user's own mean rating);
 * `support`: how much evidence backs it (0 = none, so the caller falls back to content);
 * `top`: the liked movie (rated above the user's mean) that contributed most, for
   "Because you rated X 9/10".
 
-* ItemKNN (served): adjusted-cosine similarity between movies over mean-centred ratings,
+* ItemKNN (inside BlendKNN): adjusted-cosine similarity between movies over mean-centred ratings,
   shrunk by how many people rated both (sim * n / (n + SHRINK)), top-K neighbours per movie.
   Faithful explanations: the score is literally a weighted average over named movies.
 * EASE (offline comparison): ridge regression of each movie on all others (Steck 2019), on
   mean-centred ratings, restricted to movies with enough ratings.
 
-Only movies with >= MIN_ITEM_RATINGS ratings take part. Dense NumPy is fine at FilmFuse's size
-(thousands of rated movies, hundreds of users); revisit with sparse matrices past ~20k movies.
+Only movies with >= MIN_ITEM_RATINGS ratings take part in the kNN. Its matrices are dense
+float32 items x users, so a rebuild peaks at roughly 12 bytes x items x users: ~0.1 GB today,
+~1.7 GB at 10k users x 10k items, ~13 GB at 50k users. Move to sparse matrices before ~10k
+active users.
 
 `PostgresRatingsSource` loads `app.ratings` through the read-only `ml_reader` role and rebuilds the
 model in the background (same pattern as `PostgresCatalog`). A user's own, latest ratings come
@@ -396,9 +400,9 @@ class PostgresRatingsSource:
         self._building = False
 
     def _query(self) -> list[tuple]:  # pragma: no cover - real database only
-        import psycopg
+        from app.core.db import connect
 
-        with psycopg.connect(self._conninfo, connect_timeout=5) as conn, conn.cursor() as cur:
+        with connect(self._conninfo) as conn, conn.cursor() as cur:
             cur.execute("select user_id, movie_id, score from app.ratings")
             return cur.fetchall()
 

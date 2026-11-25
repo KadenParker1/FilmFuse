@@ -45,9 +45,11 @@ jobs:
           cache-dependency-path: |
             python-ml-service/requirements.txt
             python-ml-service/requirements-dev.txt
+            python-ml-service/constraints.txt
 
+      # constraints.txt pins every transitive version, the same set the Docker image installs.
       - name: Install dependencies
-        run: pip install -r requirements.txt -r requirements-dev.txt
+        run: pip install -r requirements.txt -r requirements-dev.txt -c constraints.txt
 
       - name: Lint
         run: ruff check .
@@ -61,6 +63,38 @@ jobs:
 
       - name: Test test-persona tooling
         run: pytest -q ../tools/personas
+
+  # Railway builds these Dockerfiles on deploy; build them here so a broken image fails CI, not a
+  # deploy. Build only (nothing is pushed); layers are cached between runs.
+  docker:
+    name: Docker images (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [core-api, python-ml-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service }}
+          push: false
+          load: true
+          tags: filmfuse/${{ matrix.service }}:ci
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+      - name: Smoke-test the ML image
+        if: matrix.service == 'python-ml-service'
+        run: |
+          docker run -d --name ml -p 8000:8000 -e ML_INTERNAL_KEY=$(openssl rand -hex 32) filmfuse/python-ml-service:ci
+          for i in $(seq 1 30); do curl -fsS localhost:8000/health && exit 0; sleep 1; done
+          docker logs ml; exit 1
 
   # client/types/api.ts mirrors the core-api DTOs by hand and nothing else compares one against
   # the other, so this is the only thing standing between a forgotten field and a runtime

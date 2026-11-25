@@ -1,4 +1,4 @@
-"""Movie feature vectors (content part of hybrid-v1): one value per interpretable dim.
+"""Movie feature vectors (content part of the hybrid model): one value per interpretable dim.
 
 * Genre dims are one-hot (1.0 when the movie has that TMDB genre).
 * Mood dims are derived, because TMDB has no moods. Each mood has a rule: genres that hint at

@@ -172,9 +172,9 @@ class PostgresCatalog:
         self._absent: set[int] = set()
 
     def _connect(self):  # pragma: no cover - exercised against a real database
-        import psycopg
+        from app.core.db import connect
 
-        return psycopg.connect(self._conninfo, connect_timeout=5)
+        return connect(self._conninfo)
 
     def _query(self, sql: str, params: tuple = ()) -> list[tuple]:
         with self._connect() as conn, conn.cursor() as cur:
@@ -352,15 +352,20 @@ def taste_from_rows(rows: Iterable[tuple]) -> UserTaste:
 
 
 class PostgresTasteStore:
+    """Per-request taste lookups, over a small connection pool (no new connection per request)."""
+
     def __init__(self, conninfo: str) -> None:
-        self._conninfo = conninfo
+        from app.core.db import Pool
+
+        self._pool = Pool(conninfo)
 
     def _query(self, user_id: UUID) -> list[tuple]:  # pragma: no cover - real database only
-        import psycopg
-
-        with psycopg.connect(self._conninfo, connect_timeout=5) as conn, conn.cursor() as cur:
+        with self._pool.connection() as conn, conn.cursor() as cur:
             cur.execute(_TASTE_SQL, {"u": user_id})
             return cur.fetchall()
+
+    def close(self) -> None:
+        self._pool.close()
 
     def taste(self, user_id: UUID) -> UserTaste:
         try:

@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     env: Literal["local", "test", "production"] = Field(default="production", alias="ENV")
     ml_internal_key: str | None = Field(default=None, alias="ML_INTERNAL_KEY")
-    # Read-only role (ml_reader): content-v1 reads app.movies and taste tables through it.
+    # Read-only role (ml_reader): the model reads movies, taste, ratings and the friend graph.
     # Optional: without it the model ranks with no movie metadata (keeps the pool order).
     ml_database_url: str | None = Field(default=None, alias="ML_DATABASE_URL")
     max_body_bytes: int = Field(default=DEFAULT_MAX_BODY_BYTES, alias="ML_MAX_BODY_BYTES", ge=1024)
