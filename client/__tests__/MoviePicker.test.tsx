@@ -92,4 +92,40 @@ describe('MoviePicker', () => {
     await fireEvent.changeText(screen.getByLabelText('Search movies you couldn’t stand'), 'slow');
     await waitFor(() => expect(screen.getByTestId('least-favorites-loading')).toBeOnTheScreen());
   });
+
+  it('pages through popular movies with Show more, and hides it on the last page', async () => {
+    const page2 = [4, 5].map((id) => makeMovie({ id, title: `Pop ${id}` }));
+    const api = serveRoutes(fetchMock, [
+      { path: '/movies/popular', body: { items: popular, nextCursor: 'c2' } },
+      { path: '/movies/popular?cursor=c2', body: { items: page2, nextCursor: null } },
+    ]);
+    await renderWithClient(<Harness />);
+    await waitFor(() => expect(screen.getByTestId('least-favorites-more')).toBeOnTheScreen());
+    expect(screen.queryByRole('checkbox', { name: 'Couldn’t stand Pop 4' })).toBeNull();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Show more' }));
+    await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Couldn’t stand Pop 5' })).toBeOnTheScreen());
+    // Earlier pages stay, and the last page has no Show more.
+    expect(screen.getByRole('checkbox', { name: 'Couldn’t stand Pop 1' })).toBeOnTheScreen();
+    expect(screen.queryByTestId('least-favorites-more')).toBeNull();
+    expect(api.callsTo('GET', '/movies/popular?cursor=c2')).toHaveLength(1);
+  });
+
+  it('pages through search results with Show more', async () => {
+    serveRoutes(fetchMock, [
+      popularRoute,
+      { path: '/movies/search?q=heat', body: { items: [makeMovie({ id: 10, title: 'Heat' })], nextCursor: 's2' } },
+      { path: '/movies/search?q=heat&cursor=s2', body: { items: [makeMovie({ id: 11, title: 'Heat Wave' })], nextCursor: null } },
+    ]);
+    await renderWithClient(<Harness />);
+    await waitFor(() => expect(screen.getByTestId('least-favorites-results')).toBeOnTheScreen());
+    // Popular's single page: no Show more.
+    expect(screen.queryByTestId('least-favorites-more')).toBeNull();
+
+    await fireEvent.changeText(screen.getByLabelText('Search movies you couldn’t stand'), 'heat');
+    await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Couldn’t stand Heat' })).toBeOnTheScreen(), { timeout: 5000 });
+    await fireEvent.press(screen.getByRole('button', { name: 'Show more' }));
+    await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Couldn’t stand Heat Wave' })).toBeOnTheScreen());
+    expect(screen.queryByTestId('least-favorites-more')).toBeNull();
+  });
 });

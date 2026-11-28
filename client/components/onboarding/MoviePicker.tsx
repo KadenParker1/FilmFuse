@@ -6,7 +6,7 @@ import { flattenPages, SEARCH_MAX_LENGTH, useMovieSearch, usePopularMovies } fro
 import { useDebouncedValue } from '../../lib/useDebouncedValue';
 import { useTheme } from '../../theme/useTheme';
 import type { MovieSummaryDTO } from '../../types/api';
-import { Body, Card, ErrorState, Label, SearchBar } from '../ui';
+import { Body, Button, Card, ErrorState, Label, SearchBar } from '../ui';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -100,7 +100,7 @@ type Props = {
   max: number;
   /** The list's name for screen readers, e.g. "favourites" ("Remove Heat from favourites"). */
   listName: string;
-  /** Prefix for test ids: `${id}s-count`, `${id}-1`, `${id}s-results`, `${id}s-loading`. */
+  /** Prefix for test ids: `${id}s-count`, `${id}-1`, `${id}s-results`, `${id}s-loading`, `${id}s-more`. */
   testIDPrefix: string;
   searchLabel: string;
   /** Shown when there's no query and nothing popular to show. */
@@ -179,6 +179,16 @@ export function MoviePicker({
       </View>
     );
   }
+  // Popular and search are both paged (~20 a page); without this only the first page is reachable.
+  const more = source.hasNextPage && !source.isError && results.length > 0 ? (
+    <Button
+      testID={`${testIDPrefix}s-more`}
+      title="Show more"
+      variant="secondary"
+      loading={source.isFetchingNextPage}
+      onPress={() => void source.fetchNextPage()}
+    />
+  ) : null;
 
   return (
     <>
@@ -211,6 +221,7 @@ export function MoviePicker({
       <SearchBar label={searchLabel} placeholder="Search movies" value={input} onChangeText={setInput} maxLength={SEARCH_MAX_LENGTH} />
       {!query ? <Label>Popular right now</Label> : null}
       {grid}
+      {more}
     </>
   );
 }
